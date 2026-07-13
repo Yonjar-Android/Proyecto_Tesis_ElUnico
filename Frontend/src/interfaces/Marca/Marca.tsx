@@ -1,13 +1,34 @@
 import "./Marca.css";
+import { obtenerMarcas } from "../../services/marca.service";
+import { useEffect, useState } from "react";
 
-const marcasData = [
-  { id: 1, nombre: "Kenda" },
-  { id: 2, nombre: "Akron" },
-  { id: 3, nombre: "Yamaha" },
-  { id: 4, nombre: "S&L" },
-];
+interface Marca {
+
+    id: number;
+    Nombre_marca: string;
+
+}
 
 function Marca() {
+
+const [marcas, setMarcas] = useState<Marca[]>([]);
+
+    useEffect(() => {
+
+        cargarMarcas();
+
+    }, []);
+
+        const cargarMarcas = async () => {
+    try {
+        const data = await obtenerMarcas();
+
+        setMarcas(data);
+    } catch (error) {
+        console.error("Error al cargar marcas:", error);
+    }
+};
+
   return (
     <div className="marca-container">
         <div className="marca-content">
@@ -36,9 +57,9 @@ function Marca() {
             </tr>
           </thead>
           <tbody>
-            {marcasData.map((marca) => (
+            {marcas.map((marca) => (
               <tr key={marca.id} className="marca-tr">
-                <td className="marca-td">{marca.nombre}</td>
+                <td className="marca-td">{marca.Nombre_marca}</td>
                 <td className="marca-td marca-td-actions">
                   <button className="marca-edit-btn">✏ Editar</button>
                 </td>
@@ -50,7 +71,7 @@ function Marca() {
               <td colSpan={2}>
                 <div className="marca-footer">
                   <span className="marca-count">
-                    Mostrando {marcasData.length} de {marcasData.length} marcas
+                    Mostrando {marcas.length} de {marcas.length} marcas
                   </span>
                   <div className="marca-pagination">
                     <button className="marca-page-btn">«</button>
