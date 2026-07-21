@@ -8,3 +8,36 @@ export const obtenerMarcas = async () => {
 
     return response.data;
 };
+
+export const crearMarca = async (Nombre_marca: string) => {
+    const response = await axios.post(API, {
+        Nombre_marca
+    });
+
+    return response.data;
+};
+
+export const actualizarMarca = async (id: number, Nombre_marca: string) => {
+    const response = await axios.put(`${API}/${id}`, {
+        Nombre_marca
+    });
+
+    return response.data;
+};
+
+export const buscarMarcas = async (
+    search: string,
+    page: number,
+    perPage: number
+) => {
+
+    const response = await axios.get(`${API}/buscar`, {
+        params: {
+            search,
+            page,
+            perPage
+        }
+    });
+
+    return response.data;
+};

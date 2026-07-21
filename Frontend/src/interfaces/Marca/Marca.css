@@ -1,12 +1,15 @@
-/* Layout */
-body {
-  font-family: 'Segoe-UI', sans-serif;
+html,
+body,
+#root {
+    min-height: 100%;
+    margin: 0;
 }
 
 .marca-container {
-  height: 100vh;
-  background-color: #f3f4f6;
-  padding: 2rem;
+    min-height: 100vh;
+    background-color: #f3f4f6;
+    padding: 2rem;
+    box-sizing: border-box;
 }
 
 .marca-content{
@@ -144,6 +147,11 @@ body {
   background-color: #f9fafb;
 }
 
+.marca-page-btn:disabled {
+    opacity: .4;
+    cursor: not-allowed;
+}
+
 /* Footer */
 .marca-footer {
   display: flex;
@@ -183,4 +191,10 @@ body {
 .marca-page-btn--active {
   background-color: #c0394f;
   box-shadow: 0 0 0 2px #e85d7a55;
+}
+
+.error-text{
+    color: red;
+    font-size: 14px;
+    margin-top: 8px;
 }
