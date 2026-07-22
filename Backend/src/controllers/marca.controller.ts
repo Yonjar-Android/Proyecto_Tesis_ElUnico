@@ -32,7 +32,7 @@ export const buscarMarca = async (req: Request, res: Response) => {
 
         const search = req.query.search?.toString() ?? "";
         const page = Number(req.query.page) || 1;
-        const perPage = Number(req.query.perPage) || 5;
+        const perPage = Number(req.query.perPage) || 10;
 
         const resultado = await buscarMarcas(
             search,

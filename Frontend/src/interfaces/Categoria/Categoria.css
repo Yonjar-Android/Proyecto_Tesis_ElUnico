@@ -51,6 +51,8 @@ body {
   background-color: #d04e6b;
 }
 
+
+
 .categoria-add-icon {
   font-size: 0.75rem;
 }
@@ -178,6 +180,11 @@ body {
 
 .categoria-page-btn:hover {
   background-color: #d04e6b;
+}
+
+.categoria-page-btn:disabled {
+    opacity: .4;
+    cursor: not-allowed;
 }
 
 .categoria-page-btn--active {
