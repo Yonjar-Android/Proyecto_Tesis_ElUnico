@@ -115,14 +115,22 @@ return (
         <table className="marca-table">
           <thead>
             <tr>
-              <th className="marca-th">NOMBRE DE MARCA</th>
+              <th className="marca-th">CÓDIGO</th>
+              <th className="marca-th">NOMBRE</th>
+              <th className="marca-th">APELLIDO</th>
+              <th className="marca-th">CONTACTO</th>
+              <th className="marca-th">CRÉDITO</th>
               <th className="marca-th marca-th-actions">ACCIONES</th>
             </tr>
           </thead>
           <tbody>
             {clientes.map((cliente) => (
               <tr key={cliente.id} className="marca-tr">
+                <td className="marca-td">{cliente.NCliente}</td>
                 <td className="marca-td">{cliente.Nombre}</td>
+                <td className="marca-td">{cliente.Apellido}</td>
+                <td className="marca-td">{cliente.Telefono}</td>
+                <td className="marca-td">{cliente.Credito}</td>
                 <td className="marca-td marca-td-actions">
                   <button
                         className="marca-edit-btn"
@@ -139,7 +147,7 @@ return (
           </tbody>
           <tfoot>
             <tr>
-              <td colSpan={2}>
+              <td colSpan={6}>
                 <div className="marca-footer">
                   <span className="marca-count">
                     Mostrando {clientes.length} de {total} clientes
@@ -206,7 +214,7 @@ return (
         setError) => {
 
       try{
-        await actualizarCliente(id, nombre, apellido,
+        await actualizarCliente(Number(id), nombre, apellido,
             telefono, direccion, credito, ncliente
         );
 

@@ -12,8 +12,8 @@ export const buscarClientes = async (
 
     if (search.trim() !== "") {
         where = `
-            WHERE Nombre LIKE ?
-               OR CAST(id AS CHAR) LIKE ?
+            WHERE NCliente LIKE ?
+               OR CONCAT(Nombre, ' ', Apellido) LIKE ?
         `;
         params.push(`%${search}%`, `%${search}%`);
     }
@@ -21,7 +21,7 @@ export const buscarClientes = async (
     // Total de registros
     const [countRows]: any = await pool.query(
         `SELECT COUNT(*) AS total
-         FROM categorias
+         FROM clientes
          ${where}`,
         params
     );

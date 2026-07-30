@@ -1,0 +1,120 @@
+/* Reutiliza las mismas clases base que ModalAgregarCategoria.css:
+   .modal-overlay, .modal, .modal-header, .modal-body, .modal-footer,
+   .modal-close, .btn-cancelar, .btn-guardar, .error-text
+   Acá solo se agrega lo específico del formulario de cliente. */
+
+.modal-cliente {
+  width: 440px;
+  max-width: calc(100vw - 32px);
+}
+
+.modal-cliente .modal-header {
+  padding: 18px 22px 14px;
+}
+
+.modal-cliente .modal-header h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.05rem;
+}
+
+.modal-cliente .modal-header .icono-titulo {
+  color: #6d5ef8;
+}
+
+.modal-cliente .modal-body {
+  padding: 16px 22px 4px;
+}
+
+.modal-cliente .modal-footer {
+  padding: 14px 22px 20px;
+}
+
+.campo-fila {
+  display: flex;
+  gap: 12px;
+}
+
+.campo-fila .campo {
+  flex: 1;
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 12px;
+}
+
+.campo label {
+    align-self: flex-start;
+  font-weight: 600;
+  font-size: 0.82rem;
+}
+
+.campo input {
+  border: 1px solid #e5e7eb;
+  background: #f9fafb;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 0.88rem;
+}
+
+.campo input:focus {
+  outline: none;
+  border-color: #6d5ef8;
+  background: #fff;
+}
+
+.input-con-icono {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid #e5e7eb;
+  background: #f9fafb;
+  border-radius: 8px;
+  padding: 0 10px;
+}
+
+.input-con-icono .icono {
+  display: flex;
+  color: #9ca3af;
+  flex-shrink: 0;
+}
+
+.input-con-icono .icono svg {
+  width: 15px;
+  height: 15px;
+}
+
+.input-con-icono input {
+  border: none;
+  background: transparent;
+  padding: 8px 0;
+  flex: 1;
+  font-size: 0.88rem;
+}
+
+.input-con-icono input:focus {
+  outline: none;
+}
+
+.separador-opcional {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 2px 0 12px;
+  color: #9ca3af;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.separador-opcional::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: #e5e7eb;
+}
