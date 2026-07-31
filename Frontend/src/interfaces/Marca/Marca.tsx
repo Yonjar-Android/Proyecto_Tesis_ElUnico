@@ -1,9 +1,9 @@
-import "./Marca.css";
 import { crearMarca, buscarMarcas, actualizarMarca  } from "../../services/marca.service";
 import { useEffect, useState } from "react";
 import ModalAgregarMarca from "./ModalAgregarMarca";
 import type { PaginatedResponse } from "../../models/PaginatedResponse";
 import ModalEditarMarca from "./ModalEditarMarca";
+import "./Marca.css";
 
 interface Marca {
 
@@ -44,6 +44,7 @@ const buscar = async () => {
         perPage
     );
 
+
       setMarcas(response.data);
       setTotal(response.total);
       setLastPage(response.last_page);
@@ -55,6 +56,8 @@ const buscar = async () => {
         currentPage,
         perPage
     );
+
+    console.log(response)
 
       setMarcas(response.data);
       setTotal(response.total);
@@ -147,10 +150,10 @@ useEffect(() => {
                       ‹
                     </button>
                     <button className="marca-page-btn marca-page-btn--active">{currentPage}</button>
-                    <button className="marca-page-btn" onClick={() => setCurrentPage(currentPage + 1)} disabled={currentPage === lastPage}>
+                    <button className="marca-page-btn" onClick={() => setCurrentPage(currentPage + 1)} disabled={currentPage === lastPage || lastPage == 0}>
                       ›
                     </button>
-                    <button className="marca-page-btn" onClick={() => setCurrentPage(lastPage)} disabled={currentPage === lastPage}>
+                    <button className="marca-page-btn" onClick={() => setCurrentPage(lastPage)} disabled={currentPage === lastPage || lastPage == 0}>
                       »
                     </button>
                   </div>

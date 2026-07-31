@@ -5,30 +5,28 @@ body,
     margin: 0;
 }
 
-.marca-container {
+.cliente-container {
     min-height: 100vh;
     background-color: #f3f4f6;
     padding: 2rem;
     box-sizing: border-box;
 }
 
-.marca-content{
-    margin: 0 auto;
-    max-width: 1100px;
-    width: 100%;
+.cliente-content{
+    margin: 0% 15%;
     display: flex;
     flex-direction: column;
 }
 
 /* Top row */
-.marca-top-part {
+.cliente-top-part {
   display: flex;
   justify-content: space-between;
   gap: 1rem;
   margin-bottom: 1.5rem;
 }
 
-.marca-title {
+.cliente-title {
     display: inline-block;
   font-size: 1.4rem;
   font-weight: 700;
@@ -37,7 +35,7 @@ body,
 }
 
 /* Add button */
-.marca-add-btn {
+.cliente-add-btn {
   display: flex;
   align-items: center;
   gap: 0.4rem;
@@ -52,16 +50,16 @@ body,
   transition: background-color 0.2s;
 }
 
-.marca-add-btn:hover {
+.cliente-add-btn:hover {
   background-color: #d04e6b;
 }
 
-.marca-add-icon {
+.cliente-add-icon {
   font-size: 0.75rem;
 }
 
 /* Table card */
-.marca-table-container {
+.cliente-table-container {
   background-color: #F8FAFC;
   border-radius: 8px;
   padding: 1rem;
@@ -70,7 +68,7 @@ body,
 }
 
 /* Search */
-.marca-search-wrapper {
+.cliente-search-wrapper {
   display: flex;
   align-items: center;
   border: 1px solid #d1d5db;
@@ -81,12 +79,12 @@ body,
   max-width: 100%;
 }
 
-.marca-search-icon {
+.cliente-search-icon {
   font-size: 0.85rem;
   color: #9ca3af;
 }
 
-.marca-search-input {
+.cliente-search-input {
   border: none;
   outline: none;
   font-size: 0.875rem;
@@ -95,18 +93,18 @@ body,
   background: transparent;
 }
 
-.marca-search-input::placeholder {
+.cliente-search-input::placeholder {
   color: #9ca3af;
 }
 
 /* Table */
-.marca-table {
+.cliente-table {
   width: 100%;
   min-width: 720px;
   border-collapse: collapse;
 }
 
-.marca-th {
+.cliente-th {
   text-align: left;
   font-size: 0.7rem;
   font-weight: 600;
@@ -117,28 +115,28 @@ body,
   white-space: nowrap;
 }
 
-.marca-th-actions {
+.cliente-th-actions {
   text-align: right;
 }
 
-.marca-tr:not(:last-child) td {
+.cliente-tr:not(:last-child) td {
   border-bottom: 1px solid #f3f4f6;
 }
 
-.marca-td {
+.cliente-td {
   text-align: left;
   padding: 0.75rem;
   font-size: 0.875rem;
   color: #475569;
 }
 
-.marca-td-actions {
+.cliente-td-actions {
   text-align: right;
   white-space: nowrap;
 }
 
 /* Edit button */
-.marca-edit-btn {
+.cliente-edit-btn {
   background: none;
   border: 1px solid #e5e7eb;
   border-radius: 5px;
@@ -149,17 +147,17 @@ body,
   transition: background-color 0.15s;
 }
 
-.marca-edit-btn:hover {
+.cliente-edit-btn:hover {
   background-color: #f9fafb;
 }
 
-.marca-page-btn:disabled {
+.cliente-page-btn:disabled {
     opacity: .4;
     cursor: not-allowed;
 }
 
 /* Footer */
-.marca-footer {
+.cliente-footer {
     width: 100%;
   display: flex;
   align-items: center;
@@ -167,18 +165,18 @@ body,
   padding: 0.75rem 0 0.25rem;
 }
 
-.marca-count {
+.cliente-count {
   font-size: 0.8rem;
   color: #6b7280;
 }
 
 /* Pagination */
-.marca-pagination {
+.cliente-pagination {
   display: flex;
   gap: 0.25rem;
 }
 
-.marca-page-btn {
+.cliente-page-btn {
   background-color: #E94D61;
   color: #fff;
   border: none;
@@ -191,11 +189,11 @@ body,
   transition: background-color 0.15s;
 }
 
-.marca-page-btn:hover {
+.cliente-page-btn:hover {
   background-color: #d04e6b;
 }
 
-.marca-page-btn--active {
+.cliente-page-btn--active {
   background-color: #c0394f;
   box-shadow: 0 0 0 2px #e85d7a55;
 }

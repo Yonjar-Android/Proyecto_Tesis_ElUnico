@@ -45,12 +45,14 @@
   flex-direction: column;
   gap: 5px;
   margin-bottom: 12px;
+  width: 100%;
 }
 
 .campo label {
-    align-self: flex-start;
+  align-self: flex-start;
   font-weight: 600;
   font-size: 0.82rem;
+  margin: 0;
 }
 
 .campo input {

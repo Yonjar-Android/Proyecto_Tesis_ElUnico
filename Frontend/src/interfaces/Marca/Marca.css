@@ -3,13 +3,13 @@ body,
 #root {
     min-height: 100%;
     margin: 0;
+    font-family: 'Segoe-UI', sans-serif;
 }
 
 .marca-container {
     min-height: 100vh;
     background-color: #f3f4f6;
     padding: 2rem;
-    box-sizing: border-box;
 }
 
 .marca-content{

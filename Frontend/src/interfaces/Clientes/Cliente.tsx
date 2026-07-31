@@ -86,24 +86,24 @@ function Cliente(){
     }, [searchTerm, currentPage]);
 
 return (
-    <div className="marca-container">
-        <div className="marca-content">
-      <div className="marca-top-part">
-        <h1 className="marca-title">Clientes</h1>
+    <div className="cliente-container">
+        <div className="cliente-content">
+      <div className="cliente-top-part">
+        <h1 className="cliente-title">Clientes</h1>
         <button
-    className="marca-add-btn"
+    className="cliente-add-btn"
     onClick={() => setModalAbierto(true)}
 >
-    <span className="marca-add-icon">✦</span>
+    <span className="cliente-add-icon">✦</span>
     Agregar cliente
 </button>
       </div>
 
-      <div className="marca-table-container">
-        <div className="marca-search-wrapper">
-          <span className="marca-search-icon">🔍</span>
+      <div className="cliente-table-container">
+        <div className="cliente-search-wrapper">
+          <span className="cliente-search-icon">🔍</span>
           <input
-    className="marca-search-input"
+    className="cliente-search-input"
     type="text"
     placeholder="Buscar por id o nombre"
     value={searchTerm}
@@ -112,28 +112,28 @@ return (
 />
         </div>
 
-        <table className="marca-table">
+        <table className="cliente-table">
           <thead>
             <tr>
-              <th className="marca-th">CÓDIGO</th>
-              <th className="marca-th">NOMBRE</th>
-              <th className="marca-th">APELLIDO</th>
-              <th className="marca-th">CONTACTO</th>
-              <th className="marca-th">CRÉDITO</th>
-              <th className="marca-th marca-th-actions">ACCIONES</th>
+              <th className="cliente-th">CÓDIGO</th>
+              <th className="cliente-th">NOMBRE</th>
+              <th className="cliente-th">APELLIDO</th>
+              <th className="cliente-th">CONTACTO</th>
+              <th className="cliente-th">CRÉDITO</th>
+              <th className="cliente-th cliente-th-actions">ACCIONES</th>
             </tr>
           </thead>
           <tbody>
             {clientes.map((cliente) => (
-              <tr key={cliente.id} className="marca-tr">
-                <td className="marca-td">{cliente.NCliente}</td>
-                <td className="marca-td">{cliente.Nombre}</td>
-                <td className="marca-td">{cliente.Apellido}</td>
-                <td className="marca-td">{cliente.Telefono}</td>
-                <td className="marca-td">{cliente.Credito}</td>
-                <td className="marca-td marca-td-actions">
+              <tr key={cliente.id} className="cliente-tr">
+                <td className="cliente-td">{cliente.NCliente}</td>
+                <td className="cliente-td">{cliente.Nombre}</td>
+                <td className="cliente-td">{cliente.Apellido}</td>
+                <td className="cliente-td">{cliente.Telefono}</td>
+                <td className="cliente-td">{cliente.Credito}</td>
+                <td className="cliente-td cliente-td-actions">
                   <button
-                        className="marca-edit-btn"
+                        className="cliente-edit-btn"
                         onClick={() => {
                             setClienteSeleccionado(cliente);
                             setModalEditarAbierto(true);
@@ -148,22 +148,22 @@ return (
           <tfoot>
             <tr>
               <td colSpan={6}>
-                <div className="marca-footer">
-                  <span className="marca-count">
+                <div className="cliente-footer">
+                  <span className="cliente-count">
                     Mostrando {clientes.length} de {total} clientes
                   </span>
-                  <div className="marca-pagination">
-                    <button className="marca-page-btn" onClick={() => setCurrentPage(1)} disabled={currentPage === 1}>
+                  <div className="cliente-pagination">
+                    <button className="cliente-page-btn" onClick={() => setCurrentPage(1)} disabled={currentPage === 1}>
                       «
                     </button>
-                    <button className="marca-page-btn" onClick={() => setCurrentPage(currentPage - 1)} disabled={currentPage === 1}>
+                    <button className="cliente-page-btn" onClick={() => setCurrentPage(currentPage - 1)} disabled={currentPage === 1}>
                       ‹
                     </button>
-                    <button className="marca-page-btn marca-page-btn--active">{currentPage}</button>
-                    <button className="marca-page-btn" onClick={() => setCurrentPage(currentPage + 1)} disabled={currentPage === lastPage}>
+                    <button className="cliente-page-btn cliente-page-btn--active">{currentPage}</button>
+                    <button className="cliente-page-btn" onClick={() => setCurrentPage(currentPage + 1)} disabled={currentPage === lastPage || lastPage == 0}>
                       ›
                     </button>
-                    <button className="marca-page-btn" onClick={() => setCurrentPage(lastPage)} disabled={currentPage === lastPage}>
+                    <button className="cliente-page-btn" onClick={() => setCurrentPage(lastPage)} disabled={currentPage === lastPage || lastPage == 0}>
                       »
                     </button>
                   </div>
@@ -209,17 +209,18 @@ return (
         setModalEditarAbierto(false);
         setClienteSeleccionado(null);
     }}
-    onEditar={async (id, nombre, apellido, telefono,
+    onEditar={
+      async (id, nombre, apellido, telefono,
         direccion, credito, ncliente,        
         setError) => {
 
       try{
+
         await actualizarCliente(Number(id), nombre, apellido,
             telefono, direccion, credito, ncliente
         );
 
         setModalEditarAbierto(false);
-
         buscar();
         return true;
         } catch (error: any) {

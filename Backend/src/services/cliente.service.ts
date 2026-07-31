@@ -61,13 +61,25 @@ export const crearCliente = async (
 }
 
 export const actualizarCliente = async (
-    id:number, nombre:string, apellido: string, telefono: string,
-    direccion:string, credito: number, Ncliente:number
+    id: number,
+    nombre: string,
+    apellido: string,
+    telefono: string,
+    direccion: string,
+    credito: number,
+    Ncliente: number
 ) => {
     const [result]: any = await pool.query(
-        "UPDATE clientes (Nombre, Apellido, Telefono, Direccion, Credito, NCliente) VALUES (?,?,?,?,?,?)",
-        [nombre, apellido, telefono, direccion, credito, Ncliente]
+        `UPDATE clientes
+         SET Nombre = ?,
+             Apellido = ?,
+             Telefono = ?,
+             Direccion = ?,
+             Credito = ?,
+             NCliente = ?
+         WHERE id = ?`,
+        [nombre, apellido, telefono, direccion, credito, Ncliente, id]
     );
 
     return result;
-}
+};

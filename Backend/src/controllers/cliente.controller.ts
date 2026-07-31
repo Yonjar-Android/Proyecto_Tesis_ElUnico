@@ -41,17 +41,19 @@ export const postCliente = async (req: Request, res: Response) => {
     }
 }
 
-export const putCliente = async (req: Request, res:Response) => {
-    try{
+export const putCliente = async (req: Request, res: Response) => {
+    try {
         const { id } = req.params;
-        const { Nombre } = req.body;
-        const { Apellido } = req.body;
-        const { Telefono } = req.body;
-        const { Direccion } = req.body;
-        const { Credito } = req.body;
-        const { NCliente } = req.body;
+        const {
+            Nombre,
+            Apellido,
+            Telefono,
+            Direccion,
+            Credito,
+            NCliente
+        } = req.body;
 
-        await actualizarCliente(
+        const result = await actualizarCliente(
             Number(id),
             Nombre,
             Apellido,
@@ -59,11 +61,16 @@ export const putCliente = async (req: Request, res:Response) => {
             Direccion,
             Number(Credito),
             Number(NCliente)
-        )
-        
-    } catch(error:any){
+        );
+
+        res.status(200).json({
+            mensaje: "Cliente actualizado correctamente",
+            result
+        });
+
+    } catch (error: any) {
         res.status(400).json({
             mensaje: error.message
         });
     }
-}
+};
