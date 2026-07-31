@@ -136,8 +136,8 @@ useEffect(() => {
                     <button className="categoria-page-btn" onClick={() => setCurrentPage(1)} disabled={currentPage === 1}>«</button>
                     <button className="categoria-page-btn" onClick={() => setCurrentPage(currentPage - 1)} disabled={currentPage === 1}>‹</button>
                     <button className="categoria-page-btn categoria-page-btn--active">{currentPage}</button>
-                    <button className="categoria-page-btn" onClick={() => setCurrentPage(currentPage + 1)} disabled={currentPage === lastPage}>›</button>
-                    <button className="categoria-page-btn" onClick={() => setCurrentPage(lastPage)} disabled={currentPage === lastPage}>»</button>
+                    <button className="categoria-page-btn" onClick={() => setCurrentPage(currentPage + 1)} disabled={currentPage === lastPage || lastPage == 0}>›</button>
+                    <button className="categoria-page-btn" onClick={() => setCurrentPage(lastPage)} disabled={currentPage === lastPage || lastPage == 0}>»</button>
                   </div>
                 </div>
               </td>

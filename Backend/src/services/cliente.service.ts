@@ -52,6 +52,61 @@ export const crearCliente = async (
     nombre:string, apellido: string, telefono: string,
     direccion:string, credito: number, Ncliente:number
 ) => {
+
+        if (!nombre.trim()) {
+      throw new Error("El campo nombre no puede estar vacío.");
+    }
+
+    if (!apellido.trim()) {
+      throw new Error("El campo apellido no puede estar vacío.");
+    }
+
+    if (!String(Ncliente).trim()) {
+      throw new Error("El campo número de cliente no puede estar vacío.");
+    }
+
+     if (!/^\d+$/.test(Ncliente.toString())) {
+     throw new Error ("Ingrese un número de cliente válido.");
+    }
+
+    if (Number(Ncliente) <= 0) {
+       throw new Error("El campo número de cliente debe ser mayor que 0.");
+    }
+
+    const [rows]: any = await pool.query(
+    "SELECT COUNT(*) AS count FROM clientes WHERE NCliente = ?",
+    [Ncliente]
+    );
+
+    if (rows[0].count > 0) {
+    throw new Error("Ya existe un cliente con ese número de cliente.");
+    }
+
+    if (!/^\d+$/.test(telefono) && telefono.length != 0) {
+    throw new Error("El número de teléfono solo puede contener dígitos del 0 al 9.");
+    }
+
+    if(telefono.length != 8 && telefono.length != 0){
+      throw new Error("El número de teléfono debe contener 8 caracteres.");
+    }
+
+     const [rowsPhone]: any = await pool.query(
+    "SELECT COUNT(*) AS count FROM clientes WHERE Telefono = ?",
+    [telefono]
+    );
+
+    if (rowsPhone[0].count > 0) {
+    throw new Error("Ya existe un cliente con ese número de teléfono.");
+    }
+
+    if (isNaN(credito)) {
+    throw new Error("Ingrese un valor válido en el campo crédito.");
+    }
+
+    if(Number(String(credito)) < 0){
+      throw new Error("El valor de crédito no puede ser negativo.");
+    }
+
     const [result]: any = await pool.query(
         "INSERT INTO clientes (Nombre, Apellido, Telefono, Direccion, Credito, NCliente) VALUES (?,?,?,?,?,?)",
         [nombre, apellido, telefono, direccion, credito, Ncliente]
@@ -69,6 +124,62 @@ export const actualizarCliente = async (
     credito: number,
     Ncliente: number
 ) => {
+
+    if (!nombre.trim()) {
+      throw new Error("El campo nombre no puede estar vacío.");
+    }
+
+    if (!apellido.trim()) {
+      throw new Error("El campo apellido no puede estar vacío.");
+    }
+
+    if (!String(Ncliente).trim()) {
+      throw new Error("El campo número de cliente no puede estar vacío.");
+    }
+
+     if (!/^\d+$/.test(Ncliente.toString())) {
+     throw new Error ("Ingrese un número de cliente válido.");
+    }
+
+    if (Number(Ncliente) <= 0) {
+       throw new Error("El campo número de cliente debe ser mayor que 0.");
+    }
+
+    const [rows]: any = await pool.query(
+    "SELECT COUNT(*) AS count FROM clientes WHERE NCliente = ? AND id != ?",
+    [Ncliente, id]
+    );
+
+    if (rows[0].count > 0) {
+    throw new Error("Ya existe un cliente con ese número de cliente.");
+    }
+
+    if(!/^\d+$/.test(telefono)  && telefono.length != 0) {
+    throw new Error("El número de teléfono solo puede contener dígitos del 0 al 9.");
+    }
+
+    if(telefono.length != 8 && telefono.length != 0){
+      throw new Error("El número de teléfono debe contener 8 caracteres.");
+    }
+
+    const [rowsPhone]: any = await pool.query(
+    "SELECT COUNT(*) AS count FROM clientes WHERE Telefono = ? AND id != ?",
+    [telefono, id]
+    );
+
+    if (rowsPhone[0].count > 0) {
+    throw new Error("Ya existe un cliente con ese número de teléfono.");
+    }
+
+    if (!/^\d+$/.test(String(credito))) {
+    throw new Error("Ingrese un valor válido en el campo crédito");
+    }
+
+    if(Number(String(credito)) < 0){
+      throw new Error("El valor de crédito no puede ser negativo.");
+    }
+
+
     const [result]: any = await pool.query(
         `UPDATE clientes
          SET Nombre = ?,

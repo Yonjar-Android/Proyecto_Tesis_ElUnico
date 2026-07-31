@@ -129,7 +129,9 @@ return (
                 <td className="cliente-td">{cliente.NCliente}</td>
                 <td className="cliente-td">{cliente.Nombre}</td>
                 <td className="cliente-td">{cliente.Apellido}</td>
-                <td className="cliente-td">{cliente.Telefono}</td>
+                <td className="cliente-td">
+                {cliente.Telefono.trim() === "" ? "Sin contacto" : cliente.Telefono}
+                </td>
                 <td className="cliente-td">{cliente.Credito}</td>
                 <td className="cliente-td cliente-td-actions">
                   <button

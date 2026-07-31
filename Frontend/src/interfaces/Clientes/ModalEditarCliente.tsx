@@ -56,17 +56,48 @@ function ModalEditarCliente({ abierto, cliente, onClose, onEditar }: Props) {
 
   const guardar = async () => {
     if (!nombre.trim()) {
-      setError("El nombre no puede estar vacío.");
+      setError("El campo nombre no puede estar vacío.");
       return;
     }
 
     if (!apellido.trim()) {
-      setError("El apellido no puede estar vacío.");
+      setError("El campo apellido no puede estar vacío.");
       return;
     }
 
     if (!ncliente.trim()) {
-      setError("El número de cliente no puede estar vacío.");
+      setError("El campo número de cliente no puede estar vacío.");
+      return;
+    }
+
+    if (!/^\d+$/.test(ncliente)) {
+    setError("Ingrese un número de cliente válido.");
+    return;
+    }
+
+    if (Number(ncliente.trim()) <= 0) {
+      setError("El campo número de cliente debe ser mayor que 0.");
+      return;
+    }
+
+
+    if (!/^\d+$/.test(telefono) && telefono.length != 0) {
+    setError("El número de teléfono solo puede contener dígitos del 0 al 9.");
+    return;
+    }
+
+    if(telefono.length != 8 && telefono.length != 0){
+      setError("El número de teléfono debe contener 8 caracteres.");
+      return;
+    }
+
+    if (isNaN(Number(credito))) {
+    setError("Ingrese un valor válido en el campo crédito");
+    return;
+    }
+
+    if(Number(credito) < 0){
+      setError("El valor de crédito no puede ser negativo.");
       return;
     }
 
@@ -144,6 +175,7 @@ function ModalEditarCliente({ abierto, cliente, onClose, onEditar }: Props) {
               <input
                 type="text"
                 placeholder="Ej: C-005"
+                readOnly
                 value={ncliente}
                 onChange={(e) => setNcliente(e.target.value)}
               />
@@ -168,13 +200,15 @@ function ModalEditarCliente({ abierto, cliente, onClose, onEditar }: Props) {
             </div>
 
             <div className="campo">
-              <label>Crédito</label>
+              <label>Deuda de Crédito</label>
               <div className="input-con-icono">
                 <span className="icono">
                   <IconoTarjeta />
                 </span>
                 <input
                   type="number"
+                  min={0}
+                  readOnly
                   value={credito}
                   onChange={(e) => setCredito(e.target.value)}
                 />
