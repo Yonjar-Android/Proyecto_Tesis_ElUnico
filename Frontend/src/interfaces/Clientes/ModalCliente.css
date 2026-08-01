@@ -1,8 +1,3 @@
-/* Reutiliza las mismas clases base que ModalAgregarCategoria.css:
-   .modal-overlay, .modal, .modal-header, .modal-body, .modal-footer,
-   .modal-close, .btn-cancelar, .btn-guardar, .error-text
-   Acá solo se agrega lo específico del formulario de cliente. */
-
 .modal-cliente {
   width: 440px;
   max-width: calc(100vw - 32px);

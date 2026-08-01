@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import type { PaginatedResponse } from "../../models/PaginatedResponse";
 import ModalEditarCliente from "./ModalEditarCliente";
 import ModalAgregarCliente from "./ModalAgregarCliente"
+import ModalAbonarCliente from "./ModalAbonarCliente";
+import { crearDetalleAbono } from "../../services/detalle_abono.service";
 
 interface Cliente {
 
@@ -30,6 +32,8 @@ function Cliente(){
     const [modalAbierto, setModalAbierto] = useState(false);
     
     const [modalEditarAbierto, setModalEditarAbierto] = useState(false);
+
+    const [modalAbonarAbierto, setModalAbonarAbierto] = useState(false);
     
     const [clienteSeleccionado, setClienteSeleccionado] = useState<Cliente | null>(null);
     
@@ -134,8 +138,20 @@ return (
                 </td>
                 <td className="cliente-td">{cliente.Credito}</td>
                 <td className="cliente-td cliente-td-actions">
+
                   <button
-                        className="cliente-edit-btn"
+                        className="cliente-abonar-btn"
+                        onClick={() => {
+                            setClienteSeleccionado(cliente);
+                            setModalAbonarAbierto(true);
+                       }}
+                       disabled={cliente.Credito == 0}
+                    >
+                        ✏ Abonar
+                  </button>
+
+                  <button
+                        className="cliente-editar-btn"
                         onClick={() => {
                             setClienteSeleccionado(cliente);
                             setModalEditarAbierto(true);
@@ -231,6 +247,32 @@ return (
             return false;
         }
     }}
+/>
+
+<ModalAbonarCliente
+abierto={modalAbonarAbierto}
+cliente={clienteSeleccionado}
+onClose={() => {
+        setModalAbonarAbierto(false);
+        setClienteSeleccionado(null);
+    }}
+onAbonar={ async (id_cliente:number, monto:number, setError) => {
+  try{
+
+        await crearDetalleAbono(
+          id_cliente,
+          Number(monto)
+        );
+
+        setModalAbonarAbierto(false);
+        buscar();
+        return true;
+        } catch (error: any) {
+            
+        setError(error.response.data.mensaje);
+            return false;
+        }
+}}
 />
     </div>
   );

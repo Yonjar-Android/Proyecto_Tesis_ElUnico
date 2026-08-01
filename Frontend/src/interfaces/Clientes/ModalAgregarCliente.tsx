@@ -194,7 +194,7 @@ function ModalAgregarCliente({ abierto, onClose, onGuardar }: Props) {
             </div>
 
             <div className="campo">
-              <label>Crédito</label>
+              <label>Deuda de Crédito</label>
               <div className="input-con-icono">
                 <span className="icono">
                   <IconoTarjeta />
