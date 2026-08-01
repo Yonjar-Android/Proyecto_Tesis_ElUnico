@@ -1,0 +1,144 @@
+/* Reutiliza .modal-overlay, .modal, .modal-close, .error-text ya existentes. */
+
+.seleccion-modal {
+  width: 520px;
+  max-width: calc(100vw - 32px);
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.seleccion-modal .modal-header {
+  padding: 18px 24px 14px;
+}
+
+.seleccion-modal .modal-header h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.1rem;
+  color: #111;
+}
+
+.seleccion-body {
+  padding: 18px 24px;
+  overflow-y: auto;
+}
+
+.seleccion-buscador {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #d1d5db;
+  background-color: #f9fafb;
+  border-radius: 10px;
+  color:#111;
+  padding: 0.7rem 1rem;
+  font-size: 0.9rem;
+  margin-bottom: 14px;
+}
+
+.seleccion-buscador:focus {
+  outline: none;
+  border-color: #6d5ef8;
+  box-shadow: 0 0 0 3px rgba(109, 94, 248, 0.12);
+}
+
+.seleccion-tabla {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.seleccion-tabla th {
+  text-align: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #9ca3af;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.seleccion-th-accion {
+  text-align: right;
+}
+
+.seleccion-tabla td {
+  text-align: center;
+  padding: 0.9rem 0;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 0.92rem;
+  color: #1f2937;
+  font-weight: 600;
+}
+
+.seleccion-td-accion {
+  text-align: right;
+}
+
+.seleccion-vacio {
+  text-align: center;
+  color: #9ca3af;
+  font-size: 0.85rem;
+  padding: 1.5rem 0;
+}
+
+.seleccion-btn {
+  background-color: #eff6ff;
+  color: #2563eb;
+  border: none;
+  border-radius: 8px;
+  padding: 0.45rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.seleccion-btn:hover {
+  background-color: #dbeafe;
+}
+
+.seleccion-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 24px 18px;
+  border-top: 1px solid #f1f5f9;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.seleccion-count {
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+.seleccion-pagination {
+  display: flex;
+  gap: 0.3rem;
+}
+
+.seleccion-page-btn {
+  background-color: #e5484d;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  width: 2rem;
+  height: 2rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.seleccion-page-btn:hover {
+  background-color: #cf3d42;
+}
+
+.seleccion-page-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.seleccion-page-btn--active {
+  background-color: #111;
+}

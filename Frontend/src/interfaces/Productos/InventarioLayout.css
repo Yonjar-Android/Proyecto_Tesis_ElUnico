@@ -1,0 +1,142 @@
+.inventario-page {
+  min-height: 100vh;
+  background-color: #fff;
+}
+
+/* Banda superior con el título */
+.inventario-header-banda {
+  background-color: #f3f4f6;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 1.25rem 2rem;
+  text-align: center;
+}
+
+.inventario-header-banda h1 {
+  margin: 0;
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #e5484d;
+  letter-spacing: 0.01em;
+}
+
+/* Badge de estado */
+.inventario-status-row {
+  display: flex;
+  justify-content: flex-end;
+  padding: 1rem 2rem 0;
+}
+
+.inventario-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background-color: #f1f5f9;
+  border-radius: 6px;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: #475569;
+}
+
+.inventario-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #22c55e;
+}
+
+/* Contenedor central */
+.inventario-contenido {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 1.5rem 2rem 3rem;
+  box-sizing: border-box;
+}
+
+/* Tarjeta blanca redondeada grande (envuelve título + formulario + sidebar) */
+.inventario-card-grande {
+  background-color: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 22px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  padding: 1.75rem;
+  box-sizing: border-box;
+}
+
+.inventario-breadcrumb {
+  text-align: left;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #9ca3af;
+  margin-bottom: 0.35rem;
+}
+
+.inventario-breadcrumb strong {
+  color: #475569;
+}
+
+.inventario-titulo-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+  gap: 1rem;
+}
+
+.inventario-titulo-row h2 {
+  margin: 0 0 0.3rem;
+  text-align: left;
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #111;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+}
+
+.inventario-subtitulo {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+.inventario-volver {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: none;
+  border: none;
+  color: #475569;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.inventario-volver:hover {
+  color: #111;
+}
+
+.inventario-acciones-top {
+  display: flex;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+/* Grid de 2 columnas: formulario + sidebar */
+.inventario-grid {
+  display: grid;
+  grid-template-columns: 1.7fr 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+@media (max-width: 800px) {
+  .inventario-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import type { PaginatedResponse } from "../../models/PaginatedResponse";
 import ModalAgregarProveedor from "./ModalAgregarProveedor";
 import ModalEditarProveedor from "./ModalEditarProveedor";
-import { actualizarCliente } from "../../services/cliente.service";
 
 interface Proveedor {
 
