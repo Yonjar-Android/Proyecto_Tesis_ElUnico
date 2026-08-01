@@ -104,6 +104,10 @@ body,
   border-collapse: collapse;
 }
 
+.cliente-table > thead {
+  background-color: #F8FAFC;
+}
+
 .cliente-th {
   text-align: left;
   font-size: 0.7rem;

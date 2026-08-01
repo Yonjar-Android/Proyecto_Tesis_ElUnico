@@ -102,6 +102,10 @@ body,
   border-collapse: collapse;
 }
 
+.marca-table > thead {
+  background-color: #F8FAFC;
+}
+
 .marca-th {
   text-align: left;
   font-size: 0.7rem;
