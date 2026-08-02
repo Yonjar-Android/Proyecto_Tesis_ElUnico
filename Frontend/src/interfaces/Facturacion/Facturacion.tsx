@@ -26,7 +26,7 @@ function Facturacion() {
   const [productoSeleccionado, setProductoSeleccionado] = useState<ProductoListado | null>(null);
   const [cantidad, setCantidad] = useState("1");
   const [precio, setPrecio] = useState("0.00");
-  const [tipoPago, setTipoPago] = useState("Efectivo");
+  const [tipoPago, setTipoPago] = useState("Contado");
   const [clienteSeleccionado, setClienteSeleccionado] = useState<Cliente>(
     {
   id: 0,
@@ -219,7 +219,7 @@ function Facturacion() {
               Tipo de Pago <span style={{ color: "#e5484d" }}>*</span>
             </label>
             <select value={tipoPago} onChange={(e) => setTipoPago(e.target.value)}>
-              <option value="Efectivo">Efectivo</option>
+              <option value="Contado">Contado</option>
               <option value="Credito">Crédito</option>
               <option value="Transferencia">Transferencia</option>
             </select>

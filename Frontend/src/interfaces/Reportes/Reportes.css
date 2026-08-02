@@ -182,7 +182,6 @@
   width: 100%;
   font-size: 0.9rem;
   background: transparent;
-  color:#111;
 }
 
 .reporte-buscador-icono {
@@ -222,10 +221,10 @@
 }
 
 .reporte-tabla td {
-  text-align: left;
   padding: 0.85rem 1rem;
   border-bottom: 1px solid #f1f5f9;
   color: #374151;
+  text-align: left;
 }
 
 .reporte-td-nombre {
@@ -279,16 +278,6 @@
   font-weight: 700;
 }
 
-.reporte-pill-moderado {
-  display: inline-block;
-  background-color: #dbeafe;
-  color: #2563eb;
-  border-radius: 6px;
-  padding: 0.2rem 0.6rem;
-  font-size: 0.78rem;
-  font-weight: 700;
-}
-
 /* Footer + paginación */
 .reporte-footer {
   display: flex;
@@ -332,4 +321,108 @@
   background-color: #111;
   border-color: #111;
   color: #fff;
+}
+
+.reporte-pill-moderado {
+  display: inline-block;
+  background-color: #dbeafe;
+  color: #2563eb;
+  border-radius: 6px;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.reporte-campo select {
+  box-sizing: border-box;
+  border: 1px solid #e5e7eb;
+  background: #f9fafb;
+  border-radius: 8px;
+  padding: 0.6rem 0.85rem;
+  font-size: 0.9rem;
+  font-family: inherit;
+  color: #111;
+}
+
+.reporte-campo select:focus {
+  outline: none;
+  border-color: #e5484d;
+  background: #fff;
+}
+
+/* Ícono dentro de la tarjeta de estadística */
+.reporte-stat-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.reporte-stat-icono {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 8px;
+  color: #9ca3af;
+  flex-shrink: 0;
+}
+
+.reporte-stat-icono--azul {
+  background-color: #1d4ed8;
+  color: #fff;
+}
+
+.reporte-stat-icono--verde {
+  color: #059669;
+}
+
+.reporte-stat-card--oscura .reporte-stat-icono {
+  background-color: #1e293b;
+  color: #34d399;
+}
+
+/* Columnas centradas (Proveedor / N° Factura) */
+.reporte-td-centro {
+  text-align: center;
+}
+
+.reporte-td-factura {
+  text-align: center;
+  font-family: monospace;
+  color: #9ca3af;
+}
+
+/* Badges de estado (Contado / Crédito) */
+.reporte-badge-contado {
+  display: inline-block;
+  background-color: #d1fae5;
+  color: #059669;
+  border-radius: 6px;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.reporte-badge-credito {
+  display: inline-block;
+  background-color: #fef3c7;
+  color: #b45309;
+  border-radius: 6px;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+/* Pie de página "Página X de Y" */
+.reporte-pagina-info {
+  font-size: 0.95rem;
+  color: #374151;
+}
+
+.reporte-pagina-info strong {
+  color: #111;
 }

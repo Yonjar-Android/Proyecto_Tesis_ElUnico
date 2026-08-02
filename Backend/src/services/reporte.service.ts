@@ -173,3 +173,120 @@ export const obtenerReporteClientesConDeuda = async (
         TotalSaldoPendiente: estadisticas[0].TotalSaldoPendiente
     };
 };
+
+export const obtenerReporteVentas = async (
+    search: string = "",
+    fechaInicio: string = "",
+    fechaFin: string = "",
+    tipoPago: string = "",
+    page: number = 1,
+    perPage: number = 10
+) => {
+
+    const offset = (page - 1) * perPage;
+
+    let where = "WHERE 1=1";
+    const params: any[] = [];
+
+    // Buscar por cliente
+    if (search.trim() !== "") {
+        where += `
+            AND (
+                CONCAT(c.Nombre, ' ', c.Apellido) LIKE ?
+                OR c.NCliente LIKE ?
+            )
+        `;
+
+        params.push(
+            `%${search}%`,
+            `%${search}%`
+        );
+    }
+
+    // Fecha inicio
+    if (fechaInicio !== "") {
+        where += " AND v.Fecha >= ?";
+        params.push(fechaInicio);
+    }
+
+    // Fecha fin
+    if (fechaFin !== "") {
+        where += " AND v.Fecha <= ?";
+        params.push(fechaFin);
+    }
+
+    // Tipo de pago
+    if (tipoPago !== "" && tipoPago.toUpperCase() !== "TODAS") {
+        where += " AND v.Tipo_Pago = ?";
+        params.push(tipoPago);
+    }
+
+    // Estadísticas
+    const [estadisticas]: any = await pool.query(
+        `
+        SELECT
+            COUNT(*) AS TotalRegistros,
+
+            COALESCE(
+                SUM(
+                    CASE
+                        WHEN v.Tipo_Pago = 'CONTADO'
+                        THEN v.Total
+                        ELSE 0
+                    END
+                ),
+                0
+            ) AS VentasContado,
+
+            COALESCE(SUM(v.Total),0) AS TotalVentas
+
+        FROM ventas v
+        INNER JOIN clientes c
+            ON v.Id_cliente = c.id
+
+        ${where}
+        `,
+        params
+    );
+
+    // Total para la paginación
+    const total = estadisticas[0].TotalRegistros;
+
+    // Datos del reporte
+    const [rows]: any = await pool.query(
+        `
+        SELECT
+
+            v.id,
+            v.Fecha,
+            CONCAT(c.Nombre,' ',c.Apellido) AS Cliente,
+            c.NCliente,
+            v.Tipo_Pago,
+            v.Total
+
+        FROM ventas v
+
+        INNER JOIN clientes c
+            ON v.Id_cliente = c.id
+
+        ${where}
+
+        ORDER BY v.Fecha DESC, v.id DESC
+
+        LIMIT ? OFFSET ?
+        `,
+        [...params, perPage, offset]
+    );
+
+    return {
+        data: rows,
+        current_page: page,
+        per_page: perPage,
+        total,
+        last_page: Math.ceil(total / perPage),
+
+        TotalRegistros: estadisticas[0].TotalRegistros,
+        VentasContado: estadisticas[0].VentasContado,
+        TotalVentas: estadisticas[0].TotalVentas
+    };
+};
