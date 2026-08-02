@@ -99,3 +99,77 @@ export const obtenerReporteProductosStock = async (
         TotalProductosEnRiesgo: estadisticas[0].TotalProductosEnRiesgo
     };
 };
+
+export const obtenerReporteClientesConDeuda = async (
+    search: string = "",
+    page: number = 1,
+    perPage: number = 10
+) => {
+
+    const offset = (page - 1) * perPage;
+
+    let where = `
+        WHERE Credito > 0
+    `;
+
+    const params: any[] = [];
+
+    if (search.trim() !== "") {
+        where += `
+            AND (
+                NCliente LIKE ?
+                OR CONCAT(Nombre, ' ', Apellido) LIKE ?
+            )
+        `;
+
+        params.push(
+            `%${search}%`,
+            `%${search}%`
+        );
+    }
+
+    // Estadísticas generales
+    const [estadisticas]: any = await pool.query(
+        `
+        SELECT
+            COUNT(*) AS TotalClientesConDeuda,
+            COALESCE(SUM(Credito), 0) AS TotalSaldoPendiente
+        FROM clientes
+        WHERE Credito > 0
+        `
+    );
+
+    // Total de registros del reporte (aplicando búsqueda)
+    const [countRows]: any = await pool.query(
+        `
+        SELECT COUNT(*) AS total
+        FROM clientes
+        ${where}
+        `,
+        params
+    );
+
+    const total = countRows[0].total;
+
+    // Clientes con deuda
+    const [rows]: any = await pool.query(
+        `
+        SELECT *
+        FROM clientes
+        ${where}
+        ORDER BY Credito DESC, Nombre ASC
+        LIMIT ? OFFSET ?
+        `,
+        [...params, perPage, offset]
+    );
+
+    return {
+        data: rows,
+        current_page: page,
+        per_page: perPage,
+        total,
+        last_page: Math.ceil(total / perPage),
+        TotalClientesConDeuda: estadisticas[0].TotalClientesConDeuda,
+        TotalSaldoPendiente: estadisticas[0].TotalSaldoPendiente
+    };
+};

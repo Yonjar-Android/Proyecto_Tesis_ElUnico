@@ -1,21 +1,13 @@
 import { useEffect, useState } from "react";
 import "../Reportes.css";
 import IconoBarras from "../IconoBarras";
-//import { buscarCuentasPorCobrar, exportarCuentasPorCobrar } from "../../services/reporte.service";
+import type { Cliente } from "../../../models/Cliente";
+import { obtenerReporteCuentasCobrar, /*exportarCuentasPorCobrar*/ } from "../../../services/reporte.service";
 import type { PaginatedResponse } from "../../../models/PaginatedResponse";
 
-interface ClienteConDeuda {
-  id: number;
-  Codigo: number;
-  Nombre: string;
-  Apellido: string;
-  Contacto: string;
-  CreditoPendiente: number;
-}
-
-interface RespuestaCuentasPorCobrar extends PaginatedResponse<ClienteConDeuda> {
-  clientesConDeuda: number;
-  totalSaldoPendiente: number;
+export interface RespuestaClientesConDeuda extends PaginatedResponse<Cliente> {
+    TotalClientesConDeuda: number;
+    TotalSaldoPendiente: number;
 }
 
 function formatearMoneda(valor: number) {
@@ -26,7 +18,7 @@ function formatearMoneda(valor: number) {
 }
 
 function ReporteCuentasPorCobrar() {
-  const [clientes, setClientes] = useState<ClienteConDeuda[]>([]);
+  const [clientes, setClientes] = useState<Cliente[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [perPage] = useState(10);
@@ -38,7 +30,7 @@ function ReporteCuentasPorCobrar() {
 
   const buscar = async () => {
     try {
-      /*const response: RespuestaCuentasPorCobrar = await buscarCuentasPorCobrar(
+      const response: RespuestaClientesConDeuda = await obtenerReporteCuentasCobrar(
         searchTerm,
         currentPage,
         perPage
@@ -47,8 +39,8 @@ function ReporteCuentasPorCobrar() {
       setClientes(response.data);
       setTotal(response.total);
       setLastPage(response.last_page);
-      setClientesConDeuda(response.clientesConDeuda);
-      setTotalSaldoPendiente(response.totalSaldoPendiente);*/
+      setClientesConDeuda(response.TotalClientesConDeuda);
+      setTotalSaldoPendiente(response.TotalClientesConDeuda);
     } catch (error) {
       console.error(error);
     }
@@ -134,12 +126,12 @@ function ReporteCuentasPorCobrar() {
             <tbody>
               {clientes.map((cliente) => (
                 <tr key={cliente.id}>
-                  <td>{cliente.Codigo}</td>
+                  <td>{cliente.NCliente}</td>
                   <td className="reporte-td-nombre">{cliente.Nombre}</td>
                   <td>{cliente.Apellido}</td>
-                  <td>{cliente.Contacto || "Sin contacto"}</td>
+                  <td>{cliente.Telefono || "Sin contacto"}</td>
                   <td className="reporte-td-derecha">
-                    C$ {formatearMoneda(cliente.CreditoPendiente)}
+                    C$ {formatearMoneda(cliente.Credito)}
                   </td>
                 </tr>
               ))}
@@ -171,14 +163,14 @@ function ReporteCuentasPorCobrar() {
               <button
                 className="reporte-page-btn"
                 onClick={() => setCurrentPage((p) => p + 1)}
-                disabled={currentPage === lastPage}
+                disabled={currentPage === lastPage || lastPage == 0}
               >
                 ›
               </button>
               <button
                 className="reporte-page-btn"
                 onClick={() => setCurrentPage(lastPage)}
-                disabled={currentPage === lastPage}
+                disabled={currentPage === lastPage || lastPage == 0}
               >
                 »
               </button>

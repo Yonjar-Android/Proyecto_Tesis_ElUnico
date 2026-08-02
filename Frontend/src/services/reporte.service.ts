@@ -18,3 +18,20 @@ export const obtenerReporteStockBajo = async (
 
     return response.data;
 };
+
+export const obtenerReporteCuentasCobrar = async (
+    search: string,
+    page: number,
+    perPage: number
+) => {
+
+    const response = await axios.get(`${API}/obtenerReporteCuentasCobrar`, {
+        params: {
+            search,
+            page,
+            perPage
+        }
+    });
+
+    return response.data;
+};
