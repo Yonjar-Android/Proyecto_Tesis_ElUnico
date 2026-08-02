@@ -7,6 +7,7 @@ import detalle_abonos from "./routes/detalle_abono.routes.js"
 import proveedorRoutes from "./routes/proveedor.routes.js"
 import productoRoutes from "./routes/producto.routes.js";
 import ventaRoutes from "./routes/venta.routes.js";
+import authRoutes from "./routes/auth.routes.js";
 import dotenv from "dotenv";
 
 
@@ -28,6 +29,7 @@ app.use("/api/detalle_abono", detalle_abonos)
 app.use("/api/proveedores", proveedorRoutes);
 app.use("/api/productos", productoRoutes);
 app.use("/api/ventas", ventaRoutes);
+app.use("/api/auth", authRoutes);
 
 
 app.listen(PORT, () => {

@@ -1,10 +1,13 @@
 import { useState, type FormEvent } from "react";
+import { useNavigate } from "react-router-dom";
 import { CircleUserRound, Lock, Eye, EyeOff, X, CheckCircle2 } from "lucide-react";
 import logo from "../../assets/LogoTransparante.png";
+import { enviarRecuperacion, loginUsuario } from "../../services/auth.service";
 type RecoveryStatus = "idle" | "loading" | "sent" | "error";
 
 export default function LoginElUnico() {
-  const [email, setEmail] = useState<string>("");
+  const navigate = useNavigate();
+  const [usuario, setUsuario] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
@@ -18,20 +21,18 @@ export default function LoginElUnico() {
   async function handleLogin(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError("");
-    if (!email || !password) {
-      setError("Completa tu correo y contraseña.");
+    if (!usuario || !password) {
+      setError("Completa tu usuario y contraseña.");
       return;
     }
     setLoading(true);
     try {
-      // TODO: reemplazar con la llamada real al backend
-      // const res = await fetch("/api/auth/login", {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify({ email, password }),
-      // });
-      // if (!res.ok) throw new Error("Credenciales inválidas");
-      console.log("Login:", { email, password });
+      const response = await loginUsuario(usuario, password);
+      if (!response.success) {
+        throw new Error(response.message || "Credenciales inválidas");
+      }
+      console.log("Inicio de sesión exitoso", response.user);
+      navigate("/marcas");
     } catch (err) {
       setError("Usuario o contraseña incorrectos.");
     } finally {
@@ -45,14 +46,10 @@ export default function LoginElUnico() {
     setRecoveryStatus("loading");
     setRecoveryError("");
     try {
-      // Llamada real al backend que genera una contraseña temporal
-      // y la envía por correo desde la cuenta de la empresa.
-      const res = await fetch("/api/auth/forgot-password", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: recoveryEmail }),
-      });
-      if (!res.ok) throw new Error("No se pudo enviar el correo");
+      const response = await enviarRecuperacion(recoveryEmail);
+      if (!response.success) {
+        throw new Error(response.message || "No se pudo enviar el correo");
+      }
       setRecoveryStatus("sent");
     } catch (err) {
       setRecoveryStatus("error");
@@ -131,11 +128,11 @@ export default function LoginElUnico() {
               <CircleUserRound size={17} color="#6b7280" />
               <input
                 type="text"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={usuario}
+                onChange={(e) => setUsuario(e.target.value)}
                 placeholder="Ingrese su usuario"
                 style={inputStyle}
-                autoComplete="email"
+                autoComplete="username"
               />
             </div>
           </div>
