@@ -4,6 +4,6 @@ Nombre: string;
 Apellido:string;
 Telefono:string;
 Direccion:string;
-Credito:number;
+Saldo_Deuda:number;
 NCliente:number;
 }

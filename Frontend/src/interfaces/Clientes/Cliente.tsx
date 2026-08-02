@@ -14,7 +14,7 @@ interface Cliente {
     Apellido: string;
     Telefono: string; 
     Direccion: string;
-    Credito: number;
+    Saldo_Deuda: number;
     NCliente: number;
 
 }
@@ -136,7 +136,7 @@ return (
                 <td className="cliente-td">
                 {cliente.Telefono.trim() === "" ? "Sin contacto" : cliente.Telefono}
                 </td>
-                <td className="cliente-td">{cliente.Credito}</td>
+                <td className="cliente-td">{cliente.Saldo_Deuda}</td>
                 <td className="cliente-td cliente-td-actions">
 
                   <button
@@ -145,7 +145,7 @@ return (
                             setClienteSeleccionado(cliente);
                             setModalAbonarAbierto(true);
                        }}
-                       disabled={cliente.Credito == 0}
+                       disabled={cliente.Saldo_Deuda == 0}
                     >
                         ✏ Abonar
                   </button>
@@ -197,13 +197,13 @@ return (
     abierto={modalAbierto}
     onClose={() => setModalAbierto(false)}
     onGuardar={async (nombre, apellido, telefono,
-        direccion, credito, ncliente,
+        direccion, saldo_deuda, ncliente,
         setError) => {
     try {
 
         await crearCliente(
             nombre,apellido, telefono,
-             direccion, credito, ncliente
+             direccion, saldo_deuda, ncliente
         );
 
         setModalAbierto(false);
@@ -229,13 +229,13 @@ return (
     }}
     onEditar={
       async (id, nombre, apellido, telefono,
-        direccion, credito, ncliente,        
+        direccion, saldo_deuda, ncliente,        
         setError) => {
 
       try{
 
         await actualizarCliente(Number(id), nombre, apellido,
-            telefono, direccion, credito, ncliente
+            telefono, direccion, saldo_deuda, ncliente
         );
 
         setModalEditarAbierto(false);

@@ -19,7 +19,7 @@ interface Props {
     apellido: string,
     telefono: string,
     direccion: string,
-    credito: number,
+    saldo_deuda: number,
     ncliente: number,
     setError: (mensaje: string) => void
   ) => Promise<boolean>;
@@ -30,7 +30,7 @@ function ModalEditarCliente({ abierto, cliente, onClose, onEditar }: Props) {
   const [apellido, setApellido] = useState("");
   const [ncliente, setNcliente] = useState("0");
   const [telefono, setTelefono] = useState("");
-  const [credito, setCredito] = useState("0");
+  const [saldo_deuda, setSaldo_Deuda] = useState("0");
   const [direccion, setDireccion] = useState("");
 
   const [error, setError] = useState("");
@@ -42,7 +42,7 @@ function ModalEditarCliente({ abierto, cliente, onClose, onEditar }: Props) {
       setApellido(cliente.Apellido ?? "");
       setNcliente(String(cliente.NCliente ?? 0));
       setTelefono(cliente.Telefono ?? "");
-      setCredito(String(cliente.Credito ?? 0));
+      setSaldo_Deuda(String(cliente.Saldo_Deuda ?? 0));
       setDireccion(cliente.Direccion ?? "");
       setError("");
     }
@@ -91,12 +91,12 @@ function ModalEditarCliente({ abierto, cliente, onClose, onEditar }: Props) {
       return;
     }
 
-    if (isNaN(Number(credito))) {
+    if (isNaN(Number(saldo_deuda))) {
     setError("Ingrese un valor válido en el campo crédito");
     return;
     }
 
-    if(Number(credito) < 0){
+    if(Number(saldo_deuda) < 0){
       setError("El valor de crédito no puede ser negativo.");
       return;
     }
@@ -107,7 +107,7 @@ function ModalEditarCliente({ abierto, cliente, onClose, onEditar }: Props) {
       apellido,
       telefono,
       direccion,
-      Number(credito) || 0,
+      Number(saldo_deuda) || 0,
       Number(ncliente),
       setError
     );
@@ -209,8 +209,8 @@ function ModalEditarCliente({ abierto, cliente, onClose, onEditar }: Props) {
                   type="number"
                   min={0}
                   readOnly
-                  value={credito}
-                  onChange={(e) => setCredito(e.target.value)}
+                  value={saldo_deuda}
+                  onChange={(e) => setSaldo_Deuda(e.target.value)}
                 />
               </div>
             </div>

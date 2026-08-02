@@ -36,7 +36,7 @@ function ModalAbonarCliente({ abierto, cliente, onClose, onAbonar }: Props) {
 
   if (!abierto || !cliente) return null;
 
-  const saldoActual = cliente.Credito ?? 0;
+  const saldoActual = cliente.Saldo_Deuda ?? 0;
   const montoNumero = Number(monto) || 0;
   const saldoDespues = saldoActual - montoNumero;
 

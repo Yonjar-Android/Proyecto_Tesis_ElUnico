@@ -109,7 +109,7 @@ export const obtenerReporteClientesConDeuda = async (
     const offset = (page - 1) * perPage;
 
     let where = `
-        WHERE Credito > 0
+        WHERE Saldo_Deuda > 0
     `;
 
     const params: any[] = [];
@@ -133,9 +133,9 @@ export const obtenerReporteClientesConDeuda = async (
         `
         SELECT
             COUNT(*) AS TotalClientesConDeuda,
-            COALESCE(SUM(Credito), 0) AS TotalSaldoPendiente
+            COALESCE(SUM(Saldo_Deuda), 0) AS TotalSaldoPendiente
         FROM clientes
-        WHERE Credito > 0
+        WHERE Saldo_Deuda > 0
         `
     );
 
@@ -157,7 +157,7 @@ export const obtenerReporteClientesConDeuda = async (
         SELECT *
         FROM clientes
         ${where}
-        ORDER BY Credito DESC, Nombre ASC
+        ORDER BY Saldo_Deuda DESC, Nombre ASC
         LIMIT ? OFFSET ?
         `,
         [...params, perPage, offset]

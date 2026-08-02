@@ -16,7 +16,7 @@ interface Props {
     apellido: string,
     telefono: string,
     direccion: string,
-    credito: number,
+    saldo_deuda: number,
     ncliente: number,
     setError: (mensaje: string) => void
   ) => Promise<boolean>;
@@ -27,7 +27,7 @@ function ModalAgregarCliente({ abierto, onClose, onGuardar }: Props) {
   const [apellido, setApellido] = useState("");
   const [ncliente, setNcliente] = useState("0");
   const [telefono, setTelefono] = useState("");
-  const [credito, setCredito] = useState("0");
+  const [saldo_deuda, setSaldo_Deuda] = useState("0");
   const [direccion, setDireccion] = useState("");
 
   const [error, setError] = useState("");
@@ -39,7 +39,7 @@ function ModalAgregarCliente({ abierto, onClose, onGuardar }: Props) {
     setApellido("");
     setNcliente("0");
     setTelefono("");
-    setCredito("0");
+    setSaldo_Deuda("0");
     setDireccion("");
   }
 
@@ -83,12 +83,12 @@ function ModalAgregarCliente({ abierto, onClose, onGuardar }: Props) {
       return;
     }
 
-    if (isNaN(Number(credito))) {
-    setError("Ingrese un valor válido en el campo crédito");
+    if (isNaN(Number(saldo_deuda))) {
+    setError("Ingrese un valor válido en el campo deuda");
     return;
     }
 
-    if(Number(credito) < 0){
+    if(Number(saldo_deuda) < 0){
       setError("El valor de crédito no puede ser negativo.");
       return;
     }
@@ -98,7 +98,7 @@ function ModalAgregarCliente({ abierto, onClose, onGuardar }: Props) {
       apellido,
       telefono,
       direccion,
-      Number(credito) || 0,
+      Number(saldo_deuda) || 0,
       Number(ncliente),
       setError
     );
@@ -201,8 +201,8 @@ function ModalAgregarCliente({ abierto, onClose, onGuardar }: Props) {
                 </span>
                 <input
                   type="number"
-                  value={credito}
-                  onChange={(e) => setCredito(e.target.value)}
+                  value={saldo_deuda}
+                  onChange={(e) => setSaldo_Deuda(e.target.value)}
                 />
               </div>
             </div>

@@ -40,7 +40,7 @@ function ReporteCuentasPorCobrar() {
       setTotal(response.total);
       setLastPage(response.last_page);
       setClientesConDeuda(response.TotalClientesConDeuda);
-      setTotalSaldoPendiente(response.TotalClientesConDeuda);
+      setTotalSaldoPendiente(response.TotalSaldoPendiente);
     } catch (error) {
       console.error(error);
     }
@@ -131,7 +131,7 @@ function ReporteCuentasPorCobrar() {
                   <td>{cliente.Apellido}</td>
                   <td>{cliente.Telefono || "Sin contacto"}</td>
                   <td className="reporte-td-derecha">
-                    C$ {formatearMoneda(cliente.Credito)}
+                    C$ {formatearMoneda(cliente.Saldo_Deuda)}
                   </td>
                 </tr>
               ))}
