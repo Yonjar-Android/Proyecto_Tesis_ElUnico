@@ -1,5 +1,6 @@
 import axios from "axios";
 import type { RespuestaReporteVentas } from "../models/VentaReportes";
+import type { RespuestaReporteCompras } from "../models/CompraReporte";
 
 const API = "http://localhost:3000/api/reportes";
 
@@ -54,6 +55,32 @@ export const obtenerReporteVentasPorPeriodo = async (
                 fechaInicio,
                 fechaFin,
                 tipoPago,
+                page,
+                perPage
+            }
+        }
+    );
+
+    return data;
+};
+
+export const obtenerReporteComprasPorPeriodo = async (
+    search: string = "",
+    fechaInicio: string = "",
+    fechaFin: string = "",
+    Id_proveedor:number | null = null,
+    page: number = 1,
+    perPage: number = 10
+): Promise<RespuestaReporteCompras> => {
+
+    const { data } = await axios.get<RespuestaReporteCompras>(
+        `${API}/obtenerReporteCompras`,
+        {
+            params: {
+                search,
+                fechaInicio,
+                fechaFin,
+                Id_proveedor,
                 page,
                 perPage
             }

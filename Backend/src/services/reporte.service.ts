@@ -290,3 +290,98 @@ export const obtenerReporteVentas = async (
         TotalVentas: estadisticas[0].TotalVentas
     };
 };
+
+export const obtenerReporteCompras = async (
+    search: string = "",
+    fechaInicio: string = "",
+    fechaFin: string = "",
+    Id_proveedor: number | null = null,
+    page: number = 1,
+    perPage: number = 10
+) => {
+
+    const offset = (page - 1) * perPage;
+
+    let where = "WHERE 1=1";
+    const params: any[] = [];
+
+    // Búsqueda
+    if (search.trim() !== "") {
+        where += `
+            AND (
+                p.Nombre_Empresa LIKE ?
+                OR c.NFactura LIKE ?
+            )
+        `;
+
+        params.push(
+            `%${search}%`,
+            `%${search}%`
+        );
+    }
+
+    // Fecha inicial
+    if (fechaInicio !== "") {
+        where += " AND c.Fecha >= ?";
+        params.push(fechaInicio);
+    }
+
+    // Fecha final
+    if (fechaFin !== "") {
+        where += " AND c.Fecha <= ?";
+        params.push(fechaFin);
+    }
+
+    // Proveedor
+    if (Id_proveedor !== null && Id_proveedor > 0) {
+        where += " AND c.Id_proveedor = ?";
+        params.push(Id_proveedor);
+    }
+
+    // Estadísticas
+    const [estadisticas]: any = await pool.query(
+        `
+        SELECT
+            COUNT(*) AS TotalRegistros,
+            COALESCE(SUM(c.Total),0) AS TotalCompras
+        FROM compras c
+        INNER JOIN proveedores p
+            ON c.Id_proveedor = p.id
+        ${where}
+        `,
+        params
+    );
+
+    const total = estadisticas[0].TotalRegistros;
+
+    // Datos paginados
+    const [rows]: any = await pool.query(
+        `
+        SELECT
+            c.id,
+            c.Fecha,
+            c.NFactura,
+            c.Total,
+            c.Id_proveedor,
+            p.Nombre_Empresa,
+            p.Nombre_Contacto
+        FROM compras c
+        INNER JOIN proveedores p
+            ON c.Id_proveedor = p.id
+        ${where}
+        ORDER BY c.Fecha DESC, c.id DESC
+        LIMIT ? OFFSET ?
+        `,
+        [...params, perPage, offset]
+    );
+
+    return {
+        data: rows,
+        current_page: page,
+        per_page: perPage,
+        total,
+        last_page: Math.ceil(total / perPage),
+        TotalRegistros: estadisticas[0].TotalRegistros,
+        TotalCompras: estadisticas[0].TotalCompras
+    };
+};

@@ -2,23 +2,11 @@ import { useEffect, useState } from "react";
 import "../Reportes.css";
 import IconoBarras from "../IconoBarras";
 import { IconoCuboOutline, IconoCarrito } from "../IconosReporte";
-import { /*buscarReporteCompras, exportarReporteCompras*/ } from "../../../services/reporte.service";
+import { obtenerReporteComprasPorPeriodo, /*exportarReporteCompras*/ } from "../../../services/reporte.service";
 import { buscarProveedores } from "../../../services/proveedor.service";
 import type { Proveedor } from "../../../models/Proveedor";
 import type { PaginatedResponse } from "../../../models/PaginatedResponse";
-
-interface CompraReporte {
-  id: number;
-  Fecha: string;
-  Proveedor: string;
-  NFactura: string;
-  Total: number;
-}
-
-interface RespuestaReporteCompras extends PaginatedResponse<CompraReporte> {
-  registrosTotales: number;
-  totalCompras: number;
-}
+import type { CompraReporte, RespuestaReporteCompras } from "../../../models/CompraReporte";
 
 function formatearMoneda(valor: number) {
   return valor.toLocaleString("en-US", {
@@ -26,6 +14,20 @@ function formatearMoneda(valor: number) {
     maximumFractionDigits: 2,
   });
 }
+
+export const formatearFecha = (fecha: string): string => {
+  const date = new Date(fecha);
+
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+  const seconds = String(date.getSeconds()).padStart(2, "0");
+
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+};
 
 function ReporteCompras() {
   const [compras, setCompras] = useState<CompraReporte[]>([]);
@@ -49,18 +51,19 @@ function ReporteCompras() {
 
   const buscar = async () => {
     try {
-     /* const response: RespuestaReporteCompras = await buscarReporteCompras(
+      const response: RespuestaReporteCompras = await obtenerReporteComprasPorPeriodo(
+        "",
         fechaInicio,
         fechaFin,
-        proveedorId,
+        Number(proveedorId),
         currentPage,
         perPage
       );
 
       setCompras(response.data);
       setLastPage(response.last_page);
-      setRegistrosTotales(response.registrosTotales);
-      setTotalCompras(response.totalCompras);*/
+      setRegistrosTotales(response.TotalRegistros);
+      setTotalCompras(response.TotalCompras);
     } catch (error) {
       console.error(error);
     }
@@ -170,9 +173,9 @@ function ReporteCompras() {
             <tbody>
               {compras.map((compra) => (
                 <tr key={compra.id}>
-                  <td>{compra.Fecha}</td>
+                  <td>{formatearFecha(compra.Fecha)}</td>
                   <td className="reporte-td-centro reporte-td-nombre">
-                    {compra.Proveedor}
+                    {compra.Nombre_Empresa}
                   </td>
                   <td className="reporte-td-factura">{compra.NFactura}</td>
                   <td className="reporte-td-derecha">C$ {formatearMoneda(compra.Total)}</td>
@@ -212,14 +215,14 @@ function ReporteCompras() {
               <button
                 className="reporte-page-btn"
                 onClick={() => setCurrentPage((p) => p + 1)}
-                disabled={currentPage === lastPage}
+                disabled={currentPage === lastPage || lastPage == 0}
               >
                 ›
               </button>
               <button
                 className="reporte-page-btn"
                 onClick={() => setCurrentPage(lastPage)}
-                disabled={currentPage === lastPage}
+                disabled={currentPage === lastPage || lastPage == 0}
               >
                 »
               </button>
