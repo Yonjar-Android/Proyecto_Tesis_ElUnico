@@ -9,13 +9,14 @@ import EditarProducto from "./interfaces/Productos/EditarProducto";
 import CrearProducto from "./interfaces/Productos/CrearProducto";
 import Facturacion from "./interfaces/Facturacion/Facturacion";
 import Compras from "./interfaces/Compras/Compras";
+import LoginElUnico from "./interfaces/IniciodeSesion/LoginElUnico";
 
 function App() {
   return (
     <BrowserRouter>
 
       <nav>
-        <Link to="/">
+        <Link to="/marcas">
           <button>Marcas</button>
         </Link>
 
@@ -46,7 +47,8 @@ function App() {
       </nav>
 
       <Routes>
-        <Route path="/" element={<Marca />} />
+        <Route path="/" element={<LoginElUnico />} />
+        <Route path="/marcas" element={<Marca />} />
         <Route path="/categorias" element={<Categoria />} />
         <Route path="/clientes" element={<Cliente />} />
         <Route path="/proveedores" element={<Proveedor />} />
