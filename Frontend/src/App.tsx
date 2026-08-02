@@ -10,6 +10,8 @@ import CrearProducto from "./interfaces/Productos/CrearProducto";
 import Facturacion from "./interfaces/Facturacion/Facturacion";
 import Compras from "./interfaces/Compras/Compras";
 import LoginElUnico from "./interfaces/IniciodeSesion/LoginElUnico";
+import ReporteCuentasPorCobrar from "./interfaces/Reportes/ReporteCuentasPorCobrar/ReporteCuentasPorCobrar";
+import ReporteStockProximoAgotarse from "./interfaces/Reportes/ReporteStockPromiAgotarse/ReporteStockBajo";
 
 function App() {
   return (
@@ -44,6 +46,14 @@ function App() {
           <button>Compras</button>
         </Link>
 
+        <Link to="/reportes/cuentas-por-cobrar">
+          <button>Reporte Cuentas por Cobrar</button>
+        </Link>
+
+        <Link to="/reportes/stock-proximo-agotarse">
+          <button>Reporte Stock Próximo a Agotarse</button>
+        </Link>
+
       </nav>
 
       <Routes>
@@ -57,6 +67,10 @@ function App() {
         <Route path="/compras" element={<Compras />} />
         <Route path="/inventario/crear" element={<CrearProducto />} />
         <Route path="/inventario/editar/:id" element={<EditarProducto />} />
+
+        // Reportes
+        <Route path="/reportes/cuentas-por-cobrar" element={<ReporteCuentasPorCobrar />} />
+        <Route path="/reportes/stock-proximo-agotarse" element={<ReporteStockProximoAgotarse />} />
       </Routes>
 
     </BrowserRouter>
