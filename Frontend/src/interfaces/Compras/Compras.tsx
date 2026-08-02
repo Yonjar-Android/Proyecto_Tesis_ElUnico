@@ -103,9 +103,7 @@ function Compras() {
     setError("");
   };
  
-  const confirmarCompra = async (
-    setErrorModal: (mensaje: string) => void
-  ) => {
+  const confirmarCompra = async () => {
     
     if (items.length === 0) {
       setError("Agrega al menos un producto para realizar la compra.");
@@ -129,9 +127,12 @@ function Compras() {
       );
  
       setItems([]);
+      setError("");
+      setProductoSeleccionado(null);
+      setProveedorSeleccionado(null);
       return true;
     } catch (error: any) {
-      setErrorModal(error.response.data.mensaje);
+      setError(error.response.data.mensaje);
       return false;
     }
   };
@@ -320,7 +321,7 @@ function Compras() {
             <span className="factura-total-monto">C${total}</span>
           </div>
 
-          <button className="factura-btn-vender" /*onClick={confirmarCompra}*/>
+          <button className="factura-btn-vender" onClick={confirmarCompra}>
             Realizar Compra
           </button>
         </div>

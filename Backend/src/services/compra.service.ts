@@ -66,7 +66,7 @@ export const crearCompra = async (
                     Id_compra,
                     Id_producto,
                     Cantidad,
-                    Precio,
+                    Precio_compra,
                     Subtotal
                 )
                 VALUES (?,?,?,?,?)
