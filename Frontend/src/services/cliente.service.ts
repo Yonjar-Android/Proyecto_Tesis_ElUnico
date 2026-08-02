@@ -4,10 +4,10 @@ const API = "http://localhost:3000/api/clientes";
 
 export const crearCliente = async (
     Nombre: string, Apellido: string, Telefono: string,
-    Direccion: string, Credito: number, NCliente: number
+    Direccion: string, Saldo_Deuda: number, NCliente: number
 ) => {
     const response = await axios.post(API, {
-        Nombre, Apellido, Telefono, Direccion, Credito, NCliente
+        Nombre, Apellido, Telefono, Direccion, Saldo_Deuda, NCliente
     })
 
     return response.data;
@@ -15,11 +15,11 @@ export const crearCliente = async (
 
 export const actualizarCliente = async (
     id: number, Nombre:string, Apellido: string, 
-    Telefono: string, Direccion: string, Credito: number,
+    Telefono: string, Direccion: string, Saldo_Deuda: number,
     NCliente: number
 ) => {
     const response = await axios.put(`${API}/${id}`, {
-        Nombre, Apellido, Telefono, Direccion, Credito, NCliente
+        Nombre, Apellido, Telefono, Direccion, Saldo_Deuda, NCliente
     });
 
     return response;

@@ -1,48 +1,40 @@
 import { useState } from "react";
-import "./Facturacion.css";
-import ModalSeleccionarProducto from "./ModalSeleccionarProducto";
-import ModalSeleccionarCliente from "./ModalSeleccionarCliente";
-import ModalConfirmarVenta from "./ModalConfirmarVenta";
-import type { Cliente } from "../../models/Cliente";
+import "./Compras.css";
+import type { Proveedor } from "../../models/Proveedor";
 import type { ProductoListado } from "../../models/ProductoListado";
-import { crearVenta } from "../../services/venta.service";
+import { crearCompra } from "../../services/compra.service";
+import ModalSeleccionarProducto from "../Facturacion/ModalSeleccionarProducto";
+import ModalSeleccionarProveedor from "./ModalSeleccionarProveedor";
 
-interface ItemVenta {
+interface ItemCompra {
   productoId: number;
   nombre: string;
   marca?: string;
   cantidad: number;
-  precio: number;
+  precio_compra: number;
+  precio_venta: number;
 }
 
-function formatearFecha(fecha: Date) {
+function formatearFechaInput(fecha: Date) {
   const dia = String(fecha.getDate()).padStart(2, "0");
   const mes = String(fecha.getMonth() + 1).padStart(2, "0");
   const anio = fecha.getFullYear();
-  return `${dia}-${mes}-${anio}`;
+
+  return `${anio}-${mes}-${dia}`;
 }
 
-function Facturacion() {
+function Compras() {
   const [productoSeleccionado, setProductoSeleccionado] = useState<ProductoListado | null>(null);
   const [cantidad, setCantidad] = useState("1");
   const [precio, setPrecio] = useState("0.00");
-  const [tipoPago, setTipoPago] = useState("Contado");
-  const [clienteSeleccionado, setClienteSeleccionado] = useState<Cliente>(
-    {
-  id: 0,
-  Nombre: "Cliente",
-  Apellido: "General",
-  Telefono: "",
-  Direccion: "",
-  Credito: 0,
-  NCliente: 0
-}
-  );
+  const [precioVenta, setPrecioVenta] = useState("0.00");
+  const [fecha, setFecha] = useState(formatearFechaInput(new Date()));
+  const [NFactura, setNFactura] = useState("");
+  const [proveedorSeleccionado, setProveedorSeleccionado] = useState<Proveedor | null>(null);
 
-  const [items, setItems] = useState<ItemVenta[]>([]);
+  const [items, setItems] = useState<ItemCompra[]>([]);
   const [modalProductoAbierto, setModalProductoAbierto] = useState(false);
-  const [modalClienteAbierto, setModalClienteAbierto] = useState(false);
-  const [modalConfirmarAbierto, setModalConfirmarAbierto] = useState(false);
+  const [modalProveedorAbierto, setModalProveedorAbierto] = useState(false);
 
   const [error, setError] = useState("");
 
@@ -53,8 +45,9 @@ function Facturacion() {
   };
 
   const agregar = () => {
+
     if (!productoSeleccionado) {
-      setError("Selecciona un producto o servicio.");
+      setError("Selecciona un producto.");
       return;
     }
 
@@ -63,8 +56,13 @@ function Facturacion() {
       return;
     }
 
-    if (isNaN(Number(precio)) || Number(precio) < 0) {
-      setError("Ingresa un precio válido.");
+    if (isNaN(Number(precio)) || Number(precio) <= 0) {
+      setError("Ingresa un precio de compra válido.");
+      return;
+    }
+
+    if(!proveedorSeleccionado) {
+      setError("Selecciona un proveedor.");
       return;
     }
 
@@ -84,7 +82,8 @@ function Facturacion() {
         nombre: productoSeleccionado.Nombre,
         marca: productoSeleccionado.Nombre_marca,
         cantidad: Number(cantidad),
-        precio: Number(precio),
+        precio_compra: Number(precio),
+        precio_venta: Number(precioVenta),
       },
     ]);
 
@@ -96,50 +95,44 @@ function Facturacion() {
     setItems((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const total = items.reduce((suma, item) => suma + item.cantidad * item.precio, 0);
+  const total = items.reduce((suma, item) => suma + item.cantidad * item.precio_compra, 0);
 
   const cancelar = () => {
     setItems([]);
     limpiarCamposProducto();
     setError("");
   };
-
-  const realizarVenta = () => {
+ 
+  const confirmarCompra = async () => {
+    
     if (items.length === 0) {
-      setError("Agrega al menos un producto para realizar la venta.");
+      setError("Agrega al menos un producto para realizar la compra.");
       return;
     }
- 
-    setError("");
-    setModalConfirmarAbierto(true);
-  };
- 
-  const confirmarVenta = async (
-    montoRecibido: number,
-    setErrorModal: (mensaje: string) => void
-  ) => {
+
     try {
 
-      const total = items.reduce((suma, item) => suma + item.cantidad * item.precio, 0);
+      const total = items.reduce((suma, item) => suma + item.cantidad * item.precio_compra, 0);
 
-      await crearVenta(
-        Number(clienteSeleccionado?.id),
-        1,
-        tipoPago,
+      await crearCompra(
+        Number(proveedorSeleccionado?.id),
+        NFactura,
         total,
         items.map((item) => ({
           Id_producto: item.productoId,
           Cantidad: item.cantidad,
-          Precio_Venta: item.precio,
-          Subtotal: item.cantidad * item.precio,
+          Precio: item.precio_compra,
+          Subtotal: item.cantidad * item.precio_compra,
         })),
       );
  
       setItems([]);
-      setModalConfirmarAbierto(false);
+      setError("");
+      setProductoSeleccionado(null);
+      setProveedorSeleccionado(null);
       return true;
     } catch (error: any) {
-      setErrorModal(error.response.data.mensaje);
+      setError(error.response.data.mensaje);
       return false;
     }
   };
@@ -148,27 +141,23 @@ function Facturacion() {
     <div className="factura-page">
         <div className="factura-contenido">
       <div className="factura-header">
-        <h1>Facturación</h1>
-        <p className="factura-subtitulo">
-          Registre los productos y complete el pago de la transacción.
-        </p>
-        <p className="factura-fecha">Fecha: {formatearFecha(new Date())}</p>
+        <h1>Gestión de Compras</h1>
       </div>
 
       <div className="factura-card">
-        <div className="factura-fila-producto">
-          <div className="factura-campo factura-campo-producto">
+        <div className="compra-fila-formulario">
+          <div className="compra-campo compra-campo-producto">
             <label>
-              Producto o Servicio <span style={{ color: "#e5484d" }}>*</span>
+              Producto <span style={{ color: "#e5484d" }}>*</span>
             </label>
             <button
               type="button"
-              className="factura-selector-btn"
+              className="compra-selector-btn"
               onClick={() => setModalProductoAbierto(true)}
             >
               <span
                 className={
-                  productoSeleccionado ? "Seleccione un producto" : "factura-selector-placeholder"
+                  productoSeleccionado ? "" : "compra-selector-placeholder"
                 }
               >
                 {productoSeleccionado
@@ -178,7 +167,7 @@ function Facturacion() {
             </button>
           </div>
 
-          <div className="factura-campo factura-campo-cantidad">
+          <div className="compra-campo compra-campo-cantidad">
             <label>
               Cantidad <span style={{ color: "#e5484d" }}>*</span>
             </label>
@@ -190,11 +179,11 @@ function Facturacion() {
             />
           </div>
 
-          <div className="factura-campo factura-campo-precio">
+          <div className="compra-campo compra-campo-precio">
             <label>
-              Precio <span style={{ color: "#e5484d" }}>*</span>
+              Precio de Compra <span style={{ color: "#e5484d" }}>*</span>
             </label>
-            <div className="factura-precio-input">
+            <div className="compra-precio-input">
               <span>C$</span>
               <input
                 type="number"
@@ -206,38 +195,74 @@ function Facturacion() {
             </div>
           </div>
 
-          <button className="factura-btn-agregar" onClick={agregar}>
+          <button className="compra-btn-agregar" onClick={agregar}>
             Agregar
           </button>
         </div>
-      </div>
 
-      <div className="factura-fila-doble">
-        <div className="factura-card">
-          <div className="factura-campo">
+        <div className="compra-fila-formulario">
+          <div className="compra-campo compra-campo-producto">
             <label>
-              Tipo de Pago <span style={{ color: "#e5484d" }}>*</span>
+              Proveedor <span style={{ color: "#e5484d" }}>*</span>
             </label>
-            <select value={tipoPago} onChange={(e) => setTipoPago(e.target.value)}>
-              <option value="Contado">Contado</option>
-              <option value="Credito">Crédito</option>
-              <option value="Transferencia">Transferencia</option>
-            </select>
-          </div>
-        </div>
-
-        <div className="factura-card">
-          <div className="factura-campo">
-            <label>
-              Seleccionar Cliente <span style={{ color: "#e5484d" }}>*</span>
-            </label>
-            <button type="button" className="factura-selector-btn"
-            onClick={() => setModalClienteAbierto(true)}>
-              {`${clienteSeleccionado?.Nombre} ${clienteSeleccionado?.Apellido}` ? `${clienteSeleccionado?.Nombre} ${clienteSeleccionado?.Apellido}` : "Cliente General"}
+            <button
+              type="button"
+              className="compra-selector-btn"
+              onClick={() => setModalProveedorAbierto(true)}
+            >
+              <span
+                className={
+                  proveedorSeleccionado ? "" : "compra-selector-placeholder"
+                }
+              >
+                {proveedorSeleccionado
+                  ? proveedorSeleccionado.Nombre_Empresa
+                  : "Seleccione un proveedor"}
+              </span>
             </button>
           </div>
+
+          <div className="compra-campo compra-campo-fecha">
+            <label>
+              Fecha <span style={{ color: "#e5484d" }}>*</span>
+            </label>
+            <input
+              type="date"
+              value={fecha}
+              onChange={(e) => setFecha(e.target.value)}
+            />
+          </div>
+
+          <div className="compra-campo compra-campo-factura">
+            <label>
+              N° Factura
+            </label>
+            <input
+              type="text"
+              placeholder="Ej: FAC-102"
+              value={NFactura}
+              onChange={(e) => setNFactura(e.target.value)}
+            />
+          </div>
+
+          <div className="compra-campo compra-campo-precio-venta">
+            <label>
+              Precio de Venta <span style={{ color: "#e5484d" }}>*</span>
+            </label>
+            <div className="compra-precio-input">
+              <span>C$</span>
+              <input
+                type="number"
+                step="1"
+                min="0"
+                value={precioVenta}
+                onChange={(e) => setPrecioVenta(e.target.value)}
+              />
+            </div>
+          </div>
         </div>
       </div>
+
 
       <div className="factura-card factura-card-tabla">
         <table className="factura-tabla">
@@ -260,9 +285,9 @@ function Facturacion() {
                   )}
                 </td>
                 <td>{item.cantidad}</td>
-                <td>C${item.precio.toFixed(2)}</td>
+                <td>C${item.precio_compra}</td>
                 <td className="factura-td-subtotal">
-                  C${(item.cantidad * item.precio).toFixed(2)}
+                  C${(item.cantidad * item.precio_compra)}
                 </td>
                 <td className="factura-td-accion">
                   <button
@@ -293,11 +318,11 @@ function Facturacion() {
         <div className="factura-total-venta">
           <div className="factura-total-texto">
             <span className="factura-total-label">Total</span>
-            <span className="factura-total-monto">C${total.toFixed(2)}</span>
+            <span className="factura-total-monto">C${total}</span>
           </div>
 
-          <button className="factura-btn-vender" onClick={realizarVenta}>
-            Realizar Venta
+          <button className="factura-btn-vender" onClick={confirmarCompra}>
+            Realizar Compra
           </button>
         </div>
       </div>
@@ -306,30 +331,23 @@ function Facturacion() {
       <ModalSeleccionarProducto
         abierto={modalProductoAbierto}
         onClose={() => setModalProductoAbierto(false)}
-        onSeleccionar={(producto) => {
+        onSeleccionar={(producto: any) => {
           setProductoSeleccionado(producto);
-          setPrecio(producto.Precio_venta.toString());
+          setPrecioVenta(producto.Precio_venta);
           setModalProductoAbierto(false);
         }}
       />
 
-      <ModalSeleccionarCliente
-        abierto={modalClienteAbierto}
-        onClose={() => setModalClienteAbierto(false)}
-        onSeleccionar={(cliente) => {
-          setClienteSeleccionado(cliente);
-          setModalClienteAbierto(false);
+      <ModalSeleccionarProveedor
+        abierto={modalProveedorAbierto}
+        onClose={() => setModalProveedorAbierto(false)}
+        onSeleccionar={(proveedor) => {
+          setProveedorSeleccionado(proveedor);
+          setModalProveedorAbierto(false);
         }}
-      />
- 
-      <ModalConfirmarVenta
-        abierto={modalConfirmarAbierto}
-        totalVenta={total}
-        onClose={() => setModalConfirmarAbierto(false)}
-        onConfirmar={confirmarVenta}
       />
     </div>
   );
 }
 
-export default Facturacion;
+export default Compras;

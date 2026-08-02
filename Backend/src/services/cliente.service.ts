@@ -50,7 +50,7 @@ export const buscarClientes = async (
 
 export const crearCliente = async (
     nombre:string, apellido: string, telefono: string,
-    direccion:string, credito: number, Ncliente:number
+    direccion:string, saldo_deuda: number, Ncliente:number
 ) => {
 
         if (!nombre.trim()) {
@@ -99,24 +99,24 @@ export const crearCliente = async (
     throw new Error("Ya existe un cliente con ese número de teléfono.");
     }
 
-    if (isNaN(credito)) {
-    throw new Error("Ingrese un valor válido en el campo crédito.");
+    if (isNaN(saldo_deuda)) {
+    throw new Error("Ingrese un valor válido en el campo deuda.");
     }
 
-    if(Number(String(credito)) < 0){
+    if(Number(String(saldo_deuda)) < 0){
       throw new Error("El valor de crédito no puede ser negativo.");
     }
 
     const [result]: any = await pool.query(
-        "INSERT INTO clientes (Nombre, Apellido, Telefono, Direccion, Credito, NCliente) VALUES (?,?,?,?,?,?)",
-        [nombre, apellido, telefono, direccion, credito, Ncliente]
+        "INSERT INTO clientes (Nombre, Apellido, Telefono, Direccion, Saldo_Deuda, NCliente) VALUES (?,?,?,?,?,?)",
+        [nombre, apellido, telefono, direccion, saldo_deuda, Ncliente]
     );
 
     const idCliente = result.insertId;
 
     await pool.query(
     "INSERT INTO abonos (Id_cliente, Total_deuda) VALUES (?, ?)",
-    [idCliente, credito]
+    [idCliente, saldo_deuda]
     );
 
     return result;
@@ -128,7 +128,7 @@ export const actualizarCliente = async (
     apellido: string,
     telefono: string,
     direccion: string,
-    credito: number,
+    saldo_deuda: number,
     Ncliente: number
 ) => {
 
@@ -178,11 +178,11 @@ export const actualizarCliente = async (
     throw new Error("Ya existe un cliente con ese número de teléfono.");
     }
 
-    if (!/^\d+$/.test(String(credito))) {
+    if (!/^\d+$/.test(String(saldo_deuda))) {
     throw new Error("Ingrese un valor válido en el campo crédito");
     }
 
-    if(Number(String(credito)) < 0){
+    if(Number(String(saldo_deuda)) < 0){
       throw new Error("El valor de crédito no puede ser negativo.");
     }
 
@@ -193,10 +193,10 @@ export const actualizarCliente = async (
              Apellido = ?,
              Telefono = ?,
              Direccion = ?,
-             Credito = ?,
+             Saldo_Deuda = ?,
              NCliente = ?
          WHERE id = ?`,
-        [nombre, apellido, telefono, direccion, credito, Ncliente, id]
+        [nombre, apellido, telefono, direccion, saldo_deuda, Ncliente, id]
     );
 
     return result;
