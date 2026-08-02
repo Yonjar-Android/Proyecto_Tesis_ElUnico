@@ -3,13 +3,7 @@ import "../Productos/ModalesSeleccion/ModalSeleccion.css";
 import IconoCubo from "../Productos/ModalesSeleccion/IconoCubo";
 import { buscarClientes } from "../../services/cliente.service";
 import type { PaginatedResponse } from "../../models/PaginatedResponse";
-
-interface Cliente {
-  id: number;
-  Nombre: string;
-  Apellido: string;
-  NCliente: number;
-}
+import type { Cliente } from "../../models/Cliente";
 
 interface Props {
   abierto: boolean;

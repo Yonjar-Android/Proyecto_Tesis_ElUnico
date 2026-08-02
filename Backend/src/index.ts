@@ -6,6 +6,7 @@ import clienteRoutes from "./routes/cliente.routes.js"
 import detalle_abonos from "./routes/detalle_abono.routes.js"
 import proveedorRoutes from "./routes/proveedor.routes.js"
 import productoRoutes from "./routes/producto.routes.js";
+import ventaRoutes from "./routes/venta.routes.js";
 
 import cors from "cors";
 
@@ -24,6 +25,7 @@ app.use("/api/clientes", clienteRoutes);
 app.use("/api/detalle_abono", detalle_abonos)
 app.use("/api/proveedores", proveedorRoutes);
 app.use("/api/productos", productoRoutes);
+app.use("/api/ventas", ventaRoutes);
 
 
 app.listen(PORT, () => {

@@ -3,8 +3,9 @@ import "./Facturacion.css";
 import ModalSeleccionarProducto from "./ModalSeleccionarProducto";
 import ModalSeleccionarCliente from "./ModalSeleccionarCliente";
 import ModalConfirmarVenta from "./ModalConfirmarVenta";
+import type { Cliente } from "../../models/Cliente";
 import type { ProductoListado } from "../../models/ProductoListado";
-//import { registrarVenta } from "../../services/venta.service";
+import { crearVenta } from "../../services/venta.service";
 
 interface ItemVenta {
   productoId: number;
@@ -26,7 +27,17 @@ function Facturacion() {
   const [cantidad, setCantidad] = useState("1");
   const [precio, setPrecio] = useState("0.00");
   const [tipoPago, setTipoPago] = useState("Efectivo");
-  const [clienteSeleccionado, setClienteSeleccionado] = useState("Cliente General");
+  const [clienteSeleccionado, setClienteSeleccionado] = useState<Cliente>(
+    {
+  id: 0,
+  Nombre: "Cliente",
+  Apellido: "General",
+  Telefono: "",
+  Direccion: "",
+  Credito: 0,
+  NCliente: 0
+}
+  );
 
   const [items, setItems] = useState<ItemVenta[]>([]);
   const [modalProductoAbierto, setModalProductoAbierto] = useState(false);
@@ -56,6 +67,15 @@ function Facturacion() {
       setError("Ingresa un precio válido.");
       return;
     }
+
+    const existe = items.some(
+    (item) => item.productoId === productoSeleccionado.id
+  );
+
+  if (existe) {
+    setError("Este producto ya fue agregado a la factura.");
+    return;
+  }
 
     setItems((prev) => [
       ...prev,
@@ -99,18 +119,23 @@ function Facturacion() {
     setErrorModal: (mensaje: string) => void
   ) => {
     try {
-      /*await registrarVenta(
-        items.map((item) => ({
-          productoId: item.productoId,
-          cantidad: item.cantidad,
-          precio: item.precio,
-        })),
+
+      const total = items.reduce((suma, item) => suma + item.cantidad * item.precio, 0);
+
+      await crearVenta(
+        Number(clienteSeleccionado?.id),
+        1,
         tipoPago,
-        clienteSeleccionado,
-        montoRecibido
+        total,
+        items.map((item) => ({
+          Id_producto: item.productoId,
+          Cantidad: item.cantidad,
+          Precio_Venta: item.precio,
+          Subtotal: item.cantidad * item.precio,
+        })),
       );
  
-      setItems([]);*/
+      setItems([]);
       setModalConfirmarAbierto(false);
       return true;
     } catch (error: any) {
@@ -208,7 +233,7 @@ function Facturacion() {
             </label>
             <button type="button" className="factura-selector-btn"
             onClick={() => setModalClienteAbierto(true)}>
-              {clienteSeleccionado}
+              {`${clienteSeleccionado?.Nombre} ${clienteSeleccionado?.Apellido}` ? `${clienteSeleccionado?.Nombre} ${clienteSeleccionado?.Apellido}` : "Cliente General"}
             </button>
           </div>
         </div>
@@ -292,7 +317,7 @@ function Facturacion() {
         abierto={modalClienteAbierto}
         onClose={() => setModalClienteAbierto(false)}
         onSeleccionar={(cliente) => {
-          setClienteSeleccionado(`${cliente.Nombre} ${cliente.Apellido}`);
+          setClienteSeleccionado(cliente);
           setModalClienteAbierto(false);
         }}
       />
