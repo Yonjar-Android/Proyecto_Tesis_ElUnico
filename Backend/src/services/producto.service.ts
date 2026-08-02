@@ -15,9 +15,11 @@ export const buscarProductos = async (
         where = `
             WHERE p.Nombre LIKE ?
                OR c.Nombre_categoria LIKE ?
+               OR p.id LIKE ?
         `;
 
         params.push(
+            `%${search}%`,
             `%${search}%`,
             `%${search}%`
         );

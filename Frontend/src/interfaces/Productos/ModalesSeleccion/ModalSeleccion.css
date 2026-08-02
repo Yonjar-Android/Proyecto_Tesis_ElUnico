@@ -60,11 +60,11 @@
 }
 
 .seleccion-th-accion {
-  text-align: right;
+  text-align: center;
 }
 
 .seleccion-tabla td {
-  text-align: left;
+  text-align: center;
   padding: 0.9rem 0;
   border-bottom: 1px solid #f1f5f9;
   font-size: 0.92rem;
@@ -73,7 +73,7 @@
 }
 
 .seleccion-td-accion {
-  text-align: right;
+  text-align: center;
 }
 
 .seleccion-vacio {

@@ -134,14 +134,14 @@ function ModalSeleccionarCategoria({ abierto, onClose, onSeleccionar }: Props) {
             <button
               className="seleccion-page-btn"
               onClick={() => setCurrentPage((p) => p + 1)}
-              disabled={currentPage === lastPage}
+              disabled={currentPage === lastPage || lastPage === 0}
             >
               ›
             </button>
             <button
               className="seleccion-page-btn"
               onClick={() => setCurrentPage(lastPage)}
-              disabled={currentPage === lastPage}
+              disabled={currentPage === lastPage || lastPage === 0}
             >
               »
             </button>

@@ -162,7 +162,7 @@ function Inventario() {
               <button
                 className="inventario-page-btn"
                 onClick={() => setCurrentPage((p) => Math.min(lastPage, p + 1))}
-                disabled={currentPage === lastPage}
+                disabled={currentPage === lastPage || lastPage === 0}
               >
                 Siguiente
               </button>

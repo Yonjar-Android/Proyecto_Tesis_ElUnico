@@ -1,13 +1,5 @@
 /* Reutiliza .modal-overlay, .modal, .modal-close, .error-text ya existentes. */
 
-.seleccion-modal {
-  width: 520px;
-  max-width: calc(100vw - 32px);
-  max-height: 85vh;
-  display: flex;
-  flex-direction: column;
-}
-
 .seleccion-modal--ancho{
   width: 640px;
 }
@@ -52,42 +44,6 @@
 .seleccion-tabla {
   width: 100%;
   border-collapse: collapse;
-}
-
-.seleccion-tabla th {
-  text-align: center;
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: #9ca3af;
-  padding: 0.5rem 0;
-  border-bottom: 1px solid #f1f5f9;
-}
-
-.seleccion-th-accion {
-  text-align: right !important;
-}
-
-.seleccion-nombre-columna {
-  text-align: left !important;
-}
-
-.seleccion-th-nombre {
-  text-align: left !important;
-}
-
-.seleccion-tabla td {
-  padding: 0.9rem 0;
-  border-bottom: 1px solid #f1f5f9;
-  font-size: 0.92rem;
-  color: #1f2937;
-  font-weight: 600;
-  text-align: center;
-}
-
-.seleccion-td-accion {
-  text-align: right !important;
 }
 
 .seleccion-vacio {

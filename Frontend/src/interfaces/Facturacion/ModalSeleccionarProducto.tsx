@@ -75,7 +75,7 @@ function ModalSeleccionarProducto({ abierto, onClose, onSeleccionar }: Props) {
           <input
             className="seleccion-buscador"
             type="text"
-            placeholder="Buscar por nombre, código..."
+            placeholder="Buscar por código, nombre o categoría..."
             value={searchTerm}
             onChange={(e) => {
               setSearchTerm(e.target.value);
@@ -155,14 +155,14 @@ function ModalSeleccionarProducto({ abierto, onClose, onSeleccionar }: Props) {
             <button
               className="seleccion-page-btn"
               onClick={() => setCurrentPage((p) => p + 1)}
-              disabled={currentPage === lastPage}
+              disabled={currentPage === lastPage || lastPage === 0}
             >
               ›
             </button>
             <button
               className="seleccion-page-btn"
               onClick={() => setCurrentPage(lastPage)}
-              disabled={currentPage === lastPage}
+              disabled={currentPage === lastPage || lastPage === 0}
             >
               »
             </button>
