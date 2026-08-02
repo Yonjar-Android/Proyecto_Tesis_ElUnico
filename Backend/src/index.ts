@@ -7,6 +7,8 @@ import detalle_abonos from "./routes/detalle_abono.routes.js"
 import proveedorRoutes from "./routes/proveedor.routes.js"
 import productoRoutes from "./routes/producto.routes.js";
 import ventaRoutes from "./routes/venta.routes.js";
+import dotenv from "dotenv";
+
 
 import cors from "cors";
 
