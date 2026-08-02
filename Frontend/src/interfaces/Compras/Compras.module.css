@@ -1,0 +1,15 @@
+.filaProveedor {
+  align-items: flex-end;
+}
+ 
+.campoFecha {
+  flex: 0 0;
+}
+ 
+.campoFactura {
+  flex: 0 0;
+}
+ 
+.campoPrecioVenta {
+  flex: 0 0;
+}
