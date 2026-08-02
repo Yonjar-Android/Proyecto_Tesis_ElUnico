@@ -5,11 +5,10 @@ import type { ProductoListado } from "../../models/ProductoListado";
 import { crearCompra } from "../../services/compra.service";
 import ModalSeleccionarProducto from "../Facturacion/ModalSeleccionarProducto";
 import ModalSeleccionarProveedor from "./ModalSeleccionarProveedor";
+import { SquarePen, Trash2 } from "lucide-react";
 
 interface ItemCompra {
-  productoId: number;
-  nombre: string;
-  marca?: string;
+  producto: ProductoListado,
   cantidad: number;
   precio_compra: number;
   precio_venta: number;
@@ -33,6 +32,7 @@ function Compras() {
   const [proveedorSeleccionado, setProveedorSeleccionado] = useState<Proveedor | null>(null);
 
   const [items, setItems] = useState<ItemCompra[]>([]);
+  const [indiceEditando, setIndiceEditando] = useState<number | null>(null);
   const [modalProductoAbierto, setModalProductoAbierto] = useState(false);
   const [modalProveedorAbierto, setModalProveedorAbierto] = useState(false);
 
@@ -44,7 +44,23 @@ function Compras() {
     setPrecio("0.00");
   };
 
-  const agregar = () => {
+  const cancelarEdicion = () => {
+    setIndiceEditando(null);
+    limpiarCamposProducto();
+    setError("");
+  };
+
+  // Precarga el formulario con los datos de la fila y activa el modo edición.
+  const editarItem = (index: number) => {
+    const item = items[index];
+    setProductoSeleccionado(item.producto);
+    setCantidad(String(item.cantidad));
+    setPrecio(item.precio_compra.toFixed(2));
+    setIndiceEditando(index);
+    setError("");
+  };
+
+  const guardarProducto = () => {
 
     if (!productoSeleccionado) {
       setError("Selecciona un producto.");
@@ -66,28 +82,33 @@ function Compras() {
       return;
     }
 
-    const existe = items.some(
-    (item) => item.productoId === productoSeleccionado.id
-  );
+    // Al chequear duplicados, ignora la propia fila que se está editando.
+    const yaExiste = items.some(
+      (item, i) => item.producto.id === productoSeleccionado.id && i !== indiceEditando
+    );
 
-  if (existe) {
-    setError("Este producto ya fue agregado a la factura.");
-    return;
-  }
+    if (yaExiste) {
+      setError("Este producto ya fue agregado a la factura.");
+      return;
+    }
 
-    setItems((prev) => [
-      ...prev,
-      {
-        productoId: productoSeleccionado.id,
-        nombre: productoSeleccionado.Nombre,
-        marca: productoSeleccionado.Nombre_marca,
-        cantidad: Number(cantidad),
-        precio_compra: Number(precio),
-        precio_venta: Number(precioVenta),
-      },
-    ]);
+    const itemGuardado: ItemCompra = {
+      producto: productoSeleccionado,
+      cantidad: Number(cantidad),
+      precio_compra: Number(precio),
+      precio_venta: Number(precioVenta)
+    }
+
+    if (indiceEditando !== null) {
+      setItems((prev) =>
+        prev.map((item, i) => (i === indiceEditando ? itemGuardado : item))
+      );
+    } else {
+      setItems((prev) => [...prev, itemGuardado]);
+    }
 
     setError("");
+    setIndiceEditando(null);
     limpiarCamposProducto();
   };
 
@@ -119,7 +140,7 @@ function Compras() {
         NFactura,
         total,
         items.map((item) => ({
-          Id_producto: item.productoId,
+          Id_producto: item.producto.id,
           Cantidad: item.cantidad,
           Precio: item.precio_compra,
           Subtotal: item.cantidad * item.precio_compra,
@@ -130,6 +151,7 @@ function Compras() {
       setError("");
       setProductoSeleccionado(null);
       setProveedorSeleccionado(null);
+      setNFactura("");
       return true;
     } catch (error: any) {
       setError(error.response.data.mensaje);
@@ -194,10 +216,19 @@ function Compras() {
               />
             </div>
           </div>
+          <button className="factura-btn-agregar" onClick={guardarProducto}>
+              {indiceEditando !== null ? "Actualizar" : "Agregar"}
+            </button>
 
-          <button className="compra-btn-agregar" onClick={agregar}>
-            Agregar
-          </button>
+            {indiceEditando !== null && (
+              <button
+                type="button"
+                className="factura-btn-cancelar-edicion"
+                onClick={cancelarEdicion}
+              >
+                Cancelar edición
+              </button>
+            )}
         </div>
 
         <div className="compra-fila-formulario">
@@ -277,11 +308,13 @@ function Compras() {
           </thead>
           <tbody>
             {items.map((item, index) => (
-              <tr key={index}>
+              <tr key={index}
+              className={indiceEditando === index ? "factura-tr-editando" : ""}
+              >
                 <td>
-                  {item.nombre}
-                  {item.marca && (
-                    <span className="factura-nombre-marca">{item.marca}</span>
+                  {item.producto.Nombre}
+                  {item.producto.Nombre_marca && (
+                    <span className="factura-nombre-marca">{item.producto.Nombre_marca}</span>
                   )}
                 </td>
                 <td>{item.cantidad}</td>
@@ -291,12 +324,20 @@ function Compras() {
                 </td>
                 <td className="factura-td-accion">
                   <button
-                    className="factura-btn-eliminar"
-                    onClick={() => eliminarItem(index)}
-                    aria-label="Eliminar producto"
-                  >
-                    🗑
-                  </button>
+                      className="factura-btn-editar"
+                      onClick={() => editarItem(index)}
+                      aria-label="Editar producto"
+                    >
+                      <SquarePen size={24} />
+                    </button>
+
+                    <button
+                      className="factura-btn-eliminar"
+                      onClick={() => eliminarItem(index)}
+                      aria-label="Eliminar producto"
+                    >
+                      <Trash2 size={24} />
+                    </button>
                 </td>
               </tr>
             ))}

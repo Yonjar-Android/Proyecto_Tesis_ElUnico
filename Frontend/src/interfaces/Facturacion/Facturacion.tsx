@@ -6,11 +6,10 @@ import ModalConfirmarVenta from "./ModalConfirmarVenta";
 import type { Cliente } from "../../models/Cliente";
 import type { ProductoListado } from "../../models/ProductoListado";
 import { crearVenta } from "../../services/venta.service";
+import { SquarePen, Trash2 } from "lucide-react";
 
 interface ItemVenta {
-  productoId: number;
-  nombre: string;
-  marca?: string;
+  producto: ProductoListado;
   cantidad: number;
   precio: number;
 }
@@ -27,19 +26,21 @@ function Facturacion() {
   const [cantidad, setCantidad] = useState("1");
   const [precio, setPrecio] = useState("0.00");
   const [tipoPago, setTipoPago] = useState("Contado");
-  const [clienteSeleccionado, setClienteSeleccionado] = useState<Cliente>(
-    {
-  id: 0,
-  Nombre: "Cliente",
-  Apellido: "General",
-  Telefono: "",
-  Direccion: "",
-  Credito: 0,
-  NCliente: 0
-}
-  );
+  const [clienteSeleccionado, setClienteSeleccionado] = useState<Cliente>({
+    id: 0,
+    Nombre: "Cliente",
+    Apellido: "General",
+    Telefono: "",
+    Direccion: "",
+    Saldo_Deuda: 0,
+    NCliente: 0,
+  });
 
   const [items, setItems] = useState<ItemVenta[]>([]);
+
+  // null = modo "agregar". Cualquier otro valor = índice de la fila que se está editando.
+  const [indiceEditando, setIndiceEditando] = useState<number | null>(null);
+
   const [modalProductoAbierto, setModalProductoAbierto] = useState(false);
   const [modalClienteAbierto, setModalClienteAbierto] = useState(false);
   const [modalConfirmarAbierto, setModalConfirmarAbierto] = useState(false);
@@ -52,7 +53,33 @@ function Facturacion() {
     setPrecio("0.00");
   };
 
-  const agregar = () => {
+  const cancelarEdicion = () => {
+    setIndiceEditando(null);
+    limpiarCamposProducto();
+    setError("");
+  };
+
+  // Precarga el formulario con los datos de la fila y activa el modo edición.
+  const editarItem = (index: number) => {
+    const item = items[index];
+    setProductoSeleccionado(item.producto);
+    setCantidad(String(item.cantidad));
+    setPrecio(item.precio.toFixed(2));
+    setIndiceEditando(index);
+    setError("");
+  };
+
+  const eliminarItem = (index: number) => {
+    setItems((prev) => prev.filter((_, i) => i !== index));
+
+    // Si borras justo la fila que estabas editando, sales del modo edición.
+    if (indiceEditando === index) {
+      cancelarEdicion();
+    }
+  };
+
+  // Agrega una fila nueva, o actualiza la fila indiceEditando si estás en modo edición.
+  const guardarProducto = () => {
     if (!productoSeleccionado) {
       setError("Selecciona un producto o servicio.");
       return;
@@ -68,40 +95,40 @@ function Facturacion() {
       return;
     }
 
-    const existe = items.some(
-    (item) => item.productoId === productoSeleccionado.id
-  );
+    // Al chequear duplicados, ignora la propia fila que se está editando.
+    const yaExiste = items.some(
+      (item, i) => item.producto.id === productoSeleccionado.id && i !== indiceEditando
+    );
 
-  if (existe) {
-    setError("Este producto ya fue agregado a la factura.");
-    return;
-  }
+    if (yaExiste) {
+      setError("Este producto ya fue agregado a la factura.");
+      return;
+    }
 
-    setItems((prev) => [
-      ...prev,
-      {
-        productoId: productoSeleccionado.id,
-        nombre: productoSeleccionado.Nombre,
-        marca: productoSeleccionado.Nombre_marca,
-        cantidad: Number(cantidad),
-        precio: Number(precio),
-      },
-    ]);
+    const itemGuardado: ItemVenta = {
+      producto: productoSeleccionado,
+      cantidad: Number(cantidad),
+      precio: Number(precio),
+    };
+
+    if (indiceEditando !== null) {
+      setItems((prev) =>
+        prev.map((item, i) => (i === indiceEditando ? itemGuardado : item))
+      );
+    } else {
+      setItems((prev) => [...prev, itemGuardado]);
+    }
 
     setError("");
+    setIndiceEditando(null);
     limpiarCamposProducto();
-  };
-
-  const eliminarItem = (index: number) => {
-    setItems((prev) => prev.filter((_, i) => i !== index));
   };
 
   const total = items.reduce((suma, item) => suma + item.cantidad * item.precio, 0);
 
   const cancelar = () => {
     setItems([]);
-    limpiarCamposProducto();
-    setError("");
+    cancelarEdicion();
   };
 
   const realizarVenta = () => {
@@ -109,17 +136,16 @@ function Facturacion() {
       setError("Agrega al menos un producto para realizar la venta.");
       return;
     }
- 
+
     setError("");
     setModalConfirmarAbierto(true);
   };
- 
+
   const confirmarVenta = async (
     montoRecibido: number,
     setErrorModal: (mensaje: string) => void
   ) => {
     try {
-
       const total = items.reduce((suma, item) => suma + item.cantidad * item.precio, 0);
 
       await crearVenta(
@@ -128,13 +154,13 @@ function Facturacion() {
         tipoPago,
         total,
         items.map((item) => ({
-          Id_producto: item.productoId,
+          Id_producto: item.producto.id,
           Cantidad: item.cantidad,
           Precio_Venta: item.precio,
           Subtotal: item.cantidad * item.precio,
-        })),
+        }))
       );
- 
+
       setItems([]);
       setModalConfirmarAbierto(false);
       return true;
@@ -146,161 +172,183 @@ function Facturacion() {
 
   return (
     <div className="factura-page">
-        <div className="factura-contenido">
-      <div className="factura-header">
-        <h1>Facturación</h1>
-        <p className="factura-subtitulo">
-          Registre los productos y complete el pago de la transacción.
-        </p>
-        <p className="factura-fecha">Fecha: {formatearFecha(new Date())}</p>
-      </div>
+      <div className="factura-contenido">
+        <div className="factura-header">
+          <h1>Facturación</h1>
+          <p className="factura-subtitulo">
+            Registre los productos y complete el pago de la transacción.
+          </p>
+          <p className="factura-fecha">Fecha: {formatearFecha(new Date())}</p>
+        </div>
 
-      <div className="factura-card">
-        <div className="factura-fila-producto">
-          <div className="factura-campo factura-campo-producto">
-            <label>
-              Producto o Servicio <span style={{ color: "#e5484d" }}>*</span>
-            </label>
-            <button
-              type="button"
-              className="factura-selector-btn"
-              onClick={() => setModalProductoAbierto(true)}
-            >
-              <span
-                className={
-                  productoSeleccionado ? "Seleccione un producto" : "factura-selector-placeholder"
-                }
+        <div className="factura-card">
+          <div className="factura-fila-producto">
+            <div className="factura-campo factura-campo-producto">
+              <label>
+                Producto o Servicio <span style={{ color: "#e5484d" }}>*</span>
+              </label>
+              <button
+                type="button"
+                className="factura-selector-btn"
+                onClick={() => setModalProductoAbierto(true)}
               >
-                {productoSeleccionado
-                  ? productoSeleccionado.Nombre
-                  : "Seleccione un producto"}
-              </span>
-            </button>
-          </div>
+                <span className={productoSeleccionado ? "" : "factura-selector-placeholder"}>
+                  {productoSeleccionado ? productoSeleccionado.Nombre : "Seleccione un producto"}
+                </span>
+              </button>
+            </div>
 
-          <div className="factura-campo factura-campo-cantidad">
-            <label>
-              Cantidad <span style={{ color: "#e5484d" }}>*</span>
-            </label>
-            <input
-              type="number"
-              min="1"
-              value={cantidad}
-              onChange={(e) => setCantidad(e.target.value)}
-            />
-          </div>
-
-          <div className="factura-campo factura-campo-precio">
-            <label>
-              Precio <span style={{ color: "#e5484d" }}>*</span>
-            </label>
-            <div className="factura-precio-input">
-              <span>C$</span>
+            <div className="factura-campo factura-campo-cantidad">
+              <label>
+                Cantidad <span style={{ color: "#e5484d" }}>*</span>
+              </label>
               <input
                 type="number"
-                step="1"
-                min="0"
-                value={precio}
-                onChange={(e) => setPrecio(e.target.value)}
+                min="1"
+                value={cantidad}
+                onChange={(e) => setCantidad(e.target.value)}
               />
+            </div>
+
+            <div className="factura-campo factura-campo-precio">
+              <label>
+                Precio <span style={{ color: "#e5484d" }}>*</span>
+              </label>
+              <div className="factura-precio-input">
+                <span>C$</span>
+                <input
+                  type="number"
+                  step="1"
+                  min="0"
+                  value={precio}
+                  onChange={(e) => setPrecio(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <button className="factura-btn-agregar" onClick={guardarProducto}>
+              {indiceEditando !== null ? "Actualizar" : "Agregar"}
+            </button>
+
+            {indiceEditando !== null && (
+              <button
+                type="button"
+                className="factura-btn-cancelar-edicion"
+                onClick={cancelarEdicion}
+              >
+                Cancelar edición
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div className="factura-fila-doble">
+          <div className="factura-card">
+            <div className="factura-campo">
+              <label>
+                Tipo de Pago <span style={{ color: "#e5484d" }}>*</span>
+              </label>
+              <select value={tipoPago} onChange={(e) => setTipoPago(e.target.value)}>
+                <option value="Contado">Contado</option>
+                <option value="Credito">Crédito</option>
+                <option value="Transferencia">Transferencia</option>
+              </select>
             </div>
           </div>
 
-          <button className="factura-btn-agregar" onClick={agregar}>
-            Agregar
-          </button>
-        </div>
-      </div>
-
-      <div className="factura-fila-doble">
-        <div className="factura-card">
-          <div className="factura-campo">
-            <label>
-              Tipo de Pago <span style={{ color: "#e5484d" }}>*</span>
-            </label>
-            <select value={tipoPago} onChange={(e) => setTipoPago(e.target.value)}>
-              <option value="Contado">Contado</option>
-              <option value="Credito">Crédito</option>
-              <option value="Transferencia">Transferencia</option>
-            </select>
+          <div className="factura-card">
+            <div className="factura-campo">
+              <label>
+                Seleccionar Cliente <span style={{ color: "#e5484d" }}>*</span>
+              </label>
+              <button
+                type="button"
+                className="factura-selector-btn"
+                onClick={() => setModalClienteAbierto(true)}
+              >
+                {clienteSeleccionado
+                  ? `${clienteSeleccionado.Nombre} ${clienteSeleccionado.Apellido}`
+                  : "Cliente General"}
+              </button>
+            </div>
           </div>
         </div>
 
-        <div className="factura-card">
-          <div className="factura-campo">
-            <label>
-              Seleccionar Cliente <span style={{ color: "#e5484d" }}>*</span>
-            </label>
-            <button type="button" className="factura-selector-btn"
-            onClick={() => setModalClienteAbierto(true)}>
-              {`${clienteSeleccionado?.Nombre} ${clienteSeleccionado?.Apellido}` ? `${clienteSeleccionado?.Nombre} ${clienteSeleccionado?.Apellido}` : "Cliente General"}
+        <div className="factura-card factura-card-tabla">
+          <table className="factura-tabla">
+            <thead>
+              <tr>
+                <th>Producto</th>
+                <th>Cantidad</th>
+                <th>Precio</th>
+                <th>Subtotal</th>
+                <th className="factura-th-accion">Acción</th>
+              </tr>
+            </thead>
+            <tbody>
+              {items.map((item, index) => (
+                <tr
+                  key={index}
+                  className={indiceEditando === index ? "factura-tr-editando" : ""}
+                >
+                  <td>
+                    {item.producto.Nombre}
+                    {item.producto.Nombre_marca && (
+                      <span className="factura-nombre-marca">
+                        {item.producto.Nombre_marca}
+                      </span>
+                    )}
+                  </td>
+                  <td>{item.cantidad}</td>
+                  <td>C${item.precio.toFixed(2)}</td>
+                  <td className="factura-td-subtotal">
+                    C${(item.cantidad * item.precio).toFixed(2)}
+                  </td>
+                  <td className="factura-td-accion">
+                    <button
+                      className="factura-btn-editar"
+                      onClick={() => editarItem(index)}
+                      aria-label="Editar producto"
+                    >
+                      <SquarePen size={24} />
+                    </button>
+
+                    <button
+                      className="factura-btn-eliminar"
+                      onClick={() => eliminarItem(index)}
+                      aria-label="Eliminar producto"
+                    >
+                      <Trash2 size={24} />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          {items.length === 0 && (
+            <div className="factura-vacio">Aún no has agregado productos a la venta.</div>
+          )}
+        </div>
+
+        {error && <span className="error-text">{error}</span>}
+
+        <div className="factura-footer">
+          <button className="factura-btn-cancelar" onClick={cancelar}>
+            Cancelar
+          </button>
+
+          <div className="factura-total-venta">
+            <div className="factura-total-texto">
+              <span className="factura-total-label">Total</span>
+              <span className="factura-total-monto">C${total.toFixed(2)}</span>
+            </div>
+
+            <button className="factura-btn-vender" onClick={realizarVenta}>
+              Realizar Venta
             </button>
           </div>
         </div>
-      </div>
-
-      <div className="factura-card factura-card-tabla">
-        <table className="factura-tabla">
-          <thead>
-            <tr>
-              <th>Producto</th>
-              <th>Cantidad</th>
-              <th>Precio</th>
-              <th>Subtotal</th>
-              <th className="factura-th-accion">Acción</th>
-            </tr>
-          </thead>
-          <tbody>
-            {items.map((item, index) => (
-              <tr key={index}>
-                <td>
-                  {item.nombre}
-                  {item.marca && (
-                    <span className="factura-nombre-marca">{item.marca}</span>
-                  )}
-                </td>
-                <td>{item.cantidad}</td>
-                <td>C${item.precio.toFixed(2)}</td>
-                <td className="factura-td-subtotal">
-                  C${(item.cantidad * item.precio).toFixed(2)}
-                </td>
-                <td className="factura-td-accion">
-                  <button
-                    className="factura-btn-eliminar"
-                    onClick={() => eliminarItem(index)}
-                    aria-label="Eliminar producto"
-                  >
-                    🗑
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-
-        {items.length === 0 && (
-          <div className="factura-vacio">Aún no has agregado productos a la venta.</div>
-        )}
-      </div>
-
-      {error && <span className="error-text">{error}</span>}
-
-      <div className="factura-footer">
-        <button className="factura-btn-cancelar" onClick={cancelar}>
-          Cancelar
-        </button>
-
-        <div className="factura-total-venta">
-          <div className="factura-total-texto">
-            <span className="factura-total-label">Total</span>
-            <span className="factura-total-monto">C${total.toFixed(2)}</span>
-          </div>
-
-          <button className="factura-btn-vender" onClick={realizarVenta}>
-            Realizar Venta
-          </button>
-        </div>
-      </div>
       </div>
 
       <ModalSeleccionarProducto
@@ -321,7 +369,7 @@ function Facturacion() {
           setModalClienteAbierto(false);
         }}
       />
- 
+
       <ModalConfirmarVenta
         abierto={modalConfirmarAbierto}
         totalVenta={total}

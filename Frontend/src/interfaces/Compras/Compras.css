@@ -240,6 +240,42 @@
   font-size: 1rem;
 }
 
+
+.factura-btn-editar {
+  background: none;
+  border: none;
+  color: #2563eb;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+}
+ 
+.factura-btn-editar:hover {
+  color: #1d4ed8;
+}
+
+/* Botón para salir del modo edición sin guardar cambios */
+.factura-btn-cancelar-edicion {
+  background: none;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 0.7rem 1rem;
+  font-size: 0.85rem;
+  color: #6b7280;
+  cursor: pointer;
+  white-space: nowrap;
+}
+ 
+.factura-btn-cancelar-edicion:hover {
+  background-color: #f9fafb;
+}
+ 
+/* Resalta la fila que se está editando en este momento */
+.factura-tr-editando {
+  background-color: #fef9c3;
+}
+
+
 .factura-vacio {
   text-align: center;
   color: #9ca3af;

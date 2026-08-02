@@ -67,7 +67,7 @@ export const crearCategoria = async (nombre: string) => {
     );
 
      if (rows[0].count > 0) {
-        throw new Error("Ya existe una marca con ese nombre.");
+        throw new Error("Ya existe una categoría con ese nombre.");
     }
 
     const [result]: any = await pool.query(
