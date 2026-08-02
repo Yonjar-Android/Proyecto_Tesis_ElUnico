@@ -1,0 +1,310 @@
+.factura-page {
+  min-height: 100vh;
+  background-color: #fff;
+}
+
+.factura-contenido {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2rem;
+  box-sizing: border-box;
+}
+
+.factura-header{
+    text-align:left;
+}
+
+.factura-header h1 {
+  margin: 0 0 0.3rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #111;
+}
+
+.factura-subtitulo {
+  margin: 0 0 0.2rem;
+  font-size: 0.88rem;
+  color: #6b7280;
+}
+
+.factura-fecha {
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+.factura-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 1.25rem .5rem;
+  box-sizing: border-box;
+  margin-bottom: 1.25rem;
+}
+
+.factura-fila-doble {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+
+.factura-fila-doble .factura-card {
+  margin-bottom: 0;
+}
+
+@media (max-width: 750px) {
+  .factura-fila-doble {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Fila de agregar producto */
+.factura-fila-producto {
+  display: flex;
+  align-items: flex-end;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.factura-campo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.factura-campo label {
+  font-size: 0.72rem;
+  text-align:left;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #6b7280;
+}
+
+.factura-campo input,
+.factura-campo select {
+  box-sizing: border-box;
+  border: 1px solid #e5e7eb;
+  background: #f9fafb;
+  border-radius: 8px;
+  padding: 0.65rem 0.85rem;
+  font-size: 0.9rem;
+  font-family: inherit;
+  color: #111;
+}
+
+.factura-campo input:focus,
+.factura-campo select:focus {
+  outline: none;
+  border-color: #e5484d;
+  background: #fff;
+}
+
+.factura-campo-producto {
+  flex: 5;
+}
+
+.factura-campo-cantidad {
+  flex:1;
+}
+
+.factura-campo-precio {
+  flex: 1;
+}
+
+.factura-selector-btn {
+  width: 100%;
+  box-sizing: border-box;
+  text-align: left;
+  border: 1px solid #e5e7eb;
+  background: #f9fafb;
+  border-radius: 8px;
+  padding: 0.65rem 0.85rem;
+  font-size: 0.9rem;
+  color: #111;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.factura-selector-btn:hover {
+  background: #f3f4f6;
+}
+
+.factura-selector-placeholder {
+  color: #9ca3af;
+}
+
+.factura-precio-input {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  border: 1px solid #e5e7eb;
+  background: #f9fafb;
+  border-radius: 8px;
+  padding: 0 0.85rem;
+}
+
+.factura-precio-input span {
+  color: #9ca3af;
+  font-size: 0.9rem;
+}
+
+.factura-precio-input input {
+  border: none;
+  background: transparent;
+  padding: 0.65rem 0;
+}
+
+.factura-precio-input input:focus {
+  outline: none;
+}
+
+.factura-btn-agregar {
+  background-color: #e5484d;
+  flex:1;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.7rem 1.4rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.factura-btn-agregar:hover {
+  background-color: #cf3d42;
+}
+
+/* Tabla de la venta */
+.factura-card-tabla {
+  padding: 1.25rem 1.25rem 0.5rem;
+}
+
+.factura-tabla {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.factura-tabla th {
+  text-align: left;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #9ca3af;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.factura-th-accion {
+  text-align: right;
+}
+
+.factura-tabla td {
+  padding: 0.9rem 0;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 0.9rem;
+  color: #374151;
+  text-align: left;
+}
+
+.factura-nombre-marca {
+  display: block;
+  font-size: 0.72rem;
+  color: #9ca3af;
+  margin-top: 2px;
+}
+
+.factura-td-subtotal {
+  font-weight: 700;
+  color: #111;
+}
+
+.factura-td-accion {
+  text-align: right;
+}
+
+.factura-btn-eliminar {
+  background: none;
+  border: none;
+  color: #e5484d;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.factura-vacio {
+  text-align: center;
+  color: #9ca3af;
+  font-size: 0.85rem;
+  padding: 1.5rem 0;
+}
+
+/* Footer */
+.factura-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.factura-btn-cancelar {
+  background-color: #e5484d;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.8rem 1.6rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.factura-btn-cancelar:hover {
+  background-color: #cf3d42;
+}
+
+.factura-total-venta {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.factura-total-texto {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.factura-total-label {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #111;
+}
+
+.factura-total-monto {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #111;
+}
+
+.factura-btn-vender {
+  background-color: #059669;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.8rem 1.6rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.factura-btn-vender:hover {
+  background-color: #047857;
+}
+
+.error-text {
+  display: block;
+  color: red;
+  font-size: 0.82rem;
+  margin-top: 0.75rem;
+}

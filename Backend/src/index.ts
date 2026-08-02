@@ -25,6 +25,7 @@ app.use("/api/detalle_abono", detalle_abonos)
 app.use("/api/proveedores", proveedorRoutes);
 app.use("/api/productos", productoRoutes);
 
+
 app.listen(PORT, () => {
 
     console.log(`Servidor iniciado en http://localhost:${PORT}`);

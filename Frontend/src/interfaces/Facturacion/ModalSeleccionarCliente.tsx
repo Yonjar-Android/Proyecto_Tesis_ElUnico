@@ -1,36 +1,40 @@
 import { useEffect, useState } from "react";
-import "./ModalSeleccion.css";
-import IconoCubo from "./IconoCubo";
-import { buscarCategorias } from "../../../services/categoria.service";
-import type { PaginatedResponse } from "../../../models/PaginatedResponse";
+import "../Productos/ModalesSeleccion/ModalSeleccion.css";
+import IconoCubo from "../Productos/ModalesSeleccion/IconoCubo";
+import { buscarClientes } from "../../services/cliente.service";
+import type { PaginatedResponse } from "../../models/PaginatedResponse";
 
-interface Categoria {
+interface Cliente {
   id: number;
-  Nombre_categoria: string;
+  Nombre: string;
+  Apellido: string;
+  NCliente: number;
 }
 
 interface Props {
   abierto: boolean;
   onClose: () => void;
-  onSeleccionar: (categoria: Categoria) => void;
+  onSeleccionar: (cliente: Cliente) => void;
 }
 
-function ModalSeleccionarCategoria({ abierto, onClose, onSeleccionar }: Props) {
-  const [categorias, setCategorias] = useState<Categoria[]>([]);
+function ModalSeleccionarCliente({ abierto, onClose, onSeleccionar }: Props) {
+  const [clientes, setClientes] = useState<Cliente[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [perPage] = useState(6);
+  const [total, setTotal] = useState(0);
   const [lastPage, setLastPage] = useState(1);
 
   const buscar = async () => {
     try {
-      const response: PaginatedResponse<Categoria> = await buscarCategorias(
+      const response: PaginatedResponse<Cliente> = await buscarClientes(
         searchTerm,
         currentPage,
         perPage
       );
 
-      setCategorias(response.data);
+      setClientes(response.data);
+      setTotal(response.total);
       setLastPage(response.last_page);
     } catch (error) {
       console.error(error);
@@ -63,7 +67,7 @@ function ModalSeleccionarCategoria({ abierto, onClose, onSeleccionar }: Props) {
         <div className="modal-header">
           <h2>
             <IconoCubo />
-            Selección de categorías
+            Selección de clientes
           </h2>
           <button className="modal-close" onClick={onClose}>
             ✕
@@ -74,7 +78,7 @@ function ModalSeleccionarCategoria({ abierto, onClose, onSeleccionar }: Props) {
           <input
             className="seleccion-buscador"
             type="text"
-            placeholder="Buscar por nombre..."
+            placeholder="Buscar por nombre, código..."
             value={searchTerm}
             onChange={(e) => {
               setSearchTerm(e.target.value);
@@ -90,13 +94,15 @@ function ModalSeleccionarCategoria({ abierto, onClose, onSeleccionar }: Props) {
               </tr>
             </thead>
             <tbody>
-              {categorias.map((categoria) => (
-                <tr key={categoria.id}>
-                  <td>{categoria.Nombre_categoria}</td>
+              {clientes.map((cliente) => (
+                <tr key={cliente.id}>
+                  <td>
+                    {cliente.Nombre} {cliente.Apellido}
+                  </td>
                   <td className="seleccion-td-accion">
                     <button
                       className="seleccion-btn"
-                      onClick={() => onSeleccionar(categoria)}
+                      onClick={() => onSeleccionar(cliente)}
                     >
                       Seleccionar
                     </button>
@@ -106,13 +112,13 @@ function ModalSeleccionarCategoria({ abierto, onClose, onSeleccionar }: Props) {
             </tbody>
           </table>
 
-          {categorias.length === 0 && (
-            <div className="seleccion-vacio">No se encontraron categorías.</div>
+          {clientes.length === 0 && (
+            <div className="seleccion-vacio">No se encontraron clientes.</div>
           )}
         </div>
 
         <div className="seleccion-footer">
-          <span className="seleccion-count">Mostrando {categorias.length} categorías</span>
+          <span className="seleccion-count">Mostrando {clientes.length} clientes</span>
           <div className="seleccion-pagination">
             <button
               className="seleccion-page-btn"
@@ -152,4 +158,4 @@ function ModalSeleccionarCategoria({ abierto, onClose, onSeleccionar }: Props) {
   );
 }
 
-export default ModalSeleccionarCategoria;
+export default ModalSeleccionarCliente;

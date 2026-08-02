@@ -1,0 +1,92 @@
+.confirmar-venta-modal {
+  width: 400px;
+}
+
+.confirmar-total-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  box-sizing: border-box;
+  background-color: #eef1fd;
+  border-radius: 12px;
+  padding: 20px 16px;
+  margin-bottom: 20px;
+}
+
+.confirmar-total-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #6d5ef8;
+}
+
+.confirmar-total-monto {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #1e293b;
+}
+
+.confirmar-monto-input {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  box-sizing: border-box;
+  border-bottom: 2px solid #1e293b;
+  background: #f9fafb;
+  border-radius: 8px 8px 0 0;
+  padding: 10px 14px;
+}
+
+.confirmar-monto-input span {
+  color: #9ca3af;
+  font-size: 1.1rem;
+}
+
+.confirmar-monto-input input {
+  border: none;
+  outline: none;
+  flex: 1;
+  font-size: 1.3rem;
+  font-weight: 700;
+  background: transparent;
+  color: #1e293b;
+}
+
+.confirmar-cambio-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  box-sizing: border-box;
+  background-color: #eef4ff;
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-top: 16px;
+}
+
+.confirmar-cambio-icono {
+  font-size: 1.1rem;
+}
+
+.confirmar-cambio-label {
+  flex: 1;
+  font-size: 0.9rem;
+  color: #374151;
+}
+
+.confirmar-cambio-monto {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #2563eb;
+}
+
+.confirmar-venta-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+}

@@ -8,8 +8,16 @@
   flex-direction: column;
 }
 
+.seleccion-modal--ancho{
+  width: 640px;
+}
+
 .seleccion-modal .modal-header {
   padding: 18px 24px 14px;
+}
+
+.modal-close {
+  color:#111;
 }
 
 .seleccion-modal .modal-header h2 {
@@ -29,9 +37,7 @@
   width: 100%;
   box-sizing: border-box;
   border: 1px solid #d1d5db;
-  background-color: #f9fafb;
   border-radius: 10px;
-  color:#111;
   padding: 0.7rem 1rem;
   font-size: 0.9rem;
   margin-bottom: 14px;
@@ -60,20 +66,28 @@
 }
 
 .seleccion-th-accion {
-  text-align: right;
+  text-align: right !important;
+}
+
+.seleccion-nombre-columna {
+  text-align: left !important;
+}
+
+.seleccion-th-nombre {
+  text-align: left !important;
 }
 
 .seleccion-tabla td {
-  text-align: left;
   padding: 0.9rem 0;
   border-bottom: 1px solid #f1f5f9;
   font-size: 0.92rem;
   color: #1f2937;
   font-weight: 600;
+  text-align: center;
 }
 
 .seleccion-td-accion {
-  text-align: right;
+  text-align: right !important;
 }
 
 .seleccion-vacio {
@@ -141,4 +155,33 @@
 
 .seleccion-page-btn--active {
   background-color: #111;
+}
+
+.seleccion-th-stock {
+  text-align: left;
+}
+
+.seleccion-nombre-marca {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 400;
+  color: #9ca3af;
+  margin-top: 2px;
+}
+
+.seleccion-stock-pill {
+  display: inline-block;
+  min-width: 1.6rem;
+  text-align: center;
+  border-radius: 6px;
+  padding: 0.2rem 0.55rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  background-color: #d1fae5;
+  color: #059669;
+}
+
+.seleccion-stock-pill--bajo {
+  background-color: #fef3c7;
+  color: #b45309;
 }

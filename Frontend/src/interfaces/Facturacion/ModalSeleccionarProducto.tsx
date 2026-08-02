@@ -1,36 +1,37 @@
 import { useEffect, useState } from "react";
-import "./ModalSeleccion.css";
-import IconoCubo from "./IconoCubo";
-import { buscarCategorias } from "../../../services/categoria.service";
-import type { PaginatedResponse } from "../../../models/PaginatedResponse";
-
-interface Categoria {
-  id: number;
-  Nombre_categoria: string;
-}
+import "../Productos/ModalesSeleccion/ModalSeleccion.css";
+import "./ModalSeleccionarProducto.css";
+import IconoCubo from "../Productos/ModalesSeleccion/IconoCubo";
+import { buscarProductos } from "../../services/producto.service";
+import type { ProductoListado } from "../../models/ProductoListado";
+import type { PaginatedResponse } from "../../models/PaginatedResponse";
 
 interface Props {
   abierto: boolean;
   onClose: () => void;
-  onSeleccionar: (categoria: Categoria) => void;
+  onSeleccionar: (producto: ProductoListado) => void;
 }
 
-function ModalSeleccionarCategoria({ abierto, onClose, onSeleccionar }: Props) {
-  const [categorias, setCategorias] = useState<Categoria[]>([]);
+const UMBRAL_STOCK_BAJO = 10;
+
+function ModalSeleccionarProducto({ abierto, onClose, onSeleccionar }: Props) {
+  const [productos, setProductos] = useState<ProductoListado[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [perPage] = useState(6);
+  const [total, setTotal] = useState(0);
   const [lastPage, setLastPage] = useState(1);
 
   const buscar = async () => {
     try {
-      const response: PaginatedResponse<Categoria> = await buscarCategorias(
+      const response: PaginatedResponse<ProductoListado> = await buscarProductos(
         searchTerm,
         currentPage,
         perPage
       );
 
-      setCategorias(response.data);
+      setProductos(response.data);
+      setTotal(response.total);
       setLastPage(response.last_page);
     } catch (error) {
       console.error(error);
@@ -59,11 +60,11 @@ function ModalSeleccionarCategoria({ abierto, onClose, onSeleccionar }: Props) {
 
   return (
     <div className="modal-overlay">
-      <div className="modal seleccion-modal">
+      <div className="modal seleccion-modal seleccion-modal--ancho">
         <div className="modal-header">
           <h2>
             <IconoCubo />
-            Selección de categorías
+            Selección de Productos
           </h2>
           <button className="modal-close" onClick={onClose}>
             ✕
@@ -74,7 +75,7 @@ function ModalSeleccionarCategoria({ abierto, onClose, onSeleccionar }: Props) {
           <input
             className="seleccion-buscador"
             type="text"
-            placeholder="Buscar por nombre..."
+            placeholder="Buscar por nombre, código..."
             value={searchTerm}
             onChange={(e) => {
               setSearchTerm(e.target.value);
@@ -85,18 +86,38 @@ function ModalSeleccionarCategoria({ abierto, onClose, onSeleccionar }: Props) {
           <table className="seleccion-tabla">
             <thead>
               <tr>
-                <th>Nombre</th>
+                <th className="seleccion-th-nombre th-producto">Nombre</th>
+                <th className="seleccion-th-stock">Stock</th>
+                <th>Precio</th>
                 <th className="seleccion-th-accion">Acción</th>
               </tr>
             </thead>
             <tbody>
-              {categorias.map((categoria) => (
-                <tr key={categoria.id}>
-                  <td>{categoria.Nombre_categoria}</td>
+              {productos.map((producto) => (
+                <tr key={producto.id}>
+                  <td className="seleccion-nombre-columna">
+                    {producto.Nombre}
+                    {producto.Nombre_marca && (
+                      <span className="seleccion-nombre-marca">{producto.Nombre_marca}</span>
+                    )}
+                  </td>
+                  <td>
+                    <span
+                      className={
+                        "seleccion-stock-pill" +
+                        (producto.Stock <= UMBRAL_STOCK_BAJO
+                          ? " seleccion-stock-pill--bajo"
+                          : "")
+                      }
+                    >
+                      {producto.Stock}
+                    </span>
+                  </td>
+                  <td>C${producto.Precio_venta}</td>
                   <td className="seleccion-td-accion">
                     <button
                       className="seleccion-btn"
-                      onClick={() => onSeleccionar(categoria)}
+                      onClick={() => onSeleccionar(producto)}
                     >
                       Seleccionar
                     </button>
@@ -106,13 +127,13 @@ function ModalSeleccionarCategoria({ abierto, onClose, onSeleccionar }: Props) {
             </tbody>
           </table>
 
-          {categorias.length === 0 && (
-            <div className="seleccion-vacio">No se encontraron categorías.</div>
+          {productos.length === 0 && (
+            <div className="seleccion-vacio">No se encontraron productos.</div>
           )}
         </div>
 
         <div className="seleccion-footer">
-          <span className="seleccion-count">Mostrando {categorias.length} categorías</span>
+          <span className="seleccion-count">Mostrando {productos.length} productos</span>
           <div className="seleccion-pagination">
             <button
               className="seleccion-page-btn"
@@ -152,4 +173,4 @@ function ModalSeleccionarCategoria({ abierto, onClose, onSeleccionar }: Props) {
   );
 }
 
-export default ModalSeleccionarCategoria;
+export default ModalSeleccionarProducto;
