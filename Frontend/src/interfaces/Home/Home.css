@@ -1,0 +1,50 @@
+.home-container {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  background-image: url("../../assets/fondopantallaprincipal.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  box-sizing: border-box;
+  padding-top: 60px;
+}
+
+.home-overlay {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 24px 40px;
+  background: rgba(255, 255, 255, 0.75);
+  border-radius: 20px;
+  backdrop-filter: blur(4px);
+}
+
+.home-welcome {
+  margin-bottom: 0;
+}
+
+.home-welcome h1 {
+  font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  font-size: 28px;
+  font-weight: 800;
+  color: #14161a;
+  margin: 0 0 4px;
+}
+
+.home-welcome p {
+  font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  font-size: 15px;
+  color: #4a4f57;
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  .home-welcome h1 {
+    font-size: 22px;
+  }
+}

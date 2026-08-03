@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { CircleUserRound, Lock, Eye, EyeOff, X, CheckCircle2 } from "lucide-react";
-import logo from "../../assets/LogoTransparante.png";
+import logo from "../../assets/LogoTransparente.png";
 import { enviarRecuperacion, loginUsuario } from "../../services/auth.service";
 type RecoveryStatus = "idle" | "loading" | "sent" | "error";
 
@@ -19,41 +19,55 @@ export default function LoginElUnico() {
   const [recoveryError, setRecoveryError] = useState<string>("");
 
   async function handleLogin(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setError("");
-    if (!usuario || !password) {
-      setError("Completa tu usuario y contraseña.");
-      return;
-    }
-    setLoading(true);
-    try {
-      const response = await loginUsuario(usuario, password);
-      if (!response.success) {
-        throw new Error(response.message || "Credenciales inválidas");
-      }
-      console.log("Inicio de sesión exitoso", response.user);
-      navigate("/marcas");
-    } catch (err) {
-      setError("Usuario o contraseña incorrectos.");
-    } finally {
-      setLoading(false);
-    }
+  e.preventDefault();
+  setError("");
+  if (!usuario || !password) {
+    setError("Completa tu usuario y contraseña.");
+    return;
   }
+  setLoading(true);
+  try {
+    const response = await loginUsuario(usuario, password);
+    if (!response.success) {
+      throw new Error(response.message || "Credenciales inválidas");
+    }
+    localStorage.setItem("usuario", JSON.stringify(response.user));
+    navigate("/home");
+  } catch (err) {
+    setError("Usuario o contraseña incorrectos.");
+  } finally {
+    setLoading(false);
+  }
+}
 
   async function handleRecovery(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (!recoveryEmail) return;
+    const trimmedEmail = recoveryEmail.trim();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!trimmedEmail) {
+      setRecoveryError("Ingresa tu correo electrónico.");
+      return;
+    }
+
+    if (!emailRegex.test(trimmedEmail)) {
+      setRecoveryError("Ingresa un correo válido.");
+      return;
+    }
+
     setRecoveryStatus("loading");
     setRecoveryError("");
     try {
-      const response = await enviarRecuperacion(recoveryEmail);
+      const response = await enviarRecuperacion(trimmedEmail);
       if (!response.success) {
         throw new Error(response.message || "No se pudo enviar el correo");
       }
       setRecoveryStatus("sent");
-    } catch (err) {
+    } catch (err: any) {
       setRecoveryStatus("error");
-      setRecoveryError("No se pudo enviar el correo. Verifica la dirección.");
+      setRecoveryError(
+        err?.response?.data?.message || err?.message || "No se pudo enviar el correo. Verifica la dirección."
+      );
     }
   }
 
@@ -340,6 +354,7 @@ export default function LoginElUnico() {
     </div>
   );
 }
+
 
 const labelStyle: React.CSSProperties = {
   display: "block",
