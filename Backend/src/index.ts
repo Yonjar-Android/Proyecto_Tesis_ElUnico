@@ -11,6 +11,7 @@ import ventaRoutes from "./routes/venta.routes.js";
 import authRoutes from "./routes/auth.routes.js";
 import compraRoutes from "./routes/compra.routes.js";
 import reporteRoutes from "./routes/reporte.routes.js";
+import cajaRoutes from "./routes/caja.routes.js";
 import cors from "cors";
 
 dotenv.config();
@@ -32,6 +33,7 @@ app.use("/api/proveedores", proveedorRoutes);
 app.use("/api/productos", productoRoutes);
 app.use("/api/ventas", ventaRoutes);
 app.use("/api/compras", compraRoutes);
+app.use("/api/caja", cajaRoutes);
 app.use("/api/auth", authRoutes);
 
 app.use("/api/reportes", reporteRoutes)

@@ -16,6 +16,11 @@ import ReporteCuentasPorCobrar from "./interfaces/Reportes/ReporteCuentasPorCobr
 import ReporteStockProximoAgotarse from "./interfaces/Reportes/ReporteStockPromiAgotarse/ReporteStockBajo";
 import ReporteCompras from "./interfaces/Reportes/ReporteCompras/ReporteCompras";
 import ReporteVentas from "./interfaces/Reportes/ReporteVentas/ReporteVentas";
+import Mantenimiento from "./interfaces/Mantenimiento/Mantenimiento";
+import Usuario from "./interfaces/Usuario/Usuario";
+import Caja from "./interfaces/Caja/Caja";
+import AperturaCaja from "./interfaces/Caja/AperturaCaja";
+import CierreCaja from "./interfaces/Caja/CierreCaja";
 
 function App() {
   return (
@@ -33,6 +38,11 @@ function App() {
           <Route path="/compras" element={<Compras />} />
           <Route path="/inventario/crear" element={<CrearProducto />} />
           <Route path="/inventario/editar/:id" element={<EditarProducto />} />
+          <Route path="/mantenimiento" element={<Mantenimiento />} />
+          <Route path="/usuario" element={<Usuario />} />
+          <Route path="/caja" element={<Caja />} />
+          <Route path="/caja/apertura" element={<AperturaCaja />} />
+          <Route path="/caja/cierre" element={<CierreCaja />} />
 
           {/* Reportes */}
           <Route path="/reportes/cuentas-por-cobrar" element={<ReporteCuentasPorCobrar />} />

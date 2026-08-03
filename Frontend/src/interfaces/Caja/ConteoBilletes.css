@@ -1,0 +1,135 @@
+.conteo-billetes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.conteo-columna {
+  background: #f7f7f8;
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.conteo-titulo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #14161a;
+  margin: 0 0 12px;
+}
+
+.punto-cordobas,
+.punto-dolares {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #e04759;
+  display: inline-block;
+}
+
+.punto-dolares {
+  background: #14161a;
+}
+
+.conteo-subtotal-mini {
+  margin-left: auto;
+  color: #e04759;
+  font-weight: 800;
+}
+
+.conteo-tasa {
+  margin-left: auto;
+  font-size: 11.5px;
+  color: #8b8794;
+  font-weight: 500;
+}
+
+.conteo-fila {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 0;
+}
+
+.conteo-etiqueta {
+  font-size: 13.5px;
+  color: #4a4f57;
+  font-weight: 600;
+}
+
+.conteo-controles {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.conteo-controles button {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  border: 1px solid #e5e4e7;
+  background: #ffffff;
+  cursor: pointer;
+  font-size: 15px;
+  color: #14161a;
+}
+
+.conteo-controles input {
+  width: 52px;
+  text-align: center;
+  border: 1px solid #e5e4e7;
+  border-radius: 6px;
+  padding: 5px;
+  font-size: 13.5px;
+  outline: none;
+}
+
+.conteo-subtotal-equiv {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #e5e4e7;
+  font-size: 12.5px;
+  color: #6b6375;
+}
+
+.conteo-subtotal-equiv strong {
+  font-size: 15px;
+  color: #14161a;
+}
+
+.conteo-gran-total {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #14161a;
+  color: #ffffff;
+  border-radius: 12px;
+  padding: 18px 24px;
+}
+
+.conteo-gran-total span:first-child {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.conteo-gran-total strong {
+  font-size: 22px;
+  color: #e04759;
+}
+
+.conteo-total-usd {
+  font-size: 12.5px;
+  color: #9ca3af;
+}
+
+@media (max-width: 720px) {
+  .conteo-billetes {
+    grid-template-columns: 1fr;
+  }
+}

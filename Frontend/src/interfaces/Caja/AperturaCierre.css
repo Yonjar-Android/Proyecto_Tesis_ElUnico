@@ -1,0 +1,204 @@
+.apertura-container {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+}
+
+.apertura-titulo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 24px;
+  font-weight: 800;
+  color: #14161a;
+  margin: 0 0 6px;
+}
+
+.apertura-subtitulo {
+  color: #8b8794;
+  font-size: 13.5px;
+  margin: 0 0 24px;
+}
+
+.apertura-card {
+  background: #ffffff;
+  border: 1px solid #e5e4e7;
+  border-radius: 16px;
+  padding: 28px;
+}
+
+.apertura-campo {
+  margin-bottom: 20px;
+}
+
+.apertura-campo label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: #6b6375;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.apertura-campo input,
+.apertura-campo textarea {
+  width: 100%;
+  box-sizing: border-box;
+  background: #f7f7f8;
+  border: 1px solid #e5e4e7;
+  border-radius: 10px;
+  padding: 11px 14px;
+  font-size: 14px;
+  color: #14161a;
+  outline: none;
+  font-family: inherit;
+  resize: none;
+}
+
+.apertura-tasa {
+  max-width: 280px;
+}
+
+.apertura-tasa-input {
+  display: flex;
+  align-items: center;
+  background: #f7f7f8;
+  border: 1px solid #e5e4e7;
+  border-radius: 10px;
+  padding: 0 14px;
+}
+
+.apertura-tasa-input span {
+  color: #8b8794;
+  font-weight: 600;
+}
+
+.apertura-tasa-input input {
+  border: none;
+  background: transparent;
+  padding: 11px 8px;
+}
+
+.apertura-error {
+  color: #e04759;
+  font-size: 13px;
+  background: #fdeaec;
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+}
+
+.apertura-acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.btn-apertura-cancelar {
+  background: none;
+  border: 1px solid #e5e4e7;
+  color: #14161a;
+  border-radius: 10px;
+  padding: 12px 22px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-apertura-confirmar {
+  background: linear-gradient(135deg, #fc617b, #e04761);
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 28px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn-cierre-confirmar {
+  background: #14161a;
+}
+
+.btn-apertura-confirmar:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.cierre-resumen-sistema {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.cierre-resumen-sistema > div {
+  background: #f7f7f8;
+  border-radius: 12px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cierre-resumen-sistema span {
+  font-size: 11px;
+  color: #8b8794;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.cierre-resumen-sistema strong {
+  font-size: 16px;
+  color: #14161a;
+}
+
+.valor-verde-cierre {
+  color: #1a9e5c !important;
+}
+
+.valor-rojo-cierre {
+  color: #e04759 !important;
+}
+
+.cierre-esperado {
+  background: #14161a !important;
+}
+
+.cierre-esperado span {
+  color: #9ca3af;
+}
+
+.cierre-esperado strong {
+  color: #ffffff !important;
+}
+
+.cierre-diferencia {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f7f7f8;
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 20px;
+  font-weight: 700;
+  color: #14161a;
+}
+
+.diferencia-negativa {
+  background: #fdeaec;
+  color: #e04759;
+}
+
+.diferencia-positiva {
+  background: #e6f9ee;
+  color: #1a9e5c;
+}
+
+@media (max-width: 720px) {
+  .cierre-resumen-sistema {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

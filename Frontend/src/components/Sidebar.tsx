@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { NavLink } from "react-router-dom";
+import { useState, useEffect, useRef } from "react";
+import { NavLink, useNavigate } from "react-router-dom";
 import {
   FileText,
   ShoppingCart,
@@ -10,12 +10,52 @@ import {
   Wrench,
   User,
   ChevronDown,
+  LogOut,
+  UserCog,
+  Wallet,
 } from "lucide-react";
 import logo from "../assets/LogoTransparente1.png";
 import "./Sidebar.css";
 
+interface UsuarioSesion {
+  Nombre_Usuario: string;
+  Correo: string;
+}
+
 export default function Sidebar() {
   const [reportesAbierto, setReportesAbierto] = useState(false);
+  const [usuarioMenuAbierto, setUsuarioMenuAbierto] = useState(false);
+  const [usuario, setUsuario] = useState<UsuarioSesion | null>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
+  const [cajaAbierto, setCajaAbierto] = useState(false);
+
+  useEffect(() => {
+    const guardado = localStorage.getItem("usuario");
+    if (guardado) {
+      setUsuario(JSON.parse(guardado));
+    }
+  }, []);
+
+  useEffect(() => {
+    function handleClickFuera(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setUsuarioMenuAbierto(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickFuera);
+    return () => document.removeEventListener("mousedown", handleClickFuera);
+  }, []);
+
+  function handleLogout() {
+    localStorage.removeItem("usuario");
+    localStorage.removeItem("token");
+    navigate("/");
+  }
+
+  const iniciales = usuario?.Nombre_Usuario
+    ? usuario.Nombre_Usuario.slice(0, 2).toUpperCase()
+    : "??";
 
   return (
     <aside className="sidebar">
@@ -48,6 +88,29 @@ export default function Sidebar() {
           <Archive size={20} />
           <span>Inventario</span>
         </NavLink>
+        <button
+  type="button"
+  className="sidebar-link sidebar-dropdown-toggle"
+  onClick={() => setCajaAbierto((abierto) => !abierto)}
+>
+  <Wallet size={20} />
+  <span>Caja</span>
+  <ChevronDown size={16} className={`chevron ${cajaAbierto ? "chevron-abierto" : ""}`} />
+</button>
+
+{cajaAbierto && (
+  <div className="sidebar-submenu">
+    <NavLink to="/caja" className="sidebar-sublink">
+      Arqueo del día
+    </NavLink>
+    <NavLink to="/caja/apertura" className="sidebar-sublink">
+      Apertura de caja
+    </NavLink>
+    <NavLink to="/caja/cierre" className="sidebar-sublink">
+      Cierre de caja
+    </NavLink>
+  </div>
+)}
 
         {/* Reportes con submenú desplegable */}
         <button
@@ -86,11 +149,54 @@ export default function Sidebar() {
         </NavLink>
       </nav>
 
-      <div className="sidebar-footer">
-        <NavLink to="/usuario" className="sidebar-link">
-          <User size={20} />
-          <span>Usuario</span>
-        </NavLink>
+      {/* Usuario con menú desplegable */}
+      <div className="sidebar-footer" ref={menuRef}>
+        <button
+          type="button"
+          className="sidebar-link sidebar-usuario-toggle"
+          onClick={() => setUsuarioMenuAbierto((abierto) => !abierto)}
+        >
+          <div className="usuario-avatar">{iniciales}</div>
+          <span className="usuario-nombre-footer">
+            {usuario?.Nombre_Usuario || "Usuario"}
+          </span>
+          <ChevronDown
+            size={16}
+            className={`chevron ${usuarioMenuAbierto ? "chevron-abierto" : ""}`}
+          />
+        </button>
+
+        {usuarioMenuAbierto && (
+          <div className="usuario-dropdown">
+            <div className="usuario-dropdown-info">
+              <div className="usuario-avatar usuario-avatar-grande">{iniciales}</div>
+              <div>
+                <p className="usuario-dropdown-nombre">
+                  {usuario?.Nombre_Usuario || "Usuario"}
+                </p>
+                <p className="usuario-dropdown-correo">{usuario?.Correo || ""}</p>
+              </div>
+            </div>
+
+            <NavLink
+              to="/usuario"
+              className="usuario-dropdown-item"
+              onClick={() => setUsuarioMenuAbierto(false)}
+            >
+              <UserCog size={17} />
+              Gestionar usuarios
+            </NavLink>
+
+            <button
+              type="button"
+              className="usuario-dropdown-item usuario-dropdown-logout"
+              onClick={handleLogout}
+            >
+              <LogOut size={17} />
+              Cerrar sesión
+            </button>
+          </div>
+        )}
       </div>
     </aside>
   );
