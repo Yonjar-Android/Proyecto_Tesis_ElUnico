@@ -104,7 +104,7 @@ function Facturacion() {
       return;
     }
 
-    if (isNaN(Number(precio)) || Number(precio) < 0) {
+    if (isNaN(Number(precio)) || Number(precio) <= 0) {
       setError("Ingresa un precio válido.");
       return;
     }
