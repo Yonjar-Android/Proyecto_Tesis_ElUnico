@@ -11,6 +11,7 @@ import { SquarePen, Trash2 } from "lucide-react";
 interface ItemVenta {
   producto: ProductoListado;
   cantidad: number;
+  descuento: number;
   precio: number;
 }
 
@@ -21,9 +22,20 @@ function formatearFecha(fecha: Date) {
   return `${dia}-${mes}-${anio}`;
 }
 
+// Subtotal de una línea ANTES de descuento (cantidad * precio).
+function subtotalBruto(item: ItemVenta) {
+  return item.cantidad * item.precio;
+}
+
+// Subtotal de una línea DESPUÉS de descuento (lo que realmente se cobra).
+function subtotalNeto(item: ItemVenta) {
+  return subtotalBruto(item) - item.descuento;
+}
+
 function Facturacion() {
   const [productoSeleccionado, setProductoSeleccionado] = useState<ProductoListado | null>(null);
   const [cantidad, setCantidad] = useState("1");
+  const [descuento, setDescuento] = useState("0.00");
   const [precio, setPrecio] = useState("0.00");
   const [tipoPago, setTipoPago] = useState("Contado");
   const [clienteSeleccionado, setClienteSeleccionado] = useState<Cliente>({
@@ -50,6 +62,7 @@ function Facturacion() {
   const limpiarCamposProducto = () => {
     setProductoSeleccionado(null);
     setCantidad("1");
+    setDescuento("0.00");
     setPrecio("0.00");
   };
 
@@ -64,6 +77,7 @@ function Facturacion() {
     const item = items[index];
     setProductoSeleccionado(item.producto);
     setCantidad(String(item.cantidad));
+    setDescuento(item.descuento.toFixed(2));
     setPrecio(item.precio.toFixed(2));
     setIndiceEditando(index);
     setError("");
@@ -95,6 +109,18 @@ function Facturacion() {
       return;
     }
 
+    if (isNaN(Number(descuento)) || Number(descuento) < 0) {
+      setError("Ingresa un descuento válido.");
+      return;
+    }
+
+    const subtotalLinea = Number(cantidad) * Number(precio);
+
+    if (Number(descuento) > subtotalLinea) {
+      setError("El descuento no puede ser mayor al subtotal de la línea.");
+      return;
+    }
+
     // Al chequear duplicados, ignora la propia fila que se está editando.
     const yaExiste = items.some(
       (item, i) => item.producto.id === productoSeleccionado.id && i !== indiceEditando
@@ -108,6 +134,7 @@ function Facturacion() {
     const itemGuardado: ItemVenta = {
       producto: productoSeleccionado,
       cantidad: Number(cantidad),
+      descuento: Number(descuento),
       precio: Number(precio),
     };
 
@@ -124,7 +151,10 @@ function Facturacion() {
     limpiarCamposProducto();
   };
 
-  const total = items.reduce((suma, item) => suma + item.cantidad * item.precio, 0);
+  // Totales generales de la venta: subtotal bruto, descuento acumulado, y total neto.
+  const subtotalGeneral = items.reduce((suma, item) => suma + subtotalBruto(item), 0);
+  const descuentoGeneral = items.reduce((suma, item) => suma + item.descuento, 0);
+  const totalGeneral = subtotalGeneral - descuentoGeneral;
 
   const cancelar = () => {
     setItems([]);
@@ -146,18 +176,17 @@ function Facturacion() {
     setErrorModal: (mensaje: string) => void
   ) => {
     try {
-      const total = items.reduce((suma, item) => suma + item.cantidad * item.precio, 0);
-
       await crearVenta(
         Number(clienteSeleccionado?.id),
         1,
         tipoPago,
-        total,
+        totalGeneral,
         items.map((item) => ({
           Id_producto: item.producto.id,
           Cantidad: item.cantidad,
           Precio_Venta: item.precio,
-          Subtotal: item.cantidad * item.precio,
+          Descuento: item.descuento,
+          Subtotal: subtotalNeto(item),
         }))
       );
 
@@ -174,7 +203,7 @@ function Facturacion() {
     <div className="factura-page">
       <div className="factura-contenido">
         <div className="factura-header">
-          <h1>Facturación</h1>
+          <h1>Ventas</h1>
           <p className="factura-subtitulo">
             Registre los productos y complete el pago de la transacción.
           </p>
@@ -222,6 +251,20 @@ function Facturacion() {
                   min="0"
                   value={precio}
                   onChange={(e) => setPrecio(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div className="factura-campo factura-campo-descuento">
+              <label>Descuento</label>
+              <div className="factura-precio-input">
+                <span>C$</span>
+                <input
+                  type="number"
+                  step="1"
+                  min="0"
+                  value={descuento}
+                  onChange={(e) => setDescuento(e.target.value)}
                 />
               </div>
             </div>
@@ -281,6 +324,7 @@ function Facturacion() {
                 <th>Producto</th>
                 <th>Cantidad</th>
                 <th>Precio</th>
+                <th>Descuento</th>
                 <th>Subtotal</th>
                 <th className="factura-th-accion">Acción</th>
               </tr>
@@ -301,9 +345,10 @@ function Facturacion() {
                   </td>
                   <td>{item.cantidad}</td>
                   <td>C${item.precio.toFixed(2)}</td>
-                  <td className="factura-td-subtotal">
-                    C${(item.cantidad * item.precio).toFixed(2)}
+                  <td>
+                    {item.descuento > 0 ? `- C$${item.descuento.toFixed(2)}` : "—"}
                   </td>
+                  <td className="factura-td-subtotal">C${subtotalNeto(item).toFixed(2)}</td>
                   <td className="factura-td-accion">
                     <button
                       className="factura-btn-editar"
@@ -339,9 +384,19 @@ function Facturacion() {
           </button>
 
           <div className="factura-total-venta">
-            <div className="factura-total-texto">
-              <span className="factura-total-label">Total</span>
-              <span className="factura-total-monto">C${total.toFixed(2)}</span>
+            <div className="factura-total-desglose">
+              <div className="factura-total-linea">
+                <span>Subtotal</span>
+                <span>C${subtotalGeneral.toFixed(2)}</span>
+              </div>
+              <div className="factura-total-linea factura-total-linea--descuento">
+                <span>Descuento</span>
+                <span>- C${descuentoGeneral.toFixed(2)}</span>
+              </div>
+              <div className="factura-total-linea factura-total-linea--total">
+                <span>Total</span>
+                <span>C${totalGeneral.toFixed(2)}</span>
+              </div>
             </div>
 
             <button className="factura-btn-vender" onClick={realizarVenta}>
@@ -372,7 +427,7 @@ function Facturacion() {
 
       <ModalConfirmarVenta
         abierto={modalConfirmarAbierto}
-        totalVenta={total}
+        totalVenta={totalGeneral}
         onClose={() => setModalConfirmarAbierto(false)}
         onConfirmar={confirmarVenta}
       />

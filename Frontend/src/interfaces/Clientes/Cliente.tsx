@@ -6,6 +6,7 @@ import ModalEditarCliente from "./ModalEditarCliente";
 import ModalAgregarCliente from "./ModalAgregarCliente"
 import ModalAbonarCliente from "./ModalAbonarCliente";
 import { crearDetalleAbono } from "../../services/detalle_abono.service";
+import { SquarePen, CreditCard } from "lucide-react";
 
 interface Cliente {
 
@@ -147,7 +148,7 @@ return (
                        }}
                        disabled={cliente.Saldo_Deuda == 0}
                     >
-                        ✏ Abonar
+                        <CreditCard size={24} /> Abonar
                   </button>
 
                   <button
@@ -157,7 +158,7 @@ return (
                             setModalEditarAbierto(true);
                        }}
                     >
-                        ✏ Editar
+                        <SquarePen size={24} /> Editar
                   </button>
                 </td>
               </tr>

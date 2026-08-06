@@ -83,7 +83,8 @@ function ModalSeleccionarProveedor({ abierto, onClose, onSeleccionar }: Props) {
           <table className="seleccion-tabla">
             <thead>
               <tr>
-                <th>Proveedor</th>
+                <th>Razón Social</th>
+                <th>Dirección</th>
                 <th>Teléfono</th>
                 <th className="seleccion-th-accion">Acción</th>
               </tr>
@@ -92,6 +93,7 @@ function ModalSeleccionarProveedor({ abierto, onClose, onSeleccionar }: Props) {
               {proveedores.map((proveedor) => (
                 <tr key={proveedor.id}>
                   <td>{proveedor.Nombre_Empresa}</td>
+                  <td>{proveedor.Direccion}</td>
                   <td>{proveedor.Telefono}</td>
                   <td className="seleccion-td-accion">
                     <button

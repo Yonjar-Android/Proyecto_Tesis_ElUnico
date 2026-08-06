@@ -87,6 +87,7 @@ function ModalSeleccionarProducto({ abierto, onClose, onSeleccionar }: Props) {
             <thead>
               <tr>
                 <th className="seleccion-th-nombre th-producto">Nombre</th>
+                <th className="seleccion-th-marca th-producto">Marca</th>
                 <th className="seleccion-th-stock">Stock</th>
                 <th>Precio</th>
                 <th className="seleccion-th-accion">Acción</th>
@@ -97,9 +98,10 @@ function ModalSeleccionarProducto({ abierto, onClose, onSeleccionar }: Props) {
                 <tr key={producto.id}>
                   <td className="seleccion-nombre-columna">
                     {producto.Nombre}
-                    {producto.Nombre_marca && (
-                      <span className="seleccion-nombre-marca">{producto.Nombre_marca}</span>
-                    )}
+                  </td>
+
+                  <td className="seleccion-nombre-columna">
+                    {producto.Nombre_marca}
                   </td>
                   <td>
                     <span

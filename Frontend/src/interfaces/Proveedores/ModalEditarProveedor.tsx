@@ -48,7 +48,7 @@ function ModalEditarProveedor({ abierto, proveedor, onClose, onEditar }: Props) 
 
   const guardar = async () => {
     if (!nombreEmpresa.trim()) {
-      setError("El campo nombre de empresa no puede estar vacío.");
+      setError("El campo razón social no puede estar vacío.");
       return;
     }
 
@@ -100,7 +100,7 @@ function ModalEditarProveedor({ abierto, proveedor, onClose, onEditar }: Props) 
           <div className="campo-fila">
             <div className="campo">
               <label>
-                Nombre de Empresa <span style={{ color: "red" }}>*</span>
+                Razón Social <span style={{ color: "red" }}>*</span>
               </label>
               <input
                 type="text"

@@ -48,6 +48,7 @@
   width: 100%;
   border-collapse: collapse;
   font-size: 0.88rem;
+ 
 }
 
 .inventario-tabla thead tr {
@@ -55,7 +56,7 @@
 }
 
 .inventario-tabla th {
-  text-align: center;
+  text-align: left;
   color: #fff;
   font-weight: 700;
   font-size: 0.75rem;
@@ -72,6 +73,7 @@
   padding: 0.85rem 0.9rem;
   border-bottom: 1px solid #f1f5f9;
   color: #374151;
+  text-align: left;
 }
 
 .inventario-td-nombre {
@@ -109,17 +111,17 @@
   text-align: right;
 }
 
-.inventario-btn-icono {
+.inventario-btn-icono{
   background: none;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  padding: 0.35rem 0.55rem;
+  border: none;
+  color: #2563eb;
   cursor: pointer;
-  color: #475569;
+  display: inline-flex;
+  align-items: center;
 }
-
+ 
 .inventario-btn-icono:hover {
-  background-color: #f9fafb;
+  color: #1d4ed8;
 }
 
 .inventario-footer {

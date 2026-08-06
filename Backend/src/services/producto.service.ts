@@ -12,18 +12,31 @@ export const buscarProductos = async (
     const params: any[] = [];
 
     if (search.trim() !== "") {
-        where = `
-            WHERE p.Nombre LIKE ?
-               OR c.Nombre_categoria LIKE ?
-               OR p.id LIKE ?
-        `;
+
+    const palabras = search.trim().split(/\s+/);
+
+    const condiciones: string[] = [];
+
+    for (const palabra of palabras) {
+        condiciones.push(`
+            (
+                p.Nombre LIKE ?
+                OR c.Nombre_categoria LIKE ?
+                OR m.Nombre_marca LIKE ?
+                OR p.id LIKE ?
+            )
+        `);
 
         params.push(
-            `%${search}%`,
-            `%${search}%`,
-            `%${search}%`
+            `%${palabra}%`,
+            `%${palabra}%`,
+            `%${palabra}%`,
+            `%${palabra}%`
         );
     }
+
+    where = `WHERE ${condiciones.join(" AND ")}`;
+}
 
     const [countRows]: any = await pool.query(
         `

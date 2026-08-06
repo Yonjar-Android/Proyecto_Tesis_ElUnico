@@ -4,6 +4,7 @@ interface DetalleVentaInput {
     Id_producto: number;
     Cantidad: number;
     Precio_Venta: number;
+    Descuento: number,
     Subtotal: number;
 }
 
@@ -68,14 +69,15 @@ export const crearVenta = async (
             await connection.query(
                 `
                 INSERT INTO detalle_venta
-                (Id_venta, Id_producto, Cantidad, Precio_Venta, Subtotal)
-                VALUES (?, ?, ?, ?, ?)
+                (Id_venta, Id_producto, Cantidad, Precio_Venta, Descuento, Subtotal)
+                VALUES (?, ?, ?, ?, ?, ?)
                 `,
                 [
                     idVenta,
                     detalle.Id_producto,
                     detalle.Cantidad,
                     detalle.Precio_Venta,
+                    detalle.Descuento,
                     detalle.Subtotal
                 ]
             );

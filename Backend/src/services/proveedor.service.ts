@@ -58,7 +58,7 @@ export const crearProveedor = async (
 ) => {
 
     if (!nombreEmpresa.trim()) {
-        throw new Error("El campo nombre de la empresa no puede estar vacío.");
+        throw new Error("El campo razón social no puede estar vacío.");
     }
 
     if (!nombreContacto.trim()) {
@@ -83,7 +83,7 @@ export const crearProveedor = async (
     );
 
     if (rowsEmpresa[0].count > 0) {
-        throw new Error("Ya existe un proveedor con ese nombre de empresa.");
+        throw new Error("Ya existe un proveedor con esa razón social.");
     }
 
     const [rowsTelefono]: any = await pool.query(
@@ -116,7 +116,7 @@ export const actualizarProveedor = async (
 ) => {
 
     if (!nombreEmpresa.trim()) {
-        throw new Error("El campo nombre de la empresa no puede estar vacío.");
+        throw new Error("El campo razón social no puede estar vacío.");
     }
 
     if (!nombreContacto.trim()) {
@@ -146,7 +146,7 @@ export const actualizarProveedor = async (
     );
 
     if (rowsEmpresa[0].count > 0) {
-        throw new Error("Ya existe un proveedor con ese nombre de empresa.");
+        throw new Error("Ya existe un proveedor con esa razón social.");
     }
 
     const [rowsTelefono]: any = await pool.query(

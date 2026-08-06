@@ -13,5 +13,6 @@ export interface Detalle_Venta {
     Id_producto: number,
     Cantidad: number,
     Precio_Venta: number,
+    Descuento: Number,
     Subtotal: number
 }

@@ -42,6 +42,7 @@ function Compras() {
     setProductoSeleccionado(null);
     setCantidad("1");
     setPrecio("0.00");
+    setPrecioVenta("0.00");
   };
 
   const cancelarEdicion = () => {
@@ -77,8 +78,13 @@ function Compras() {
       return;
     }
 
-    if(!proveedorSeleccionado) {
-      setError("Selecciona un proveedor.");
+    if (isNaN(Number(precioVenta)) || Number(precioVenta) <= 0) {
+      setError("Ingresa un precio de venta válido.");
+      return;
+    }
+
+    if(Number(precioVenta) < Number(precio)){
+      setError("El precio de venta no puede ser menor que el precio de compra.");
       return;
     }
 
@@ -130,6 +136,13 @@ function Compras() {
       setError("Agrega al menos un producto para realizar la compra.");
       return;
     }
+
+    if(!proveedorSeleccionado) {
+      setError("Selecciona un proveedor.");
+      return;
+    }
+
+    
 
     try {
 
@@ -260,6 +273,7 @@ function Compras() {
             <input
               type="date"
               value={fecha}
+               max={formatearFechaInput(new Date())}
               onChange={(e) => setFecha(e.target.value)}
             />
           </div>
