@@ -26,9 +26,9 @@ export const buscarDetalleAbonos = async (req: Request, res: Response) => {
 
 export const postDetalleAbono = async (req: Request, res: Response) => {
     try {
-        const { Id_cliente, Monto } = req.body;
+        const { Id_cliente, Monto, Notas } = req.body;
 
-        await crearDetalleAbono(Id_cliente, Monto);
+        await crearDetalleAbono(Id_cliente, Monto, Notas);
 
         res.status(201).json({
             mensaje: "Abono creado correctamente"
@@ -45,12 +45,14 @@ export const putDetalleAbono = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
         const {
-            Monto
+            Monto,
+            Notas
         } = req.body;
 
         const result = await actualizarDetalleAbono(
             Number(id),
-            Number(Monto)
+            Number(Monto),
+            Notas
         );
 
         res.status(200).json({

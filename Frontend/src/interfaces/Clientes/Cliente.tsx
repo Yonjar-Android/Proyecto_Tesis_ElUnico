@@ -257,12 +257,13 @@ onClose={() => {
         setModalAbonarAbierto(false);
         setClienteSeleccionado(null);
     }}
-onAbonar={ async (id_cliente:number, monto:number, setError) => {
+onAbonar={ async (id_cliente:number, monto:number, notas:string, setError) => {
   try{
 
         await crearDetalleAbono(
           id_cliente,
-          Number(monto)
+          Number(monto),
+          notas
         );
 
         setModalAbonarAbierto(false);

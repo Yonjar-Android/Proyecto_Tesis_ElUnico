@@ -90,3 +90,47 @@
   justify-content: center;
   gap: 0.4rem;
 }
+
+.moneda-selector {
+  display: flex;
+  gap: 6px;
+  width: 100%;
+}
+
+.moneda-btn {
+  flex: 1;
+  padding: 8px 10px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 8px;
+  background: #f9fafb;
+  color: #64748b;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.moneda-btn:hover {
+  border-color: #6d5ef8;
+  color: #6d5ef8;
+}
+
+.moneda-btn.activo {
+  background: #6d5ef8;
+  border-color: #6d5ef8;
+  color: #fff;
+}
+
+.confirmar-nota-tasa {
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin-top: -8px;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.confirmar-cambio-mas {
+  font-size: 1rem;
+  color: #9ca3af;
+  font-weight: 600;
+}
