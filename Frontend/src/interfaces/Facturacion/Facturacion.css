@@ -1,6 +1,7 @@
 .factura-page {
   min-height: 100vh;
   background-color: #fff;
+  box-sizing: border-box;
 }
 
 .factura-contenido {
@@ -10,14 +11,10 @@
   box-sizing: border-box;
 }
 
-.factura-header{
-    text-align:left;
-}
-
 .factura-header h1 {
   margin: 0 0 0.3rem;
   font-size: 1.5rem;
-  font-weight: 600;
+  font-weight: 800;
   color: #111;
 }
 
@@ -28,6 +25,7 @@
 }
 
 .factura-fecha {
+  margin: 0 0 1.25rem;
   font-size: 0.85rem;
   color: #6b7280;
 }
@@ -35,7 +33,7 @@
 .factura-card {
   border: 1px solid #e5e7eb;
   border-radius: 14px;
-  padding: 1.25rem .5rem;
+  padding: 1.25rem;
   box-sizing: border-box;
   margin-bottom: 1.25rem;
 }
@@ -72,9 +70,8 @@
 
 .factura-campo label {
   font-size: 0.72rem;
-  text-align:left;
   font-weight: 700;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.03em;
   text-transform: uppercase;
   color: #6b7280;
 }
@@ -99,15 +96,20 @@
 }
 
 .factura-campo-producto {
-  flex: 5;
+  flex: 2;
+  min-width: 220px;
 }
 
 .factura-campo-cantidad {
-  flex:1;
+  width: 100px;
 }
 
 .factura-campo-precio {
-  flex: 1;
+  width: 140px;
+}
+
+.factura-campo-descuento {
+  width: 140px;
 }
 
 .factura-selector-btn {
@@ -159,7 +161,6 @@
 
 .factura-btn-agregar {
   background-color: #e5484d;
-  flex:1;
   color: #fff;
   border: none;
   border-radius: 8px;
@@ -204,7 +205,6 @@
   border-bottom: 1px solid #f1f5f9;
   font-size: 0.9rem;
   color: #374151;
-  text-align: left;
 }
 
 .factura-nombre-marca {
@@ -219,50 +219,12 @@
   color: #111;
 }
 
-.factura-td-accion {
-  text-align: right;
-}
-
 .factura-btn-eliminar {
   background: none;
   border: none;
   color: #e5484d;
   cursor: pointer;
   font-size: 1rem;
-}
-
-.factura-btn-editar {
-  background: none;
-  border: none;
-  color: #2563eb;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-}
- 
-.factura-btn-editar:hover {
-  color: #1d4ed8;
-}
-
-/* Botón para salir del modo edición sin guardar cambios */
-.factura-btn-cancelar-edicion {
-  background: none;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  padding: 0.7rem 1rem;
-  font-size: 0.85rem;
-  color: #6b7280;
-  cursor: pointer;
-  white-space: nowrap;
-}
- 
-.factura-btn-cancelar-edicion:hover {
-  background-color: #f9fafb;
-}
- 
-/* Resalta la fila que se está editando en este momento */
-.factura-tr-editando {
-  background-color: #fef9c3;
 }
 
 .factura-vacio {
@@ -321,6 +283,34 @@
   color: #111;
 }
 
+/* Desglose de Subtotal / Descuento / Total (usado en Facturación con descuento) */
+.factura-total-desglose {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 190px;
+}
+
+.factura-total-linea {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+.factura-total-linea--descuento span:last-child {
+  color: #dc2626;
+}
+
+.factura-total-linea--total {
+  margin-top: 0.2rem;
+  padding-top: 0.35rem;
+  border-top: 1px solid #e5e7eb;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #111;
+}
+
 .factura-btn-vender {
   background-color: #059669;
   color: #fff;
@@ -341,4 +331,45 @@
   color: red;
   font-size: 0.82rem;
   margin-top: 0.75rem;
+}
+
+/* Botones de acción de la tabla (editar / eliminar) */
+.factura-td-accion {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.factura-btn-editar {
+  background: none;
+  border: none;
+  color: #2563eb;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+}
+
+.factura-btn-editar:hover {
+  color: #1d4ed8;
+}
+
+/* Botón para salir del modo edición sin guardar cambios */
+.factura-btn-cancelar-edicion {
+  background: none;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 0.7rem 1rem;
+  font-size: 0.85rem;
+  color: #6b7280;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.factura-btn-cancelar-edicion:hover {
+  background-color: #f9fafb;
+}
+
+/* Resalta la fila que se está editando en este momento */
+.factura-tr-editando {
+  background-color: #fef9c3;
 }

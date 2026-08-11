@@ -48,6 +48,10 @@
   color: #6d5ef8;
 }
 
+.abono-montos-recibido{
+  width: 100%;
+}
+
 .abono-input-monto {
   display: flex;
   align-items: center;
@@ -65,6 +69,7 @@
 
 .abono-input-monto input {
   border: none;
+  width: 100%;
   outline: none;
   flex: 1;
   font-size: 1.2rem;
@@ -108,4 +113,83 @@
 
 .abono-btn-registrar {
   font-weight: 700;
+}
+
+.abono-modal .modal-body {
+  padding: 16px 22px 4px;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.moneda-selector {
+  display: flex;
+  gap: 6px;
+  width: 100%;
+}
+
+.moneda-btn {
+  flex: 1;
+  padding: 8px 10px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 8px;
+  background: #f9fafb;
+  color: #64748b;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.moneda-btn:hover {
+  border-color: #6d5ef8;
+  color: #6d5ef8;
+}
+
+.moneda-btn.activo {
+  background: #6d5ef8;
+  border-color: #6d5ef8;
+  color: #fff;
+}
+
+.abono-montos-recibido.en-linea {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.campo-compacto {
+  margin-bottom: 0;
+}
+
+.abono-nota-tasa {
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin-top: -8px;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.abono-resumen-grupo {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.abono-resumen {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border: 1px dashed #d1d5db;
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 0.8rem;
+  color: #374151;
+  width: 100%;
+}
+
+.abono-resumen-monto {
+  font-weight: 700;
+  color: #111;
+  font-size: 1rem;
 }

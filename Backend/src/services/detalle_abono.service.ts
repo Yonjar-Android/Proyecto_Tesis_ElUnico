@@ -50,7 +50,8 @@ search: string = "",
 
 export const crearDetalleAbono = async (
     id_cliente: number,
-    monto: number
+    monto: number,
+    notas: string
 ) => {
     const [rows]: any = await pool.query(
         "SELECT id FROM abonos WHERE Id_cliente = ?",
@@ -68,8 +69,8 @@ export const crearDetalleAbono = async (
     const id_abono = rows[0].id;
 
     const [result]: any = await pool.query(
-        "INSERT INTO detalle_abono (Id_abono, Fecha, Monto) VALUES (?, NOW(), ?)",
-        [id_abono, monto]
+        "INSERT INTO detalle_abono (Id_abono, Fecha, Monto, Notas) VALUES (?, NOW(), ?, ?)",
+        [id_abono, monto, notas]
     );
 
     return result;
@@ -77,15 +78,17 @@ export const crearDetalleAbono = async (
 
 export const actualizarDetalleAbono = async(
     id: number,
-    monto: number
+    monto: number,
+    notas: string
 ) => {
 
     const [result]: any = await pool.query(
         `
         UPDATE detalle_abono
         SET Monto = ?,
+        Notas = ?,
         WHERE id = ?`,
-        [monto, id]
+        [monto, notas, id]
     )
 
     return result;

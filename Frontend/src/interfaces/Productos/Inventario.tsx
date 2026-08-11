@@ -5,6 +5,8 @@ import { useNavigate } from "react-router-dom";
 import type { PaginatedResponse } from "../../models/PaginatedResponse";
 import { buscarProductos } from "../../services/producto.service";
 import type { ProductoListado } from "../../models/ProductoListado";
+import { SquarePen } from "lucide-react";
+
 
 function Inventario() {
   const navigate = useNavigate();
@@ -112,7 +114,7 @@ function Inventario() {
                       onClick={() => navigate(`/inventario/editar/${producto.id}`)}
                       aria-label="Editar producto"
                     >
-                      ✏
+                      <SquarePen size={24} />
                     </button>
                   </td>
                 </tr>

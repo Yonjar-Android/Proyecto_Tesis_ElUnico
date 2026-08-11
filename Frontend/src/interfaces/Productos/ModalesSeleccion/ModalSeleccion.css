@@ -1,7 +1,7 @@
 /* Reutiliza .modal-overlay, .modal, .modal-close, .error-text ya existentes. */
 
 .seleccion-modal {
-  width: 520px;
+  width: 640px;
   max-width: calc(100vw - 32px);
   max-height: 85vh;
   display: flex;

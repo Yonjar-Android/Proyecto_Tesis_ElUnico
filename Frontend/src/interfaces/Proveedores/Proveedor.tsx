@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import type { PaginatedResponse } from "../../models/PaginatedResponse";
 import ModalAgregarProveedor from "./ModalAgregarProveedor";
 import ModalEditarProveedor from "./ModalEditarProveedor";
+import { SquarePen } from "lucide-react";
 
 interface Proveedor {
 
@@ -102,7 +103,7 @@ return (
           <input
     className="proveedor-search-input"
     type="text"
-    placeholder="Buscar por Empresa o Contacto"
+    placeholder="Buscar por Razón Social o Contacto"
     value={searchTerm}
     onChange={(e) => setSearchTerm(e.target.value)}
     onKeyDown={handleKeyDown}
@@ -112,7 +113,7 @@ return (
         <table className="proveedor-table">
           <thead>
             <tr>
-              <th className="proveedor-th">EMPRESA</th>
+              <th className="proveedor-th">RAZÓN SOCIAL</th>
               <th className="proveedor-th">NOMBRE CONTACTO</th>
               <th className="proveedor-th">TELÉFONO</th>
               <th className="proveedor-th">DIRECCIÓN</th>
@@ -139,7 +140,7 @@ return (
                             setModalEditarAbierto(true);
                        }}
                     >
-                        ✏ Editar
+                        <SquarePen size={24} /> Editar
                   </button>
                 </td>
               </tr>

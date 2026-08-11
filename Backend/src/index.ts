@@ -1,5 +1,5 @@
 import express from "express";
-import dotenv from "dotenv";
+//import dotenv from "dotenv";
 import { conectarDB } from "./config/database.js";
 import marcaRoutes from "./routes/marca.routes.js";
 import categoriaRoutes from "./routes/categoria.routes.js";
@@ -12,10 +12,11 @@ import authRoutes from "./routes/auth.routes.js";
 import compraRoutes from "./routes/compra.routes.js";
 import reporteRoutes from "./routes/reporte.routes.js";
 import cajaRoutes from "./routes/caja.routes.js";
+import servicioRoutes from "./routes/service.routes.js"
 import cors from "cors";
 import { authMiddleware } from "./authMiddleware/authMiddleware.js";
 
-dotenv.config();
+//dotenv.config();
 
 const app = express();
 
@@ -27,7 +28,8 @@ app.use(cors());
 app.use(express.json());
 
 // Rutas públicas
-app.use("/api/auth", authRoutes);
+app.use("/api/servicios", servicioRoutes);
+app.use("/api/auth", authRoutes)
 
 // Rutas protegidas
 app.use("/api/marcas", authMiddleware, marcaRoutes);

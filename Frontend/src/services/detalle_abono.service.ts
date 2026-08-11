@@ -4,21 +4,23 @@ const API = "http://localhost:3000/api/detalle_abono";
 
 export const crearDetalleAbono = async (
     Id_cliente:number,
-    Monto:number
+    Monto:number,
+    Notas: string
 ) => {
     const response = await axios.post(API, {
         Id_cliente,
-        Monto
+        Monto,
+        Notas
         })
 
     return response.data;
 }
 
 export const actualizarDetalleAbonos = async (
-    id: number, Monto:number
+    id: number, Monto:number, Notas: string
 ) => {
     const response = await axios.put(`${API}/${id}`, {
-       Monto
+       Monto, Notas
     });
 
     return response;

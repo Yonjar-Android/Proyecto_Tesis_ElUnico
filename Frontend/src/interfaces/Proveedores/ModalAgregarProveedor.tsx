@@ -41,7 +41,7 @@ function ModalAgregarProveedor({ abierto, onClose, onGuardar }: Props) {
 
   const guardar = async () => {
     if (!nombreEmpresa.trim()) {
-      setError("El campo nombre de empresa no puede estar vacío.");
+      setError("El campo razón social no puede estar vacío.");
       return;
     }
 
@@ -94,11 +94,11 @@ function ModalAgregarProveedor({ abierto, onClose, onGuardar }: Props) {
           <div className="campo-fila">
             <div className="campo">
               <label>
-                Nombre de Empresa <span style={{ color: "red" }}>*</span>
+                Razón Social <span style={{ color: "red" }}>*</span>
               </label>
               <input
                 type="text"
-                placeholder="Empresa"
+                placeholder="Razón Social"
                 value={nombreEmpresa}
                 onChange={(e) => setNombreEmpresa(e.target.value)}
               />
