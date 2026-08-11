@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { CircleUserRound, Lock, Eye, EyeOff, X, CheckCircle2 } from "lucide-react";
 import logo from "../../assets/LogoTransparente.png";
 import { enviarRecuperacion, loginUsuario } from "../../services/auth.service";
+
 type RecoveryStatus = "idle" | "loading" | "sent" | "error";
 
 export default function LoginElUnico() {
@@ -32,7 +33,10 @@ export default function LoginElUnico() {
       throw new Error(response.message || "Credenciales inválidas");
     }
     localStorage.setItem("usuario", JSON.stringify(response.user));
-    navigate("/home");
+  if (response.token) {
+  localStorage.setItem("token", response.token);
+}
+navigate("/home");
   } catch (err) {
     setError("Usuario o contraseña incorrectos.");
   } finally {

@@ -26,9 +26,9 @@ function EditarProducto() {
   const [stockActual, setStockActual] = useState("0");
   const [stockMinimo, setStockMinimo] = useState("0");
 
-  const [ventasMes, setVentasMes] = useState(0);
-  const [margen, setMargen] = useState(0);
-  const [margenDeltaTexto, setMargenDeltaTexto] = useState("");
+  const [ventasMes, _setVentasMes] = useState(0);
+  const [margen, _setMargen] = useState(0);
+  const [margenDeltaTexto, _setMargenDeltaTexto] = useState("");
 
   const [modalCategoriaAbierto, setModalCategoriaAbierto] = useState(false);
   const [modalMarcaAbierto, setModalMarcaAbierto] = useState(false);

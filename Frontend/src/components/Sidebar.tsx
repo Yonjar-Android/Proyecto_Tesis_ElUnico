@@ -8,7 +8,6 @@ import {
   Archive,
   PieChart,
   Wrench,
-  User,
   ChevronDown,
   LogOut,
   UserCog,

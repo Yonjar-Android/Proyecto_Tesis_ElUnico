@@ -3,7 +3,6 @@ import "../Reportes.css";
 import IconoBarras from "../IconoBarras";
 import type { ProductoListado } from "../../../models/ProductoListado.js";
 import { obtenerReporteStockBajo, /*exportarStockBajo*/ } from "../../../services/reporte.service.js";
-import type { PaginatedResponse } from "../../../models/PaginatedResponse";
 
 export interface ReporteProductoStock {
     id: number;
@@ -94,7 +93,7 @@ function ReporteStockBajo() {
     );
   }
 
-    return producto.Stock;
+  return producto.Stock;
   }
 
   return (

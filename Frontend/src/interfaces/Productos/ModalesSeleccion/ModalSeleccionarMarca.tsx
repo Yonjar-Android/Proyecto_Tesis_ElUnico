@@ -20,7 +20,6 @@ function ModalSeleccionarMarca({ abierto, onClose, onSeleccionar }: Props) {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [perPage] = useState(6);
-  const [total, setTotal] = useState(0);
   const [lastPage, setLastPage] = useState(1);
 
   const buscar = async () => {
@@ -32,7 +31,6 @@ function ModalSeleccionarMarca({ abierto, onClose, onSeleccionar }: Props) {
       );
 
       setMarcas(response.data);
-      setTotal(response.total);
       setLastPage(response.last_page);
     } catch (error) {
       console.error(error);

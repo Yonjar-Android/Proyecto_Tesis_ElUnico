@@ -113,19 +113,23 @@ export default function Caja() {
           </div>
 
           <div className="caja-resumen-grid">
-            <div className="caja-resumen-card">
-              <span>Ingresos del día</span>
-              <strong className="valor-verde">C${ingresosDia.toLocaleString()}</strong>
-            </div>
-            <div className="caja-resumen-card">
-              <span>Egresos del día</span>
-              <strong className="valor-rojo">- C${totalEgresos.toLocaleString()}</strong>
-            </div>
-            <div className="caja-resumen-card caja-resumen-neto">
-              <span>Neto del día</span>
-              <strong>C${netoDia.toLocaleString()}</strong>
-            </div>
-          </div>
+  <div className="caja-resumen-card">
+    <span>Monto de apertura</span>
+    <strong>C${sesionActiva.monto_apertura_cordobas.toLocaleString()}</strong>
+  </div>
+  <div className="caja-resumen-card">
+    <span>Ingresos del día</span>
+    <strong className="valor-verde">C${ingresosDia.toLocaleString()}</strong>
+  </div>
+  <div className="caja-resumen-card">
+    <span>Egresos del día</span>
+    <strong className="valor-rojo">- C${totalEgresos.toLocaleString()}</strong>
+  </div>
+  <div className="caja-resumen-card caja-resumen-neto">
+    <span>Neto del día</span>
+    <strong>C${netoDia.toLocaleString()}</strong>
+  </div>
+</div>
 
           <button className="btn-registrar-egreso" onClick={() => setModalEgresoAbierto(true)}>
             <Plus size={18} />

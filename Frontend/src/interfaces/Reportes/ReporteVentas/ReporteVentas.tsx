@@ -3,7 +3,6 @@ import "../Reportes.css";
 import IconoBarras from "../IconoBarras";
 import { IconoCuboOutline, IconoTendencia } from "../IconosReporte";
 import { obtenerReporteVentasPorPeriodo, /*exportarReporteVentas*/ } from "../../../services/reporte.service";
-import { buscarClientes } from "../../../services/cliente.service";
 import type { VentaReporte } from "../../../models/VentaReportes";
 import type { Cliente } from "../../../models/Cliente";
 import type { PaginatedResponse } from "../../../models/PaginatedResponse";
@@ -40,7 +39,7 @@ function ReporteVentas() {
   const [fechaInicio, setFechaInicio] = useState("");
   const [fechaFin, setFechaFin] = useState("");
   const [clienteId, setClienteId] = useState("");
-  const [clientes, setClientes] = useState<Cliente[]>([]);
+  const [clientes] = useState<Cliente[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [perPage] = useState(10);
   const [lastPage, setLastPage] = useState(1);

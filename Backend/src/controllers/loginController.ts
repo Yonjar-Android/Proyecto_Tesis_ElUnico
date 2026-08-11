@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
-
+import jwt from "jsonwebtoken";
 import { loginService, resetPasswordByEmail } from "../services/auth.service.js";
+
 
 export const login = async (req: Request, res: Response) => {
   const { usuario, password } = req.body;
@@ -14,10 +15,9 @@ export const login = async (req: Request, res: Response) => {
     });
   }
 
-  return res.json({
-    success: true,
-    user,
-  });
+// ...
+const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET as string, { expiresIn: "8h" });
+return res.json({ success: true, user, token });
 };
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

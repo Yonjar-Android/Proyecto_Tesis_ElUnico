@@ -13,6 +13,7 @@ import compraRoutes from "./routes/compra.routes.js";
 import reporteRoutes from "./routes/reporte.routes.js";
 import cajaRoutes from "./routes/caja.routes.js";
 import cors from "cors";
+import { authMiddleware } from "./authMiddleware/authMiddleware.js";
 
 dotenv.config();
 
@@ -25,21 +26,21 @@ conectarDB();
 app.use(cors());
 app.use(express.json());
 
-app.use("/api/marcas", marcaRoutes);
-app.use("/api/categorias", categoriaRoutes);
-app.use("/api/clientes", clienteRoutes);
-app.use("/api/detalle_abono", detalle_abonos)
-app.use("/api/proveedores", proveedorRoutes);
-app.use("/api/productos", productoRoutes);
-app.use("/api/ventas", ventaRoutes);
-app.use("/api/compras", compraRoutes);
-app.use("/api/caja", cajaRoutes);
+// Rutas públicas
 app.use("/api/auth", authRoutes);
 
-app.use("/api/reportes", reporteRoutes)
+// Rutas protegidas
+app.use("/api/marcas", authMiddleware, marcaRoutes);
+app.use("/api/categorias", authMiddleware, categoriaRoutes);
+app.use("/api/clientes", authMiddleware, clienteRoutes);
+app.use("/api/detalle_abono", authMiddleware, detalle_abonos);
+app.use("/api/proveedores", authMiddleware, proveedorRoutes);
+app.use("/api/productos", authMiddleware, productoRoutes);
+app.use("/api/ventas", authMiddleware, ventaRoutes);
+app.use("/api/compras", authMiddleware, compraRoutes);
+app.use("/api/caja", authMiddleware, cajaRoutes);
+app.use("/api/reportes", authMiddleware, reporteRoutes);
 
 app.listen(PORT, () => {
-
     console.log(`Servidor iniciado en http://localhost:${PORT}`);
-
 });

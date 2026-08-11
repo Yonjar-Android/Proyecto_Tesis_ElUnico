@@ -1,33 +1,49 @@
 import { pool } from "../config/database.js";
 
-export async function obtenerSesionActiva() {
-  const [rows]: any = await pool.query(
-    "SELECT * FROM caja_sesiones WHERE estado = 'Abierta' ORDER BY fecha_apertura DESC LIMIT 1"
-  );
-  return rows[0] ?? null;
-}
+// Ajusta el import de tu conexión/pool según cómo lo tengas en este archivo
+// import { pool } from "../config/database.js";
 
 export async function crearSesionCaja(
+  idUsuario: number,
   montoAperturaCordobas: number,
   tasaCambio: number,
   observaciones: string
 ) {
   const [result]: any = await pool.query(
-    `INSERT INTO caja_sesiones
-      (fecha_apertura, monto_apertura_cordobas, tasa_cambio, observaciones_apertura, estado)
-      VALUES (?, ?, ?, ?, 'Abierta')`,
-    [new Date(), montoAperturaCordobas, tasaCambio, observaciones]
+    `INSERT INTO sesiones_caja (id_usuario, fecha_apertura, monto_apertura_cordobas, tasa_cambio, observaciones, estado)
+     VALUES (?, NOW(), ?, ?, ?, 'Abierta')`,
+    [idUsuario, montoAperturaCordobas, tasaCambio, observaciones]
   );
-
   return result.insertId;
 }
 
-export async function obtenerEgresosPorSesion(idSesion: number) {
-  const [rows]: any = await pool.query(
-    "SELECT * FROM caja_egresos WHERE id_sesion = ? ORDER BY fecha_registro DESC",
-    [idSesion]
+export async function cerrarSesionCaja(
+  idSesion: number,
+  totalEfectivoContado: number,
+  totalTarjetaTransferencia: number,
+  diferencia: number,
+  observaciones: string
+) {
+  const [result]: any = await pool.query(
+    `UPDATE sesiones_caja SET
+      fecha_cierre = NOW(),
+      total_efectivo_contado = ?,
+      total_tarjeta_transferencia = ?,
+      diferencia = ?,
+      observaciones = ?,
+      estado = 'Cerrada'
+     WHERE id_sesion = ? AND estado = 'Abierta'`,
+    [totalEfectivoContado, totalTarjetaTransferencia, diferencia, observaciones, idSesion]
   );
-  return rows;
+  return result.affectedRows;
+}
+
+export async function buscarSesionActiva(idUsuario: number) {
+  const [rows]: any = await pool.query(
+    `SELECT * FROM sesiones_caja WHERE id_usuario = ? AND estado = 'Abierta' LIMIT 1`,
+    [idUsuario]
+  );
+  return rows[0] || null;
 }
 
 export async function crearEgresoCaja(
@@ -39,78 +55,29 @@ export async function crearEgresoCaja(
   observaciones: string
 ) {
   const [result]: any = await pool.query(
-    `INSERT INTO caja_egresos
-      (id_sesion, tipo_egreso, concepto, metodo_pago, monto_cordobas, observaciones, fecha_registro)
-      VALUES (?, ?, ?, ?, ?, ?, ?)`,
-    [
-      idSesion,
-      tipoEgreso,
-      concepto,
-      metodoPago,
-      montoCordobas,
-      observaciones,
-      new Date(),
-    ]
+    `INSERT INTO egresos_caja (id_sesion, tipo_egreso, metodo_pago, concepto, monto_cordobas, observaciones)
+     VALUES (?, ?, ?, ?, ?, ?)`,
+    [idSesion, tipoEgreso, metodoPago, concepto, montoCordobas, observaciones]
   );
-
   return result.insertId;
 }
 
-export async function eliminarEgresoCaja(idEgreso: number) {
+export async function eliminarEgresoCajaModel(idEgreso: number) {
   const [result]: any = await pool.query(
-    "DELETE FROM caja_egresos WHERE id_egreso = ?",
+    `DELETE FROM egresos_caja WHERE id_egreso = ?`,
     [idEgreso]
   );
   return result.affectedRows;
 }
 
-export async function obtenerIngresosDelDia() {
-  const [rows]: any = await pool.query(
-    "SELECT COALESCE(SUM(Total), 0) AS ingresos FROM ventas WHERE DATE(Fecha) = CURDATE()"
-  );
-  return rows[0]?.ingresos ?? 0;
-}
-
-export async function obtenerTotalEgresosPorSesion(idSesion: number) {
-  const [rows]: any = await pool.query(
-    "SELECT COALESCE(SUM(monto_cordobas), 0) AS totalEgresos FROM caja_egresos WHERE id_sesion = ?",
+export async function obtenerResumenCierreModel(idSesion: number) {
+  const [sesion]: any = await pool.query(
+    `SELECT * FROM sesiones_caja WHERE id_sesion = ?`,
     [idSesion]
   );
-  return rows[0]?.totalEgresos ?? 0;
-}
-
-export async function obtenerResumenCierreCaja(idSesion: number) {
-  const [sesionRows]: any = await pool.query(
-    "SELECT monto_apertura_cordobas, tasa_cambio, fecha_apertura, observaciones_apertura FROM caja_sesiones WHERE id_sesion = ?",
+  const [egresos]: any = await pool.query(
+    `SELECT * FROM egresos_caja WHERE id_sesion = ?`,
     [idSesion]
   );
-
-  const sesion = sesionRows[0];
-  if (!sesion) {
-    return null;
-  }
-
-  const ingresosDia = await obtenerIngresosDelDia();
-  const totalEgresos = await obtenerTotalEgresosPorSesion(idSesion);
-  const efectivoEsperado = sesion.monto_apertura_cordobas + ingresosDia - totalEgresos;
-
-  return {
-    montoApertura: sesion.monto_apertura_cordobas,
-    tasaCambio: sesion.tasa_cambio,
-    fechaApertura: sesion.fecha_apertura,
-    observacionesApertura: sesion.observaciones_apertura,
-    ingresosDia,
-    totalEgresos,
-    efectivoEsperado,
-  };
-}
-
-export async function cerrarSesionCaja(
-  idSesion: number
-) {
-  const [result]: any = await pool.query(
-    "UPDATE caja_sesiones SET estado = 'Cerrada', fecha_cierre = ? WHERE id_sesion = ? AND estado = 'Abierta'",
-    [new Date(), idSesion]
-  );
-  return result.affectedRows;
+  return { sesion: sesion[0] || null, egresos };
 }

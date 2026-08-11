@@ -1,18 +1,20 @@
 import axios from "axios";
 
-const API = import.meta.env.VITE_API_URL || "http://localhost:3001/api/caja";
+import axiosInstance from "./axiosInstance";
+
+const API = "/caja"; ;
 
 export type EgresoCajaInput = {
   idSesion: number;
   tipoEgreso: string;
   metodoPago: string;
   concepto: string;
-  monto: number;
+  montoCordobas: number;   // antes: monto
   observaciones: string;
 };
 
 export const obtenerSesionActiva = async () => {
-  const response = await axios.get(`${API}/sesion-activa`);
+  const response = await axiosInstance.get(`${API}/sesion-activa`);
   return response.data;
 };
 
@@ -21,7 +23,7 @@ export const abrirCaja = async (
   tasaCambio: number,
   observaciones: string
 ) => {
-  const response = await axios.post(`${API}/apertura`, {
+  const response = await axiosInstance.post(`${API}/apertura`, {
     montoAperturaCordobas,
     tasaCambio,
     observaciones,
@@ -30,12 +32,12 @@ export const abrirCaja = async (
 };
 
 export const crearEgresoCaja = async (payload: EgresoCajaInput) => {
-  const response = await axios.post(`${API}/egresos`, payload);
+  const response = await axiosInstance.post(`${API}/egresos`, payload);
   return response.data;
 };
 
 export const eliminarEgreso = async (id: number) => {
-  const response = await axios.delete(`${API}/egresos/${id}`);
+  const response = await axiosInstance.delete(`${API}/egresos/${id}`);
   return response.data;
 };
 

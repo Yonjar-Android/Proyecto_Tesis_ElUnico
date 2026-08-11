@@ -142,7 +142,7 @@ function Facturacion() {
   };
 
   const confirmarVenta = async (
-    montoRecibido: number,
+    _montoRecibido: number,
     setErrorModal: (mensaje: string) => void
   ) => {
     try {

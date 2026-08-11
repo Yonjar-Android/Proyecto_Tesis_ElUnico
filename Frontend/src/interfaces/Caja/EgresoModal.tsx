@@ -31,13 +31,13 @@ export default function EgresoModal({ idSesion, onClose, onGuardado }: EgresoMod
     setGuardando(true);
     try {
       const data = await crearEgresoCaja({
-        idSesion,
-        tipoEgreso,
-        metodoPago,
-        concepto,
-        monto: Number(monto),
-        observaciones,
-      });
+  idSesion,
+  tipoEgreso,
+  metodoPago,
+  concepto,
+  montoCordobas: Number(monto),
+  observaciones,
+});
 
       onGuardado({
         id_egreso: data.idEgreso,
