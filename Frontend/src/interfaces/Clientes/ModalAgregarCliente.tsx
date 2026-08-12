@@ -202,6 +202,8 @@ function ModalAgregarCliente({ abierto, onClose, onGuardar }: Props) {
                 <input
                   type="number"
                   value={saldo_deuda}
+                  step={1}
+                  min={0}
                   onChange={(e) => setSaldo_Deuda(e.target.value)}
                 />
               </div>
