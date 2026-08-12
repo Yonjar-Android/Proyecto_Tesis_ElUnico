@@ -15,6 +15,7 @@ import cajaRoutes from "./routes/caja.routes.js";
 import servicioRoutes from "./routes/service.routes.js"
 import cors from "cors";
 import { authMiddleware } from "./authMiddleware/authMiddleware.js";
+import usuarioRoutes from "./routes/usuario.routes.js";
 
 //dotenv.config();
 
@@ -42,6 +43,7 @@ app.use("/api/ventas", authMiddleware, ventaRoutes);
 app.use("/api/compras", authMiddleware, compraRoutes);
 app.use("/api/caja", authMiddleware, cajaRoutes);
 app.use("/api/reportes", authMiddleware, reporteRoutes);
+app.use("/api/usuarios", authMiddleware, usuarioRoutes);
 
 app.listen(PORT, () => {
     console.log(`Servidor iniciado en http://localhost:${PORT}`);

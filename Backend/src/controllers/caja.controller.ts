@@ -6,13 +6,14 @@ import {
   eliminarEgresoCaja,
   cerrarCaja,
   obtenerResumenCierreCaja,
+  actualizarEgresoCaja,
 } from "../services/caja.service.js";
 
 export const getSesionActiva = async (req: Request, res: Response) => {
   try {
     const idUsuario = (req as any).usuario?.id;
-    const sesion = await obtenerSesionActiva(idUsuario);
-    res.status(200).json({ success: true, sesion });
+    const resultado = await obtenerSesionActiva(idUsuario);
+    res.status(200).json({ success: true, ...resultado });
   } catch (error: any) {
     res.status(400).json({ success: false, message: error.message });
   }
@@ -85,9 +86,26 @@ export const postCierreCaja = async (req: Request, res: Response) => {
 
 export const getResumenCierreCaja = async (req: Request, res: Response) => {
   try {
-    const { idSesion } = req.query;
-    const resumen = await obtenerResumenCierreCaja(Number(idSesion));
-    res.status(200).json({ success: true, ...resumen });
+    const idUsuario = (req as any).usuario?.id;
+    const resumen = await obtenerResumenCierreCaja(idUsuario);
+    res.status(200).json({ success: true, resumen });
+  } catch (error: any) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+};
+export const putEgresoCaja = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { tipoEgreso, metodoPago, concepto, montoCordobas, observaciones } = req.body;
+    await actualizarEgresoCaja(
+      Number(id),
+      tipoEgreso,
+      metodoPago,
+      concepto,
+      Number(montoCordobas),
+      observaciones || ""
+    );
+    res.status(200).json({ success: true });
   } catch (error: any) {
     res.status(400).json({ success: false, message: error.message });
   }

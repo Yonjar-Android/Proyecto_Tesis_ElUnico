@@ -43,9 +43,24 @@ export async function buscarSesionActiva(idUsuario: number) {
     `SELECT * FROM sesiones_caja WHERE id_usuario = ? AND estado = 'Abierta' LIMIT 1`,
     [idUsuario]
   );
-  return rows[0] || null;
-}
+  const sesion = rows[0] || null;
 
+  if (!sesion) {
+    return { sesion: null, egresos: [], ingresosDia: 0 };
+  }
+
+  const [egresos]: any = await pool.query(
+    `SELECT * FROM egresos_caja WHERE id_sesion = ? ORDER BY fecha_registro DESC`,
+    [sesion.id_sesion]
+  );
+
+  const [ingresos]: any = await pool.query(
+    `SELECT COALESCE(SUM(Total), 0) AS total FROM ventas WHERE Fecha >= ?`,
+    [sesion.fecha_apertura]
+  );
+
+  return { sesion, egresos, ingresosDia: Number(ingresos[0].total) };
+}
 export async function crearEgresoCaja(
   idSesion: number,
   tipoEgreso: string,
@@ -70,14 +85,52 @@ export async function eliminarEgresoCajaModel(idEgreso: number) {
   return result.affectedRows;
 }
 
-export async function obtenerResumenCierreModel(idSesion: number) {
-  const [sesion]: any = await pool.query(
-    `SELECT * FROM sesiones_caja WHERE id_sesion = ?`,
-    [idSesion]
+export async function obtenerResumenCierreModel(idUsuario: number) {
+  const [rows]: any = await pool.query(
+    `SELECT * FROM sesiones_caja WHERE id_usuario = ? AND estado = 'Abierta' LIMIT 1`,
+    [idUsuario]
   );
-  const [egresos]: any = await pool.query(
-    `SELECT * FROM egresos_caja WHERE id_sesion = ?`,
-    [idSesion]
+  const sesion = rows[0] || null;
+
+  if (!sesion) {
+    return {
+      sesion: null,
+      montoApertura: 0,
+      ingresosDia: 0,
+      totalEgresos: 0,
+      efectivoEsperado: 0,
+    };
+  }
+
+  const [egresosRows]: any = await pool.query(
+    `SELECT COALESCE(SUM(monto_cordobas), 0) AS total FROM egresos_caja WHERE id_sesion = ?`,
+    [sesion.id_sesion]
   );
-  return { sesion: sesion[0] || null, egresos };
+  const totalEgresos = Number(egresosRows[0].total);
+
+  const [ventasRows]: any = await pool.query(
+    `SELECT COALESCE(SUM(Total), 0) AS total FROM ventas WHERE Fecha >= ?`,
+    [sesion.fecha_apertura]
+  );
+  const ingresosDia = Number(ventasRows[0].total);
+
+  const montoApertura = Number(sesion.monto_apertura_cordobas);
+  const efectivoEsperado = montoApertura + ingresosDia - totalEgresos;
+
+  return { sesion, montoApertura, ingresosDia, totalEgresos, efectivoEsperado };
+}
+  
+export async function actualizarEgresoCajaModel(
+  idEgreso: number,
+  tipoEgreso: string,
+  metodoPago: string,
+  concepto: string,
+  montoCordobas: number,
+  observaciones: string
+) {
+  const [result]: any = await pool.query(
+    `UPDATE egresos_caja SET tipo_egreso = ?, metodo_pago = ?, concepto = ?, monto_cordobas = ?, observaciones = ? WHERE id_egreso = ?`,
+    [tipoEgreso, metodoPago, concepto, montoCordobas, observaciones, idEgreso]
+  );
+  return result.affectedRows;
 }

@@ -1,6 +1,6 @@
-import axios from "axios";
+import axiosInstance from "./axiosInstance";
 
-const API = "http://localhost:3000/api/compras";
+const API = "http://localhost:3001/api/compras";
 
 interface DetalleCompra {
     Id_producto: number;
@@ -16,7 +16,7 @@ export const crearCompra = async (
     Detalles: DetalleCompra[]
 ) => {
 
-    const response = await axios.post(API, {
+    const response = await axiosInstance.post(API, {
         Id_proveedor,
         NFactura,
         Total,

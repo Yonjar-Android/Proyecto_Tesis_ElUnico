@@ -1,4 +1,3 @@
-import axios from "axios";
 
 import axiosInstance from "./axiosInstance";
 
@@ -48,7 +47,7 @@ export const cerrarCaja = async (
   diferencia: number,
   observaciones: string
 ) => {
-  const response = await axios.post(`${API}/cierre`, {
+  const response = await axiosInstance.post(`${API}/cierre`, {
     idSesion,
     totalEfectivoContado,
     totalTarjetaTransferencia,
@@ -59,6 +58,10 @@ export const cerrarCaja = async (
 };
 
 export const obtenerResumenCierre = async () => {
-  const response = await axios.get(`${API}/resumen-cierre`);
+  const response = await axiosInstance.get(`${API}/resumen-cierre`);
+  return response.data;
+};
+export const actualizarEgreso = async (id: number, payload: EgresoCajaInput) => {
+  const response = await axiosInstance.put(`${API}/egresos/${id}`, payload);
   return response.data;
 };

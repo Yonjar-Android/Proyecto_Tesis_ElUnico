@@ -1,6 +1,6 @@
-import axios from "axios";
+import axiosInstance from "./axiosInstance";
 
-const API = "http://localhost:3000/api/servicios";
+const API = "http://localhost:3001/api/servicios";
 
 export const crearServicio = async (
     Nombre_servicio: string,
@@ -8,7 +8,7 @@ export const crearServicio = async (
     Precio: number 
 ) => {
 
-    const response = await axios.post(API, {
+    const response = await axiosInstance.post(API, {
         Nombre_servicio,
         Descripcion,
         Precio
@@ -17,14 +17,14 @@ export const crearServicio = async (
     return response.data;
 };
 
-export const actualizarProducto = async (
+export const actualizarServicio = async (
     id: number,
     Nombre_servicio: string,
     Descripcion: string,
     Precio: number 
 ) => {
 
-    const response = await axios.put(`${API}/${id}`, {
+    const response = await axiosInstance.put(`${API}/${id}`, {
     Nombre_servicio,
     Descripcion,
     Precio 
@@ -39,7 +39,7 @@ export const buscarServicios = async (
     perPage: number
 ) => {
 
-    const response = await axios.get(`${API}/buscar`, {
+    const response = await axiosInstance.get(`${API}/buscar`, {
         params: {
             search,
             page,

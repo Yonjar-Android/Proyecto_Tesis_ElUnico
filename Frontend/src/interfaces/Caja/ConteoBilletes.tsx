@@ -77,7 +77,7 @@ export default function ConteoBilletes({ tasaCambio, onTotalChange }: ConteoBill
     <div className="conteo-billetes">
       <div className="conteo-columna">
         <h4 className="conteo-titulo">
-          <span className="punto-cordobas" /> Mil Córdobas
+          <span className="punto-cordobas" /> Córdobas
           <span className="conteo-subtotal-mini">C${subtotalCordobas.toLocaleString()}</span>
         </h4>
         {DENOMINACIONES_CORDOBAS.map((d) => (

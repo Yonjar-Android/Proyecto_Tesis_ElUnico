@@ -39,7 +39,7 @@ function Facturacion() {
   const [precio, setPrecio] = useState("0.00");
   const [tipoPago, setTipoPago] = useState("Contado");
   const [clienteSeleccionado, setClienteSeleccionado] = useState<Cliente>({
-    id: 0,
+    id: 7,
     Nombre: "Cliente",
     Apellido: "General",
     Telefono: "",

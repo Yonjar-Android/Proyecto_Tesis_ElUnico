@@ -1,6 +1,5 @@
-import axios from "axios";
-
-const API = "http://localhost:3000/api/proveedores";
+import axiosInstance from "./axiosInstance";
+const API = "http://localhost:3001/api/proveedores";
 
 export const crearProveedor = async (
     Nombre_Empresa: string,
@@ -9,7 +8,7 @@ export const crearProveedor = async (
     Direccion: string
 ) => {
 
-    const response = await axios.post(API, {
+    const response = await axiosInstance.post(API, {
         Nombre_Empresa,
         Nombre_Contacto,
         Telefono,
@@ -27,7 +26,7 @@ export const actualizarProveedor = async (
     Direccion: string
 ) => {
 
-    const response = await axios.put(`${API}/${id}`, {
+    const response = await axiosInstance.put(`${API}/${id}`, {
         Nombre_Empresa,
         Nombre_Contacto,
         Telefono,
@@ -43,7 +42,7 @@ export const buscarProveedores = async (
     perPage: number
 ) => {
 
-    const response = await axios.get(`${API}/buscar`, {
+    const response = await axiosInstance.get(`${API}/buscar`, {
         params: {
             search,
             page,

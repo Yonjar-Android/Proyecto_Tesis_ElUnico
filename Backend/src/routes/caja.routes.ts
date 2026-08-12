@@ -6,6 +6,7 @@ import {
   deleteEgresoCaja,
   postCierreCaja,
   getResumenCierreCaja,
+  putEgresoCaja,  
 } from "../controllers/caja.controller.js";
 
 
@@ -18,6 +19,7 @@ router.post("/egresos", postEgresoCaja);
 router.delete("/egresos/:id", deleteEgresoCaja);
 router.post("/cierre", postCierreCaja);
 router.get("/resumen-cierre", getResumenCierreCaja);
+router.put("/egresos/:id", putEgresoCaja);
 
 
 export default router;

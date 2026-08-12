@@ -1,7 +1,7 @@
-import axios from "axios";
+import axiosInstance from "./axiosInstance";
 import type { DetalleVenta } from "../models/DetalleVenta";
 
-const API = "http://localhost:3000/api/ventas";
+const API = "http://localhost:3001/api/ventas";
 
 export const crearVenta = async (
     Id_cliente: number,
@@ -11,7 +11,7 @@ export const crearVenta = async (
     Detalles: DetalleVenta[]
 ) => {
 
-    const response = await axios.post(API, {
+    const response = await axiosInstance.post(API, {
         Id_cliente,
         Id_usuario,
         Tipo_Pago,

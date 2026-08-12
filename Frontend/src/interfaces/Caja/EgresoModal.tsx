@@ -1,10 +1,20 @@
 import { useState } from "react";
 import { Wallet, X } from "lucide-react";
-import { crearEgresoCaja } from "../../services/caja.service";
+import { crearEgresoCaja, actualizarEgreso } from "../../services/caja.service";
 import "./EgresoModal.css";
+
+interface EgresoExistente {
+  id_egreso: number;
+  tipo_egreso: string;
+  metodo_pago: string;
+  concepto: string;
+  monto_cordobas: number;
+  observaciones?: string;
+}
 
 interface EgresoModalProps {
   idSesion: number;
+  egresoAEditar?: EgresoExistente | null;
   onClose: () => void;
   onGuardado: (egreso: any) => void;
 }
@@ -12,12 +22,14 @@ interface EgresoModalProps {
 const TIPOS_EGRESO = ["Compras", "Servicios", "Sueldos", "Mantenimiento", "Otros"];
 const METODOS_PAGO = ["Efectivo", "Tarjeta", "Transferencia"];
 
-export default function EgresoModal({ idSesion, onClose, onGuardado }: EgresoModalProps) {
-  const [tipoEgreso, setTipoEgreso] = useState(TIPOS_EGRESO[0]);
-  const [metodoPago, setMetodoPago] = useState(METODOS_PAGO[0]);
-  const [concepto, setConcepto] = useState("");
-  const [monto, setMonto] = useState("");
-  const [observaciones, setObservaciones] = useState("");
+export default function EgresoModal({ idSesion, egresoAEditar, onClose, onGuardado }: EgresoModalProps) {
+  const esEdicion = !!egresoAEditar;
+
+  const [tipoEgreso, setTipoEgreso] = useState(egresoAEditar?.tipo_egreso || TIPOS_EGRESO[0]);
+  const [metodoPago, setMetodoPago] = useState(egresoAEditar?.metodo_pago || METODOS_PAGO[0]);
+  const [concepto, setConcepto] = useState(egresoAEditar?.concepto || "");
+  const [monto, setMonto] = useState(egresoAEditar ? String(egresoAEditar.monto_cordobas) : "");
+  const [observaciones, setObservaciones] = useState(egresoAEditar?.observaciones || "");
   const [guardando, setGuardando] = useState(false);
   const [error, setError] = useState("");
 
@@ -30,25 +42,38 @@ export default function EgresoModal({ idSesion, onClose, onGuardado }: EgresoMod
 
     setGuardando(true);
     try {
-      const data = await crearEgresoCaja({
-  idSesion,
-  tipoEgreso,
-  metodoPago,
-  concepto,
-  montoCordobas: Number(monto),
-  observaciones,
-});
-
-      onGuardado({
-        id_egreso: data.idEgreso,
-        tipo_egreso: tipoEgreso,
-        metodo_pago: metodoPago,
+      const payload = {
+        idSesion,
+        tipoEgreso,
+        metodoPago,
         concepto,
-        monto_cordobas: Number(monto),
-        fecha_registro: new Date().toLocaleTimeString("es-NI", { hour: "2-digit", minute: "2-digit" }),
-      });
+        montoCordobas: Number(monto),
+        observaciones,
+      };
+
+      if (esEdicion && egresoAEditar) {
+        await actualizarEgreso(egresoAEditar.id_egreso, payload);
+        onGuardado({
+          id_egreso: egresoAEditar.id_egreso,
+          tipo_egreso: tipoEgreso,
+          metodo_pago: metodoPago,
+          concepto,
+          monto_cordobas: Number(monto),
+          fecha_registro: (egresoAEditar as any).fecha_registro,
+        });
+      } else {
+        const data = await crearEgresoCaja(payload);
+        onGuardado({
+          id_egreso: data.idEgreso,
+          tipo_egreso: tipoEgreso,
+          metodo_pago: metodoPago,
+          concepto,
+          monto_cordobas: Number(monto),
+          fecha_registro: new Date().toLocaleTimeString("es-NI", { hour: "2-digit", minute: "2-digit" }),
+        });
+      }
     } catch (err) {
-      setError("No se pudo guardar el egreso.");
+      setError(esEdicion ? "No se pudo actualizar el egreso." : "No se pudo guardar el egreso.");
     } finally {
       setGuardando(false);
     }
@@ -63,7 +88,7 @@ export default function EgresoModal({ idSesion, onClose, onGuardado }: EgresoMod
 
         <h2 className="egreso-titulo">
           <Wallet size={18} />
-          Registrar Egreso de Caja
+          {esEdicion ? "Editar Egreso de Caja" : "Registrar Egreso de Caja"}
         </h2>
 
         <div className="egreso-grid">
@@ -132,7 +157,7 @@ export default function EgresoModal({ idSesion, onClose, onGuardado }: EgresoMod
           </button>
           <button className="btn-egreso-guardar" onClick={handleGuardar} disabled={guardando}>
             <Wallet size={16} />
-            {guardando ? "Guardando..." : "Guardar egreso"}
+            {guardando ? "Guardando..." : esEdicion ? "Guardar cambios" : "Guardar egreso"}
           </button>
         </div>
       </div>
