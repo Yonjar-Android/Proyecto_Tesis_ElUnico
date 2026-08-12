@@ -8,7 +8,7 @@ body,
 
 .marca-container {
     min-height: 100vh;
-    background-color: #f3f4f6;
+    background-color: #fff;
     padding: 2rem;
 }
 
@@ -136,20 +136,31 @@ body,
 }
 
 /* Edit button */
-.marca-edit-btn {
-  background: none;
-  border: 1px solid #e5e7eb;
-  border-radius: 5px;
-  padding: 0.3rem 0.75rem;
-  font-size: 0.8rem;
+.marca-edit-btn{
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background-color: #F1F5F9;
   color: #475569;
+  border: none;
+  border-radius: 10px;
+  padding: 0.45rem 0.9rem;
+  margin: 0rem 0.3rem;
+  font-size: 0.85rem;
+  font-weight: 500;
   cursor: pointer;
   transition: background-color 0.15s;
 }
 
 .marca-edit-btn:hover {
-  background-color: #f9fafb;
+  background-color: #e5eaf0;
 }
+
+.marca-edit-btn:disabled {
+  opacity: .4;
+  cursor: not-allowed;
+}
+
 
 .marca-page-btn:disabled {
     opacity: .4;

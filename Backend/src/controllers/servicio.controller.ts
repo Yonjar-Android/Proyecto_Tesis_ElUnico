@@ -23,7 +23,7 @@ export const buscarServicio = async(req: Request, res: Response) => {
         } catch (error) {
     
             res.status(500).json({
-                mensaje: "Error al buscar productos."
+                mensaje: "Error al buscar servicios."
             });
     
         }

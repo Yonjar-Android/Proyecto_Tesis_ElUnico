@@ -28,7 +28,7 @@ app.use(cors());
 app.use(express.json());
 
 // Rutas públicas
-app.use("/api/servicios", servicioRoutes);
+app.use("/api/servicios", authMiddleware, servicioRoutes);
 app.use("/api/auth", authRoutes)
 
 // Rutas protegidas

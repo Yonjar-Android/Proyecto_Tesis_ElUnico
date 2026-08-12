@@ -4,6 +4,7 @@ import ModalAgregarMarca from "./ModalAgregarMarca";
 import type { PaginatedResponse } from "../../models/PaginatedResponse";
 import ModalEditarMarca from "./ModalEditarMarca";
 import "./Marca.css";
+import { SquarePen } from 'lucide-react'
 
 interface Marca {
 
@@ -122,14 +123,14 @@ useEffect(() => {
               <tr key={marca.id} className="marca-tr">
                 <td className="marca-td">{marca.Nombre_marca}</td>
                 <td className="marca-td marca-td-actions">
-                  <button
+                    <button
                         className="marca-edit-btn"
                         onClick={() => {
                             setMarcaSeleccionada(marca);
                             setModalEditarAbierto(true);
                        }}
                     >
-                        ✏ Editar
+                        <SquarePen size={24} /> Editar
                   </button>
                 </td>
               </tr>

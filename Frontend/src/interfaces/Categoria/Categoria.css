@@ -9,7 +9,7 @@ body,
 
 .categoria-container {
   min-height: 100vh;
-  background-color: #f3f4f6;
+  background-color: #fff;
   padding: 2rem;
 }
 
@@ -138,20 +138,30 @@ body,
   text-align: right;
 }
 
-/* Edit button */
-.categoria-edit-btn {
-  background: none;
-  border: 1px solid #e5e7eb;
-  border-radius: 5px;
-  padding: 0.3rem 0.75rem;
-  font-size: 0.8rem;
+/* Botón Editar */
+.categoria-edit-btn{
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background-color: #F1F5F9;
   color: #475569;
+  border: none;
+  border-radius: 10px;
+  padding: 0.45rem 0.9rem;
+  margin: 0rem 0.3rem;
+  font-size: 0.85rem;
+  font-weight: 500;
   cursor: pointer;
   transition: background-color 0.15s;
 }
 
 .categoria-edit-btn:hover {
-  background-color: #f9fafb;
+  background-color: #e5eaf0;
+}
+
+.categoria-edit-btn:disabled {
+  opacity: .4;
+  cursor: not-allowed;
 }
 
 /* Footer */
@@ -198,4 +208,19 @@ body,
 .categoria-page-btn--active {
   background-color: #c0394f;
   box-shadow: 0 0 0 2px #e85d7a55;
+}
+
+.modal-body textarea {
+    width:100%;
+    padding:16px;
+    border-radius:14px;
+    border:1px solid #ddd;
+    font-size:16px;
+    color: #4B5563;
+    box-sizing:border-box;
+    background:#F9FAFB;
+    font-family: inherit;
+    resize: none;
+    overflow: auto;
+    margin-bottom: 12px;
 }

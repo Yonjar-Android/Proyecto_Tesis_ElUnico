@@ -87,6 +87,12 @@ export default function Sidebar() {
           <Archive size={20} />
           <span>Inventario</span>
         </NavLink>
+
+        <NavLink to="/servicio" className="sidebar-link">
+          <Archive size={20} />
+          <span>Servicios</span>
+        </NavLink>
+
         <button
   type="button"
   className="sidebar-link sidebar-dropdown-toggle"

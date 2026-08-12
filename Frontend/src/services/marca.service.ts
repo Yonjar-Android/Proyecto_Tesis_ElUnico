@@ -1,6 +1,7 @@
 import axios from "axios";
 
 const API = "http://localhost:3000/api/marcas";
+const token = localStorage.getItem("token");
 
 export const obtenerMarcas = async () => {
 
@@ -12,6 +13,10 @@ export const obtenerMarcas = async () => {
 export const crearMarca = async (Nombre_marca: string) => {
     const response = await axios.post(API, {
         Nombre_marca
+    }, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
     });
 
     return response.data;
@@ -20,6 +25,10 @@ export const crearMarca = async (Nombre_marca: string) => {
 export const actualizarMarca = async (id: number, Nombre_marca: string) => {
     const response = await axios.put(`${API}/${id}`, {
         Nombre_marca
+    }, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
     });
 
     return response.data;
@@ -36,6 +45,9 @@ export const buscarMarcas = async (
             search,
             page,
             perPage
+        },
+        headers: {
+            Authorization: `Bearer ${token}`
         }
     });
 

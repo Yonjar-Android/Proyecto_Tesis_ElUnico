@@ -1,6 +1,7 @@
 import axios from "axios";
 
 const API = "http://localhost:3000/api/proveedores";
+const token = localStorage.getItem("token");
 
 export const crearProveedor = async (
     Nombre_Empresa: string,
@@ -14,6 +15,10 @@ export const crearProveedor = async (
         Nombre_Contacto,
         Telefono,
         Direccion
+    }, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
     });
 
     return response.data;
@@ -32,6 +37,10 @@ export const actualizarProveedor = async (
         Nombre_Contacto,
         Telefono,
         Direccion
+    }, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
     });
 
     return response;
@@ -48,6 +57,9 @@ export const buscarProveedores = async (
             search,
             page,
             perPage
+        },
+        headers: {
+            Authorization: `Bearer ${token}`
         }
     });
 
