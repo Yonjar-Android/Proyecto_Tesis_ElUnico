@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Plus, Pencil, AlertTriangle, FileDown } from "lucide-react";
 import EgresoModal from "./EgresoModal";
-import { obtenerSesionActiva, eliminarEgreso } from "../../services/caja.service";
+import { obtenerSesionActiva } from "../../services/caja.service";
 import "./Caja.css";
 
 interface SesionCaja {

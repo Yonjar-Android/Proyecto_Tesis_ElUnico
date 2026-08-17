@@ -9,7 +9,7 @@ import type { Cliente } from "../../models/Cliente";
 import type { ProductoListado } from "../../models/ProductoListado";
 import { crearVenta } from "../../services/venta.service";
 import { SquarePen, Trash2 } from "lucide-react";
-import { obtenerSesionCajaActiva } from "../../services/caja.service";
+import { obtenerSesionActiva } from "../../services/caja.service";
 
 interface ItemVenta {
   producto: ProductoListado;
@@ -67,7 +67,7 @@ function Facturacion() {
   useEffect(() => {
     const verificarCaja = async () => {
       try {
-        const data = await obtenerSesionCajaActiva();
+        const data = await obtenerSesionActiva();
         setCajaAbierta(Boolean(data.sesionActiva ?? data.sesion));
       } catch {
         setCajaAbierta(false);

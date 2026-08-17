@@ -12,6 +12,11 @@ export type EgresoCajaInput = {
   observaciones: string;
 };
 
+export const obtenerSesionActiva = async () => {
+  const response = await axiosInstance.get(`${API}/sesion-activa`);
+  return response.data;
+};
+
 export const abrirCaja = async (
   montoAperturaCordobas: number,
   tasaCambio: number,
