@@ -1,6 +1,6 @@
-import axios from "axios";
+import axiosInstance from "./axiosInstance";
 
-const API = "http://localhost:3000/api/detalle_abono";
+const API = "http://localhost:3001/api/detalle_abono";
 const token = localStorage.getItem("token");
 
 export const crearDetalleAbono = async (
@@ -8,7 +8,7 @@ export const crearDetalleAbono = async (
     Monto:number,
     Notas: string
 ) => {
-    const response = await axios.post(API, {
+    const response = await axiosInstance.post(API, {
         Id_cliente,
         Monto,
         Notas
@@ -23,7 +23,7 @@ export const crearDetalleAbono = async (
 export const actualizarDetalleAbonos = async (
     id: number, Monto:number, Notas: string
 ) => {
-    const response = await axios.put(`${API}/${id}`, {
+    const response = await axiosInstance.put(`${API}/${id}`, {
        Monto, Notas
     }, {
         headers: {
@@ -39,7 +39,7 @@ export const buscarDetalleAbonos = async(
     page: number,
     perPage: number
 ) => {
-    const response = await axios.get(`${API}/buscar`,{
+    const response = await axiosInstance.get(`${API}/buscar`,{
         params: {
             search,
             page,

@@ -1,17 +1,17 @@
-import axios from "axios";
+import axiosInstance from "./axiosInstance";
 
-const API = "http://localhost:3000/api/marcas";
+const API = "http://localhost:3001/api/marcas";
 const token = localStorage.getItem("token");
 
 export const obtenerMarcas = async () => {
 
-    const response = await axios.get(API);
+    const response = await axiosInstance.get(API);
 
     return response.data;
 };
 
 export const crearMarca = async (Nombre_marca: string) => {
-    const response = await axios.post(API, {
+    const response = await axiosInstance.post(API, {
         Nombre_marca
     }, {
         headers: {
@@ -23,7 +23,7 @@ export const crearMarca = async (Nombre_marca: string) => {
 };
 
 export const actualizarMarca = async (id: number, Nombre_marca: string) => {
-    const response = await axios.put(`${API}/${id}`, {
+    const response = await axiosInstance.put(`${API}/${id}`, {
         Nombre_marca
     }, {
         headers: {
@@ -40,7 +40,7 @@ export const buscarMarcas = async (
     perPage: number
 ) => {
 
-    const response = await axios.get(`${API}/buscar`, {
+    const response = await axiosInstance.get(`${API}/buscar`, {
         params: {
             search,
             page,

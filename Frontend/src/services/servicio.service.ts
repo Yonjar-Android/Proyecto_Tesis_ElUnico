@@ -1,6 +1,6 @@
-import axios from "axios";
+import axiosInstance from "./axiosInstance";
 
-const API = "http://localhost:3000/api/servicios";
+const API = "http://localhost:3001/api/servicios";
 const token = localStorage.getItem("token");
 
 export const crearServicio = async (
@@ -9,7 +9,7 @@ export const crearServicio = async (
     Precio: number 
 ) => {
 
-    const response = await axios.post(API, {
+    const response = await axiosInstance.post(API, {
         Nombre_servicio,
         Descripcion,
         Precio
@@ -29,7 +29,7 @@ export const actualizarServicio = async (
     Precio: number 
 ) => {
 
-    const response = await axios.put(`${API}/${id}`, {
+    const response = await axiosInstance.put(`${API}/${id}`, {
     Nombre_servicio,
     Descripcion,
     Precio 
@@ -48,7 +48,7 @@ export const buscarServicios = async (
     perPage: number
 ) => {
 
-    const response = await axios.get(`${API}/buscar`, {
+    const response = await axiosInstance.get(`${API}/buscar`, {
         params: {
             search,
             page,

@@ -1,6 +1,13 @@
 import { useEffect, useState } from "react";
 import { UserPlus, Pencil, Trash2, X, Eye, EyeOff, Search } from "lucide-react";
 import "./Usuario.css";
+import {
+  obtenerUsuarios as fetchUsuarios,
+  crearUsuario,
+  actualizarUsuario,
+  eliminarUsuario,
+  obtenerRoles
+} from "../../services/usuario.service";
 
 interface UsuarioRegistro {
   id: number;
@@ -12,6 +19,11 @@ interface UsuarioSesion {
   Nombre_Usuario: string;
   Correo: string;
 }
+interface Rol {
+  id: number;
+  Nombre_rol: string;
+}
+
 
 type ModoModal = "crear" | "editar" | null;
 
@@ -20,6 +32,8 @@ export default function Usuario() {
   const [usuarios, setUsuarios] = useState<UsuarioRegistro[]>([]);
   const [busqueda, setBusqueda] = useState("");
   const [cargando, setCargando] = useState(false);
+  const [roles, setRoles] = useState<Rol[]>([]);
+const [rolForm, setRolForm] = useState<number>(0);
 
   const [modalAbierto, setModalAbierto] = useState<ModoModal>(null);
   const [usuarioEditando, setUsuarioEditando] = useState<UsuarioRegistro | null>(null);
@@ -33,29 +47,34 @@ export default function Usuario() {
   const [usuarioAEliminar, setUsuarioAEliminar] = useState<UsuarioRegistro | null>(null);
 
   useEffect(() => {
-    const guardado = localStorage.getItem("usuario");
-    if (guardado) setUsuarioSesion(JSON.parse(guardado));
-    cargarUsuarios();
-  }, []);
+  const guardado = localStorage.getItem("usuario");
+  if (guardado) setUsuarioSesion(JSON.parse(guardado));
+  cargarUsuarios();
+  cargarRoles();
+}, []);
 
-  async function cargarUsuarios() {
-    setCargando(true);
-    try {
-      // TODO: reemplazar con la llamada real al backend
-      // const res = await fetch("/api/usuarios");
-      // const data = await res.json();
-      // setUsuarios(data);
-
-      setUsuarios([
-        { id: 1, Nombre_Usuario: "admin", Correo: "admin@elunico.com" },
-        { id: 2, Nombre_Usuario: "horell", Correo: "horell@elunico.com" },
-      ]);
-    } catch (err) {
-      console.error("Error al cargar usuarios:", err);
-    } finally {
-      setCargando(false);
-    }
+async function cargarRoles() {
+  try {
+    const data = await obtenerRoles();
+    setRoles(data.roles);
+    if (data.roles.length > 0) setRolForm(data.roles[0].id);
+  } catch (err) {
+    console.error("Error al cargar roles:", err);
   }
+}
+
+ async function cargarUsuarios() {
+  setCargando(true);
+  try {
+    const data = await fetchUsuarios();
+    setUsuarios(data.usuarios);
+  } catch (err) {
+    console.error("Error al cargar usuarios:", err);
+  } finally {
+    setCargando(false);
+  }
+}
+
 
   const usuariosFiltrados = usuarios.filter(
     (u) =>
@@ -63,15 +82,15 @@ export default function Usuario() {
       u.Correo.toLowerCase().includes(busqueda.toLowerCase())
   );
 
-  function abrirModalCrear() {
-    setUsuarioEditando(null);
-    setNombreForm("");
-    setCorreoForm("");
-    setPasswordForm("");
-    setErrorForm("");
-    setModalAbierto("crear");
-  }
-
+ function abrirModalCrear() {
+  setUsuarioEditando(null);
+  setNombreForm("");
+  setCorreoForm("");
+  setPasswordForm("");
+  setRolForm(roles[0]?.id || 0);
+  setErrorForm("");
+  setModalAbierto("crear");
+}
   function abrirModalEditar(usuario: UsuarioRegistro) {
     setUsuarioEditando(usuario);
     setNombreForm(usuario.Nombre_Usuario);
@@ -87,76 +106,46 @@ export default function Usuario() {
     setMostrarPassword(false);
   }
 
-  async function handleGuardar() {
-    setErrorForm("");
+ async function handleGuardar() {
+  setErrorForm("");
 
-    if (!nombreForm || !correoForm) {
-      setErrorForm("Usuario y correo son obligatorios.");
-      return;
-    }
-
-    if (modalAbierto === "crear" && !passwordForm) {
-      setErrorForm("La contraseña es obligatoria para un usuario nuevo.");
-      return;
-    }
-
-    setGuardando(true);
-    try {
-      if (modalAbierto === "crear") {
-        // TODO: reemplazar con la llamada real
-        // await fetch("/api/usuarios", {
-        //   method: "POST",
-        //   headers: { "Content-Type": "application/json" },
-        //   body: JSON.stringify({
-        //     nombreUsuario: nombreForm,
-        //     correo: correoForm,
-        //     password: passwordForm,
-        //   }),
-        // });
-        const nuevoId = Math.max(0, ...usuarios.map((u) => u.id)) + 1;
-        setUsuarios((prev) => [
-          ...prev,
-          { id: nuevoId, Nombre_Usuario: nombreForm, Correo: correoForm },
-        ]);
-      } else if (modalAbierto === "editar" && usuarioEditando) {
-        // TODO: reemplazar con la llamada real
-        // await fetch(`/api/usuarios/${usuarioEditando.id}`, {
-        //   method: "PUT",
-        //   headers: { "Content-Type": "application/json" },
-        //   body: JSON.stringify({
-        //     nombreUsuario: nombreForm,
-        //     correo: correoForm,
-        //     password: passwordForm || undefined,
-        //   }),
-        // });
-        setUsuarios((prev) =>
-          prev.map((u) =>
-            u.id === usuarioEditando.id
-              ? { ...u, Nombre_Usuario: nombreForm, Correo: correoForm }
-              : u
-          )
-        );
-      }
-      cerrarModal();
-    } catch (err) {
-      setErrorForm("No se pudo guardar el usuario. Intenta de nuevo.");
-    } finally {
-      setGuardando(false);
-    }
+  if (!nombreForm || !correoForm) {
+    setErrorForm("Usuario y correo son obligatorios.");
+    return;
   }
+
+  if (modalAbierto === "crear" && !passwordForm) {
+    setErrorForm("La contraseña es obligatoria para un usuario nuevo.");
+    return;
+  }
+
+  setGuardando(true);
+  try {
+    if (modalAbierto === "crear") {
+      await crearUsuario({ nombreUsuario: nombreForm, correo: correoForm, password: passwordForm, idRol: rolForm });
+    } else if (modalAbierto === "editar" && usuarioEditando) {
+      await actualizarUsuario(usuarioEditando.id, nombreForm, correoForm);
+    }
+    await cargarUsuarios();
+    cerrarModal();
+  } catch (err: any) {
+    setErrorForm(err?.response?.data?.message || "No se pudo guardar el usuario. Intenta de nuevo.");
+  } finally {
+    setGuardando(false);
+  }
+}
 
   async function confirmarEliminar() {
-    if (!usuarioAEliminar) return;
-    try {
-      // TODO: reemplazar con la llamada real
-      // await fetch(`/api/usuarios/${usuarioAEliminar.id}`, { method: "DELETE" });
-      setUsuarios((prev) => prev.filter((u) => u.id !== usuarioAEliminar.id));
-    } catch (err) {
-      console.error("Error al eliminar usuario:", err);
-    } finally {
-      setUsuarioAEliminar(null);
-    }
+  if (!usuarioAEliminar) return;
+  try {
+    await eliminarUsuario(usuarioAEliminar.id);
+    setUsuarios((prev) => prev.filter((u) => u.id !== usuarioAEliminar.id));
+  } catch (err: any) {
+    console.error("Error al eliminar usuario:", err?.response?.data?.message || err);
+  } finally {
+    setUsuarioAEliminar(null);
   }
+}
 
   return (
     <div className="usuario-container">
@@ -292,15 +281,26 @@ export default function Usuario() {
               {modalAbierto === "crear" ? "Agregar usuario" : "Editar usuario"}
             </h2>
 
-            <div className="modal-campo">
-              <label>Usuario</label>
-              <input
-                type="text"
-                value={nombreForm}
-                onChange={(e) => setNombreForm(e.target.value)}
-                placeholder="Nombre de usuario"
-              />
-            </div>
+        <div className="modal-campo">
+  <label>Usuario</label>
+  <input
+    type="text"
+    value={nombreForm}
+    onChange={(e) => setNombreForm(e.target.value)}
+    placeholder="Nombre de usuario"
+  />
+</div>
+
+<div className="modal-campo">
+  <label>Rol</label>
+  <select value={rolForm} onChange={(e) => setRolForm(Number(e.target.value))}>
+    {roles.map((rol) => (
+      <option key={rol.id} value={rol.id}>
+        {rol.Nombre_rol}
+      </option>
+    ))}
+  </select>
+</div>
 
             <div className="modal-campo">
               <label>Correo</label>

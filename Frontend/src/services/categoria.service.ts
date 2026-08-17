@@ -1,18 +1,18 @@
-import axios from "axios";
+import axiosInstance from "./axiosInstance";
 
-const API = "http://localhost:3000/api/categorias";
+const API = "http://localhost:3001/api/categorias";
 const token = localStorage.getItem("token");
 
 export const obtenerCategorias = async () => {
 
-    const response = await axios.get(API);
+    const response = await axiosInstance.get(API);
 
     return response.data;
 };
 
 export const crearCategoria = async (Nombre_categoria:string) => {
 
-    const response = await axios.post(API, {
+    const response = await axiosInstance.post(API, {
         Nombre_categoria
     }, {
         headers: {
@@ -24,7 +24,7 @@ export const crearCategoria = async (Nombre_categoria:string) => {
 }
 
 export const actualizarCategoria = async (id:number, Nombre_categoria:string) => {
-    const response = await axios.put(`${API}/${id}`,{
+    const response = await axiosInstance.put(`${API}/${id}`,{
         Nombre_categoria
     }, {
         headers: {
@@ -39,7 +39,7 @@ export const buscarCategorias = async(
     page: number,
     perPage: number
 ) => {
-    const response = await axios.get(`${API}/buscar`,{
+    const response = await axiosInstance.get(`${API}/buscar`,{
         params: {
             search,
             page,

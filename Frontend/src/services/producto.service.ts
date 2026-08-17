@@ -1,6 +1,6 @@
-import axios from "axios";
+import axiosInstance from "./axiosInstance";
 
-const API = "http://localhost:3000/api/productos";
+const API = "http://localhost:3001/api/productos";
 const token = localStorage.getItem("token");
 
 export const crearProducto = async (
@@ -13,7 +13,7 @@ export const crearProducto = async (
     Fecha_vencimiento: String | null
 ) => {
 
-    const response = await axios.post(API, {
+    const response = await axiosInstance.post(API, {
         Nombre,
         Id_marca,
         Id_categoria,
@@ -41,7 +41,7 @@ export const actualizarProducto = async (
     Fecha_vencimiento: String | null
 ) => {
 
-    const response = await axios.put(`${API}/${id}`, {
+    const response = await axiosInstance.put(`${API}/${id}`, {
         Nombre,
         Id_marca,
         Id_categoria,
@@ -64,7 +64,7 @@ export const buscarProductos = async (
     perPage: number
 ) => {
 
-    const response = await axios.get(`${API}/buscar`, {
+    const response = await axiosInstance.get(`${API}/buscar`, {
         params: {
             search,
             page,
@@ -79,19 +79,11 @@ export const buscarProductos = async (
 };
 
 export const buscarProductoPorId = async (id: number) => {
-    const response = await axios.get(`${API}/${id}`, {
-        headers: {
-            Authorization: `Bearer ${token}`
-        }
-    });
+    const response = await axiosInstance.get(`${API}/${id}`);
     return response.data;
 }
 
 export const obtenerTotalProductosCategorias = async () => {
-    const response = await axios.get(`${API}/obtener-estadisticas`, {
-        headers: {
-            Authorization: `Bearer ${token}`
-        }
-    });
+    const response = await axiosInstance.get(`${API}/obtener-estadisticas`);
     return response.data;
 }

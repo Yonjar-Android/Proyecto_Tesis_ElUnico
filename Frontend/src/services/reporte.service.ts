@@ -1,8 +1,8 @@
-import axios from "axios";
+import axiosInstance from "./axiosInstance";
 import type { RespuestaReporteVentas } from "../models/VentaReportes";
 import type { RespuestaReporteCompras } from "../models/CompraReporte";
 
-const API = "http://localhost:3000/api/reportes";
+const API = "http://localhost:3001/api/reportes";
 const token = localStorage.getItem("token");
 
 export const obtenerReporteStockBajo = async (
@@ -11,7 +11,7 @@ export const obtenerReporteStockBajo = async (
     perPage: number
 ) => {
 
-    const response = await axios.get(`${API}/obtenerReporteStockBajo`, {
+    const response = await axiosInstance.get(`${API}/obtenerReporteStockBajo`, {
         params: {
             search,
             page,
@@ -31,7 +31,7 @@ export const obtenerReporteCuentasCobrar = async (
     perPage: number
 ) => {
 
-    const response = await axios.get(`${API}/obtenerReporteCuentasCobrar`, {
+    const response = await axiosInstance.get(`${API}/obtenerReporteCuentasCobrar`, {
         params: {
             search,
             page,
@@ -54,7 +54,7 @@ export const obtenerReporteVentasPorPeriodo = async (
     perPage: number = 10
 ): Promise<RespuestaReporteVentas> => {
 
-    const { data } = await axios.get<RespuestaReporteVentas>(
+    const { data } = await axiosInstance.get<RespuestaReporteVentas>(
         `${API}/obtenerReporteVentas`,
         {
             params: {
@@ -83,7 +83,7 @@ export const obtenerReporteComprasPorPeriodo = async (
     perPage: number = 10
 ): Promise<RespuestaReporteCompras> => {
 
-    const { data } = await axios.get<RespuestaReporteCompras>(
+    const { data } = await axiosInstance.get<RespuestaReporteCompras>(
         `${API}/obtenerReporteCompras`,
         {
             params: {

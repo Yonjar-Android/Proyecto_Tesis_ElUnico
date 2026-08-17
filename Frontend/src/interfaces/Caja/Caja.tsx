@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus, Trash2, AlertTriangle, FileDown } from "lucide-react";
+import { Plus, Pencil, AlertTriangle, FileDown } from "lucide-react";
 import EgresoModal from "./EgresoModal";
 import { obtenerSesionActiva, eliminarEgreso } from "../../services/caja.service";
 import "./Caja.css";
@@ -29,7 +29,7 @@ export default function Caja() {
   const [ingresosDia, setIngresosDia] = useState(0);
   const [modalEgresoAbierto, setModalEgresoAbierto] = useState(false);
   const [tab, setTab] = useState<"arqueo" | "historial">("arqueo");
-
+const [egresoEditando, setEgresoEditando] = useState<Egreso | null>(null);
   useEffect(() => {
     cargarEstadoCaja();
   }, []);
@@ -39,7 +39,7 @@ export default function Caja() {
       const data = await obtenerSesionActiva();
       setSesionActiva(data.sesion);
       setEgresos(data.egresos || []);
-      setIngresosDia(data.ingresosDia || 0);
+      setIngresosDia(Number(data.ingresosDia) || 0);
     } catch (error) {
       console.error(error);
       setSesionActiva(null);
@@ -48,17 +48,15 @@ export default function Caja() {
     }
   }
 
-  const totalEgresos = egresos.reduce((acc, e) => acc + e.monto_cordobas, 0);
+  const totalEgresos = egresos.reduce((acc, e) => acc + Number(e.monto_cordobas), 0);
   const netoDia = ingresosDia - totalEgresos;
 
-  async function handleEliminarEgreso(id: number) {
-    try {
-      await eliminarEgreso(id);
-      setEgresos((prev) => prev.filter((e) => e.id_egreso !== id));
-    } catch (error) {
-      console.error(error);
-    }
-  }
+ function handleEgresoActualizado(egresoActualizado: Egreso) {
+  setEgresos((prev) =>
+    prev.map((e) => (e.id_egreso === egresoActualizado.id_egreso ? egresoActualizado : e))
+  );
+  setEgresoEditando(null);
+}
 
   return (
     <div className="caja-container">
@@ -155,14 +153,14 @@ export default function Caja() {
                       </p>
                     </div>
                     <div className="movimiento-derecha">
-                      <span className="movimiento-monto">- C${egreso.monto_cordobas}</span>
-                      <button
-                        className="movimiento-eliminar"
-                        onClick={() => handleEliminarEgreso(egreso.id_egreso)}
-                      >
-                        <Trash2 size={15} />
-                      </button>
-                    </div>
+  <span className="movimiento-monto">- C${egreso.monto_cordobas}</span>
+  <button
+    className="movimiento-eliminar"
+    onClick={() => setEgresoEditando(egreso)}
+  >
+    <Pencil size={15} />
+  </button>
+</div>
                   </div>
                 ))}
                 <div className="caja-total-egresos">
@@ -185,16 +183,24 @@ export default function Caja() {
         </>
       )}
 
-      {modalEgresoAbierto && sesionActiva && (
-        <EgresoModal
-          idSesion={sesionActiva.id_sesion}
-          onClose={() => setModalEgresoAbierto(false)}
-          onGuardado={(nuevoEgreso) => {
-            setEgresos((prev) => [...prev, nuevoEgreso]);
-            setModalEgresoAbierto(false);
-          }}
-        />
-      )}
+      {(modalEgresoAbierto || egresoEditando) && sesionActiva && (
+  <EgresoModal
+    idSesion={sesionActiva.id_sesion}
+    egresoAEditar={egresoEditando}
+    onClose={() => {
+      setModalEgresoAbierto(false);
+      setEgresoEditando(null);
+    }}
+    onGuardado={(egreso) => {
+      if (egresoEditando) {
+        handleEgresoActualizado(egreso);
+      } else {
+        setEgresos((prev) => [...prev, egreso]);
+      }
+      setModalEgresoAbierto(false);
+    }}
+  />
+)}
     </div>
   );
 }

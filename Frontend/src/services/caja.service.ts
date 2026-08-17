@@ -1,4 +1,3 @@
-import axios from "axios";
 
 import axiosInstance from "./axiosInstance";
 
@@ -13,11 +12,6 @@ export type EgresoCajaInput = {
   observaciones: string;
 };
 
-export const obtenerSesionActiva = async () => {
-  const response = await axiosInstance.get(`${API}/sesion-activa`);
-  return response.data;
-};
-
 export const abrirCaja = async (
   montoAperturaCordobas: number,
   tasaCambio: number,
@@ -30,7 +24,21 @@ export const abrirCaja = async (
   });
   return response.data;
 };
+export interface SesionCajaActiva {
+  sesionActiva?: boolean;
+  sesion?: {
+    id_sesion: number;
+    fecha_apertura: string;
+    monto_apertura_cordobas: number;
+    tasa_cambio: number;
+    estado: string;
+  } | null;
+}
 
+export async function obtenerSesionCajaActiva(): Promise<SesionCajaActiva> {
+  const { data } = await axiosInstance.get("/caja/sesion-activa");
+  return data;
+}
 export const crearEgresoCaja = async (payload: EgresoCajaInput) => {
   const response = await axiosInstance.post(`${API}/egresos`, payload);
   return response.data;
@@ -48,7 +56,7 @@ export const cerrarCaja = async (
   diferencia: number,
   observaciones: string
 ) => {
-  const response = await axios.post(`${API}/cierre`, {
+  const response = await axiosInstance.post(`${API}/cierre`, {
     idSesion,
     totalEfectivoContado,
     totalTarjetaTransferencia,
@@ -59,6 +67,10 @@ export const cerrarCaja = async (
 };
 
 export const obtenerResumenCierre = async () => {
-  const response = await axios.get(`${API}/resumen-cierre`);
+  const response = await axiosInstance.get(`${API}/resumen-cierre`);
+  return response.data;
+};
+export const actualizarEgreso = async (id: number, payload: EgresoCajaInput) => {
+  const response = await axiosInstance.put(`${API}/egresos/${id}`, payload);
   return response.data;
 };

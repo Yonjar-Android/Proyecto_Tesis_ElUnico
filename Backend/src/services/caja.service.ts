@@ -5,6 +5,7 @@ import {
   crearEgresoCaja,
   eliminarEgresoCajaModel,
   obtenerResumenCierreModel,
+  actualizarEgresoCajaModel
 } from "../models/caja.models.js";
 
 export async function abrirCaja(
@@ -92,9 +93,33 @@ export async function cerrarCaja(
   return { idSesion, totalEfectivoContado, totalTarjetaTransferencia, diferencia, observaciones };
 }
 
-export async function obtenerResumenCierreCaja(idSesion: number) {
-  if (!idSesion || isNaN(idSesion)) {
-    throw new Error("Sesión de caja inválida.");
+export async function obtenerResumenCierreCaja(idUsuario: number) {
+  if (!idUsuario || isNaN(idUsuario)) {
+    throw new Error("Usuario inválido.");
   }
-  return await obtenerResumenCierreModel(idSesion);
+  return await obtenerResumenCierreModel(idUsuario);
+}
+export async function actualizarEgresoCaja(
+  idEgreso: number,
+  tipoEgreso: string,
+  metodoPago: string,
+  concepto: string,
+  montoCordobas: number,
+  observaciones: string
+) {
+  if (!idEgreso || isNaN(idEgreso)) {
+    throw new Error("Egreso inválido.");
+  }
+  if (!concepto || concepto.trim() === "") {
+    throw new Error("El concepto del egreso es obligatorio.");
+  }
+  if (montoCordobas <= 0 || isNaN(montoCordobas)) {
+    throw new Error("El monto del egreso debe ser mayor a 0.");
+  }
+
+  const filas = await actualizarEgresoCajaModel(idEgreso, tipoEgreso, metodoPago, concepto, montoCordobas, observaciones);
+  if (filas === 0) {
+    throw new Error("No se encontró el egreso a actualizar.");
+  }
+  return true;
 }
