@@ -25,6 +25,7 @@ function EditarProducto() {
   const [precio, setPrecio] = useState("0.00");
   const [stockActual, setStockActual] = useState("0");
   const [stockMinimo, setStockMinimo] = useState("0");
+  const [fechaVencimiento, setFechaVencimiento] = useState("");
 
   const [ventasMes, _setVentasMes] = useState(0);
   const [margen, _setMargen] = useState(0);
@@ -52,6 +53,13 @@ function EditarProducto() {
       .catch((error) => console.error(error));
   }, [id]);*/
 
+  // Fecha mínima seleccionable: mañana (la fecha debe ser posterior a hoy)
+const getFechaMinima = () => {
+  const manana = new Date();
+  manana.setDate(manana.getDate() + 1);
+  return manana.toISOString().split("T")[0]; // YYYY-MM-DD
+};
+
   useEffect(() => {
     if (!id) return;
 
@@ -61,24 +69,29 @@ function EditarProducto() {
   }, [id]);
 
   // Precarga el formulario una vez que el producto llega.
-  useEffect(() => {
-    if (producto) {
-      setNombreProducto(producto.Nombre ?? "");
-      setCategoria({
-        id: producto.Id_categoria,
-        Nombre_categoria: producto.Nombre_categoria
-        });
-      setMarca({
-        id: producto.Id_marca,
-        Nombre_marca: producto.Nombre_marca
-        });
+useEffect(() => {
+  if (producto) {
+    setNombreProducto(producto.Nombre ?? "");
+    setCategoria({
+      id: producto.Id_categoria,
+      Nombre_categoria: producto.Nombre_categoria
+    });
+    setMarca({
+      id: producto.Id_marca,
+      Nombre_marca: producto.Nombre_marca
+    });
 
-      setPrecio(String(producto.Precio_venta ?? 0));
-      setStockActual(String(producto.Stock ?? 0));
-      setStockMinimo(String(producto.Stock_min ?? 0));
-      setError("");
-    }
-  }, [producto]);
+    setPrecio(String(producto.Precio_venta ?? 0));
+    setStockActual(String(producto.Stock ?? 0));
+    setStockMinimo(String(producto.Stock_min ?? 0));
+    setFechaVencimiento(
+      producto.Fecha_vencimiento
+        ? String(producto.Fecha_vencimiento).split("T")[0]
+        : ""
+    );
+    setError("");
+  }
+}, [producto]);
 
   if (!producto) return <div className="inventario-page" />;
 
@@ -108,6 +121,16 @@ function EditarProducto() {
       return;
     }
 
+    if (fechaVencimiento) {
+  const hoy = new Date();
+  hoy.setHours(0, 0, 0, 0);
+  const fechaSeleccionada = new Date(fechaVencimiento + "T00:00:00");
+
+  if (fechaSeleccionada <= hoy) {
+    setError("La fecha de vencimiento debe ser posterior a la fecha actual.");
+    return;
+  }
+}
     try {
       await actualizarProducto(
         producto.id,
@@ -117,7 +140,7 @@ function EditarProducto() {
         Number(precio),
         Number(stockActual) || 0,
         Number(stockMinimo) || 0,
-        null
+        fechaVencimiento ? fechaVencimiento : null
       );
 
       navigate("/inventario");
@@ -164,22 +187,11 @@ function EditarProducto() {
               </div>
 
               <div className="producto-campo">
-                <label>Nombre del producto</label>
+                <label>Nombre del producto <span style={{ color: "#e5484d" }}> *</span></label> 
                 <input
                   type="text"
                   value={nombreProducto}
                   onChange={(e) => setNombreProducto(e.target.value)}
-                />
-              </div>
-
-              <div className="producto-campo">
-                <label>
-                  Código / Referencia <span style={{ color: "#e5484d" }}>*</span>
-                </label>
-                <input
-                  type="text"
-                  value={codigo}
-                  onChange={(e) => setCodigo(e.target.value)}
                 />
               </div>
 
@@ -230,6 +242,16 @@ function EditarProducto() {
                   />
                 </div>
               </div>
+
+              <div className="producto-campo">
+  <label>Fecha de vencimiento</label>
+  <input
+    type="date"
+    min={getFechaMinima()}
+    value={fechaVencimiento}
+    onChange={(e) => setFechaVencimiento(e.target.value)}
+  />
+</div>
 
               <div className="producto-divisor">Control de existencias</div>
 

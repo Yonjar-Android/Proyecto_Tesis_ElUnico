@@ -10,7 +10,7 @@ export const crearProducto = async (
     Precio_venta: number,
     Stock: number,
     Stock_min: number,
-    Fecha_vencimiento: Date | null
+    Fecha_vencimiento: String | null
 ) => {
 
     const response = await axios.post(API, {
@@ -38,7 +38,7 @@ export const actualizarProducto = async (
     Precio_venta: number,
     Stock: number,
     Stock_min: number,
-    Fecha_vencimiento: Date | null
+    Fecha_vencimiento: String | null
 ) => {
 
     const response = await axios.put(`${API}/${id}`, {

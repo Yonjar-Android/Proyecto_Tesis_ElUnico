@@ -20,6 +20,7 @@ function CrearProducto() {
   const [precio, setPrecio] = useState("0.00");
   const [stockInicial, setStockInicial] = useState("0");
   const [stockMinimo, setStockMinimo] = useState("5");
+  const [fechaVencimiento, setFechaVencimiento] = useState("");
 
   const [totalProductos, setTotalProductos] = useState(0);
   const [totalCategorias, setTotalCategorias] = useState(0);
@@ -32,12 +33,23 @@ function CrearProducto() {
   useEffect(() => {
     obtenerTotalProductosCategorias()
       .then((data) => {
-        console.log(data);
         setTotalProductos(data.totalProductos);
         setTotalCategorias(data.totalCategorias);
+
+      if (data.marcaSinMarca) {
+          setMarca(data.marcaSinMarca[0]);
+      }
+      
       })
       .catch((error) => console.error(error));
   }, []);
+
+  // Fecha mínima seleccionable: mañana (la fecha debe ser posterior a hoy)
+const getFechaMinima = () => {
+  const manana = new Date();
+  manana.setDate(manana.getDate() + 1);
+  return manana.toISOString().split("T")[0]; // YYYY-MM-DD
+};
 
   const guardar = async () => {
     if (!nombreProducto.trim()) {
@@ -50,15 +62,21 @@ function CrearProducto() {
       return;
     }
 
-    if (!marca?.id) {
-      setError("La marca no puede estar vacía.");
-      return;
-    }
-
     if (isNaN(Number(precio)) || Number(precio) <= 0) {
       setError("Ingresa un precio de venta válido.");
       return;
     }
+
+    if (fechaVencimiento) {
+  const hoy = new Date();
+  hoy.setHours(0, 0, 0, 0);
+  const fechaSeleccionada = new Date(fechaVencimiento + "T00:00:00");
+
+  if (fechaSeleccionada <= hoy) {
+    setError("La fecha de vencimiento debe ser posterior a la fecha actual.");
+    return;
+  }
+}
 
     try {
       await crearProducto(
@@ -68,7 +86,7 @@ function CrearProducto() {
         Number(precio),
         Number(stockInicial) || 0,
         Number(stockMinimo) || 0,
-        null
+        fechaVencimiento ? fechaVencimiento : null
       );
 
       navigate("/inventario");
@@ -106,7 +124,7 @@ function CrearProducto() {
             <div className="producto-form-card">
               <div className="producto-campo">
                 <label>
-                  Nombre del producto<span style={{ color: "#e5484d" }}>*</span>
+                  Nombre del producto <span style={{ color: "#e5484d" }}>*</span>
                 </label>
                 <input
                   type="text"
@@ -163,6 +181,16 @@ function CrearProducto() {
                   />
                 </div>
               </div>
+
+              <div className="producto-campo">
+    <label>Fecha de vencimiento</label>
+  <input
+    type="date"
+    min={getFechaMinima()}
+    value={fechaVencimiento}
+    onChange={(e) => setFechaVencimiento(e.target.value)}
+  />
+    </div>
 
               <div className="producto-divisor">Control de existencias</div>
 

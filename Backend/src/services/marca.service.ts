@@ -40,15 +40,20 @@ export const buscarMarcas = async (
 
     // Registros paginados
     const [rows] = await pool.query(
-        `
-        SELECT id, Nombre_marca
-        FROM marcas
-        ${where}
-        ORDER BY Nombre_marca
-        LIMIT ? OFFSET ?
-        `,
-        [...params, perPage, offset]
-    );
+    `
+    SELECT id, Nombre_marca
+    FROM marcas
+    ${where}
+    ORDER BY
+        CASE
+            WHEN LOWER(Nombre_marca) = 'sin marca' THEN 0
+            ELSE 1
+        END,
+        Nombre_marca
+    LIMIT ? OFFSET ?
+    `,
+    [...params, perPage, offset]
+);
 
     return {
         data: rows,

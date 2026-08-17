@@ -119,7 +119,7 @@ export const crearProducto = async (
     precioVenta: number,
     stock: number,
     stockMin: number,
-    fechaVencimiento: Date | null
+    fechaVencimiento: String | null
 ) => {
 
     if (!nombre.trim()) {
@@ -172,11 +172,6 @@ export const crearProducto = async (
     if (!Number.isInteger(stockMin) || stockMin < 0) {
         throw new Error("El stock mínimo debe ser un número entero mayor o igual a 0.");
     }
-
-    if (fechaVencimiento !== null && isNaN(new Date(fechaVencimiento).getTime())) {
-        throw new Error("La fecha de vencimiento no es válida.");
-    }
-
     const [result]: any = await pool.query(
         `
         INSERT INTO productos
@@ -301,13 +296,21 @@ export const actualizarProducto = async (
 
 export const obtenerTotalProductosCategorias = async () => {
 
-    const [[productos], [categorias]]: any = await Promise.all([
+    const [[productos], [categorias], marcaSinMarca]: any = await Promise.all([
         pool.query("SELECT COUNT(*) AS total FROM productos"),
-        pool.query("SELECT COUNT(*) AS total FROM categorias")
+        pool.query("SELECT COUNT(*) AS total FROM categorias"),
+        pool.query(`
+            SELECT id, Nombre_marca
+            FROM marcas
+            WHERE id = '20'
+            LIMIT 1
+        `)
     ]);
+
 
     return {
         totalProductos: productos[0].total,
-        totalCategorias: categorias[0].total
+        totalCategorias: categorias[0].total,
+        marcaSinMarca: marcaSinMarca[0] || null
     };
 };
