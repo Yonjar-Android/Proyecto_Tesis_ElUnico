@@ -79,11 +79,11 @@ export const buscarProductos = async (
 };
 
 export const buscarProductoPorId = async (id: number) => {
-    const response = await axios.get(`${API}/${id}`);
+    const response = await axiosInstance.get(`${API}/${id}`);
     return response.data;
 }
 
 export const obtenerTotalProductosCategorias = async () => {
-    const response = await axios.get(`${API}/obtener-estadisticas`);
+    const response = await axiosInstance.get(`${API}/obtener-estadisticas`);
     return response.data;
 }
