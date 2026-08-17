@@ -1,6 +1,7 @@
 import axiosInstance from "./axiosInstance";
 
 const API = "http://localhost:3001/api/compras";
+const token = localStorage.getItem("token");
 
 interface DetalleCompra {
     Id_producto: number;
@@ -21,6 +22,10 @@ export const crearCompra = async (
         NFactura,
         Total,
         Detalles
+    }, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
     });
 
     return response.data;

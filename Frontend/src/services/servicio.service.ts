@@ -1,6 +1,7 @@
 import axiosInstance from "./axiosInstance";
 
 const API = "http://localhost:3001/api/servicios";
+const token = localStorage.getItem("token");
 
 export const crearServicio = async (
     Nombre_servicio: string,
@@ -12,6 +13,10 @@ export const crearServicio = async (
         Nombre_servicio,
         Descripcion,
         Precio
+    }, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
     });
 
     return response.data;
@@ -28,6 +33,10 @@ export const actualizarServicio = async (
     Nombre_servicio,
     Descripcion,
     Precio 
+    }, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
     });
 
     return response;
@@ -44,6 +53,9 @@ export const buscarServicios = async (
             search,
             page,
             perPage
+        },
+        headers: {
+            Authorization: `Bearer ${token}`
         }
     });
 

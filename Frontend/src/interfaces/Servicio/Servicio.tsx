@@ -1,21 +1,21 @@
-import "./Categoria.css";
-import { buscarCategorias, crearCategoria, actualizarCategoria } from "../../services/categoria.service";
+import "../Categoria/Categoria.css";
+import { buscarServicios, crearServicio, actualizarServicio } from "../../services/servicio.service";
 import { useEffect, useState } from "react";
-import ModalAgregarCategoria from "./ModalAgregarCategoria";
+import ModalAgregarServicio from "./ModalAgregarServicio";
 import type { PaginatedResponse } from "../../models/PaginatedResponse";
-import ModalEditarCategoria from "./ModalEditarCategoria";
+import ModalEditarServicio from "./ModalEditarServicio";
 import { SquarePen } from 'lucide-react'
 
-interface Categoria {
-
+interface Servicio {
     id: number;
-    Nombre_categoria: string;
-
+    Nombre_servicio: string;
+    Descripcion: string | null;
+    Precio: number;
 }
 
-function Categoria(){
+function Servicio(){
 
-const [categorias, setCategorias] = useState<Categoria[]>([]);
+const [servicios, setServicios] = useState<Servicio[]>([]);
 const [currentPage, setCurrentPage] = useState(1);
 const [perPage] = useState(10);
 const [total, setTotal] = useState(0);
@@ -25,36 +25,37 @@ const [modalAbierto, setModalAbierto] = useState(false);
 
 const [modalEditarAbierto, setModalEditarAbierto] = useState(false);
 
-const [categoriaSeleccionada, setCategoriaSeleccionada] = useState<Categoria | null>(null);
+const [servicioSeleccionado, setServicioSeleccionado] = useState<Servicio | null>(null);
 
 const [searchTerm, setSearchTerm] = useState<string>("");
 
     useEffect(() => { 
+        console.log("hola");
       buscar();
     }, []);
 
 const buscar = async () => {
   try {
           if (searchTerm.trim() === "") {
-              const response: PaginatedResponse<Categoria> = await buscarCategorias(
+              const response: PaginatedResponse<Servicio> = await buscarServicios(
           searchTerm,
           currentPage,
           perPage
       );
   
-        setCategorias(response.data);
+        setServicios(response.data);
         setTotal(response.total);
         setLastPage(response.last_page);
               return;
           }
   
-          const response: PaginatedResponse<Categoria> = await buscarCategorias(
+          const response: PaginatedResponse<Servicio> = await buscarServicios(
           searchTerm,
           currentPage,
           perPage
       );
   
-        setCategorias(response.data);
+        setServicios(response.data);
         setTotal(response.total);
         setLastPage(response.last_page);
       } catch (error) {
@@ -83,10 +84,10 @@ useEffect(() => {
     <div className="categoria-container">
         <div className="categoria-content">
       <div className="categoria-top-part">
-        <h1 className="categoria-title">Categorías</h1>
+        <h1 className="categoria-title">Servicios</h1>
         <button className="categoria-add-btn"
         onClick={() => setModalAbierto(true)}>
-          <span className="categoria-add-icon">✦</span> Agregar categoría
+          <span className="categoria-add-icon">✦</span> Agregar servicio
         </button>
       </div>
 
@@ -106,19 +107,23 @@ useEffect(() => {
         <table className="categoria-table">
           <thead>
             <tr>
-              <th className="categoria-th">NOMBRE DE CATEGORIA</th>
+              <th className="categoria-th">NOMBRE DEL SERVICIO</th>
+              <th className="categoria-th">DESCRIPCIÓN</th>
+              <th className="categoria-th">PRECIO</th>
               <th className="categoria-th categoria-th-actions">ACCIONES</th>
             </tr>
           </thead>
           <tbody>
-            {categorias.map((categoria) => (
-              <tr key={categoria.id} className="categoria-tr">
-                <td className="categoria-td">{categoria.Nombre_categoria}</td>
+            {servicios.map((servicio) => (
+              <tr key={servicio.id} className="categoria-tr">
+                <td className="categoria-td">{servicio.Nombre_servicio}</td>
+                <td className="categoria-td">{servicio.Descripcion || "—"}</td>
+                <td className="categoria-td">C${servicio.Precio || "0"}</td>
                 <td className="categoria-td categoria-td-actions">
                     <button
                         className="categoria-edit-btn"
                         onClick={() => {
-                            setCategoriaSeleccionada(categoria);
+                            setServicioSeleccionado(servicio);
                             setModalEditarAbierto(true);
                        }}
                     >
@@ -130,10 +135,10 @@ useEffect(() => {
           </tbody>
           <tfoot>
             <tr>
-              <td colSpan={2}>
+              <td colSpan={4}>
                 <div className="categoria-footer">
                   <span className="categoria-count">
-                    Mostrando {categorias.length} de {total} categorías
+                    Mostrando {servicios.length} de {total} servicios
                   </span>
                   <div className="categoria-pagination">
                     <button className="categoria-page-btn" onClick={() => setCurrentPage(1)} disabled={currentPage === 1}>«</button>
@@ -150,12 +155,12 @@ useEffect(() => {
       </div>
       </div>
 
-      <ModalAgregarCategoria
+      <ModalAgregarServicio
       abierto={modalAbierto}
       onClose={() => setModalAbierto(false)}
-      onGuardar={ async (nombre, setError) => {
+      onGuardar={ async (nombre, descripcion, precio, setError) => {
         try{
-          await crearCategoria(nombre);
+          await crearServicio(nombre, descripcion, precio);
 
           setModalAbierto(false);
           buscar();
@@ -169,16 +174,16 @@ useEffect(() => {
       }
       />
 
-      <ModalEditarCategoria 
+      <ModalEditarServicio 
       abierto={modalEditarAbierto}
-      categoria={categoriaSeleccionada}
+      servicio={servicioSeleccionado}
       onClose={() => {
         setModalEditarAbierto(false);
-        setCategoriaSeleccionada(null)
+        setServicioSeleccionado(null)
       }}
-      onEditar={async (id, nombre, setError) =>{
+      onEditar={async (id, nombre, descripcion, precio, setError) =>{
         try {
-          await actualizarCategoria(id, nombre);
+          await actualizarServicio(id, nombre, descripcion, precio);
 
           setModalEditarAbierto(false);
 
@@ -195,4 +200,4 @@ useEffect(() => {
   );
 }
 
-export default Categoria;
+export default Servicio;

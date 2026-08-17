@@ -21,6 +21,7 @@ import Usuario from "./interfaces/Usuario/Usuario";
 import Caja from "./interfaces/Caja/Caja";
 import AperturaCaja from "./interfaces/Caja/AperturaCaja";
 import CierreCaja from "./interfaces/Caja/CierreCaja";
+import Servicio from "./interfaces/Servicio/Servicio";
 
 function App() {
   return (
@@ -43,6 +44,7 @@ function App() {
           <Route path="/caja" element={<Caja />} />
           <Route path="/caja/apertura" element={<AperturaCaja />} />
           <Route path="/caja/cierre" element={<CierreCaja />} />
+          <Route path="/servicio" element={<Servicio />} />
 
           {/* Reportes */}
           <Route path="/reportes/cuentas-por-cobrar" element={<ReporteCuentasPorCobrar />} />

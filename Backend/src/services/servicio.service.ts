@@ -31,7 +31,7 @@ export const buscarServicios = async(
     // Registros paginados
     const [rows] = await pool.query(
         `
-        SELECT id, Nombre_servicio
+        SELECT *
         FROM servicios
         ${where}
         ORDER BY Nombre_servicio
@@ -59,7 +59,7 @@ export const crearServicio = async(
     }
 
     const [rowsNombre]: any = await pool.query(
-        "SELECT COUNT(*) AS count FROM servicio WHERE Nombre_servicio = ?",
+        "SELECT COUNT(*) AS count FROM servicios WHERE Nombre_servicio = ?",
         [nombre]
     );
 
@@ -68,7 +68,7 @@ export const crearServicio = async(
     }
 
     if (isNaN(precio) || precio <= 0) {
-        throw new Error("Ingrese un precio de venta válido.");
+        throw new Error("Ingrese un precio válido.");
     }
 
     const [result]: any = await pool.query(
@@ -119,7 +119,7 @@ export const actualizarServicio = async(
         UPDATE servicios
         SET Nombre_servicio = ?,
             Descripcion = ?,
-            Precio = ?,
+            Precio = ?
         WHERE id = ?
         `,
         [

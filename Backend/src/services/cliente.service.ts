@@ -14,8 +14,9 @@ export const buscarClientes = async (
         where = `
             WHERE NCliente LIKE ?
                OR CONCAT(Nombre, ' ', Apellido) LIKE ?
+               OR Telefono LIKE ?
         `;
-        params.push(`%${search}%`, `%${search}%`);
+        params.push(`%${search}%`, `%${search}%`, `%${search}%`);
     }
 
     // Total de registros
@@ -90,6 +91,7 @@ export const crearCliente = async (
       throw new Error("El número de teléfono debe contener 8 caracteres.");
     }
 
+    if (telefono.trim() !== "") {
      const [rowsPhone]: any = await pool.query(
     "SELECT COUNT(*) AS count FROM clientes WHERE Telefono = ?",
     [telefono]
@@ -97,7 +99,7 @@ export const crearCliente = async (
 
     if (rowsPhone[0].count > 0) {
     throw new Error("Ya existe un cliente con ese número de teléfono.");
-    }
+    }}
 
     if (isNaN(saldo_deuda)) {
     throw new Error("Ingrese un valor válido en el campo deuda.");

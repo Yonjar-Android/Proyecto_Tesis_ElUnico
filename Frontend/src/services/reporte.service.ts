@@ -3,6 +3,7 @@ import type { RespuestaReporteVentas } from "../models/VentaReportes";
 import type { RespuestaReporteCompras } from "../models/CompraReporte";
 
 const API = "http://localhost:3001/api/reportes";
+const token = localStorage.getItem("token");
 
 export const obtenerReporteStockBajo = async (
     search: string,
@@ -15,6 +16,9 @@ export const obtenerReporteStockBajo = async (
             search,
             page,
             perPage
+        },
+        headers: {
+            Authorization: `Bearer ${token}`
         }
     });
 
@@ -32,6 +36,9 @@ export const obtenerReporteCuentasCobrar = async (
             search,
             page,
             perPage
+        },
+        headers: {
+            Authorization: `Bearer ${token}`
         }
     });
 
@@ -57,7 +64,10 @@ export const obtenerReporteVentasPorPeriodo = async (
                 tipoPago,
                 page,
                 perPage
-            }
+            },
+            headers: {
+            Authorization: `Bearer ${token}`
+        }
         }
     );
 
@@ -83,7 +93,10 @@ export const obtenerReporteComprasPorPeriodo = async (
                 Id_proveedor,
                 page,
                 perPage
-            }
+            },
+            headers: {
+            Authorization: `Bearer ${token}`
+        }
         }
     );
 

@@ -208,6 +208,7 @@ function ModalEditarCliente({ abierto, cliente, onClose, onEditar }: Props) {
                 <input
                   type="number"
                   min={0}
+                  step={1}
                   readOnly
                   value={saldo_deuda}
                   onChange={(e) => setSaldo_Deuda(e.target.value)}

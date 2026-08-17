@@ -1,6 +1,7 @@
 import axiosInstance from "./axiosInstance";
 
 const API = "http://localhost:3001/api/productos";
+const token = localStorage.getItem("token");
 
 export const crearProducto = async (
     Nombre: string,
@@ -20,6 +21,10 @@ export const crearProducto = async (
         Stock,
         Stock_min,
         Fecha_vencimiento
+    }, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
     });
 
     return response.data;
@@ -44,6 +49,10 @@ export const actualizarProducto = async (
         Stock,
         Stock_min,
         Fecha_vencimiento
+    }, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
     });
 
     return response;
@@ -60,6 +69,9 @@ export const buscarProductos = async (
             search,
             page,
             perPage
+        },
+        headers: {
+            Authorization: `Bearer ${token}`
         }
     });
 
@@ -67,11 +79,11 @@ export const buscarProductos = async (
 };
 
 export const buscarProductoPorId = async (id: number) => {
-    const response = await axiosInstance.get(`${API}/${id}`);
+    const response = await axios.get(`${API}/${id}`);
     return response.data;
 }
 
 export const obtenerTotalProductosCategorias = async () => {
-    const response = await axiosInstance.get(`${API}/obtener-estadisticas`);
+    const response = await axios.get(`${API}/obtener-estadisticas`);
     return response.data;
 }
