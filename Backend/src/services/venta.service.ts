@@ -44,7 +44,15 @@ export const crearVenta = async (
                 );
             }
         }
+// Verificar que haya una sesión de caja abierta
+const [sesionRows]: any = await connection.query(
+    "SELECT id_sesion FROM sesiones_caja WHERE id_usuario = ? AND estado = 'Abierta' LIMIT 1",
+    [idUsuario]
+);
 
+if (sesionRows.length === 0) {
+    throw new Error("No se puede registrar la venta: no hay una sesión de caja abierta.");
+}
         // Crear venta
         const [venta]: any = await connection.query(
             `

@@ -1,12 +1,15 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "./Facturacion.css";
 import ModalSeleccionarProducto from "./ModalSeleccionarProducto";
 import ModalSeleccionarCliente from "./ModalSeleccionarCliente";
-import ModalConfirmarVenta from "./ModalConfirmarVenta";
+import ModalConfirmarVenta, {
+  type DetalleConfirmacionVenta,
+} from "./ModalConfirmarVenta";
 import type { Cliente } from "../../models/Cliente";
 import type { ProductoListado } from "../../models/ProductoListado";
 import { crearVenta } from "../../services/venta.service";
 import { SquarePen, Trash2 } from "lucide-react";
+import { obtenerSesionCajaActiva } from "../../services/caja.service";
 
 interface ItemVenta {
   producto: ProductoListado;
@@ -58,6 +61,20 @@ function Facturacion() {
   const [modalConfirmarAbierto, setModalConfirmarAbierto] = useState(false);
 
   const [error, setError] = useState("");
+
+  const [cajaAbierta, setCajaAbierta] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    const verificarCaja = async () => {
+      try {
+        const data = await obtenerSesionCajaActiva();
+        setCajaAbierta(Boolean(data.sesionActiva ?? data.sesion));
+      } catch {
+        setCajaAbierta(false);
+      }
+    };
+    verificarCaja();
+  }, []);
 
   const limpiarCamposProducto = () => {
     setProductoSeleccionado(null);
@@ -161,54 +178,64 @@ function Facturacion() {
     cancelarEdicion();
   };
 
-  const realizarVenta = () => {
-    if (items.length === 0) {
-      setError("Agrega al menos un producto para realizar la venta.");
-      return;
-    }
+ const realizarVenta = () => {
+  if (!cajaAbierta) {
+    setError("No se puede realizar la venta: la caja está cerrada. Abra una sesión de caja primero.");
+    return;
+  }
 
-    setError("");
-    setModalConfirmarAbierto(true);
-  };
+  if (items.length === 0) {
+    setError("Agrega al menos un producto para realizar la venta.");
+    return;
+  }
+
+  setError("");
+  setModalConfirmarAbierto(true);
+};
 
   const confirmarVenta = async (
-    _montoRecibido: number,
-    setErrorModal: (mensaje: string) => void
-  ) => {
-    try {
-      await crearVenta(
-        Number(clienteSeleccionado?.id),
-        1,
-        tipoPago,
-        totalGeneral,
-        items.map((item) => ({
-          Id_producto: item.producto.id,
-          Cantidad: item.cantidad,
-          Precio_Venta: item.precio,
-          Descuento: item.descuento,
-          Subtotal: subtotalNeto(item),
-        }))
-      );
+  _detalle: DetalleConfirmacionVenta,
+  setErrorModal: (mensaje: string) => void
+): Promise<boolean> => {
+  try {
+    await crearVenta(
+      Number(clienteSeleccionado?.id),
+      tipoPago,
+      totalGeneral,
+      items.map((item) => ({
+        Id_producto: item.producto.id,
+        Cantidad: item.cantidad,
+        Precio_Venta: item.precio,
+        Descuento: item.descuento,
+        Subtotal: subtotalNeto(item),
+      }))
+    );
 
-      setItems([]);
-      setModalConfirmarAbierto(false);
-      return true;
-    } catch (error: any) {
-      setErrorModal(error.response.data.mensaje);
-      return false;
-    }
-  };
+    setItems([]);
+    setModalConfirmarAbierto(false);
+    return true;
+  } catch (error: any) {
+    setErrorModal(error?.response?.data?.mensaje ?? "Error al confirmar la venta.");
+    return false;
+  }
+};
 
   return (
     <div className="factura-page">
       <div className="factura-contenido">
         <div className="factura-header">
+          {cajaAbierta === false && (
+  <div className="factura-alerta-caja">
+    ⚠ La caja está cerrada. Debe abrir una sesión de caja antes de facturar.
+  </div>
+)}
           <h1>Ventas</h1>
           <p className="factura-subtitulo">
             Registre los productos y complete el pago de la transacción.
           </p>
           <p className="factura-fecha">Fecha: {formatearFecha(new Date())}</p>
         </div>
+        
 
         <div className="factura-card">
           <div className="factura-fila-producto">
@@ -399,9 +426,14 @@ function Facturacion() {
               </div>
             </div>
 
-            <button className="factura-btn-vender" onClick={realizarVenta}>
-              Realizar Venta
-            </button>
+           <button
+  className="factura-btn-vender"
+  onClick={realizarVenta}
+  disabled={!cajaAbierta}
+  title={!cajaAbierta ? "La caja está cerrada" : undefined}
+>
+  Realizar Venta
+</button>
           </div>
         </div>
       </div>

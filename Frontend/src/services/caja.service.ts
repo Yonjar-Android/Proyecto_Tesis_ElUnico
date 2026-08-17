@@ -12,11 +12,6 @@ export type EgresoCajaInput = {
   observaciones: string;
 };
 
-export const obtenerSesionActiva = async () => {
-  const response = await axiosInstance.get(`${API}/sesion-activa`);
-  return response.data;
-};
-
 export const abrirCaja = async (
   montoAperturaCordobas: number,
   tasaCambio: number,
@@ -29,7 +24,21 @@ export const abrirCaja = async (
   });
   return response.data;
 };
+export interface SesionCajaActiva {
+  sesionActiva?: boolean;
+  sesion?: {
+    id_sesion: number;
+    fecha_apertura: string;
+    monto_apertura_cordobas: number;
+    tasa_cambio: number;
+    estado: string;
+  } | null;
+}
 
+export async function obtenerSesionCajaActiva(): Promise<SesionCajaActiva> {
+  const { data } = await axiosInstance.get("/caja/sesion-activa");
+  return data;
+}
 export const crearEgresoCaja = async (payload: EgresoCajaInput) => {
   const response = await axiosInstance.post(`${API}/egresos`, payload);
   return response.data;
