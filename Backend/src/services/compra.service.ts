@@ -5,6 +5,7 @@ interface DetalleCompraInput {
     Cantidad: number;
     Precio: number;
     Subtotal: number;
+    Precio_venta: number;
 }
 
 export const crearCompra = async (
@@ -80,7 +81,18 @@ export const crearCompra = async (
                 ]
             );
 
-        }
+            await connection.query(
+        `
+        UPDATE productos
+        SET Precio_venta = ?
+        WHERE id = ?
+        `,
+        [
+            detalle.Precio_venta,
+            detalle.Id_producto
+        ]
+    );
+}
 
         await connection.commit();
 

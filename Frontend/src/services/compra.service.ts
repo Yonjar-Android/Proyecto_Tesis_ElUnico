@@ -8,6 +8,7 @@ interface DetalleCompra {
     Cantidad: number;
     Precio: number;
     Subtotal: number;
+    Precio_venta: number;
 }
 
 export const crearCompra = async (

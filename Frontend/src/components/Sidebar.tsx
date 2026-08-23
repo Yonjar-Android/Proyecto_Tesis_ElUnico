@@ -15,6 +15,8 @@ import {
 } from "lucide-react";
 import logo from "../assets/LogoTransparente1.png";
 import "./Sidebar.css";
+import { obtenerSesionActiva } from "../services/caja.service";
+import cajaModalStyles from "./CajaModal.module.css";
 
 interface UsuarioSesion {
   Nombre_Usuario: string;
@@ -28,6 +30,9 @@ export default function Sidebar() {
   const menuRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const [cajaAbierto, setCajaAbierto] = useState(false);
+
+  const [cajaSesionAbierta, setCajaSesionAbierta] = useState(false);
+  const [mostrarModalCaja, setMostrarModalCaja] = useState(false);
 
   useEffect(() => {
     const guardado = localStorage.getItem("usuario");
@@ -46,11 +51,24 @@ export default function Sidebar() {
     return () => document.removeEventListener("mousedown", handleClickFuera);
   }, []);
 
-  function handleLogout() {
+  const handleLogout = async () => {
+  try {
+    const data = await obtenerSesionActiva();
+
+    if (data.sesion != null && data.sesion.estado == "Abierta") {
+      console.log(data);
+      setCajaSesionAbierta(true);
+      setMostrarModalCaja(true);
+      return;
+    }
+
     localStorage.removeItem("usuario");
     localStorage.removeItem("token");
     navigate("/");
+  } catch (error) {
+    console.error("Error al verificar el estado de la caja:", error);
   }
+};
 
   const iniciales = usuario?.Nombre_Usuario
     ? usuario.Nombre_Usuario.slice(0, 2).toUpperCase()
@@ -213,6 +231,26 @@ export default function Sidebar() {
           </div>
         )}
       </div>
+
+      {mostrarModalCaja && (
+  <div className={cajaModalStyles.overlay}>
+    <div className={cajaModalStyles.modal}>
+      <h3>Caja abierta</h3>
+
+      <p>
+        No puedes cerrar sesión mientras tengas una caja abierta.
+        Debes realizar el cierre de caja antes de salir del sistema.
+      </p>
+
+      <button
+        type="button"
+        onClick={() => setMostrarModalCaja(false)}
+      >
+        Entendido
+      </button>
+    </div>
+  </div>
+)}
     </aside>
   );
 }

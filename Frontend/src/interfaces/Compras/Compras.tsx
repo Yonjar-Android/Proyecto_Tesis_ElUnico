@@ -157,6 +157,7 @@ function Compras() {
           Cantidad: item.cantidad,
           Precio: item.precio_compra,
           Subtotal: item.cantidad * item.precio_compra,
+          Precio_venta: item.precio_venta
         })),
       );
  
