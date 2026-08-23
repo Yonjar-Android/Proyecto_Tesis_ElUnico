@@ -111,3 +111,100 @@ if (sesionRows.length === 0) {
     }
 
 };
+
+export const buscarFacturaParaDevolucion = async (
+    idVenta: number
+) => {
+
+    const [ventaRows]: any = await pool.query(
+        `
+        SELECT
+            v.id,
+            v.Id_cliente,
+            v.Fecha,
+            CONCAT(c.Nombre, ' ', c.Apellido) AS cliente
+        FROM ventas v
+        INNER JOIN clientes c
+            ON c.id = v.Id_cliente
+        WHERE v.id = ?
+        `,
+        [idVenta]
+    );
+
+    if (ventaRows.length === 0) {
+        throw new Error("La factura no existe.");
+    }
+
+    const venta = ventaRows[0];
+
+    const [detalleRows]: any = await pool.query(
+        `
+        SELECT
+            dv.id AS idDetalleVenta,
+            dv.Id_producto AS idProducto,
+            p.Nombre AS nombreProducto,
+            m.Nombre_marca AS nombreMarca,
+            dv.Cantidad AS cantidadComprada,
+
+            COALESCE(
+                SUM(dd.Cantidad),
+                0
+            ) AS cantidadDevuelta
+
+        FROM detalle_venta dv
+
+        INNER JOIN productos p
+            ON p.id = dv.Id_producto
+
+        LEFT JOIN marcas m
+            ON m.id = p.Id_marca
+
+        LEFT JOIN detalle_devolucion dd
+            ON dd.Id_detalle_venta = dv.id
+
+        WHERE dv.Id_venta = ?
+          AND dv.Id_producto IS NOT NULL
+
+        GROUP BY
+            dv.id,
+            dv.Id_producto,
+            p.Nombre,
+            m.Nombre_marca,
+            dv.Cantidad
+
+        ORDER BY dv.id ASC
+        `,
+        [idVenta]
+    );
+
+    const items = detalleRows
+        .map((item: any) => {
+
+            const cantidadComprada =
+                Number(item.cantidadComprada);
+
+            const cantidadDevuelta =
+                Number(item.cantidadDevuelta);
+
+            return {
+                idDetalleVenta: item.idDetalleVenta,
+                idProducto: item.idProducto,
+                nombreProducto: item.nombreProducto,
+                nombreMarca: item.nombreMarca,
+                cantidadComprada,
+                cantidadDevuelta,
+                cantidadADevolver:
+                    cantidadComprada - cantidadDevuelta
+            };
+        })
+        .filter(
+            (item: any) => item.cantidadADevolver > 0
+        );
+
+    return {
+        numeroFactura: String(venta.id),
+        cliente: venta.cliente,
+        fecha: venta.Fecha,
+        items
+    };
+};

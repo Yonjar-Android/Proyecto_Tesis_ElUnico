@@ -68,6 +68,11 @@ export default function Sidebar() {
           <span>Facturación</span>
         </NavLink>
 
+        <NavLink to="/devoluciones" className="sidebar-link">
+          <FileText size={20} />
+          <span>Devoluciones</span>
+        </NavLink>
+
         <NavLink to="/compras" className="sidebar-link">
           <ShoppingCart size={20} />
           <span>Compras</span>
@@ -86,6 +91,11 @@ export default function Sidebar() {
         <NavLink to="/inventario" className="sidebar-link">
           <Archive size={20} />
           <span>Inventario</span>
+        </NavLink>
+
+        <NavLink to="/salidasInventario" className="sidebar-link">
+          <Archive size={20} />
+          <span>Otras salidas de inventario</span>
         </NavLink>
 
         <NavLink to="/servicio" className="sidebar-link">

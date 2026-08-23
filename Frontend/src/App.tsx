@@ -22,6 +22,8 @@ import Caja from "./interfaces/Caja/Caja";
 import AperturaCaja from "./interfaces/Caja/AperturaCaja";
 import CierreCaja from "./interfaces/Caja/CierreCaja";
 import Servicio from "./interfaces/Servicio/Servicio";
+import Devoluciones from "./interfaces/Devoluciones/Devoluciones";
+import SalidasInventario from "./interfaces/SalidasInventario/SalidasInventario";
 
 function App() {
   return (
@@ -35,7 +37,9 @@ function App() {
           <Route path="/clientes" element={<Cliente />} />
           <Route path="/proveedores" element={<Proveedor />} />
           <Route path="/inventario" element={<Inventario />} />
+          <Route path="/salidasInventario" element={<SalidasInventario />} />
           <Route path="/facturacion" element={<Facturacion />} />
+          <Route path="/devoluciones" element={<Devoluciones />} />
           <Route path="/compras" element={<Compras />} />
           <Route path="/inventario/crear" element={<CrearProducto />} />
           <Route path="/inventario/editar/:id" element={<EditarProducto />} />

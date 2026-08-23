@@ -16,12 +16,14 @@ import servicioRoutes from "./routes/service.routes.js"
 import cors from "cors";
 import { authMiddleware } from "./authMiddleware/authMiddleware.js";
 import usuarioRoutes from "./routes/usuario.routes.js";
+import devolucionesRoutes from "./routes/devoluciones.routes.js";
+import salidasRoutes from "./routes/salidas_Inventario.js";
 
 //dotenv.config();
 
 const app = express();
 
-const PORT = Number(process.env.PORT) || 3000;
+const PORT = Number(process.env.PORT) || 3001;
 
 conectarDB();
 
@@ -44,6 +46,8 @@ app.use("/api/compras", authMiddleware, compraRoutes);
 app.use("/api/caja", authMiddleware, cajaRoutes);
 app.use("/api/reportes", authMiddleware, reporteRoutes);
 app.use("/api/usuarios", authMiddleware, usuarioRoutes);
+app.use("/api/devoluciones", authMiddleware, devolucionesRoutes);
+app.use("/api/salidas_inventario", authMiddleware, salidasRoutes);
 
 app.listen(PORT, () => {
     console.log(`Servidor iniciado en http://localhost:${PORT}`);

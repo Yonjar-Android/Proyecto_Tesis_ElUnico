@@ -1,0 +1,332 @@
+/* SalidasInventario.module.css
+   CSS Module: cada clase se compila a un nombre único por archivo,
+   por lo que nunca choca con estilos de otros componentes. */
+
+.page {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  color: #1f2937;
+  background-color: #ffffff;
+  min-height: 100%;
+  padding: 32px;
+  box-sizing: border-box;
+}
+
+.contenido {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Header */
+
+.header h1 {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.subtitulo {
+  margin: 4px 0 0;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+/* Tarjetas */
+
+.card {
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 20px 24px;
+}
+
+.cardTabla {
+  padding: 0;
+  overflow: hidden;
+}
+
+/* Campos genéricos */
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.campo label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #6b7280;
+}
+
+.requerido {
+  color: #e5484d;
+}
+
+.campo input[type="text"],
+.campo input[type="number"],
+.campo select,
+.campo textarea {
+  background-color: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 14px;
+  color: #111827;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.15s ease;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.campo input[type="text"]:focus,
+.campo input[type="number"]:focus,
+.campo select:focus,
+.campo textarea:focus {
+  border-color: #9ca3af;
+}
+
+.campo textarea {
+  resize: none;
+  min-height: 40px;
+}
+
+/* Selector de producto (botón, igual que en Ventas) */
+
+.selectorBtn {
+  background-color: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 14px;
+  color: #111827;
+  text-align: left;
+  cursor: pointer;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.selectorPlaceholder {
+  color: #9ca3af;
+}
+
+/* Fila de registro (tipo, producto, cantidad, agregar) */
+
+.filaRegistro {
+  display: grid;
+  grid-template-columns: 1.2fr 1.4fr 0.7fr auto;
+  gap: 16px;
+  align-items: flex-end;
+}
+
+.filaObservacion {
+  margin-top: 16px;
+}
+
+.btnAgregar {
+  background-color: #e5484d;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 11px 22px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  height: 42px;
+  transition: background-color 0.15s ease;
+}
+
+.btnAgregar:hover {
+  background-color: #d33c41;
+}
+
+/* Tabla de items a registrar */
+
+.tabla {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tabla thead th {
+  text-align: left;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #6b7280;
+  padding: 16px 24px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.tabla tbody td {
+  padding: 14px 24px;
+  font-size: 14px;
+  color: #111827;
+  border-bottom: 1px solid #f3f4f6;
+  vertical-align: middle;
+}
+
+.tabla tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.nombreMarca {
+  display: block;
+  font-size: 12px;
+  color: #9ca3af;
+  margin-top: 2px;
+}
+
+.thAccion {
+  text-align: right !important;
+}
+
+.tdAccion {
+  text-align: right;
+}
+
+.btnEliminar {
+  background: none;
+  border: none;
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.btnEliminar:hover {
+  background-color: #fdecec;
+  color: #e5484d;
+}
+
+.vacio {
+  padding: 40px 24px;
+  text-align: center;
+  color: #9ca3af;
+  font-size: 14px;
+}
+
+/* Error */
+
+.errorText {
+  color: #e5484d;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* Footer de registro */
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.btnCancelar {
+  background-color: #e5e7eb;
+  color: #374151;
+  border: none;
+  border-radius: 8px;
+  padding: 14px 28px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.btnCancelar:hover {
+  background-color: #d1d5db;
+}
+
+.btnRegistrar {
+  background-color: #1a7f41;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 14px 28px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.btnRegistrar:hover:not(:disabled) {
+  background-color: #156935;
+}
+
+.btnRegistrar:disabled {
+  background-color: #9ca3af;
+  cursor: not-allowed;
+}
+
+/* Historial */
+
+.seccionHistorial {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.seccionHistorial h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.estadoBadge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.estadoCompletada {
+  background-color: #e6f4ea;
+  color: #1a7f41;
+}
+
+.estadoAnulada {
+  background-color: #fdecec;
+  color: #e5484d;
+}
+
+.estadoPendiente {
+  background-color: #fdf3e3;
+  color: #b45309;
+}
+
+/* Responsive */
+
+@media (max-width: 860px) {
+  .filaRegistro {
+    grid-template-columns: 1fr;
+  }
+
+  .btnAgregar {
+    width: 100%;
+  }
+}
+
+@media (max-width: 720px) {
+  .footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

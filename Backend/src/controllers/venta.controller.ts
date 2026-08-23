@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { crearVenta } from "../services/venta.service.js";
+import { crearVenta, buscarFacturaParaDevolucion } from "../services/venta.service.js";
 
 export const postVenta = async (req: Request, res: Response) => {
     try {
@@ -31,6 +31,32 @@ export const postVenta = async (req: Request, res: Response) => {
         });
 
     } catch (error: any) {
+
+        res.status(400).json({
+            mensaje: error.message
+        });
+
+    }
+};
+
+export const getFacturaParaDevolucion = async (
+    req: Request,
+    res: Response
+) => {
+
+    try {
+
+        const { id } = req.params;
+
+        const resultado = await buscarFacturaParaDevolucion(
+            Number(id)
+        );
+
+        res.json(resultado);
+
+    } catch (error: any) {
+
+        console.error(error);
 
         res.status(400).json({
             mensaje: error.message
