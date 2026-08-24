@@ -9,7 +9,7 @@ import type { PaginatedResponse } from "../../models/PaginatedResponse";
 interface Props {
   abierto: boolean;
   onClose: () => void;
-  onSeleccionar: (producto: ProductoListado) => void;
+  onSeleccionar: (producto: ProductoListado, cantidad: number) => void;
 }
 
 const UMBRAL_STOCK_BAJO = 10;
@@ -20,6 +20,9 @@ function ModalSeleccionarProducto({ abierto, onClose, onSeleccionar }: Props) {
   const [currentPage, setCurrentPage] = useState(1);
   const [perPage] = useState(6);
   const [lastPage, setLastPage] = useState(1);
+
+  // Cantidad seleccionada por producto (clave = id del producto)
+  const [cantidades, setCantidades] = useState<Record<number, number>>({});
 
   const buscar = async () => {
     try {
@@ -51,10 +54,47 @@ function ModalSeleccionarProducto({ abierto, onClose, onSeleccionar }: Props) {
     if (abierto) {
       setSearchTerm("");
       setCurrentPage(1);
+      setCantidades({});
     }
   }, [abierto]);
 
   if (!abierto) return null;
+
+  const obtenerCantidad = (producto: ProductoListado) => {
+    // Si no se ha tocado el input, por defecto es 1 (o el stock si es 0)
+    return cantidades[producto.id] ?? (producto.Stock > 0 ? 1 : 0);
+  };
+
+  const manejarCambioCantidad = (producto: ProductoListado, valor: string) => {
+    let cantidad = parseInt(valor, 10);
+
+    if (isNaN(cantidad)) {
+      cantidad = 0;
+    }
+
+    if (cantidad < 0) {
+      cantidad = 0;
+    }
+
+    if (cantidad > producto.Stock) {
+      cantidad = producto.Stock;
+    }
+
+    setCantidades((prev) => ({
+      ...prev,
+      [producto.id]: cantidad,
+    }));
+  };
+
+  const manejarSeleccionar = (producto: ProductoListado) => {
+    const cantidad = obtenerCantidad(producto);
+
+    if (cantidad <= 0 || cantidad > producto.Stock) {
+      return;
+    }
+
+    onSeleccionar(producto, cantidad);
+  };
 
   return (
     <div className="modal-overlay">
@@ -88,42 +128,62 @@ function ModalSeleccionarProducto({ abierto, onClose, onSeleccionar }: Props) {
                 <th className="seleccion-th-marca th-producto">Marca</th>
                 <th className="seleccion-th-stock">Stock</th>
                 <th>Precio</th>
+                <th className="seleccion-th-cantidad">Cantidad</th>
                 <th className="seleccion-th-accion">Acción</th>
               </tr>
             </thead>
             <tbody>
-              {productos.map((producto) => (
-                <tr key={producto.id}>
-                  <td className="seleccion-nombre-columna">
-                    {producto.Nombre}
-                  </td>
+              {productos.map((producto) => {
+                const cantidad = obtenerCantidad(producto);
+                const cantidadInvalida = cantidad <= 0 || cantidad > producto.Stock;
 
-                  <td className="seleccion-nombre-columna">
-                    {producto.Nombre_marca}
-                  </td>
-                  <td>
-                    <span
-                      className={
-                        "seleccion-stock-pill" +
-                        (producto.Stock <= UMBRAL_STOCK_BAJO
-                          ? " seleccion-stock-pill--bajo"
-                          : "")
-                      }
-                    >
-                      {producto.Stock}
-                    </span>
-                  </td>
-                  <td>C${producto.Precio_venta}</td>
-                  <td className="seleccion-td-accion">
-                    <button
-                      className="seleccion-btn"
-                      onClick={() => onSeleccionar(producto)}
-                    >
-                      Seleccionar
-                    </button>
-                  </td>
-                </tr>
-              ))}
+                return (
+                  <tr key={producto.id}>
+                    <td className="seleccion-nombre-columna">
+                      {producto.Nombre}
+                    </td>
+
+                    <td className="seleccion-nombre-columna">
+                      {producto.Nombre_marca}
+                    </td>
+                    <td>
+                      <span
+                        className={
+                          "seleccion-stock-pill" +
+                          (producto.Stock <= UMBRAL_STOCK_BAJO
+                            ? " seleccion-stock-pill--bajo"
+                            : "")
+                        }
+                      >
+                        {producto.Stock}
+                      </span>
+                    </td>
+                    <td>C${producto.Precio_venta}</td>
+                    <td className="seleccion-td-cantidad">
+                      <input
+                        className="seleccion-cantidad-input"
+                        type="number"
+                        min={0}
+                        max={producto.Stock}
+                        value={cantidad}
+                        disabled={producto.Stock === 0}
+                        onChange={(e) =>
+                          manejarCambioCantidad(producto, e.target.value)
+                        }
+                      />
+                    </td>
+                    <td className="seleccion-td-accion">
+                      <button
+                        className="seleccion-btn"
+                        onClick={() => manejarSeleccionar(producto)}
+                        disabled={cantidadInvalida}
+                      >
+                        Seleccionar
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
 

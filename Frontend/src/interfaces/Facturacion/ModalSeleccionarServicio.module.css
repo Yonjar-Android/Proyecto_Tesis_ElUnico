@@ -1,0 +1,111 @@
+.buscador {
+  box-sizing: border-box;
+  width: 100%;
+  border: 1px solid #e5e7eb;
+  background: #f9fafb;
+  border-radius: 8px;
+  padding: 0.65rem 0.85rem;
+  font-size: 0.9rem;
+  font-family: inherit;
+  color: #111;
+  margin-bottom: 1rem;
+}
+
+.buscador:focus {
+  outline: none;
+  border-color: #e5484d;
+  background: #fff;
+}
+
+.tabla {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tabla th {
+  text-align: left;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #6b7280;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.tabla td {
+  padding: 0.65rem 0.75rem;
+  border-bottom: 1px solid #f1f1f1;
+  font-size: 0.9rem;
+  color: #111;
+}
+
+.thAccion,
+.tdAccion {
+  text-align: right;
+}
+
+.descripcion {
+  color: #6b7280;
+  font-size: 0.8rem;
+  display: block;
+  margin-top: 0.15rem;
+}
+
+.btn {
+  background: #e5484d;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.btn:hover {
+  opacity: 0.9;
+}
+
+.vacio {
+  text-align: center;
+  padding: 1.5rem 0;
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1rem;
+}
+
+.count {
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+.pagination {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.pageBtn {
+  border: 1px solid #e5e7eb;
+  background: #f9fafb;
+  border-radius: 6px;
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.pageBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.pageBtnActive {
+  background: #e5484d;
+  color: #fff;
+  border-color: #e5484d;
+}

@@ -1,22 +1,33 @@
 import { useState, useEffect } from "react";
 import "./Facturacion.css";
 import ModalSeleccionarProducto from "./ModalSeleccionarProducto";
+import ModalSeleccionarServicio from "./ModalSeleccionarServicio";
 import ModalSeleccionarCliente from "./ModalSeleccionarCliente";
 import ModalConfirmarVenta, {
   type DetalleConfirmacionVenta,
 } from "./ModalConfirmarVenta";
 import type { Cliente } from "../../models/Cliente";
 import type { ProductoListado } from "../../models/ProductoListado";
+import type { Servicio } from "../../models/Servicio";
 import { crearVenta } from "../../services/venta.service";
 import { SquarePen, Trash2 } from "lucide-react";
 import { obtenerSesionActiva } from "../../services/caja.service";
 
-interface ItemVenta {
-  producto: ProductoListado;
-  cantidad: number;
-  descuento: number;
-  precio: number;
-}
+type ItemVenta =
+  | {
+      tipo: "producto";
+      producto: ProductoListado;
+      cantidad: number;
+      descuento: number;
+      precio: number;
+    }
+  | {
+      tipo: "servicio";
+      servicio: Servicio;
+      cantidad: number;
+      descuento: number;
+      precio: number;
+    };
 
 function formatearFecha(fecha: Date) {
   const dia = String(fecha.getDate()).padStart(2, "0");
@@ -25,24 +36,30 @@ function formatearFecha(fecha: Date) {
   return `${dia}-${mes}-${anio}`;
 }
 
-// Subtotal de una línea ANTES de descuento (cantidad * precio).
 function subtotalBruto(item: ItemVenta) {
   return item.cantidad * item.precio;
 }
 
-// Subtotal de una línea DESPUÉS de descuento (lo que realmente se cobra).
 function subtotalNeto(item: ItemVenta) {
   return subtotalBruto(item) - item.descuento;
 }
 
 function Facturacion() {
-  const [productoSeleccionado, setProductoSeleccionado] = useState<ProductoListado | null>(null);
+  const [tipoSeleccion, setTipoSeleccion] = useState<"producto" | "servicio">(
+    "producto"
+  );
+
+  const [productoSeleccionado, setProductoSeleccionado] =
+    useState<ProductoListado | null>(null);
+  const [servicioSeleccionado, setServicioSeleccionado] =
+    useState<Servicio | null>(null);
+
   const [cantidad, setCantidad] = useState("1");
   const [descuento, setDescuento] = useState("0.00");
   const [precio, setPrecio] = useState("0.00");
   const [tipoPago, setTipoPago] = useState("Contado");
   const [clienteSeleccionado, setClienteSeleccionado] = useState<Cliente>({
-    id: 7,
+    id: 10,
     Nombre: "Cliente",
     Apellido: "General",
     Telefono: "",
@@ -52,16 +69,14 @@ function Facturacion() {
   });
 
   const [items, setItems] = useState<ItemVenta[]>([]);
-
-  // null = modo "agregar". Cualquier otro valor = índice de la fila que se está editando.
   const [indiceEditando, setIndiceEditando] = useState<number | null>(null);
 
   const [modalProductoAbierto, setModalProductoAbierto] = useState(false);
+  const [modalServicioAbierto, setModalServicioAbierto] = useState(false);
   const [modalClienteAbierto, setModalClienteAbierto] = useState(false);
   const [modalConfirmarAbierto, setModalConfirmarAbierto] = useState(false);
 
   const [error, setError] = useState("");
-
   const [cajaAbierta, setCajaAbierta] = useState<boolean | null>(null);
 
   useEffect(() => {
@@ -76,8 +91,9 @@ function Facturacion() {
     verificarCaja();
   }, []);
 
-  const limpiarCamposProducto = () => {
+  const limpiarCamposItem = () => {
     setProductoSeleccionado(null);
+    setServicioSeleccionado(null);
     setCantidad("1");
     setDescuento("0.00");
     setPrecio("0.00");
@@ -85,14 +101,23 @@ function Facturacion() {
 
   const cancelarEdicion = () => {
     setIndiceEditando(null);
-    limpiarCamposProducto();
+    limpiarCamposItem();
     setError("");
   };
 
-  // Precarga el formulario con los datos de la fila y activa el modo edición.
   const editarItem = (index: number) => {
     const item = items[index];
-    setProductoSeleccionado(item.producto);
+
+    if (item.tipo === "producto") {
+      setTipoSeleccion("producto");
+      setProductoSeleccionado(item.producto);
+      setServicioSeleccionado(null);
+    } else {
+      setTipoSeleccion("servicio");
+      setServicioSeleccionado(item.servicio);
+      setProductoSeleccionado(null);
+    }
+
     setCantidad(String(item.cantidad));
     setDescuento(item.descuento.toFixed(2));
     setPrecio(item.precio.toFixed(2));
@@ -103,21 +128,35 @@ function Facturacion() {
   const eliminarItem = (index: number) => {
     setItems((prev) => prev.filter((_, i) => i !== index));
 
-    // Si borras justo la fila que estabas editando, sales del modo edición.
     if (indiceEditando === index) {
       cancelarEdicion();
     }
   };
 
-  // Agrega una fila nueva, o actualiza la fila indiceEditando si estás en modo edición.
-  const guardarProducto = () => {
-    if (!productoSeleccionado) {
-      setError("Selecciona un producto o servicio.");
+  const guardarItem = () => {
+    const itemBase = tipoSeleccion === "producto" ? productoSeleccionado : servicioSeleccionado;
+
+    if (!itemBase) {
+      setError(
+        tipoSeleccion === "producto"
+          ? "Selecciona un producto."
+          : "Selecciona un servicio."
+      );
       return;
     }
 
     if (isNaN(Number(cantidad)) || Number(cantidad) <= 0) {
       setError("Ingresa una cantidad válida.");
+      return;
+    }
+
+    // El stock solo aplica a productos; los servicios no tienen existencias.
+    if (
+      tipoSeleccion === "producto" &&
+      productoSeleccionado &&
+      Number(cantidad) > productoSeleccionado.Stock
+    ) {
+      setError("La cantidad ingresada es mayor que el stock disponible.");
       return;
     }
 
@@ -138,22 +177,39 @@ function Facturacion() {
       return;
     }
 
-    // Al chequear duplicados, ignora la propia fila que se está editando.
-    const yaExiste = items.some(
-      (item, i) => item.producto.id === productoSeleccionado.id && i !== indiceEditando
-    );
+    const yaExiste = items.some((item, i) => {
+      if (i === indiceEditando) return false;
+      if (item.tipo !== tipoSeleccion) return false;
+      const idActual = tipoSeleccion === "producto" ? productoSeleccionado?.id : servicioSeleccionado?.id;
+      const idItem = item.tipo === "producto" ? item.producto.id : item.servicio.id;
+      return idItem === idActual;
+    });
 
     if (yaExiste) {
-      setError("Este producto ya fue agregado a la factura.");
+      setError(
+        tipoSeleccion === "producto"
+          ? "Este producto ya fue agregado a la factura."
+          : "Este servicio ya fue agregado a la factura."
+      );
       return;
     }
 
-    const itemGuardado: ItemVenta = {
-      producto: productoSeleccionado,
-      cantidad: Number(cantidad),
-      descuento: Number(descuento),
-      precio: Number(precio),
-    };
+    const itemGuardado: ItemVenta =
+      tipoSeleccion === "producto"
+        ? {
+            tipo: "producto",
+            producto: productoSeleccionado as ProductoListado,
+            cantidad: Number(cantidad),
+            descuento: Number(descuento),
+            precio: Number(precio),
+          }
+        : {
+            tipo: "servicio",
+            servicio: servicioSeleccionado as Servicio,
+            cantidad: Number(cantidad),
+            descuento: Number(descuento),
+            precio: Number(precio),
+          };
 
     if (indiceEditando !== null) {
       setItems((prev) =>
@@ -165,10 +221,9 @@ function Facturacion() {
 
     setError("");
     setIndiceEditando(null);
-    limpiarCamposProducto();
+    limpiarCamposItem();
   };
 
-  // Totales generales de la venta: subtotal bruto, descuento acumulado, y total neto.
   const subtotalGeneral = items.reduce((suma, item) => suma + subtotalBruto(item), 0);
   const descuentoGeneral = items.reduce((suma, item) => suma + item.descuento, 0);
   const totalGeneral = subtotalGeneral - descuentoGeneral;
@@ -178,78 +233,134 @@ function Facturacion() {
     cancelarEdicion();
   };
 
- const realizarVenta = () => {
-  if (!cajaAbierta) {
-    setError("No se puede realizar la venta: la caja está cerrada. Abra una sesión de caja primero.");
-    return;
-  }
+  const realizarVenta = () => {
+    if (!cajaAbierta) {
+      setError("No se puede realizar la venta: la caja está cerrada. Abra una sesión de caja primero.");
+      return;
+    }
 
-  if (items.length === 0) {
-    setError("Agrega al menos un producto para realizar la venta.");
-    return;
-  }
+    if (items.length === 0) {
+      setError("Agrega al menos un producto o servicio para realizar la venta.");
+      return;
+    }
 
-  setError("");
-  setModalConfirmarAbierto(true);
-};
+    setError("");
+    setModalConfirmarAbierto(true);
+  };
 
   const confirmarVenta = async (
-  _detalle: DetalleConfirmacionVenta,
-  setErrorModal: (mensaje: string) => void
-): Promise<boolean> => {
-  try {
-    await crearVenta(
-      Number(clienteSeleccionado?.id),
-      tipoPago,
-      totalGeneral,
-      items.map((item) => ({
-        Id_producto: item.producto.id,
-        Cantidad: item.cantidad,
-        Precio_Venta: item.precio,
-        Descuento: item.descuento,
-        Subtotal: subtotalNeto(item),
-      }))
-    );
+    _detalle: DetalleConfirmacionVenta,
+    setErrorModal: (mensaje: string) => void
+  ): Promise<boolean> => {
+    try {
+      await crearVenta(
+        Number(clienteSeleccionado?.id),
+        tipoPago,
+        totalGeneral,
+        items.map((item) =>
+          item.tipo === "producto"
+            ? {
+                Id_producto: item.producto.id,
+                Cantidad: item.cantidad,
+                Precio_Venta: item.precio,
+                Descuento: item.descuento,
+                Subtotal: subtotalNeto(item),
+              }
+            : {
+                // ⚠ Ajusta esta forma al contrato real que espera tu backend
+                // para líneas de servicio (p.ej. si usa Id_servicio o un
+                // campo Tipo dentro del mismo detalle).
+                Id_servicio: item.servicio.id,
+                Cantidad: item.cantidad,
+                Precio_Venta: item.precio,
+                Descuento: item.descuento,
+                Subtotal: subtotalNeto(item),
+              }
+        )
+      );
 
-    setItems([]);
-    setModalConfirmarAbierto(false);
-    return true;
-  } catch (error: any) {
-    setErrorModal(error?.response?.data?.mensaje ?? "Error al confirmar la venta.");
-    return false;
-  }
-};
+      setItems([]);
+      setModalConfirmarAbierto(false);
+      return true;
+    } catch (error: any) {
+      setErrorModal(error?.response?.data?.mensaje ?? "Error al confirmar la venta.");
+      return false;
+    }
+  };
+
+  const cambiarTipoSeleccion = (tipo: "producto" | "servicio") => {
+    if (tipo === tipoSeleccion) return;
+    setTipoSeleccion(tipo);
+    setProductoSeleccionado(null);
+    setServicioSeleccionado(null);
+    setPrecio("0.00");
+  };
 
   return (
     <div className="factura-page">
       <div className="factura-contenido">
         <div className="factura-header">
           {cajaAbierta === false && (
-  <div className="factura-alerta-caja">
-    ⚠ La caja está cerrada. Debe abrir una sesión de caja antes de facturar.
-  </div>
-)}
+            <div className="factura-alerta-caja">
+              ⚠ La caja está cerrada. Debe abrir una sesión de caja antes de facturar.
+            </div>
+          )}
           <h1>Ventas</h1>
           <p className="factura-subtitulo">
             Registre los productos y complete el pago de la transacción.
           </p>
           <p className="factura-fecha">Fecha: {formatearFecha(new Date())}</p>
         </div>
-        
 
         <div className="factura-card">
+          <div className="factura-tipo-toggle">
+            <button
+              type="button"
+              className={
+                "factura-tipo-btn" +
+                (tipoSeleccion === "producto" ? " factura-tipo-btn--activo" : "")
+              }
+              onClick={() => cambiarTipoSeleccion("producto")}
+            >
+              Producto
+            </button>
+            <button
+              type="button"
+              className={
+                "factura-tipo-btn" +
+                (tipoSeleccion === "servicio" ? " factura-tipo-btn--activo" : "")
+              }
+              onClick={() => cambiarTipoSeleccion("servicio")}
+            >
+              Servicio
+            </button>
+          </div>
+
           <div className="factura-fila-producto">
             <div className="factura-campo factura-campo-producto">
               <label>
-                Producto o Servicio <span style={{ color: "#e5484d" }}>*</span>
+                {tipoSeleccion === "producto" ? "Producto" : "Servicio"}{" "}
+                <span style={{ color: "#e5484d" }}>*</span>
               </label>
               <button
                 type="button"
                 className="factura-selector-btn"
-                onClick={() => setModalProductoAbierto(true)}
+                onClick={() =>
+                  tipoSeleccion === "producto"
+                    ? setModalProductoAbierto(true)
+                    : setModalServicioAbierto(true)
+                }
               >
-                <span className={productoSeleccionado ? "" : "factura-selector-placeholder"}>
-                  {productoSeleccionado ? productoSeleccionado.Nombre : "Seleccione un producto"}
+                <span
+                  className={
+                    productoSeleccionado || servicioSeleccionado
+                      ? ""
+                      : "factura-selector-placeholder"
+                  }
+                >
+                  {tipoSeleccion === "producto"
+                    ? productoSeleccionado?.Nombre ?? "Seleccione un producto"
+                    : servicioSeleccionado?.Nombre_servicio ?? "Seleccione un servicio"}
                 </span>
               </button>
             </div>
@@ -296,7 +407,7 @@ function Facturacion() {
               </div>
             </div>
 
-            <button className="factura-btn-agregar" onClick={guardarProducto}>
+            <button className="factura-btn-agregar" onClick={guardarItem}>
               {indiceEditando !== null ? "Actualizar" : "Agregar"}
             </button>
 
@@ -320,7 +431,12 @@ function Facturacion() {
               </label>
               <select value={tipoPago} onChange={(e) => setTipoPago(e.target.value)}>
                 <option value="Contado">Contado</option>
-                <option value="Credito">Crédito</option>
+                <option
+  value="Credito"
+  disabled={clienteSeleccionado.id === 10}
+>
+  Crédito
+</option>
                 <option value="Transferencia">Transferencia</option>
               </select>
             </div>
@@ -348,7 +464,7 @@ function Facturacion() {
           <table className="factura-tabla">
             <thead>
               <tr>
-                <th>Producto</th>
+                <th>Producto / Servicio</th>
                 <th>Cantidad</th>
                 <th>Precio</th>
                 <th>Descuento</th>
@@ -363,11 +479,14 @@ function Facturacion() {
                   className={indiceEditando === index ? "factura-tr-editando" : ""}
                 >
                   <td>
-                    {item.producto.Nombre}
-                    {item.producto.Nombre_marca && (
+                    {item.tipo === "producto" ? item.producto.Nombre : item.servicio.Nombre_servicio}
+                    {item.tipo === "producto" && item.producto.Nombre_marca && (
                       <span className="factura-nombre-marca">
                         {item.producto.Nombre_marca}
                       </span>
+                    )}
+                    {item.tipo === "servicio" && (
+                      <span className="factura-nombre-marca">Servicio</span>
                     )}
                   </td>
                   <td>{item.cantidad}</td>
@@ -380,7 +499,7 @@ function Facturacion() {
                     <button
                       className="factura-btn-editar"
                       onClick={() => editarItem(index)}
-                      aria-label="Editar producto"
+                      aria-label="Editar"
                     >
                       <SquarePen size={24} />
                     </button>
@@ -388,7 +507,7 @@ function Facturacion() {
                     <button
                       className="factura-btn-eliminar"
                       onClick={() => eliminarItem(index)}
-                      aria-label="Eliminar producto"
+                      aria-label="Eliminar"
                     >
                       <Trash2 size={24} />
                     </button>
@@ -399,7 +518,7 @@ function Facturacion() {
           </table>
 
           {items.length === 0 && (
-            <div className="factura-vacio">Aún no has agregado productos a la venta.</div>
+            <div className="factura-vacio">Aún no has agregado productos ni servicios a la venta.</div>
           )}
         </div>
 
@@ -426,14 +545,14 @@ function Facturacion() {
               </div>
             </div>
 
-           <button
-  className="factura-btn-vender"
-  onClick={realizarVenta}
-  disabled={!cajaAbierta}
-  title={!cajaAbierta ? "La caja está cerrada" : undefined}
->
-  Realizar Venta
-</button>
+            <button
+              className="factura-btn-vender"
+              onClick={realizarVenta}
+              disabled={!cajaAbierta}
+              title={!cajaAbierta ? "La caja está cerrada" : undefined}
+            >
+              Realizar Venta
+            </button>
           </div>
         </div>
       </div>
@@ -441,10 +560,23 @@ function Facturacion() {
       <ModalSeleccionarProducto
         abierto={modalProductoAbierto}
         onClose={() => setModalProductoAbierto(false)}
-        onSeleccionar={(producto) => {
+        onSeleccionar={(producto, cant) => {
           setProductoSeleccionado(producto);
+          setServicioSeleccionado(null);
           setPrecio(producto.Precio_venta.toString());
+          setCantidad(cant.toString());
           setModalProductoAbierto(false);
+        }}
+      />
+
+      <ModalSeleccionarServicio
+        abierto={modalServicioAbierto}
+        onClose={() => setModalServicioAbierto(false)}
+        onSeleccionar={(servicio) => {
+          setServicioSeleccionado(servicio);
+          setProductoSeleccionado(null);
+          setPrecio(servicio.Precio.toString());
+          setModalServicioAbierto(false);
         }}
       />
 

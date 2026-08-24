@@ -1,7 +1,7 @@
 /* Reutiliza .modal-overlay, .modal, .modal-close, .error-text ya existentes. */
 
 .seleccion-modal--ancho{
-  width: 640px;
+  width: 740px;
 }
 
 .seleccion-modal .modal-header {
@@ -98,6 +98,30 @@
   font-size: 0.8rem;
   font-weight: 700;
   cursor: pointer;
+}
+
+.seleccion-cantidad-input {
+  box-sizing: border-box;
+  border: 1px solid #e5e7eb;
+  background: #f9fafb;
+  border-radius: 8px;
+  padding: 0.65rem 0.85rem;
+  font-size: 0.9rem;
+  font-family: inherit;
+  color: #111;
+  width: 70px;
+  text-align: center;
+}
+
+.seleccion-cantidad-input:focus {
+  outline: none;
+  border-color: #e5484d;
+  background: #fff;
+}
+
+.seleccion-cantidad-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .seleccion-page-btn:hover {

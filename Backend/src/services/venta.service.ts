@@ -6,6 +6,7 @@ interface DetalleVentaInput {
     Precio_Venta: number;
     Descuento: number,
     Subtotal: number;
+    Id_servicio: number;
 }
 
 export const crearVenta = async (
@@ -28,7 +29,8 @@ export const crearVenta = async (
 
         // Verificar stock
         for (const detalle of detalles) {
-
+            console.log(detalle)
+            if(detalle.Id_producto != null && detalle.Id_servicio == null){
             const [rows]: any = await connection.query(
                 "SELECT Nombre, Stock FROM productos WHERE id = ?",
                 [detalle.Id_producto]
@@ -43,6 +45,7 @@ export const crearVenta = async (
                     `Stock insuficiente para el producto "${rows[0].Nombre}". Stock disponible: ${rows[0].Stock}.`
                 );
             }
+        }
         }
 // Verificar que haya una sesión de caja abierta
 const [sesionRows]: any = await connection.query(
@@ -72,25 +75,27 @@ if (sesionRows.length === 0) {
         const idVenta = venta.insertId;
 
         // Crear detalles
-        for (const detalle of detalles) {
+        // Crear detalles
+for (const detalle of detalles) {
 
-            await connection.query(
-                `
-                INSERT INTO detalle_venta
-                (Id_venta, Id_producto, Cantidad, Precio_Venta, Descuento, Subtotal)
-                VALUES (?, ?, ?, ?, ?, ?)
-                `,
-                [
-                    idVenta,
-                    detalle.Id_producto,
-                    detalle.Cantidad,
-                    detalle.Precio_Venta,
-                    detalle.Descuento,
-                    detalle.Subtotal
-                ]
-            );
+    await connection.query(
+        `
+        INSERT INTO detalle_venta
+        (Id_venta, Id_producto, Id_servicio, Cantidad, Precio_Venta, Descuento, Subtotal)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+        `,
+        [
+            idVenta,
+            detalle.Id_producto ?? null,
+            detalle.Id_servicio ?? null,
+            detalle.Cantidad,
+            detalle.Precio_Venta,
+            detalle.Descuento,
+            detalle.Subtotal
+        ]
+    );
 
-        }
+}
 
         await connection.commit();
 

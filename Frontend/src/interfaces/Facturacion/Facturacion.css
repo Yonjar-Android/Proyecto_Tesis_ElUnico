@@ -373,3 +373,26 @@
 .factura-tr-editando {
   background-color: #fef9c3;
 }
+
+.factura-tipo-toggle {
+  display: inline-flex;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+}
+
+.factura-tipo-btn {
+  border: 1px solid #e5e7eb;
+  background: #f9fafb;
+  color: #6b7280;
+  border-radius: 8px;
+  padding: 0.4rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.factura-tipo-btn--activo {
+  background: #e5484d;
+  border-color: #e5484d;
+  color: #fff;
+}
