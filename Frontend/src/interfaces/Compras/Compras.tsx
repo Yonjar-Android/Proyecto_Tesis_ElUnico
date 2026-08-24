@@ -391,6 +391,7 @@ function Compras() {
           setProductoSeleccionado(producto);
           setPrecioVenta(producto.Precio_venta);
           setModalProductoAbierto(false);
+          
         }}
       />
 

@@ -104,6 +104,18 @@
   width: 100px;
 }
 
+.factura-campo-label-fila {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.factura-stock-disponible {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #16a34a;
+}
+
 .factura-campo-precio {
   width: 140px;
 }

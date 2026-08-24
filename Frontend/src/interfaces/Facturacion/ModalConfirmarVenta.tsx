@@ -66,7 +66,8 @@ function ModalConfirmarVenta({
       ? numDolaresRecibido * TASA_CAMBIO
       : numCordobasRecibido + numDolaresRecibido * TASA_CAMBIO;
 
-  const cambioCordobas = Math.max(0, recibidoEnCordobas - totalVenta);
+   const cambioCordobas = Math.max(0, recibidoEnCordobas - totalVenta);
+  const faltanteCordobas = Math.max(0, totalVenta - recibidoEnCordobas);
 
   function cerrar() {
     onClose();
@@ -218,13 +219,23 @@ function ModalConfirmarVenta({
             </p>
           )}
 
-          <div className="confirmar-cambio-card">
-            <span className="confirmar-cambio-icono">💵</span>
-            <span className="confirmar-cambio-label">Cambio</span>
-            <span className="confirmar-cambio-monto">
-              C${formatearMoneda(cambioCordobas)}
-            </span>
-          </div>
+                    {faltanteCordobas > 0 ? (
+            <div className="confirmar-cambio-card confirmar-cambio-card--falta">
+              <span className="confirmar-cambio-icono">⚠️</span>
+              <span className="confirmar-cambio-label">Falta</span>
+              <span className="confirmar-cambio-monto">
+                C${formatearMoneda(faltanteCordobas)}
+              </span>
+            </div>
+          ) : (
+            <div className="confirmar-cambio-card">
+              <span className="confirmar-cambio-icono">💵</span>
+              <span className="confirmar-cambio-label">Cambio</span>
+              <span className="confirmar-cambio-monto">
+                C${formatearMoneda(cambioCordobas)}
+              </span>
+            </div>
+          )}
 
           {error && <span className="error-text">{error}</span>}
         </div>

@@ -173,7 +173,7 @@ function Facturacion() {
     const subtotalLinea = Number(cantidad) * Number(precio);
 
     if (Number(descuento) > subtotalLinea) {
-      setError("El descuento no puede ser mayor al subtotal de la línea.");
+      setError("El descuento no puede ser mayor al subtotal.");
       return;
     }
 
@@ -338,10 +338,19 @@ function Facturacion() {
 
           <div className="factura-fila-producto">
             <div className="factura-campo factura-campo-producto">
-              <label>
-                {tipoSeleccion === "producto" ? "Producto" : "Servicio"}{" "}
-                <span style={{ color: "#e5484d" }}>*</span>
-              </label>
+              <div className="factura-campo-label-fila">
+                <label>
+                  {tipoSeleccion === "producto" ? "Producto" : "Servicio"}{" "}
+                  <span style={{ color: "#e5484d" }}>*</span>
+                </label>
+
+                {tipoSeleccion === "producto" && productoSeleccionado && (
+                  <span className="factura-stock-disponible">
+                    Stock: {productoSeleccionado.Stock}
+                  </span>
+                )}
+              </div>
+
               <button
                 type="button"
                 className="factura-selector-btn"
@@ -560,13 +569,15 @@ function Facturacion() {
       <ModalSeleccionarProducto
         abierto={modalProductoAbierto}
         onClose={() => setModalProductoAbierto(false)}
+        validarStock
         onSeleccionar={(producto, cant) => {
           setProductoSeleccionado(producto);
           setServicioSeleccionado(null);
           setPrecio(producto.Precio_venta.toString());
           setCantidad(cant.toString());
           setModalProductoAbierto(false);
-        }}
+        }
+        }
       />
 
       <ModalSeleccionarServicio

@@ -10,11 +10,12 @@ interface Props {
   abierto: boolean;
   onClose: () => void;
   onSeleccionar: (producto: ProductoListado, cantidad: number) => void;
+  validarStock?: boolean;
 }
 
 const UMBRAL_STOCK_BAJO = 10;
 
-function ModalSeleccionarProducto({ abierto, onClose, onSeleccionar }: Props) {
+function ModalSeleccionarProducto({ abierto, onClose, onSeleccionar, validarStock = false }: Props) {
   const [productos, setProductos] = useState<ProductoListado[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -60,9 +61,10 @@ function ModalSeleccionarProducto({ abierto, onClose, onSeleccionar }: Props) {
 
   if (!abierto) return null;
 
-  const obtenerCantidad = (producto: ProductoListado) => {
-    // Si no se ha tocado el input, por defecto es 1 (o el stock si es 0)
-    return cantidades[producto.id] ?? (producto.Stock > 0 ? 1 : 0);
+      const obtenerCantidad = (producto: ProductoListado) => {
+    // Si no se ha tocado el input, por defecto es 1 (o el stock si es 0, solo cuando se valida stock)
+    const porDefecto = validarStock ? (producto.Stock > 0 ? 1 : 0) : 1;
+    return cantidades[producto.id] ?? porDefecto;
   };
 
   const manejarCambioCantidad = (producto: ProductoListado, valor: string) => {
@@ -76,7 +78,7 @@ function ModalSeleccionarProducto({ abierto, onClose, onSeleccionar }: Props) {
       cantidad = 0;
     }
 
-    if (cantidad > producto.Stock) {
+     if (validarStock && cantidad > producto.Stock) {
       cantidad = producto.Stock;
     }
 
@@ -86,10 +88,14 @@ function ModalSeleccionarProducto({ abierto, onClose, onSeleccionar }: Props) {
     }));
   };
 
-  const manejarSeleccionar = (producto: ProductoListado) => {
+      const manejarSeleccionar = (producto: ProductoListado) => {
     const cantidad = obtenerCantidad(producto);
 
-    if (cantidad <= 0 || cantidad > producto.Stock) {
+    if (cantidad <= 0) {
+      return;
+    }
+
+    if (validarStock && cantidad > producto.Stock) {
       return;
     }
 
@@ -133,9 +139,11 @@ function ModalSeleccionarProducto({ abierto, onClose, onSeleccionar }: Props) {
               </tr>
             </thead>
             <tbody>
-              {productos.map((producto) => {
+                {productos.map((producto) => {
                 const cantidad = obtenerCantidad(producto);
-                const cantidadInvalida = cantidad <= 0 || cantidad > producto.Stock;
+                const sinStock = validarStock && producto.Stock === 0;
+                const cantidadInvalida =
+                  cantidad <= 0 || (validarStock && cantidad > producto.Stock);
 
                 return (
                   <tr key={producto.id}>
@@ -160,23 +168,23 @@ function ModalSeleccionarProducto({ abierto, onClose, onSeleccionar }: Props) {
                     </td>
                     <td>C${producto.Precio_venta}</td>
                     <td className="seleccion-td-cantidad">
-                      <input
+                        <input
                         className="seleccion-cantidad-input"
                         type="number"
                         min={0}
-                        max={producto.Stock}
+                        max={validarStock ? producto.Stock : undefined}
                         value={cantidad}
-                        disabled={producto.Stock === 0}
+                        disabled={sinStock}
                         onChange={(e) =>
                           manejarCambioCantidad(producto, e.target.value)
                         }
                       />
                     </td>
                     <td className="seleccion-td-accion">
-                      <button
+                        <button
                         className="seleccion-btn"
                         onClick={() => manejarSeleccionar(producto)}
-                        disabled={cantidadInvalida}
+                        disabled={cantidadInvalida || sinStock}
                       >
                         Seleccionar
                       </button>
