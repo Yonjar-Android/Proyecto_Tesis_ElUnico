@@ -5,6 +5,7 @@ import ModalAgregarServicio from "./ModalAgregarServicio";
 import type { PaginatedResponse } from "../../models/PaginatedResponse";
 import ModalEditarServicio from "./ModalEditarServicio";
 import { SquarePen } from 'lucide-react'
+import { formatearMoneda } from "../FuncionAuxiliar";
 
 interface Servicio {
     id: number;
@@ -118,7 +119,7 @@ useEffect(() => {
               <tr key={servicio.id} className="categoria-tr">
                 <td className="categoria-td">{servicio.Nombre_servicio}</td>
                 <td className="categoria-td">{servicio.Descripcion || "—"}</td>
-                <td className="categoria-td">C${servicio.Precio || "0"}</td>
+                <td className="categoria-td">C${formatearMoneda(servicio.Precio) || "0"}</td>
                 <td className="categoria-td categoria-td-actions">
                     <button
                         className="categoria-edit-btn"

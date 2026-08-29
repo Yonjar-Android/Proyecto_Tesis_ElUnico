@@ -3,6 +3,7 @@ import "../Reportes.css";
 import IconoBarras from "../IconoBarras";
 import type { ProductoListado } from "../../../models/ProductoListado.js";
 import { obtenerReporteStockBajo, /*exportarStockBajo*/ } from "../../../services/reporte.service.js";
+import { formatearMoneda } from "../../FuncionAuxiliar";
 
 export interface ReporteProductoStock {
     id: number;
@@ -160,7 +161,7 @@ function ReporteStockBajo() {
                   <td>
                     <span className="reporte-pill-categoria">{producto.Nombre_categoria}</span>
                   </td>
-                  <td>C${producto.Precio_venta}</td>
+                  <td>C${formatearMoneda(producto.Precio_venta)}</td>
                   <td>{producto.Stock_min}</td>
                   <td>{renderStock(producto)}</td>
                 </tr>

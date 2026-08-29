@@ -6,6 +6,7 @@ import { crearCompra } from "../../services/compra.service";
 import ModalSeleccionarProducto from "../Facturacion/ModalSeleccionarProducto";
 import ModalSeleccionarProveedor from "./ModalSeleccionarProveedor";
 import { SquarePen, Trash2 } from "lucide-react";
+import { formatearMoneda } from "../FuncionAuxiliar"
 
 interface ItemCompra {
   producto: ProductoListado,
@@ -333,9 +334,9 @@ function Compras() {
                   )}
                 </td>
                 <td>{item.cantidad}</td>
-                <td>C${item.precio_compra}</td>
+                <td>C${formatearMoneda(item.precio_compra)}</td>
                 <td className="factura-td-subtotal">
-                  C${(item.cantidad * item.precio_compra)}
+                  C${(formatearMoneda(item.cantidad * item.precio_compra))}
                 </td>
                 <td className="factura-td-accion">
                   <button
@@ -374,7 +375,7 @@ function Compras() {
         <div className="factura-total-venta">
           <div className="factura-total-texto">
             <span className="factura-total-label">Total</span>
-            <span className="factura-total-monto">C${total}</span>
+            <span className="factura-total-monto">C${formatearMoneda(total)}</span>
           </div>
 
           <button className="factura-btn-vender" onClick={confirmarCompra}>

@@ -4,17 +4,11 @@ import IconoBarras from "../IconoBarras";
 import type { Cliente } from "../../../models/Cliente";
 import { obtenerReporteCuentasCobrar, /*exportarCuentasPorCobrar*/ } from "../../../services/reporte.service";
 import type { PaginatedResponse } from "../../../models/PaginatedResponse";
+import { formatearMoneda, formatearTelefono } from "../../FuncionAuxiliar";
 
 export interface RespuestaClientesConDeuda extends PaginatedResponse<Cliente> {
     TotalClientesConDeuda: number;
     TotalSaldoPendiente: number;
-}
-
-function formatearMoneda(valor: number) {
-  return valor.toLocaleString("en-US", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
 }
 
 function ReporteCuentasPorCobrar() {
@@ -129,7 +123,7 @@ function ReporteCuentasPorCobrar() {
                   <td>{cliente.NCliente}</td>
                   <td className="reporte-td-nombre">{cliente.Nombre}</td>
                   <td>{cliente.Apellido}</td>
-                  <td>{cliente.Telefono || "Sin contacto"}</td>
+                  <td>{formatearTelefono(cliente.Telefono) || "Sin contacto"}</td>
                   <td className="reporte-td-derecha">
                     C$ {formatearMoneda(cliente.Saldo_Deuda)}
                   </td>

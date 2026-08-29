@@ -6,7 +6,7 @@ import type { PaginatedResponse } from "../../models/PaginatedResponse";
 import { buscarProductos } from "../../services/producto.service";
 import type { ProductoListado } from "../../models/ProductoListado";
 import { SquarePen } from "lucide-react";
-
+import { formatearMoneda } from "../FuncionAuxiliar";
 
 function Inventario() {
   const navigate = useNavigate();
@@ -98,7 +98,7 @@ function Inventario() {
                   <td>
                     <span className="inventario-pill-categoria">{producto.Nombre_categoria}</span>
                   </td>
-                  <td>C${producto.Precio_venta}</td>
+                  <td>C${formatearMoneda(producto.Precio_venta)}</td>
                   <td>
                     {producto.Stock <= producto.Stock_min ? (
                       <span className="inventario-pill-critico">

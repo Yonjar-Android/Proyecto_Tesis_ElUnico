@@ -194,6 +194,7 @@ function ModalEditarCliente({ abierto, cliente, onClose, onEditar }: Props) {
                 <input
                   type="text"
                   value={telefono}
+                  max={8}
                   onChange={(e) => setTelefono(e.target.value)}
                 />
               </div>

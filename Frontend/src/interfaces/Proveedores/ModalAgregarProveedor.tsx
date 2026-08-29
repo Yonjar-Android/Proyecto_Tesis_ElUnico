@@ -5,6 +5,7 @@ import {
   IconoTelefono,
   IconoUbicacion,
 } from "../Clientes/IconosCliente";
+import { formatearTelefono } from "../FuncionAuxiliar";
 
 interface Props {
   abierto: boolean;
@@ -128,6 +129,7 @@ function ModalAgregarProveedor({ abierto, onClose, onGuardar }: Props) {
               <input
                 type="text"
                 placeholder="Ej: 34459876"
+                maxLength={8}
                 value={telefono}
                 onChange={(e) => setTelefono(e.target.value)}
               />

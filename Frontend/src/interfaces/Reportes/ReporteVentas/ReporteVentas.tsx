@@ -6,18 +6,12 @@ import { obtenerReporteVentasPorPeriodo, /*exportarReporteVentas*/ } from "../..
 import type { VentaReporte } from "../../../models/VentaReportes";
 import type { Cliente } from "../../../models/Cliente";
 import type { PaginatedResponse } from "../../../models/PaginatedResponse";
+import { formatearMoneda } from "../../FuncionAuxiliar";
 
 export interface RespuestaReporteVentas extends PaginatedResponse<VentaReporte> {
   TotalRegistros: number;
   VentasContado: number;
   TotalVentas: number;
-}
-
-function formatearMoneda(valor: number) {
-  return valor.toLocaleString("en-US", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
 }
 
 export const formatearFecha = (fecha: string): string => {

@@ -7,13 +7,7 @@ import { buscarProveedores } from "../../../services/proveedor.service";
 import type { Proveedor } from "../../../models/Proveedor";
 import type { PaginatedResponse } from "../../../models/PaginatedResponse";
 import type { CompraReporte, RespuestaReporteCompras } from "../../../models/CompraReporte";
-
-function formatearMoneda(valor: number) {
-  return valor.toLocaleString("en-US", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-}
+import { formatearMoneda } from "../../FuncionAuxiliar";
 
 export const formatearFecha = (fecha: string): string => {
   const date = new Date(fecha);

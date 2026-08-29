@@ -5,6 +5,7 @@ import type { PaginatedResponse } from "../../models/PaginatedResponse";
 import ModalAgregarProveedor from "./ModalAgregarProveedor";
 import ModalEditarProveedor from "./ModalEditarProveedor";
 import { SquarePen } from "lucide-react";
+import { formatearTelefono } from "../FuncionAuxiliar";
 
 interface Proveedor {
 
@@ -126,7 +127,7 @@ return (
                 <td className="proveedor-td">{proveedor.Nombre_Empresa}</td>
                 <td className="proveedor-td">{proveedor.Nombre_Contacto}</td>
                 <td className="proveedor-td">
-                {proveedor.Telefono.trim() === "" ? "Sin contacto" : proveedor.Telefono}
+                {proveedor.Telefono.trim() === "" ? "Sin contacto" : formatearTelefono(proveedor.Telefono)}
                 </td>
                 <td className="proveedor-td">
                     {proveedor.Direccion?.trim() ? proveedor.Direccion : "Sin dirección"}

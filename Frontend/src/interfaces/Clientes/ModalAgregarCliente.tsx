@@ -58,20 +58,20 @@ function ModalAgregarCliente({ abierto, onClose, onGuardar }: Props) {
       return;
     }
 
-    if (!/^\d+$/.test(ncliente)) {
-    setError("Ingrese un número de cliente válido.");
-    return;
-    }
-
-    if (Number(ncliente.trim()) <= 0) {
-      setError("El campo número de cliente debe ser mayor que 0.");
-      return;
-    }
-
     if (!ncliente.trim()) {
-      setError("El campo número de cliente no puede estar vacío.");
-      return;
-    }
+  setError("El campo número de cliente no puede estar vacío.");
+  return;
+}
+
+if (!/^\d+$/.test(ncliente.trim())) {
+  setError("Ingrese un número de cliente válido.");
+  return;
+}
+
+if (Number(ncliente) <= 0) {
+  setError("El campo número de cliente debe ser mayor que 0.");
+  return;
+}
 
     if (!/^\d+$/.test(telefono) && telefono.length != 0) {
     setError("El número de teléfono solo puede contener dígitos del 0 al 9.");
@@ -188,6 +188,7 @@ function ModalAgregarCliente({ abierto, onClose, onGuardar }: Props) {
                 <input
                   type="text"
                   value={telefono}
+                  maxLength={8}
                   onChange={(e) => setTelefono(e.target.value)}
                 />
               </div>

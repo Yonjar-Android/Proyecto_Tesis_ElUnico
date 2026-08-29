@@ -12,6 +12,7 @@ import type { Servicio } from "../../models/Servicio";
 import { crearVenta } from "../../services/venta.service";
 import { SquarePen, Trash2 } from "lucide-react";
 import { obtenerSesionActiva } from "../../services/caja.service";
+import { formatearMoneda } from "../FuncionAuxiliar"
 
 type ItemVenta =
   | {
@@ -119,8 +120,8 @@ function Facturacion() {
     }
 
     setCantidad(String(item.cantidad));
-    setDescuento(item.descuento.toFixed(2));
-    setPrecio(item.precio.toFixed(2));
+    setDescuento(formatearMoneda(item.descuento));
+    setPrecio(formatearMoneda(item.precio));
     setIndiceEditando(index);
     setError("");
   };
@@ -499,11 +500,11 @@ function Facturacion() {
                     )}
                   </td>
                   <td>{item.cantidad}</td>
-                  <td>C${item.precio.toFixed(2)}</td>
+                  <td>C${formatearMoneda(item.precio)}</td>
                   <td>
-                    {item.descuento > 0 ? `- C$${item.descuento.toFixed(2)}` : "—"}
+                    {item.descuento > 0 ? `- C$${formatearMoneda(item.descuento)}` : "—"}
                   </td>
-                  <td className="factura-td-subtotal">C${subtotalNeto(item).toFixed(2)}</td>
+                  <td className="factura-td-subtotal">C${formatearMoneda(subtotalNeto(item))}</td>
                   <td className="factura-td-accion">
                     <button
                       className="factura-btn-editar"
@@ -542,15 +543,15 @@ function Facturacion() {
             <div className="factura-total-desglose">
               <div className="factura-total-linea">
                 <span>Subtotal</span>
-                <span>C${subtotalGeneral.toFixed(2)}</span>
+                <span>C${formatearMoneda(subtotalGeneral)}</span>
               </div>
               <div className="factura-total-linea factura-total-linea--descuento">
                 <span>Descuento</span>
-                <span>- C${descuentoGeneral.toFixed(2)}</span>
+                <span>- C${formatearMoneda(descuentoGeneral)}</span>
               </div>
               <div className="factura-total-linea factura-total-linea--total">
                 <span>Total</span>
-                <span>C${totalGeneral.toFixed(2)}</span>
+                <span>C${formatearMoneda(totalGeneral)}</span>
               </div>
             </div>
 
@@ -603,6 +604,7 @@ function Facturacion() {
       <ModalConfirmarVenta
         abierto={modalConfirmarAbierto}
         totalVenta={totalGeneral}
+        tipoPago={tipoPago}
         onClose={() => setModalConfirmarAbierto(false)}
         onConfirmar={confirmarVenta}
       />

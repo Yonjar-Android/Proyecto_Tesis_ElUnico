@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import "./ModalAbonarCliente.css";
 import Cliente from "./Cliente";
+import { formatearMoneda } from "../FuncionAuxiliar"
 
 type TipoMoneda = "cordobas" | "dolares" | "mixto";
 
@@ -26,13 +27,6 @@ interface Props {
     notas: string,
     setError: (mensaje: string) => void
   ) => Promise<boolean>;
-}
-
-function formatearMoneda(valor: number) {
-  return valor.toLocaleString("en-US", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
 }
 
 function ModalAbonarCliente({ abierto, cliente, onClose, onAbonar }: Props) {
@@ -248,12 +242,12 @@ const registrar = async () => {
             )}
           </div>
 
-          {tipoMonedaRecibida === "mixto" && (
-            <p className="abono-nota-tasa">
-              Equivalente recibido: C${formatearMoneda(recibidoEnCordobas)}{" "}
-              (tasa C${formatearMoneda(TASA_CAMBIO)} por $1)
-            </p>
-          )}
+          {tipoMonedaRecibida !== "cordobas" && (
+  <p className="abono-nota-tasa">
+    Equivalente recibido: C${formatearMoneda(recibidoEnCordobas)}{" "}
+    (tasa C${formatearMoneda(TASA_CAMBIO)} por $1)
+  </p>
+)}
 
           <div className="campo">
             <label>Notas (Opcional)</label>

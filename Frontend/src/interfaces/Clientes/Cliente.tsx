@@ -7,6 +7,7 @@ import ModalAgregarCliente from "./ModalAgregarCliente"
 import ModalAbonarCliente from "./ModalAbonarCliente";
 import { crearDetalleAbono } from "../../services/detalle_abono.service";
 import { SquarePen, CreditCard } from "lucide-react";
+import { formatearMoneda, formatearTelefono } from "../FuncionAuxiliar"
 
 interface Cliente {
 
@@ -135,9 +136,9 @@ return (
                 <td className="cliente-td">{cliente.Nombre}</td>
                 <td className="cliente-td">{cliente.Apellido}</td>
                 <td className="cliente-td">
-                {cliente.Telefono.trim() === "" ? "Sin contacto" : cliente.Telefono}
+                {formatearTelefono(cliente.Telefono.trim()) === "" ? "Sin contacto" : formatearTelefono(cliente.Telefono)}
                 </td>
-                <td className="cliente-td">{cliente.Saldo_Deuda}</td>
+                <td className="cliente-td">{formatearMoneda(cliente.Saldo_Deuda)}</td>
                 <td className="cliente-td cliente-td-actions">
 
                   <button

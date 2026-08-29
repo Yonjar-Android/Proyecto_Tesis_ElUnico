@@ -4,6 +4,7 @@ import IconoCubo from "../Productos/ModalesSeleccion/IconoCubo";
 import { buscarProveedores } from "../../services/proveedor.service";
 import type { Proveedor } from "../../models/Proveedor";
 import type { PaginatedResponse } from "../../models/PaginatedResponse";
+import { formatearTelefono } from "../FuncionAuxiliar";
 
 interface Props {
   abierto: boolean;
@@ -92,7 +93,7 @@ function ModalSeleccionarProveedor({ abierto, onClose, onSeleccionar }: Props) {
                 <tr key={proveedor.id}>
                   <td>{proveedor.Nombre_Empresa}</td>
                   <td>{proveedor.Direccion}</td>
-                  <td>{proveedor.Telefono}</td>
+                  <td>{formatearTelefono(proveedor.Telefono)}</td>
                   <td className="seleccion-td-accion">
                     <button
                       className="seleccion-btn"

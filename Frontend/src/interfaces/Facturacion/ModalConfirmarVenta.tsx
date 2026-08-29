@@ -17,6 +17,7 @@ export interface DetalleConfirmacionVenta {
 interface Props {
   abierto: boolean;
   totalVenta: number;
+  tipoPago: string;
   onClose: () => void;
   onConfirmar: (
     detalle: DetalleConfirmacionVenta,
@@ -34,6 +35,7 @@ function formatearMoneda(valor: number) {
 function ModalConfirmarVenta({
   abierto,
   totalVenta,
+  tipoPago,
   onClose,
   onConfirmar,
 }: Props) {
@@ -82,12 +84,13 @@ function ModalConfirmarVenta({
   }
 
   const confirmar = async () => {
-    if (tipoMonedaRecibida === "cordobas" && numCordobasRecibido <= 0) {
+
+    if (tipoMonedaRecibida === "cordobas" && numCordobasRecibido <= 0 && tipoPago != "Credito") {
       setError("Ingresa el monto recibido en córdobas.");
       return;
     }
 
-    if (tipoMonedaRecibida === "dolares" && numDolaresRecibido <= 0) {
+    if (tipoMonedaRecibida === "dolares" && numDolaresRecibido <= 0 && tipoPago != "Credito") {
       setError("Ingresa el monto recibido en dólares.");
       return;
     }
@@ -96,12 +99,13 @@ function ModalConfirmarVenta({
       tipoMonedaRecibida === "mixto" &&
       numCordobasRecibido <= 0 &&
       numDolaresRecibido <= 0
+      && tipoPago != "Credito"
     ) {
       setError("Ingresa al menos un monto recibido (córdobas o dólares).");
       return;
     }
 
-    if (recibidoEnCordobas < totalVenta) {
+    if (recibidoEnCordobas < totalVenta && tipoPago != "Credito") {
       setError("El monto recibido no puede ser menor al total a pagar.");
       return;
     }
@@ -112,7 +116,7 @@ function ModalConfirmarVenta({
         tipoMonedaRecibida === "dolares" ? 0 : numCordobasRecibido,
       montoRecibidoDolares:
         tipoMonedaRecibida === "cordobas" ? 0 : numDolaresRecibido,
-      cambioCordobas: Number(cambioCordobas.toFixed(2)),
+      cambioCordobas: Number(formatearMoneda(Number(cambioCordobas))),
       tasaCambio: TASA_CAMBIO,
     };
 
@@ -212,8 +216,8 @@ function ModalConfirmarVenta({
             </div>
           )}
 
-          {tipoMonedaRecibida === "mixto" && (
-            <p className="confirmar-nota-tasa">
+                    {tipoMonedaRecibida !== "cordobas" && (
+            <p className="abono-nota-tasa">
               Equivalente recibido: C${formatearMoneda(recibidoEnCordobas)}{" "}
               (tasa C${formatearMoneda(TASA_CAMBIO)} por $1)
             </p>
