@@ -6,6 +6,7 @@ import ModalAgregarProveedor from "./ModalAgregarProveedor";
 import ModalEditarProveedor from "./ModalEditarProveedor";
 import { SquarePen } from "lucide-react";
 import { formatearTelefono } from "../FuncionAuxiliar";
+import Notificacion, { type TipoNotificacion } from "../../components/Notification/Notification";
 
 interface Proveedor {
 
@@ -31,7 +32,8 @@ function Proveedor(){
     const [modalEditarAbierto, setModalEditarAbierto] = useState(false);
     
     const [proveedorSeleccionado, setProveedorSeleccionado] = useState<Proveedor | null>(null);
-    
+    const [notif, setNotif] = useState<{ mensaje: string; tipo: TipoNotificacion } | null>(null);
+
         useEffect(() => {
     
             buscar();
@@ -86,6 +88,13 @@ function Proveedor(){
 
 return (
     <div className="proveedor-container">
+      {notif && (
+                    <Notificacion
+                      mensaje={notif.mensaje}
+                      tipo={notif.tipo}
+                      onCerrar={() => setNotif(null)}
+                    />
+                  )}
         <div className="proveedor-content">
       <div className="proveedor-top-part">
         <h1 className="proveedor-title">Proveedores</h1>
@@ -192,11 +201,11 @@ return (
 
             setModalAbierto(false);
             buscar();
-
+            setNotif({ mensaje: "Proveedor registrado correctamente", tipo: "exito" });
             return true
         } catch(error: any){
             setError(error.response.data.mensaje)
-
+            setNotif({ mensaje: "Ocurrió un error", tipo: "error" });
             return false;
         }
       }}
@@ -221,9 +230,10 @@ return (
 
         setModalEditarAbierto(false);
         buscar();
+        setNotif({ mensaje: "Proveedor actualizado correctamente", tipo: "exito" });
         return true;
         } catch (error: any) {
-            
+            setNotif({ mensaje: "Ocurrió un error", tipo: "error" });
             setError(error.response.data.mensaje);
             return false;
         }

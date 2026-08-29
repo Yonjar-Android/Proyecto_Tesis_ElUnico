@@ -3,6 +3,7 @@ import styles from "./SalidasInventario.module.css";
 import { Trash2 } from "lucide-react";
 import ModalSeleccionarProducto from "../Facturacion/ModalSeleccionarProducto";
 import type { ProductoListado } from "../../models/ProductoListado";
+import Notificacion, { type TipoNotificacion } from "../../components/Notification/Notification";
 
 import {
   crearSalida,
@@ -62,6 +63,8 @@ function SalidasInventario() {
 
   const [historial, setHistorial] = useState<SalidaHistorial[]>([]);
   const [cargandoHistorial, setCargandoHistorial] = useState(true);
+
+  const [notif, setNotif] = useState<{ mensaje: string; tipo: TipoNotificacion } | null>(null);
 
   useEffect(() => {
     const cargarHistorial = async () => {
@@ -147,18 +150,28 @@ function SalidasInventario() {
 
       await crearSalida(payload);
 
+      setNotif({ mensaje: "Salida realizada correctamente", tipo: "exito" });
+
       // Refresca el historial para reflejar la salida recién registrada.
       //const data = await obtenerHistorialSalidas();
       //setHistorial(data);
 
       cancelar();
     } catch (err: any) {
+      setNotif({ mensaje: "Ocurrió un error", tipo: "error" });
       setError(err?.response?.data?.mensaje ?? "Error al registrar la salida.");
     }
   };
 
   return (
     <div className={styles.page}>
+      {notif && (
+                    <Notificacion
+                      mensaje={notif.mensaje}
+                      tipo={notif.tipo}
+                      onCerrar={() => setNotif(null)}
+                    />
+                  )}
       <div className={styles.contenido}>
         <div className={styles.header}>
           <h1>Salidas de Inventario</h1>

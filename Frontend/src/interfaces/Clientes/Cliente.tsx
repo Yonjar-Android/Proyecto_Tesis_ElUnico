@@ -8,6 +8,7 @@ import ModalAbonarCliente from "./ModalAbonarCliente";
 import { crearDetalleAbono } from "../../services/detalle_abono.service";
 import { SquarePen, CreditCard } from "lucide-react";
 import { formatearMoneda, formatearTelefono } from "../FuncionAuxiliar"
+import Notificacion, { type TipoNotificacion } from "../../components/Notification/Notification";
 
 interface Cliente {
 
@@ -38,6 +39,8 @@ function Cliente(){
     const [modalAbonarAbierto, setModalAbonarAbierto] = useState(false);
     
     const [clienteSeleccionado, setClienteSeleccionado] = useState<Cliente | null>(null);
+
+    const [notif, setNotif] = useState<{ mensaje: string; tipo: TipoNotificacion } | null>(null);
     
         useEffect(() => {
     
@@ -93,6 +96,13 @@ function Cliente(){
 
 return (
     <div className="cliente-container">
+      {notif && (
+                    <Notificacion
+                      mensaje={notif.mensaje}
+                      tipo={notif.tipo}
+                      onCerrar={() => setNotif(null)}
+                    />
+                  )}
         <div className="cliente-content">
       <div className="cliente-top-part">
         <h1 className="cliente-title">Clientes</h1>
@@ -210,11 +220,11 @@ return (
 
         setModalAbierto(false);
         buscar();
-
+        setNotif({ mensaje: "Cliente registrado correctamente", tipo: "exito" });
         return true;
 
     } catch (error: any) {
-
+      setNotif({ mensaje: "Ocurrió un error", tipo: "error" });
         setError(error.response.data.mensaje);
 
         return false;
@@ -242,9 +252,10 @@ return (
 
         setModalEditarAbierto(false);
         buscar();
+        setNotif({ mensaje: "Cliente actualizado correctamente", tipo: "exito" });
         return true;
         } catch (error: any) {
-            
+            setNotif({ mensaje: "Ocurrió un error correctamente", tipo: "error" });
             setError(error.response.data.mensaje);
             return false;
         }
@@ -269,9 +280,10 @@ onAbonar={ async (id_cliente:number, monto:number, notas:string, setError) => {
 
         setModalAbonarAbierto(false);
         buscar();
+        setNotif({ mensaje: "Abono registrado correctamente", tipo: "exito" });
         return true;
         } catch (error: any) {
-            
+        setNotif({ mensaje: "Ocurrió un error", tipo: "error" });
         setError(error.response.data.mensaje);
             return false;
         }

@@ -5,6 +5,7 @@ import ModalAgregarCategoria from "./ModalAgregarCategoria";
 import type { PaginatedResponse } from "../../models/PaginatedResponse";
 import ModalEditarCategoria from "./ModalEditarCategoria";
 import { SquarePen } from 'lucide-react'
+import Notificacion, { type TipoNotificacion } from "../../components/Notification/Notification";
 
 interface Categoria {
 
@@ -28,6 +29,8 @@ const [modalEditarAbierto, setModalEditarAbierto] = useState(false);
 const [categoriaSeleccionada, setCategoriaSeleccionada] = useState<Categoria | null>(null);
 
 const [searchTerm, setSearchTerm] = useState<string>("");
+
+const [notif, setNotif] = useState<{ mensaje: string; tipo: TipoNotificacion } | null>(null);
 
     useEffect(() => { 
       buscar();
@@ -81,6 +84,13 @@ useEffect(() => {
 
     return (
     <div className="categoria-container">
+      {notif && (
+                    <Notificacion
+                      mensaje={notif.mensaje}
+                      tipo={notif.tipo}
+                      onCerrar={() => setNotif(null)}
+                    />
+                  )}
         <div className="categoria-content">
       <div className="categoria-top-part">
         <h1 className="categoria-title">Categorías</h1>
@@ -159,6 +169,7 @@ useEffect(() => {
 
           setModalAbierto(false);
           buscar();
+          setNotif({ mensaje: "Categoría registrada correctamente", tipo: "exito" });
           return true;
         } catch(error: any){
           setError(error.response.data.mensaje);
@@ -183,9 +194,10 @@ useEffect(() => {
           setModalEditarAbierto(false);
 
           buscar();
+          setNotif({ mensaje: "Categoría actualizada correctamente", tipo: "exito" });
           return true;
         } catch(error: any){
-
+          setNotif({ mensaje: "Ocurrió un error", tipo: "exito" });
           setError(error.response.data.mensaje);
           return false;
         }

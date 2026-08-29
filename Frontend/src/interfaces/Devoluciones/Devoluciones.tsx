@@ -3,6 +3,7 @@ import styles from "./Devoluciones.module.css";
 import { crearDevolucion} from "../../services/devoluciones.service";
 import type {CrearDevolucionData} from "../../services/devoluciones.service"
 import { buscarFacturaParaDevolucion} from "../../services/venta.service";
+import Notificacion, { type TipoNotificacion } from "../../components/Notification/Notification";
 
 // Motivo de la devolución. Se muestra como <select>; ajusta la lista según tu negocio.
 const MOTIVOS_DEVOLUCION = [
@@ -55,6 +56,8 @@ function Devoluciones() {
   const [observacion, setObservacion] = useState("");
 
   const [error, setError] = useState("");
+
+  const [notif, setNotif] = useState<{ mensaje: string; tipo: TipoNotificacion } | null>(null);
 
   const buscarFactura = async () => {
     if (!numeroFactura.trim()) {
@@ -162,6 +165,8 @@ function Devoluciones() {
 
         await crearDevolucion(payload);
 
+        setNotif({ mensaje: "Devolución realizada correctamente", tipo: "exito" });
+
         limpiar();
 
     } catch (err: any) {
@@ -170,11 +175,21 @@ function Devoluciones() {
             err?.response?.data?.mensaje ??
             "Error al registrar la devolución."
         );
+
+        setNotif({ mensaje: "Ocurrió un error", tipo: "error" });
+
     }
 };
 
   return (
     <div className={styles.page}>
+                {notif && (
+        <Notificacion
+          mensaje={notif.mensaje}
+          tipo={notif.tipo}
+          onCerrar={() => setNotif(null)}
+        />
+      )}
       <div className={styles.contenido}>
         <div className={styles.header}>
           <h1>Devoluciones</h1>

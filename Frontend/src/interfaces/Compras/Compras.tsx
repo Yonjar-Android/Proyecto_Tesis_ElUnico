@@ -7,6 +7,7 @@ import ModalSeleccionarProducto from "../Facturacion/ModalSeleccionarProducto";
 import ModalSeleccionarProveedor from "./ModalSeleccionarProveedor";
 import { SquarePen, Trash2 } from "lucide-react";
 import { formatearMoneda } from "../FuncionAuxiliar"
+import Notificacion, { type TipoNotificacion } from "../../components/Notification/Notification";
 
 interface ItemCompra {
   producto: ProductoListado,
@@ -38,7 +39,8 @@ function Compras() {
   const [modalProveedorAbierto, setModalProveedorAbierto] = useState(false);
 
   const [error, setError] = useState("");
-
+  const [notif, setNotif] = useState<{ mensaje: string; tipo: TipoNotificacion } | null>(null);
+  
   const limpiarCamposProducto = () => {
     setProductoSeleccionado(null);
     setCantidad("1");
@@ -167,8 +169,12 @@ function Compras() {
       setProductoSeleccionado(null);
       setProveedorSeleccionado(null);
       setNFactura("");
+
+      setNotif({ mensaje: "Compra realizada correctamente", tipo: "exito" });
+
       return true;
     } catch (error: any) {
+      setNotif({ mensaje: "Ocurrió un error al realizar la compra", tipo: "error" });
       setError(error.response.data.mensaje);
       return false;
     }
@@ -176,6 +182,13 @@ function Compras() {
 
   return (
     <div className="factura-page">
+      {notif && (
+              <Notificacion
+                mensaje={notif.mensaje}
+                tipo={notif.tipo}
+                onCerrar={() => setNotif(null)}
+              />
+            )}
         <div className="factura-contenido">
       <div className="factura-header">
         <h1>Gestión de Compras</h1>

@@ -13,6 +13,7 @@ import { crearVenta } from "../../services/venta.service";
 import { SquarePen, Trash2 } from "lucide-react";
 import { obtenerSesionActiva } from "../../services/caja.service";
 import { formatearMoneda } from "../FuncionAuxiliar"
+import Notificacion, { type TipoNotificacion } from "../../components/Notification/Notification";
 
 type ItemVenta =
   | {
@@ -68,6 +69,9 @@ function Facturacion() {
     Saldo_Deuda: 0,
     NCliente: 0,
   });
+
+  const [notif, setNotif] = useState<{ mensaje: string; tipo: TipoNotificacion } | null>(null);
+
 
   const [items, setItems] = useState<ItemVenta[]>([]);
   const [indiceEditando, setIndiceEditando] = useState<number | null>(null);
@@ -268,9 +272,6 @@ function Facturacion() {
                 Subtotal: subtotalNeto(item),
               }
             : {
-                // ⚠ Ajusta esta forma al contrato real que espera tu backend
-                // para líneas de servicio (p.ej. si usa Id_servicio o un
-                // campo Tipo dentro del mismo detalle).
                 Id_servicio: item.servicio.id,
                 Cantidad: item.cantidad,
                 Precio_Venta: item.precio,
@@ -280,10 +281,15 @@ function Facturacion() {
         )
       );
 
+      setNotif({ mensaje: "Venta registrada correctamente", tipo: "exito" });
+
+
       setItems([]);
       setModalConfirmarAbierto(false);
       return true;
     } catch (error: any) {
+      setNotif({ mensaje: "No se pudo registrar la venta", tipo: "error" });
+
       setErrorModal(error?.response?.data?.mensaje ?? "Error al confirmar la venta.");
       return false;
     }
@@ -299,6 +305,14 @@ function Facturacion() {
 
   return (
     <div className="factura-page">
+
+          {notif && (
+  <Notificacion
+    mensaje={notif.mensaje}
+    tipo={notif.tipo}
+    onCerrar={() => setNotif(null)}
+  />
+)}
       <div className="factura-contenido">
         <div className="factura-header">
           {cajaAbierta === false && (

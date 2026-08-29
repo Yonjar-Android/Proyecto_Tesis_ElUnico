@@ -5,6 +5,7 @@ import type { PaginatedResponse } from "../../models/PaginatedResponse";
 import ModalEditarMarca from "./ModalEditarMarca";
 import "./Marca.css";
 import { SquarePen } from 'lucide-react'
+import Notificacion, { type TipoNotificacion } from "../../components/Notification/Notification";
 
 interface Marca {
 
@@ -28,6 +29,8 @@ const [modalAbierto, setModalAbierto] = useState(false);
 const [modalEditarAbierto, setModalEditarAbierto] = useState(false);
 
 const [marcaSeleccionada, setMarcaSeleccionada] = useState<Marca | null>(null);
+
+const [notif, setNotif] = useState<{ mensaje: string; tipo: TipoNotificacion } | null>(null);
 
     useEffect(() => {
 
@@ -86,6 +89,13 @@ useEffect(() => {
 
   return (
     <div className="marca-container">
+      {notif && (
+                    <Notificacion
+                      mensaje={notif.mensaje}
+                      tipo={notif.tipo}
+                      onCerrar={() => setNotif(null)}
+                    />
+                  )}
         <div className="marca-content">
       <div className="marca-top-part">
         <h1 className="marca-title">Marcas</h1>
@@ -176,11 +186,11 @@ useEffect(() => {
 
         setModalAbierto(false);
         buscar();
-
+        setNotif({ mensaje: "Marca registrada correctamente", tipo: "exito" });
         return true;
 
     } catch (error: any) {
-
+        setNotif({ mensaje: "Ocurrió un error", tipo: "error" });
         setError(error.response.data.mensaje);
 
         return false;
@@ -201,12 +211,12 @@ useEffect(() => {
         await actualizarMarca(id, nombre);
 
         setModalEditarAbierto(false);
-
+        setNotif({ mensaje: "Marca actualizada correctamente", tipo: "exito" });
         buscar();
         return true;
         } catch (error: any) {
-            
             setError(error.response.data.mensaje);
+            setNotif({ mensaje: "Ocurrió un error", tipo: "error" });
             return false;
         }
     }}

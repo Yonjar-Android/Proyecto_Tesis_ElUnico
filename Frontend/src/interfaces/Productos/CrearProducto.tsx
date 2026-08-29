@@ -10,6 +10,7 @@ import ModalSeleccionarCategoria from "./ModalesSeleccion/ModalSeleccionarCatego
 import ModalSeleccionarMarca from "./ModalesSeleccion/ModalSeleccionarMarca";
 import type { Marca } from "../../models/Marca";
 import type { Categoria } from "../../models/Categoria";
+import Notificacion, { type TipoNotificacion } from "../../components/Notification/Notification";
 
 function CrearProducto() {
   const navigate = useNavigate();
@@ -29,6 +30,7 @@ function CrearProducto() {
   const [modalMarcaAbierto, setModalMarcaAbierto] = useState(false);
 
   const [error, setError] = useState("");
+  const [notif, setNotif] = useState<{ mensaje: string; tipo: TipoNotificacion } | null>(null);
 
   useEffect(() => {
     obtenerTotalProductosCategorias()
@@ -89,14 +91,24 @@ const getFechaMinima = () => {
         fechaVencimiento ? fechaVencimiento : null
       );
 
+      setNotif({ mensaje: "Producto registrado correctamente", tipo: "exito" });
+
       navigate("/inventario");
     } catch (error: any) {
+      setNotif({ mensaje: "Ocurrió un error", tipo: "error" });
       setError(error.response.data.mensaje);
     }
   };
 
   return (
     <div className="inventario-page">
+      {notif && (
+                    <Notificacion
+                      mensaje={notif.mensaje}
+                      tipo={notif.tipo}
+                      onCerrar={() => setNotif(null)}
+                    />
+                  )}
       <div className="inventario-header-banda">
         <h1>Inventario</h1>
       </div>

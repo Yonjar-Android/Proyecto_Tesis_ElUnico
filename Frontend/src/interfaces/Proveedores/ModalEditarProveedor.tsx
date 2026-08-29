@@ -134,7 +134,7 @@ function ModalEditarProveedor({ abierto, proveedor, onClose, onEditar }: Props) 
               <input
                 type="text"
                 placeholder="Ej: 3445-9876"
-                max={8}
+                maxLength={8}
                 value={telefono}
                 onChange={(e) => setTelefono(e.target.value)}
               />

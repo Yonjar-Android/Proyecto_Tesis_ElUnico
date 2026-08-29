@@ -6,6 +6,7 @@ import type { PaginatedResponse } from "../../models/PaginatedResponse";
 import ModalEditarServicio from "./ModalEditarServicio";
 import { SquarePen } from 'lucide-react'
 import { formatearMoneda } from "../FuncionAuxiliar";
+import Notificacion, { type TipoNotificacion } from "../../components/Notification/Notification";
 
 interface Servicio {
     id: number;
@@ -29,6 +30,8 @@ const [modalEditarAbierto, setModalEditarAbierto] = useState(false);
 const [servicioSeleccionado, setServicioSeleccionado] = useState<Servicio | null>(null);
 
 const [searchTerm, setSearchTerm] = useState<string>("");
+
+const [notif, setNotif] = useState<{ mensaje: string; tipo: TipoNotificacion } | null>(null);
 
     useEffect(() => { 
         console.log("hola");
@@ -83,6 +86,13 @@ useEffect(() => {
 
     return (
     <div className="categoria-container">
+      {notif && (
+                    <Notificacion
+                      mensaje={notif.mensaje}
+                      tipo={notif.tipo}
+                      onCerrar={() => setNotif(null)}
+                    />
+                  )}
         <div className="categoria-content">
       <div className="categoria-top-part">
         <h1 className="categoria-title">Servicios</h1>
@@ -165,8 +175,10 @@ useEffect(() => {
 
           setModalAbierto(false);
           buscar();
+          setNotif({ mensaje: "Servicio creado correctamente", tipo: "exito" });
           return true;
         } catch(error: any){
+          setNotif({ mensaje: "Ocurrió un error", tipo: "error" });
           setError(error.response.data.mensaje);
           return false;
         }
@@ -189,9 +201,10 @@ useEffect(() => {
           setModalEditarAbierto(false);
 
           buscar();
+          setNotif({ mensaje: "Servicio actualizado correctamente", tipo: "exito" });
           return true;
         } catch(error: any){
-
+          setNotif({ mensaje: "Ocurrió un error", tipo: "error" });
           setError(error.response.data.mensaje);
           return false;
         }
