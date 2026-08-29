@@ -9,11 +9,13 @@ import ModalConfirmarVenta, {
 import type { Cliente } from "../../models/Cliente";
 import type { ProductoListado } from "../../models/ProductoListado";
 import type { Servicio } from "../../models/Servicio";
-import { crearVenta } from "../../services/venta.service";
+import { crearVenta, obtenerReciboVenta } from "../../services/venta.service";
 import { SquarePen, Trash2 } from "lucide-react";
 import { obtenerSesionActiva } from "../../services/caja.service";
 import { formatearMoneda } from "../FuncionAuxiliar"
 import Notificacion, { type TipoNotificacion } from "../../components/Notification/Notification";
+import ModalConfirmarImpresion from "./ModalConfirmarImpresion";
+import { type DatosRecibo } from "../../models/Recibo";
 
 type ItemVenta =
   | {
@@ -72,6 +74,8 @@ function Facturacion() {
 
   const [notif, setNotif] = useState<{ mensaje: string; tipo: TipoNotificacion } | null>(null);
 
+  const [modalReciboAbierto, setModalReciboAbierto] = useState(false);
+  const [datosRecibo, setDatosRecibo] = useState<DatosRecibo | null>(null);
 
   const [items, setItems] = useState<ItemVenta[]>([]);
   const [indiceEditando, setIndiceEditando] = useState<number | null>(null);
@@ -258,7 +262,7 @@ function Facturacion() {
     setErrorModal: (mensaje: string) => void
   ): Promise<boolean> => {
     try {
-      await crearVenta(
+      const { idVenta } = await crearVenta(
         Number(clienteSeleccionado?.id),
         tipoPago,
         totalGeneral,
@@ -281,9 +285,15 @@ function Facturacion() {
         )
       );
 
+      console.log(idVenta);
+
+      const recibo = await obtenerReciboVenta(idVenta);
+
       setNotif({ mensaje: "Venta registrada correctamente", tipo: "exito" });
 
-
+      setDatosRecibo(recibo);
+      setModalReciboAbierto(true);
+      console.log("Hellouda");
       setItems([]);
       setModalConfirmarAbierto(false);
       return true;
@@ -621,6 +631,12 @@ function Facturacion() {
         tipoPago={tipoPago}
         onClose={() => setModalConfirmarAbierto(false)}
         onConfirmar={confirmarVenta}
+      />
+
+      <ModalConfirmarImpresion
+        abierto={modalReciboAbierto}
+        datos={datosRecibo}
+        onClose={() => setModalReciboAbierto(false)}
       />
     </div>
   );

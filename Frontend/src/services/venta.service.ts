@@ -40,3 +40,13 @@ export const buscarFacturaParaDevolucion = async (
 
     return response.data;
 };
+
+export const obtenerReciboVenta = async (idVenta: number) => {
+    const response = await axiosInstance.get(`${API}/${idVenta}/recibo`, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
+
+    return response.data;
+};

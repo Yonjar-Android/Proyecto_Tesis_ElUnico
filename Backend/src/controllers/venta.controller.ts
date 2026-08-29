@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { crearVenta, buscarFacturaParaDevolucion } from "../services/venta.service.js";
+import { crearVenta, buscarFacturaParaDevolucion, obtenerReciboVenta } from "../services/venta.service.js";
 
 export const postVenta = async (req: Request, res: Response) => {
     try {
@@ -18,17 +18,14 @@ export const postVenta = async (req: Request, res: Response) => {
         } = req.body;
 
         const resultado = await crearVenta(
-            Number(Id_cliente),
-            idUsuario,
-            Tipo_Pago,
-            Number(Total),
-            Detalles
-        );
+    Number(Id_cliente),
+    idUsuario,
+    Tipo_Pago,
+    Number(Total),
+    Detalles
+);
 
-        res.status(201).json({
-            mensaje: "Venta registrada correctamente.",
-            venta: resultado
-        });
+res.status(201).json(resultado);
 
     } catch (error: any) {
 
@@ -49,6 +46,32 @@ export const getFacturaParaDevolucion = async (
         const { id } = req.params;
 
         const resultado = await buscarFacturaParaDevolucion(
+            Number(id)
+        );
+
+        res.json(resultado);
+
+    } catch (error: any) {
+
+        console.error(error);
+
+        res.status(400).json({
+            mensaje: error.message
+        });
+
+    }
+};
+
+export const getReciboVenta = async (
+    req: Request,
+    res: Response
+) => {
+
+    try {
+
+        const { id } = req.params;
+
+        const resultado = await obtenerReciboVenta(
             Number(id)
         );
 

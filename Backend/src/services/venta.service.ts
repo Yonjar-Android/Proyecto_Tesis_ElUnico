@@ -9,6 +9,46 @@ interface DetalleVentaInput {
     Id_servicio: number;
 }
 
+// tipos que puede exponer el backend (puedes ponerlos en un archivo compartido)
+export interface ArticuloRecibo {
+  nombre: string;
+  bodega?: string;
+  cantidad: number;
+  precioUnitario: number;
+  descuento: number;
+}
+
+export interface ReciboVentaDTO {
+  ticketNumero: number;
+  cajero: string;
+  fecha: string;
+  hora: string;
+  tipoPago: string;
+  clienteNombre: string;
+  clienteCedula?: string;
+  articulos: ArticuloRecibo[];
+}
+
+function formatearFecha(fecha: Date) {
+  const dia = String(fecha.getDate()).padStart(2, "0");
+  const mes = String(fecha.getMonth() + 1).padStart(2, "0");
+  const anio = fecha.getFullYear();
+  return `${dia}-${mes}-${anio}`;
+}
+
+export const formatearHora = (fecha: Date): string => {
+    let horas = fecha.getHours();
+    const minutos = fecha.getMinutes().toString().padStart(2, "0");
+    const meridiano = horas >= 12 ? "P. M." : "A. M.";
+
+    horas = horas % 12;
+    horas = horas === 0 ? 12 : horas; // la hora 0 se muestra como 12
+
+    const horasFormateadas = horas.toString().padStart(2, "0");
+
+    return `${horasFormateadas}:${minutos} ${meridiano}`;
+};
+
 export const crearVenta = async (
     idCliente: number,
     idUsuario: number,
@@ -212,4 +252,68 @@ export const buscarFacturaParaDevolucion = async (
         fecha: venta.Fecha,
         items
     };
+};
+
+export const obtenerReciboVenta = async (idVenta: number): Promise<ReciboVentaDTO> => {
+    const connection = await pool.getConnection();
+
+    try {
+        const [ventaRows]: any = await connection.query(
+            `
+            SELECT
+                v.id            AS idVenta,
+                v.Fecha         AS Fecha,
+                v.Tipo_Pago     AS Tipo_Pago,
+                c.Nombre        AS ClienteNombre,
+                c.Apellido      AS ClienteApellido,
+                u.Nombre_Usuario AS CajeroNombre
+            FROM ventas v
+            INNER JOIN clientes c ON c.id = v.Id_cliente
+            INNER JOIN usuarios u ON u.id = v.Id_usuario
+            WHERE v.id = ?
+            `,
+            [idVenta]
+        );
+
+        if (ventaRows.length === 0) {
+            throw new Error("No se encontró la venta solicitada.");
+        }
+
+        const venta = ventaRows[0];
+
+        const [detalleRows]: any = await connection.query(
+            `
+            SELECT
+                dv.Cantidad       AS Cantidad,
+                dv.Precio_Venta   AS Precio_Venta,
+                dv.Descuento      AS Descuento,
+                p.Nombre          AS ProductoNombre,
+                s.Nombre_servicio AS ServicioNombre
+            FROM detalle_venta dv
+            LEFT JOIN productos p ON p.id = dv.Id_producto
+            LEFT JOIN servicios s ON s.id = dv.Id_servicio
+            WHERE dv.Id_venta = ?
+            `,
+            [idVenta]
+        );
+
+        return {
+            ticketNumero: venta.idVenta,
+            cajero: venta.CajeroNombre,
+            fecha: formatearFecha(venta.Fecha),
+            hora: formatearHora(venta.Fecha),
+            tipoPago: venta.Tipo_Pago,
+            clienteNombre: `${venta.ClienteNombre} ${venta.ClienteApellido}`,
+            clienteCedula: undefined, // pendiente hasta que exista la columna
+            articulos: detalleRows.map((d: any) => ({
+                nombre: d.ProductoNombre ?? d.ServicioNombre ?? "",
+                cantidad: Number(d.Cantidad),
+                precioUnitario: Number(d.Precio_Venta),
+                descuento: Number(d.Descuento),
+            })),
+        };
+
+    } finally {
+        connection.release();
+    }
 };

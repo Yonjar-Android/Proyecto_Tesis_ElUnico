@@ -1,0 +1,75 @@
+.recibo {
+  width: 280px;
+  margin: 0 auto;
+  padding: 16px;
+  background: #fff;
+  font-family: "Courier New", Courier, monospace;
+  color: #000;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.encabezado {
+  text-align: center;
+}
+
+.encabezado h2 {
+  margin: 0 0 4px;
+  font-size: 15px;
+  letter-spacing: 1px;
+}
+
+.eslogan {
+  font-style: italic;
+  margin: 0 0 4px;
+}
+
+.encabezado p {
+  margin: 0;
+}
+
+.separador {
+  border-top: 1px dashed #000;
+  margin: 8px 0;
+}
+
+.datosVenta .filaDato {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.tituloArticulos {
+  font-weight: bold;
+}
+
+.filaEncabezadoArticulos {
+  display: flex;
+  justify-content: space-between;
+  font-weight: bold;
+  margin-top: 4px;
+}
+
+.articulo {
+  margin-bottom: 6px;
+}
+
+.nombreArticulo {
+  font-weight: bold;
+}
+
+.filaArticulo {
+  display: flex;
+  justify-content: space-between;
+}
+
+.filaTotal {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 4px;
+}
+
+.filaTotalFinal {
+  font-weight: bold;
+  font-size: 13px;
+}

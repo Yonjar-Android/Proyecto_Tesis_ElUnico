@@ -1,0 +1,76 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.caja {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px 28px;
+  width: 100%;
+  max-width: 360px;
+  text-align: center;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.caja h3 {
+  margin: 0 0 8px;
+}
+
+.caja p {
+  margin: 0 0 20px;
+  color: #444;
+}
+
+.acciones {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.botonPrimario,
+.botonSecundario {
+  padding: 10px 18px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.botonPrimario {
+  background: #2563eb;
+  color: #fff;
+}
+
+.botonSecundario {
+  background: #eee;
+  color: #333;
+}
+
+/* Oculto fuera del viewport en pantalla; el portal lo cuelga como hijo directo de <body> */
+.reciboParaImprimir {
+  position: fixed;
+  top: 0;
+  left: -9999px;
+}
+
+@media print {
+  @page {
+    margin: 0;
+  }
+
+  /* Colapsa TODO el árbol de la app (incluido el overlay con position:fixed) */
+  body > *:not(.reciboParaImprimir) {
+    display: none !important;
+  }
+
+  .reciboParaImprimir {
+    position: static;
+    left: 0;
+  }
+}
