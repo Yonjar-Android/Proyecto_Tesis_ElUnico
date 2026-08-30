@@ -356,6 +356,7 @@ function Compras() {
                       className="factura-btn-editar"
                       onClick={() => editarItem(index)}
                       aria-label="Editar producto"
+                      title="Editar"
                     >
                       <SquarePen size={24} />
                     </button>
@@ -364,6 +365,7 @@ function Compras() {
                       className="factura-btn-eliminar"
                       onClick={() => eliminarItem(index)}
                       aria-label="Eliminar producto"
+                      title="Eliminar"
                     >
                       <Trash2 size={24} />
                     </button>

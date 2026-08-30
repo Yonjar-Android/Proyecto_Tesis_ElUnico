@@ -285,15 +285,12 @@ function Facturacion() {
         )
       );
 
-      console.log(idVenta);
-
       const recibo = await obtenerReciboVenta(idVenta);
 
       setNotif({ mensaje: "Venta registrada correctamente", tipo: "exito" });
 
       setDatosRecibo(recibo);
       setModalReciboAbierto(true);
-      console.log("Hellouda");
       setItems([]);
       setModalConfirmarAbierto(false);
       return true;
@@ -534,6 +531,7 @@ function Facturacion() {
                       className="factura-btn-editar"
                       onClick={() => editarItem(index)}
                       aria-label="Editar"
+                      title="Editar"
                     >
                       <SquarePen size={24} />
                     </button>
@@ -542,6 +540,7 @@ function Facturacion() {
                       className="factura-btn-eliminar"
                       onClick={() => eliminarItem(index)}
                       aria-label="Eliminar"
+                      title="Eliminar"
                     >
                       <Trash2 size={24} />
                     </button>

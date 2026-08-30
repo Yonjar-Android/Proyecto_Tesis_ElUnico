@@ -209,7 +209,7 @@
 }
 
 .factura-th-accion {
-  text-align: right;
+  text-align: end !important;
 }
 
 .factura-tabla td {
@@ -349,7 +349,6 @@
 .factura-td-accion {
   display: flex;
   justify-content: flex-end;
-  gap: 0.5rem;
 }
 
 .factura-btn-editar {

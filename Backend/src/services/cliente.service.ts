@@ -51,7 +51,7 @@ export const buscarClientes = async (
 
 export const crearCliente = async (
     nombre:string, apellido: string, telefono: string,
-    direccion:string, saldo_deuda: number, Ncliente:number
+    direccion:string, saldo_deuda: number, Ncliente:number, Ncedula:string
 ) => {
 
         if (!nombre.trim()) {
@@ -101,6 +101,16 @@ export const crearCliente = async (
     throw new Error("Ya existe un cliente con ese número de teléfono.");
     }}
 
+    if (Ncedula.trim() !== "") {
+     const [rownCedula]: any = await pool.query(
+    "SELECT COUNT(*) AS count FROM clientes WHERE NCedula = ?",
+    [Ncedula]
+    );
+
+    if (rownCedula[0].count > 0) {
+    throw new Error("Ya existe un cliente con ese número de cédula.");
+    }}
+
     if (isNaN(saldo_deuda)) {
     throw new Error("Ingrese un valor válido en el campo deuda.");
     }
@@ -110,8 +120,8 @@ export const crearCliente = async (
     }
 
     const [result]: any = await pool.query(
-        "INSERT INTO clientes (Nombre, Apellido, Telefono, Direccion, Saldo_Deuda, NCliente) VALUES (?,?,?,?,?,?)",
-        [nombre, apellido, telefono, direccion, saldo_deuda, Ncliente]
+        "INSERT INTO clientes (Nombre, Apellido, Telefono, Direccion, Saldo_Deuda, NCliente, NCedula) VALUES (?,?,?,?,?,?,?)",
+        [nombre, apellido, telefono, direccion, saldo_deuda, Ncliente, Ncedula]
     );
 
     const idCliente = result.insertId;
@@ -131,7 +141,8 @@ export const actualizarCliente = async (
     telefono: string,
     direccion: string,
     saldo_deuda: number,
-    Ncliente: number
+    Ncliente: number,
+    Ncedula:string
 ) => {
 
     if (!nombre.trim()) {
@@ -171,6 +182,7 @@ export const actualizarCliente = async (
       throw new Error("El número de teléfono debe contener 8 caracteres.");
     }
 
+    if (telefono.trim() !== "") {
     const [rowsPhone]: any = await pool.query(
     "SELECT COUNT(*) AS count FROM clientes WHERE Telefono = ? AND id != ?",
     [telefono, id]
@@ -178,7 +190,17 @@ export const actualizarCliente = async (
 
     if (rowsPhone[0].count > 0) {
     throw new Error("Ya existe un cliente con ese número de teléfono.");
-    }
+    }}
+
+    if (Ncedula.trim() !== "") {
+    const [rownCedula]: any = await pool.query(
+    "SELECT COUNT(*) AS count FROM clientes WHERE NCedula = ? AND id != ?",
+    [Ncedula, id]
+    );
+
+    if (rownCedula[0].count > 0) {
+    throw new Error("Ya existe un cliente con ese número de cédula.");
+    }}
 
     if (!/^\d+$/.test(String(saldo_deuda))) {
     throw new Error("Ingrese un valor válido en el campo crédito");
@@ -196,9 +218,10 @@ export const actualizarCliente = async (
              Telefono = ?,
              Direccion = ?,
              Saldo_Deuda = ?,
-             NCliente = ?
+             NCliente = ?,
+             NCedula = ?
          WHERE id = ?`,
-        [nombre, apellido, telefono, direccion, saldo_deuda, Ncliente, id]
+        [nombre, apellido, telefono, direccion, saldo_deuda, Ncliente, Ncedula ,id]
     );
 
     return result;

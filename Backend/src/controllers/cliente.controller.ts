@@ -26,9 +26,9 @@ export const buscarCliente = async (req: Request, res: Response) => {
 
 export const postCliente = async (req: Request, res: Response) => {
     try {
-        const { Nombre, Apellido, Telefono, Direccion, Saldo_Deuda, NCliente } = req.body;
+        const { Nombre, Apellido, Telefono, Direccion, Saldo_Deuda, NCliente, NCedula } = req.body;
 
-        await crearCliente(Nombre, Apellido, Telefono, Direccion, Saldo_Deuda, NCliente);
+        await crearCliente(Nombre, Apellido, Telefono, Direccion, Saldo_Deuda, NCliente, NCedula);
 
         res.status(201).json({
             mensaje: "Cliente creado correctamente"
@@ -50,7 +50,8 @@ export const putCliente = async (req: Request, res: Response) => {
             Telefono,
             Direccion,
             Saldo_Deuda,
-            NCliente
+            NCliente,
+            NCedula
         } = req.body;
 
         const result = await actualizarCliente(
@@ -60,7 +61,8 @@ export const putCliente = async (req: Request, res: Response) => {
             Telefono,
             Direccion,
             Number(Saldo_Deuda),
-            Number(NCliente)
+            Number(NCliente),
+            NCedula
         );
 
         res.status(200).json({

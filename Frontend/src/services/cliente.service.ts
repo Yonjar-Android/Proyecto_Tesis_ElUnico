@@ -5,10 +5,10 @@ const token = localStorage.getItem("token");
 
 export const crearCliente = async (
     Nombre: string, Apellido: string, Telefono: string,
-    Direccion: string, Saldo_Deuda: number, NCliente: number
+    Direccion: string, Saldo_Deuda: number, NCliente: number, NCedula:string
 ) => {
     const response = await axiosInstance.post(API, {
-        Nombre, Apellido, Telefono, Direccion, Saldo_Deuda, NCliente
+        Nombre, Apellido, Telefono, Direccion, Saldo_Deuda, NCliente, NCedula
     }, {
         headers: {
             Authorization: `Bearer ${token}`
@@ -21,10 +21,10 @@ export const crearCliente = async (
 export const actualizarCliente = async (
     id: number, Nombre:string, Apellido: string, 
     Telefono: string, Direccion: string, Saldo_Deuda: number,
-    NCliente: number
+    NCliente: number, NCedula:string
 ) => {
     const response = await axiosInstance.put(`${API}/${id}`, {
-        Nombre, Apellido, Telefono, Direccion, Saldo_Deuda, NCliente
+        Nombre, Apellido, Telefono, Direccion, Saldo_Deuda, NCliente, NCedula
     }, {
         headers: {
             Authorization: `Bearer ${token}`

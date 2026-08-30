@@ -113,6 +113,7 @@ function Inventario() {
                       className="inventario-btn-icono"
                       onClick={() => navigate(`/inventario/editar/${producto.id}`)}
                       aria-label="Editar producto"
+                      title="Editar"
                     >
                       <SquarePen size={24} />
                     </button>

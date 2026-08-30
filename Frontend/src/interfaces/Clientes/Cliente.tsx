@@ -19,7 +19,7 @@ interface Cliente {
     Direccion: string;
     Saldo_Deuda: number;
     NCliente: number;
-
+    NCedula: string;
 }
 
 function Cliente(){
@@ -209,13 +209,13 @@ return (
     abierto={modalAbierto}
     onClose={() => setModalAbierto(false)}
     onGuardar={async (nombre, apellido, telefono,
-        direccion, saldo_deuda, ncliente,
+        direccion, saldo_deuda, ncliente, ncedula,
         setError) => {
     try {
 
         await crearCliente(
             nombre,apellido, telefono,
-             direccion, saldo_deuda, ncliente
+             direccion, saldo_deuda, ncliente, ncedula
         );
 
         setModalAbierto(false);
@@ -241,13 +241,13 @@ return (
     }}
     onEditar={
       async (id, nombre, apellido, telefono,
-        direccion, saldo_deuda, ncliente,        
+        direccion, saldo_deuda, ncliente, ncedula,        
         setError) => {
 
       try{
 
         await actualizarCliente(Number(id), nombre, apellido,
-            telefono, direccion, saldo_deuda, ncliente
+            telefono, direccion, saldo_deuda, ncliente, ncedula
         );
 
         setModalEditarAbierto(false);

@@ -6,4 +6,5 @@ Telefono:string;
 Direccion:string;
 Saldo_Deuda:number;
 NCliente:number;
+NCedula:string;
 }
