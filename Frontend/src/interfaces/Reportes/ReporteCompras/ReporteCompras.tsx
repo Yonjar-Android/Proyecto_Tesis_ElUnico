@@ -8,6 +8,9 @@ import type { Proveedor } from "../../../models/Proveedor";
 import type { PaginatedResponse } from "../../../models/PaginatedResponse";
 import type { CompraReporte, RespuestaReporteCompras } from "../../../models/CompraReporte";
 import { formatearMoneda } from "../../FuncionAuxiliar";
+import ModalDetalleCompra, { type DetalleCompraDTO } from "./ModalDetalleCompras";
+import { FileText } from "lucide-react";
+import { obtenerDetalleCompra } from "../../../services/compra.service";
 
 export const formatearFecha = (fecha: string): string => {
   const date = new Date(fecha);
@@ -23,6 +26,14 @@ export const formatearFecha = (fecha: string): string => {
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 };
 
+const obtenerFechaHoy = (): string => {
+  const hoy = new Date();
+  const year = hoy.getFullYear();
+  const month = String(hoy.getMonth() + 1).padStart(2, "0");
+  const day = String(hoy.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
 function ReporteCompras() {
   const [compras, setCompras] = useState<CompraReporte[]>([]);
   const [fechaInicio, setFechaInicio] = useState("");
@@ -32,9 +43,50 @@ function ReporteCompras() {
   const [currentPage, setCurrentPage] = useState(1);
   const [perPage] = useState(5);
   const [lastPage, setLastPage] = useState(1);
+  const [errorFechas, setErrorFechas] = useState("");
+
+  const [modalDetalleAbierto, setModalDetalleAbierto] = useState(false);
+  const [detalleCompra, setDetalleCompra] = useState<DetalleCompraDTO | null>(null);
 
   const [registrosTotales, setRegistrosTotales] = useState(0);
   const [totalCompras, setTotalCompras] = useState(0);
+
+  const validarFechas = (): boolean => {
+    const hoy = obtenerFechaHoy();
+  
+    if (fechaInicio && fechaInicio > hoy) {
+      setErrorFechas("La fecha de inicio no puede ser mayor a la fecha actual.");
+      return false;
+    }
+  
+    if (fechaFin && fechaFin > hoy) {
+      setErrorFechas("La fecha de fin no puede ser mayor a la fecha actual.");
+      return false;
+    }
+  
+    if (fechaInicio && fechaFin && fechaFin < fechaInicio) {
+      setErrorFechas("La fecha de fin no puede ser menor que la fecha de inicio.");
+      return false;
+    }
+  
+    setErrorFechas("");
+    return true;
+  };
+  
+  // Validación en vivo mientras el usuario cambia las fechas
+  useEffect(() => {
+    validarFechas();
+  }, [fechaInicio, fechaFin]);
+
+  const verDetalleCompra = async (idCompra: number) => {
+  try {
+    const detalle = await obtenerDetalleCompra(idCompra);
+    setDetalleCompra(detalle);
+    setModalDetalleAbierto(true);
+  } catch (error) {
+    console.error(error);
+  }
+};
 
   // Carga el combo de proveedores una sola vez.
   useEffect(() => {
@@ -113,23 +165,32 @@ function ReporteCompras() {
         </div>
 
         <div className="reporte-filtro-row">
-          <div className="reporte-campo">
-            <label>📅 Fecha inicio</label>
-            <input
-              type="date"
-              value={fechaInicio}
-              onChange={(e) => setFechaInicio(e.target.value)}
-            />
-          </div>
+          <div className="reporte-fechas-grupo">
+    <div className="reporte-fechas-fila">
+      <div className="reporte-campo">
+        <label>📅 Fecha inicio</label>
+        <input
+          type="date"
+          value={fechaInicio}
+          max={obtenerFechaHoy()}
+          onChange={(e) => setFechaInicio(e.target.value)}
+        />
+      </div>
 
-          <div className="reporte-campo">
-            <label>📅 Fecha fin</label>
-            <input
-              type="date"
-              value={fechaFin}
-              onChange={(e) => setFechaFin(e.target.value)}
-            />
-          </div>
+      <div className="reporte-campo">
+        <label>📅 Fecha fin</label>
+        <input
+          type="date"
+          value={fechaFin}
+          min={fechaInicio || undefined}
+          max={obtenerFechaHoy()}
+          onChange={(e) => setFechaFin(e.target.value)}
+        />
+      </div>
+    </div>
+
+    {errorFechas && <span className="reporte-error-fechas">{errorFechas}</span>}
+  </div>
 
           <div className="reporte-campo">
             <label>▽ Proveedor</label>
@@ -162,6 +223,7 @@ function ReporteCompras() {
                 <th className="reporte-td-centro">Proveedor</th>
                 <th className="reporte-td-centro">N° Factura</th>
                 <th className="reporte-th-derecha">Total</th>
+                <th className="reporte-th-derecha">Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -173,6 +235,11 @@ function ReporteCompras() {
                   </td>
                   <td className="reporte-td-factura">{compra.NFactura}</td>
                   <td className="reporte-td-derecha">C$ {formatearMoneda(compra.Total)}</td>
+                  <td className="reporte-td-derecha">
+  <button className="reporte-btn-imprimir" onClick={() => verDetalleCompra(compra.id)} title="Ver detalles">
+    <FileText size={24} />
+  </button>
+</td>
                 </tr>
               ))}
             </tbody>
@@ -224,6 +291,11 @@ function ReporteCompras() {
           </div>
         </div>
       </div>
+      <ModalDetalleCompra
+  abierto={modalDetalleAbierto}
+  datos={detalleCompra}
+  onClose={() => setModalDetalleAbierto(false)}
+/>
     </div>
   );
 }

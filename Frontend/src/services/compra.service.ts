@@ -1,4 +1,5 @@
 import axiosInstance from "./axiosInstance";
+import type { DetalleCompraDTO } from "../models/CompraReporte";
 
 const API = "http://localhost:3001/api/compras";
 const token = localStorage.getItem("token");
@@ -29,5 +30,12 @@ export const crearCompra = async (
         }
     });
 
+    return response.data;
+};
+
+export const obtenerDetalleCompra = async (idCompra: number): Promise<DetalleCompraDTO> => {
+    const response = await axiosInstance.get(`${API}/${idCompra}/detalle`, {
+        headers: { Authorization: `Bearer ${token}` }
+    });
     return response.data;
 };

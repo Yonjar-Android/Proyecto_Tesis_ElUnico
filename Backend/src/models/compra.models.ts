@@ -14,3 +14,19 @@ export interface Detalle_Compra{
     Precio: number;
     Subtotal: number;
 }
+
+export interface ArticuloCompra {
+    nombre: string;
+    cantidad: number;
+    precio: number;
+    subtotal: number;
+}
+
+export interface DetalleCompraDTO {
+    idCompra: number;
+    fecha: string;
+    nFactura: string;
+    total: number;
+    proveedorNombre: string;
+    articulos: ArticuloCompra[];
+}

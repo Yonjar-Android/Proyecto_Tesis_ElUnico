@@ -426,3 +426,32 @@
 .reporte-pagina-info strong {
   color: #111;
 }
+
+.reporte-btn-imprimir {
+  background: none;
+  border: none;
+  color: #2563eb;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: end;
+}
+
+.reporte-btn-imprimir:hover {
+  color: #1d4ed8;
+}
+
+.reporte-fechas-grupo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.reporte-fechas-fila {
+  display: flex;
+  gap: 12px;
+}
+
+.reporte-error-fechas {
+  color: #e5484d;
+  font-size: 13px;
+}

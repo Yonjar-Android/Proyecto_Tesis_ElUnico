@@ -19,12 +19,14 @@
 }
 
 .caja h3 {
-  margin: 0 0 8px;
+  font-size: 1.6rem;
+  margin: 0.6em;
 }
 
 .caja p {
-  margin: 0 0 20px;
+   margin: 0.8em;
   color: #444;
+  font-size: 1.3rem;
 }
 
 .acciones {
@@ -40,6 +42,7 @@
   border: none;
   cursor: pointer;
   font-weight: 600;
+  font-size: 1rem;
 }
 
 .botonPrimario {

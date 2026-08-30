@@ -1,4 +1,5 @@
 import { pool } from "../config/database.js";
+import { DetalleCompraDTO } from "../models/compra.models.js";
 
 interface DetalleCompraInput {
     Id_producto: number;
@@ -6,6 +7,13 @@ interface DetalleCompraInput {
     Precio: number;
     Subtotal: number;
     Precio_venta: number;
+}
+
+function formatearFecha(fecha: Date) {
+  const dia = String(fecha.getDate()).padStart(2, "0");
+  const mes = String(fecha.getMonth() + 1).padStart(2, "0");
+  const anio = fecha.getFullYear();
+  return `${dia}-${mes}-${anio}`;
 }
 
 export const crearCompra = async (
@@ -112,4 +120,62 @@ export const crearCompra = async (
 
     }
 
+};
+
+export const obtenerDetalleCompra = async (idCompra: number): Promise<DetalleCompraDTO> => {
+    const connection = await pool.getConnection();
+
+    try {
+        const [compraRows]: any = await connection.query(
+            `
+            SELECT
+                c.id            AS idCompra,
+                c.Fecha         AS Fecha,
+                c.NFactura      AS NFactura,
+                c.Total         AS Total,
+                p.Nombre_Empresa AS ProveedorNombre
+            FROM compras c
+            INNER JOIN proveedores p ON p.id = c.Id_proveedor
+            WHERE c.id = ?
+            `,
+            [idCompra]
+        );
+
+        if (compraRows.length === 0) {
+            throw new Error("No se encontró la compra solicitada.");
+        }
+
+        const compra = compraRows[0];
+
+        const [detalleRows]: any = await connection.query(
+            `
+            SELECT
+                dc.Cantidad AS Cantidad,
+                dc.Precio_compra   AS Precio,
+                dc.Subtotal AS Subtotal,
+                pr.Nombre   AS ProductoNombre
+            FROM detalle_compra dc
+            INNER JOIN productos pr ON pr.id = dc.Id_producto
+            WHERE dc.Id_compra = ?
+            `,
+            [idCompra]
+        );
+
+        return {
+            idCompra: compra.idCompra,
+            fecha: formatearFecha(compra.Fecha),
+            nFactura: compra.NFactura,
+            total: Number(compra.Total),
+            proveedorNombre: compra.ProveedorNombre,
+            articulos: detalleRows.map((d: any) => ({
+                nombre: d.ProductoNombre,
+                cantidad: Number(d.Cantidad),
+                precio: Number(d.Precio),
+                subtotal: Number(d.Subtotal),
+            })),
+        };
+
+    } finally {
+        connection.release();
+    }
 };

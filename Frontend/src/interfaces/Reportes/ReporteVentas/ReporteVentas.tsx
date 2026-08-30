@@ -7,6 +7,10 @@ import type { VentaReporte } from "../../../models/VentaReportes";
 import type { Cliente } from "../../../models/Cliente";
 import type { PaginatedResponse } from "../../../models/PaginatedResponse";
 import { formatearMoneda } from "../../FuncionAuxiliar";
+import ModalConfirmarImpresion from "../../Facturacion/ModalConfirmarImpresion"; // ajusta ruta
+import type { DatosRecibo } from "../../Facturacion/Recibo/Recibo_Venta";
+import { Printer } from "lucide-react";
+import { obtenerReciboVenta } from "../../../services/venta.service";
 
 export interface RespuestaReporteVentas extends PaginatedResponse<VentaReporte> {
   TotalRegistros: number;
@@ -28,6 +32,14 @@ export const formatearFecha = (fecha: string): string => {
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 };
 
+const obtenerFechaHoy = (): string => {
+  const hoy = new Date();
+  const year = hoy.getFullYear();
+  const month = String(hoy.getMonth() + 1).padStart(2, "0");
+  const day = String(hoy.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
 function ReporteVentas() {
   const [ventas, setVentas] = useState<VentaReporte[]>([]);
   const [fechaInicio, setFechaInicio] = useState("");
@@ -37,10 +49,51 @@ function ReporteVentas() {
   const [currentPage, setCurrentPage] = useState(1);
   const [perPage] = useState(10);
   const [lastPage, setLastPage] = useState(1);
+  const [errorFechas, setErrorFechas] = useState("");
 
   const [registrosTotales, setRegistrosTotales] = useState(0);
   const [ventasContado, setVentasContado] = useState(0);
   const [totalVentas, setTotalVentas] = useState(0);
+
+  const [modalReciboAbierto, setModalReciboAbierto] = useState(false);
+const [datosRecibo, setDatosRecibo] = useState<DatosRecibo | null>(null);
+
+const imprimirTicket = async (idVenta: number) => {
+  try {
+    const recibo = await obtenerReciboVenta(idVenta);
+    setDatosRecibo(recibo);
+    setModalReciboAbierto(true);
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+const validarFechas = (): boolean => {
+  const hoy = obtenerFechaHoy();
+
+  if (fechaInicio && fechaInicio > hoy) {
+    setErrorFechas("La fecha de inicio no puede ser mayor a la fecha actual.");
+    return false;
+  }
+
+  if (fechaFin && fechaFin > hoy) {
+    setErrorFechas("La fecha de fin no puede ser mayor a la fecha actual.");
+    return false;
+  }
+
+  if (fechaInicio && fechaFin && fechaFin < fechaInicio) {
+    setErrorFechas("La fecha de fin no puede ser menor que la fecha de inicio.");
+    return false;
+  }
+
+  setErrorFechas("");
+  return true;
+};
+
+// Validación en vivo mientras el usuario cambia las fechas
+useEffect(() => {
+  validarFechas();
+}, [fechaInicio, fechaFin]);
 
   // Carga el combo de clientes una sola vez.
   /*useEffect(() => {
@@ -130,46 +183,56 @@ function ReporteVentas() {
         </div>
 
         <div className="reporte-filtro-row">
-          <div className="reporte-campo">
-            <label>📅 Fecha inicio</label>
-            <input
-              type="date"
-              value={fechaInicio}
-              onChange={(e) => setFechaInicio(e.target.value)}
-            />
-          </div>
+  <div className="reporte-fechas-grupo">
+    <div className="reporte-fechas-fila">
+      <div className="reporte-campo">
+        <label>📅 Fecha inicio</label>
+        <input
+          type="date"
+          value={fechaInicio}
+          max={obtenerFechaHoy()}
+          onChange={(e) => setFechaInicio(e.target.value)}
+        />
+      </div>
 
-          <div className="reporte-campo">
-            <label>📅 Fecha fin</label>
-            <input
-              type="date"
-              value={fechaFin}
-              onChange={(e) => setFechaFin(e.target.value)}
-            />
-          </div>
+      <div className="reporte-campo">
+        <label>📅 Fecha fin</label>
+        <input
+          type="date"
+          value={fechaFin}
+          min={fechaInicio || undefined}
+          max={obtenerFechaHoy()}
+          onChange={(e) => setFechaFin(e.target.value)}
+        />
+      </div>
+    </div>
 
-          <div className="reporte-campo">
-            <label>▽ Cliente</label>
-            <select value={clienteId} onChange={(e) => setClienteId(e.target.value)}>
-              <option value="">Todas las opciones</option>
-              {clientes.map((cliente) => (
-                <option key={cliente.id} value={cliente.id}>
-                  {cliente.Nombre} {cliente.Apellido}
-                </option>
-              ))}
-            </select>
-          </div>
+    {errorFechas && <span className="reporte-error-fechas">{errorFechas}</span>}
+  </div>
 
-          <button
-            className="reporte-btn-filtrar"
-            onClick={() => {
-              setCurrentPage(1);
-              buscar();
-            }}
-          >
-            🔍 Filtrar Datos
-          </button>
-        </div>
+  <div className="reporte-campo">
+    <label>▽ Cliente</label>
+    <select value={clienteId} onChange={(e) => setClienteId(e.target.value)}>
+      <option value="">Todas las opciones</option>
+      {clientes.map((cliente) => (
+        <option key={cliente.id} value={cliente.id}>
+          {cliente.Nombre} {cliente.Apellido}
+        </option>
+      ))}
+    </select>
+  </div>
+
+  <button
+    className="reporte-btn-filtrar"
+    onClick={() => {
+      if (!validarFechas()) return;
+      setCurrentPage(1);
+      buscar();
+    }}
+  >
+    🔍 Filtrar Datos
+  </button>
+</div>
 
         <div className="reporte-card-tabla">
           <table className="reporte-tabla">
@@ -179,6 +242,7 @@ function ReporteVentas() {
                 <th>Cliente</th>
                 <th>Estado</th>
                 <th className="reporte-th-derecha">Monto</th>
+                <th className="reporte-th-derecha">Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -198,6 +262,16 @@ function ReporteVentas() {
                     </span>
                   </td>
                   <td className="reporte-td-derecha">C$ {formatearMoneda(venta.Total)}</td>
+                  <td className="reporte-td-derecha">
+  <button
+    className="reporte-btn-imprimir"
+    onClick={() => imprimirTicket(venta.id)}
+    aria-label="Imprimir recibo"
+    title="Imprimir recibo"
+  >
+    <Printer size={24} />
+  </button>
+</td>
                 </tr>
               ))}
             </tbody>
@@ -249,6 +323,11 @@ function ReporteVentas() {
           </div>
         </div>
       </div>
+      <ModalConfirmarImpresion
+  abierto={modalReciboAbierto}
+  datos={datosRecibo}
+  onClose={() => setModalReciboAbierto(false)}
+/>
     </div>
   );
 }

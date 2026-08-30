@@ -1,0 +1,112 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.caja {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px 28px;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.encabezado {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.encabezado h3 {
+  margin: 0;
+}
+
+.cerrarX {
+  background: none;
+  border: none;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  color: #888;
+}
+
+.cerrarX:hover {
+  color: #333;
+}
+
+.datosCompra {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 16px;
+  font-size: 14px;
+}
+
+.filaDato {
+  display: flex;
+  justify-content: space-between;
+  color: #444;
+}
+
+.filaDato span:first-child {
+  font-weight: 600;
+  color: #222;
+}
+
+.tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+
+.tabla th {
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+  padding: 6px 4px;
+  color: #666;
+  font-weight: 600;
+}
+
+.tabla td {
+  padding: 6px 4px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.centro {
+  text-align: center;
+}
+
+.derecha {
+  text-align: right;
+}
+
+.filaTotal {
+  display: flex;
+  justify-content: space-between;
+  font-weight: bold;
+  font-size: 15px;
+  margin-bottom: 20px;
+}
+
+.botonCerrar {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+  background: #eee;
+  color: #333;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.botonCerrar:hover {
+  background: #e0e0e0;
+}

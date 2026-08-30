@@ -32,7 +32,7 @@ function ReporteStockBajo() {
   const [productos, setProductos] = useState<ProductoListado[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [perPage] = useState(2);
+  const [perPage] = useState(10);
   const [total, setTotal] = useState(0);
   const [lastPage, setLastPage] = useState(1);
 
