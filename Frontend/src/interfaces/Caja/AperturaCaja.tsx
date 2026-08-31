@@ -1,30 +1,37 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Wallet } from "lucide-react";
 import ConteoBilletes from "./ConteoBilletes";
 import type { DesgloseItem } from "./ConteoBilletes";
 import { abrirCaja } from "../../services/caja.service";
+import { useCajaAbierta } from "../../context/CajaContext";
 import "./AperturaCierre.css";
-
+ 
 export default function AperturaCaja() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { refrescarCaja } = useCajaAbierta();
+ 
+  const mensajeCaja = (location.state as { mensajeCaja?: string } | null)?.mensajeCaja;
+ 
   const [tasaCambio, setTasaCambio] = useState(36.62);
   const [totalContado, setTotalContado] = useState(0);
   const [, setDesglose] = useState<DesgloseItem[]>([]);
   const [observaciones, setObservaciones] = useState("");
   const [guardando, setGuardando] = useState(false);
   const [error, setError] = useState("");
-
+ 
   async function handleAbrirCaja() {
     setError("");
     if (totalContado <= 0) {
       setError("Debes contar el efectivo inicial antes de abrir la caja.");
       return;
     }
-
+ 
     setGuardando(true);
     try {
       await abrirCaja(totalContado, tasaCambio, observaciones);
+      await refrescarCaja(); // actualiza el contexto ANTES de navegar, si no, RutaProtegidaCaja te rebota de vuelta aquí
       navigate("/caja");
     } catch (err) {
       setError("No se pudo abrir la caja. Intenta de nuevo.");
@@ -32,7 +39,7 @@ export default function AperturaCaja() {
       setGuardando(false);
     }
   }
-
+ 
   return (
     <div className="apertura-container">
       <h1 className="apertura-titulo">
@@ -42,7 +49,11 @@ export default function AperturaCaja() {
       <p className="apertura-subtitulo">
         Cuenta el efectivo con el que se inicia el día antes de comenzar a operar.
       </p>
-
+ 
+      {mensajeCaja && (
+        <div className="apertura-error">⚠ {mensajeCaja}</div>
+      )}
+ 
       <div className="apertura-card">
         <div className="apertura-campo apertura-tasa">
           <label>Tasa de cambio del día (1 USD =)</label>
@@ -56,7 +67,7 @@ export default function AperturaCaja() {
             />
           </div>
         </div>
-
+ 
         <ConteoBilletes
           tasaCambio={tasaCambio}
           onTotalChange={(total, items) => {
@@ -64,7 +75,7 @@ export default function AperturaCaja() {
             setDesglose(items);
           }}
         />
-
+ 
         <div className="apertura-campo">
           <label>Observaciones de apertura</label>
           <textarea
@@ -74,9 +85,9 @@ export default function AperturaCaja() {
             rows={3}
           />
         </div>
-
+ 
         {error && <div className="apertura-error">{error}</div>}
-
+ 
         <div className="apertura-acciones">
           <button className="btn-apertura-cancelar" onClick={() => navigate("/caja")}>
             Cancelar

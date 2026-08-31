@@ -17,10 +17,12 @@ import logo from "../assets/LogoTransparente1.png";
 import "./Sidebar.css";
 import { obtenerSesionActiva } from "../services/caja.service";
 import cajaModalStyles from "./CajaModal.module.css";
+import { useCajaAbierta } from "../context/CajaContext";
 
 interface UsuarioSesion {
   Nombre_Usuario: string;
   Correo: string;
+  Nombre_rol: string;
 }
 
 export default function Sidebar() {
@@ -33,6 +35,8 @@ export default function Sidebar() {
 
   const [cajaSesionAbierta, setCajaSesionAbierta] = useState(false);
   const [mostrarModalCaja, setMostrarModalCaja] = useState(false);
+
+  const { cajaAbierta: cajaSesionActiva } = useCajaAbierta();
 
   useEffect(() => {
     const guardado = localStorage.getItem("usuario");
@@ -52,27 +56,29 @@ export default function Sidebar() {
   }, []);
 
   const handleLogout = async () => {
-  try {
-    const data = await obtenerSesionActiva();
+    try {
+      const data = await obtenerSesionActiva();
 
-    if (data.sesion != null && data.sesion.estado == "Abierta") {
-      console.log(data);
-      setCajaSesionAbierta(true);
-      setMostrarModalCaja(true);
-      return;
+      if (data.sesion != null && data.sesion.estado == "Abierta") {
+        console.log(data);
+        setCajaSesionAbierta(true);
+        setMostrarModalCaja(true);
+        return;
+      }
+
+      localStorage.removeItem("usuario");
+      localStorage.removeItem("token");
+      navigate("/");
+    } catch (error) {
+      console.error("Error al verificar el estado de la caja:", error);
     }
-
-    localStorage.removeItem("usuario");
-    localStorage.removeItem("token");
-    navigate("/");
-  } catch (error) {
-    console.error("Error al verificar el estado de la caja:", error);
-  }
-};
+  };
 
   const iniciales = usuario?.Nombre_Usuario
     ? usuario.Nombre_Usuario.slice(0, 2).toUpperCase()
     : "??";
+
+  const esAdministrador = usuario?.Nombre_rol === "Administrador";
 
   return (
     <aside className="sidebar">
@@ -81,9 +87,9 @@ export default function Sidebar() {
       </div>
 
       <nav className="sidebar-nav">
-        <NavLink to="/facturacion" className="sidebar-link">
+        <NavLink to="/Facturacion" className="sidebar-link">
           <FileText size={20} />
-          <span>Facturación</span>
+          <span>Ventas</span>
         </NavLink>
 
         <NavLink to="/devoluciones" className="sidebar-link">
@@ -122,64 +128,87 @@ export default function Sidebar() {
         </NavLink>
 
         <button
-  type="button"
-  className="sidebar-link sidebar-dropdown-toggle"
-  onClick={() => setCajaAbierto((abierto) => !abierto)}
->
-  <Wallet size={20} />
-  <span>Caja</span>
-  <ChevronDown size={16} className={`chevron ${cajaAbierto ? "chevron-abierto" : ""}`} />
-</button>
-
-{cajaAbierto && (
-  <div className="sidebar-submenu">
-    <NavLink to="/caja" className="sidebar-sublink">
-      Arqueo del día
-    </NavLink>
-    <NavLink to="/caja/apertura" className="sidebar-sublink">
-      Apertura de caja
-    </NavLink>
-    <NavLink to="/caja/cierre" className="sidebar-sublink">
-      Cierre de caja
-    </NavLink>
-  </div>
-)}
-
-        {/* Reportes con submenú desplegable */}
-        <button
           type="button"
           className="sidebar-link sidebar-dropdown-toggle"
-          onClick={() => setReportesAbierto((abierto) => !abierto)}
+          onClick={() => setCajaAbierto((abierto) => !abierto)}
         >
-          <PieChart size={20} />
-          <span>Reportes</span>
-          <ChevronDown
-            size={16}
-            className={`chevron ${reportesAbierto ? "chevron-abierto" : ""}`}
-          />
+          <Wallet size={20} />
+          <span>Caja</span>
+          <ChevronDown size={16} className={`chevron ${cajaAbierto ? "chevron-abierto" : ""}`} />
         </button>
 
-        {reportesAbierto && (
+        {cajaAbierto && (
           <div className="sidebar-submenu">
-            <NavLink to="/reportes/cuentas-por-cobrar" className="sidebar-sublink">
-              Cuentas por Cobrar
+            <NavLink
+              to="/caja"
+              className={`sidebar-sublink ${!cajaSesionActiva ? "sidebar-sublink-disabled" : ""}`}
+              onClick={(e) => {
+                if (!cajaSesionActiva) e.preventDefault();
+              }}
+              title={!cajaSesionActiva ? "Debe abrir caja primero" : undefined}
+            >
+              Arqueo del día
             </NavLink>
-            <NavLink to="/reportes/stock-proximo-agotarse" className="sidebar-sublink">
-              Stock Próximo a Agotarse
+
+            <NavLink to="/caja/apertura" className="sidebar-sublink">
+              Apertura de caja
             </NavLink>
-            <NavLink to="/reportes/ventas" className="sidebar-sublink">
-              Ventas por Período
-            </NavLink>
-            <NavLink to="/reportes/compras" className="sidebar-sublink">
-              Compras por Período
+
+            <NavLink
+              to="/caja/cierre"
+              className={`sidebar-sublink ${!cajaSesionActiva ? "sidebar-sublink-disabled" : ""}`}
+              onClick={(e) => {
+                if (!cajaSesionActiva) e.preventDefault();
+              }}
+              title={!cajaSesionActiva ? "Debe abrir caja primero" : undefined}
+            >
+              Cierre de caja
             </NavLink>
           </div>
         )}
 
-        <NavLink to="/mantenimiento" className="sidebar-link">
-          <Wrench size={20} />
-          <span>Mantenimiento</span>
-        </NavLink>
+        {/* Reportes: solo Administrador */}
+        {esAdministrador && (
+          <>
+            <button
+              type="button"
+              className="sidebar-link sidebar-dropdown-toggle"
+              onClick={() => setReportesAbierto((abierto) => !abierto)}
+            >
+              <PieChart size={20} />
+              <span>Reportes</span>
+              <ChevronDown
+                size={16}
+                className={`chevron ${reportesAbierto ? "chevron-abierto" : ""}`}
+              />
+            </button>
+
+            {reportesAbierto && (
+              <div className="sidebar-submenu">
+                <NavLink to="/reportes/cuentas-por-cobrar" className="sidebar-sublink">
+                  Cuentas por Cobrar
+                </NavLink>
+                <NavLink to="/reportes/stock-proximo-agotarse" className="sidebar-sublink">
+                  Stock Próximo a Agotarse
+                </NavLink>
+                <NavLink to="/reportes/ventas" className="sidebar-sublink">
+                  Ventas por Período
+                </NavLink>
+                <NavLink to="/reportes/compras" className="sidebar-sublink">
+                  Compras por Período
+                </NavLink>
+              </div>
+            )}
+          </>
+        )}
+
+        {/* Mantenimiento: solo Administrador */}
+        {esAdministrador && (
+          <NavLink to="/mantenimiento" className="sidebar-link">
+            <Wrench size={20} />
+            <span>Mantenimiento</span>
+          </NavLink>
+        )}
       </nav>
 
       {/* Usuario con menú desplegable */}
@@ -211,14 +240,17 @@ export default function Sidebar() {
               </div>
             </div>
 
-            <NavLink
-              to="/usuario"
-              className="usuario-dropdown-item"
-              onClick={() => setUsuarioMenuAbierto(false)}
-            >
-              <UserCog size={17} />
-              Gestionar usuarios
-            </NavLink>
+            {/* Gestionar usuarios: solo Administrador */}
+            {esAdministrador && (
+              <NavLink
+                to="/usuario"
+                className="usuario-dropdown-item"
+                onClick={() => setUsuarioMenuAbierto(false)}
+              >
+                <UserCog size={17} />
+                Gestionar usuarios
+              </NavLink>
+            )}
 
             <button
               type="button"
@@ -233,24 +265,21 @@ export default function Sidebar() {
       </div>
 
       {mostrarModalCaja && (
-  <div className={cajaModalStyles.overlay}>
-    <div className={cajaModalStyles.modal}>
-      <h3>Caja abierta</h3>
+        <div className={cajaModalStyles.overlay}>
+          <div className={cajaModalStyles.modal}>
+            <h3>Caja abierta</h3>
 
-      <p>
-        No puedes cerrar sesión mientras tengas una caja abierta.
-        Debes realizar el cierre de caja antes de salir del sistema.
-      </p>
+            <p>
+              No puedes cerrar sesión mientras tengas una caja abierta.
+              Debes realizar el cierre de caja antes de salir del sistema.
+            </p>
 
-      <button
-        type="button"
-        onClick={() => setMostrarModalCaja(false)}
-      >
-        Entendido
-      </button>
-    </div>
-  </div>
-)}
+            <button type="button" onClick={() => setMostrarModalCaja(false)}>
+              Entendido
+            </button>
+          </div>
+        </div>
+      )}
     </aside>
   );
 }

@@ -212,3 +212,9 @@
   color: #e04759;
   border-top: 1px solid #eceef1;
 }
+
+.sidebar-sublink-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}

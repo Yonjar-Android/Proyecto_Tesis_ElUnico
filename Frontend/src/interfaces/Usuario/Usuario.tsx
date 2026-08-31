@@ -13,6 +13,8 @@ interface UsuarioRegistro {
   id: number;
   Nombre_Usuario: string;
   Correo: string;
+  Id_rol: number;
+  Nombre_rol: string;
 }
 
 interface UsuarioSesion {
@@ -24,7 +26,6 @@ interface Rol {
   Nombre_rol: string;
 }
 
-
 type ModoModal = "crear" | "editar" | null;
 
 export default function Usuario() {
@@ -33,7 +34,7 @@ export default function Usuario() {
   const [busqueda, setBusqueda] = useState("");
   const [cargando, setCargando] = useState(false);
   const [roles, setRoles] = useState<Rol[]>([]);
-const [rolForm, setRolForm] = useState<number>(0);
+  const [rolForm, setRolForm] = useState<number>(0);
 
   const [modalAbierto, setModalAbierto] = useState<ModoModal>(null);
   const [usuarioEditando, setUsuarioEditando] = useState<UsuarioRegistro | null>(null);
@@ -47,34 +48,33 @@ const [rolForm, setRolForm] = useState<number>(0);
   const [usuarioAEliminar, setUsuarioAEliminar] = useState<UsuarioRegistro | null>(null);
 
   useEffect(() => {
-  const guardado = localStorage.getItem("usuario");
-  if (guardado) setUsuarioSesion(JSON.parse(guardado));
-  cargarUsuarios();
-  cargarRoles();
-}, []);
+    const guardado = localStorage.getItem("usuario");
+    if (guardado) setUsuarioSesion(JSON.parse(guardado));
+    cargarUsuarios();
+    cargarRoles();
+  }, []);
 
-async function cargarRoles() {
-  try {
-    const data = await obtenerRoles();
-    setRoles(data.roles);
-    if (data.roles.length > 0) setRolForm(data.roles[0].id);
-  } catch (err) {
-    console.error("Error al cargar roles:", err);
+  async function cargarRoles() {
+    try {
+      const data = await obtenerRoles();
+      setRoles(data.roles);
+      if (data.roles.length > 0) setRolForm(data.roles[0].id);
+    } catch (err) {
+      console.error("Error al cargar roles:", err);
+    }
   }
-}
 
- async function cargarUsuarios() {
-  setCargando(true);
-  try {
-    const data = await fetchUsuarios();
-    setUsuarios(data.usuarios);
-  } catch (err) {
-    console.error("Error al cargar usuarios:", err);
-  } finally {
-    setCargando(false);
+  async function cargarUsuarios() {
+    setCargando(true);
+    try {
+      const data = await fetchUsuarios();
+      setUsuarios(data.usuarios);
+    } catch (err) {
+      console.error("Error al cargar usuarios:", err);
+    } finally {
+      setCargando(false);
+    }
   }
-}
-
 
   const usuariosFiltrados = usuarios.filter(
     (u) =>
@@ -82,20 +82,22 @@ async function cargarRoles() {
       u.Correo.toLowerCase().includes(busqueda.toLowerCase())
   );
 
- function abrirModalCrear() {
-  setUsuarioEditando(null);
-  setNombreForm("");
-  setCorreoForm("");
-  setPasswordForm("");
-  setRolForm(roles[0]?.id || 0);
-  setErrorForm("");
-  setModalAbierto("crear");
-}
+  function abrirModalCrear() {
+    setUsuarioEditando(null);
+    setNombreForm("");
+    setCorreoForm("");
+    setPasswordForm("");
+    setRolForm(roles[0]?.id || 0);
+    setErrorForm("");
+    setModalAbierto("crear");
+  }
+
   function abrirModalEditar(usuario: UsuarioRegistro) {
     setUsuarioEditando(usuario);
     setNombreForm(usuario.Nombre_Usuario);
     setCorreoForm(usuario.Correo);
     setPasswordForm("");
+    setRolForm(usuario.Id_rol);
     setErrorForm("");
     setModalAbierto("editar");
   }
@@ -106,46 +108,51 @@ async function cargarRoles() {
     setMostrarPassword(false);
   }
 
- async function handleGuardar() {
-  setErrorForm("");
+  async function handleGuardar() {
+    setErrorForm("");
 
-  if (!nombreForm || !correoForm) {
-    setErrorForm("Usuario y correo son obligatorios.");
-    return;
-  }
-
-  if (modalAbierto === "crear" && !passwordForm) {
-    setErrorForm("La contraseña es obligatoria para un usuario nuevo.");
-    return;
-  }
-
-  setGuardando(true);
-  try {
-    if (modalAbierto === "crear") {
-      await crearUsuario({ nombreUsuario: nombreForm, correo: correoForm, password: passwordForm, idRol: rolForm });
-    } else if (modalAbierto === "editar" && usuarioEditando) {
-      await actualizarUsuario(usuarioEditando.id, nombreForm, correoForm);
+    if (!nombreForm || !correoForm) {
+      setErrorForm("Usuario y correo son obligatorios.");
+      return;
     }
-    await cargarUsuarios();
-    cerrarModal();
-  } catch (err: any) {
-    setErrorForm(err?.response?.data?.message || "No se pudo guardar el usuario. Intenta de nuevo.");
-  } finally {
-    setGuardando(false);
+
+    if (modalAbierto === "crear" && !passwordForm) {
+      setErrorForm("La contraseña es obligatoria para un usuario nuevo.");
+      return;
+    }
+
+    setGuardando(true);
+    try {
+      if (modalAbierto === "crear") {
+        await crearUsuario({
+          nombreUsuario: nombreForm,
+          correo: correoForm,
+          password: passwordForm,
+          idRol: rolForm,
+        });
+      } else if (modalAbierto === "editar" && usuarioEditando) {
+        await actualizarUsuario(usuarioEditando.id, nombreForm, correoForm, rolForm);
+      }
+      await cargarUsuarios();
+      cerrarModal();
+    } catch (err: any) {
+      setErrorForm(err?.response?.data?.message || "No se pudo guardar el usuario. Intenta de nuevo.");
+    } finally {
+      setGuardando(false);
+    }
   }
-}
 
   async function confirmarEliminar() {
-  if (!usuarioAEliminar) return;
-  try {
-    await eliminarUsuario(usuarioAEliminar.id);
-    setUsuarios((prev) => prev.filter((u) => u.id !== usuarioAEliminar.id));
-  } catch (err: any) {
-    console.error("Error al eliminar usuario:", err?.response?.data?.message || err);
-  } finally {
-    setUsuarioAEliminar(null);
+    if (!usuarioAEliminar) return;
+    try {
+      await eliminarUsuario(usuarioAEliminar.id);
+      setUsuarios((prev) => prev.filter((u) => u.id !== usuarioAEliminar.id));
+    } catch (err: any) {
+      console.error("Error al eliminar usuario:", err?.response?.data?.message || err);
+    } finally {
+      setUsuarioAEliminar(null);
+    }
   }
-}
 
   return (
     <div className="usuario-container">
@@ -189,19 +196,20 @@ async function cargarRoles() {
               <tr>
                 <th>Usuario</th>
                 <th>Correo</th>
+                <th>Rol</th>
                 <th className="col-acciones">Acciones</th>
               </tr>
             </thead>
             <tbody>
               {cargando ? (
                 <tr>
-                  <td colSpan={3} className="tabla-vacia">
+                  <td colSpan={4} className="tabla-vacia">
                     Cargando usuarios...
                   </td>
                 </tr>
               ) : usuariosFiltrados.length === 0 ? (
                 <tr>
-                  <td colSpan={3} className="tabla-vacia">
+                  <td colSpan={4} className="tabla-vacia">
                     No se encontraron usuarios.
                   </td>
                 </tr>
@@ -217,6 +225,7 @@ async function cargarRoles() {
                       </div>
                     </td>
                     <td>{usuario.Correo}</td>
+                    <td>{usuario.Nombre_rol}</td>
                     <td className="col-acciones">
                       <button
                         className="btn-icono"
@@ -251,6 +260,7 @@ async function cargarRoles() {
                 <div>
                   <p className="usuario-tarjeta-nombre">{usuario.Nombre_Usuario}</p>
                   <p className="usuario-tarjeta-correo">{usuario.Correo}</p>
+                  <p className="usuario-tarjeta-correo">{usuario.Nombre_rol}</p>
                 </div>
               </div>
               <div className="usuario-tarjeta-acciones">
@@ -281,26 +291,26 @@ async function cargarRoles() {
               {modalAbierto === "crear" ? "Agregar usuario" : "Editar usuario"}
             </h2>
 
-        <div className="modal-campo">
-  <label>Usuario</label>
-  <input
-    type="text"
-    value={nombreForm}
-    onChange={(e) => setNombreForm(e.target.value)}
-    placeholder="Nombre de usuario"
-  />
-</div>
+            <div className="modal-campo">
+              <label>Usuario</label>
+              <input
+                type="text"
+                value={nombreForm}
+                onChange={(e) => setNombreForm(e.target.value)}
+                placeholder="Nombre de usuario"
+              />
+            </div>
 
-<div className="modal-campo">
-  <label>Rol</label>
-  <select value={rolForm} onChange={(e) => setRolForm(Number(e.target.value))}>
-    {roles.map((rol) => (
-      <option key={rol.id} value={rol.id}>
-        {rol.Nombre_rol}
-      </option>
-    ))}
-  </select>
-</div>
+            <div className="modal-campo">
+              <label>Rol</label>
+              <select value={rolForm} onChange={(e) => setRolForm(Number(e.target.value))}>
+                {roles.map((rol) => (
+                  <option key={rol.id} value={rol.id}>
+                    {rol.Nombre_rol}
+                  </option>
+                ))}
+              </select>
+            </div>
 
             <div className="modal-campo">
               <label>Correo</label>

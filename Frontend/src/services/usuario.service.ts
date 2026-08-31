@@ -24,12 +24,13 @@ export const crearUsuario = async (payload: UsuarioInput) => {
   return response.data;
 };
 
-export const actualizarUsuario = async (id: number, nombreUsuario: string, correo: string) => {
-  const response = await axiosInstance.put(`${API}/${id}`, { nombreUsuario, correo });
-  return response.data;
-};
 
 export const eliminarUsuario = async (id: number) => {
   const response = await axiosInstance.delete(`${API}/${id}`);
+  return response.data;
+};
+
+export const actualizarUsuario = async (id: number, nombreUsuario: string, correo: string, idRol: number) => {
+  const response = await axiosInstance.put(`${API}/${id}`, { nombreUsuario, correo, idRol });
   return response.data;
 };

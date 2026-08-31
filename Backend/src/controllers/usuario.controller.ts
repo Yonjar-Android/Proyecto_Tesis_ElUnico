@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { listarUsuarios, crearUsuario, actualizarUsuario, eliminarUsuario, listarRoles } from "../services/usuario.service.js";
+
 export const getUsuarios = async (req: Request, res: Response) => {
   try {
     const usuarios = await listarUsuarios();
@@ -31,8 +32,8 @@ export const getRoles = async (req: Request, res: Response) => {
 export const putUsuario = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { nombreUsuario, correo } = req.body;
-    await actualizarUsuario(Number(id), nombreUsuario, correo);
+    const { nombreUsuario, correo, idRol } = req.body;
+    await actualizarUsuario(Number(id), nombreUsuario, correo, Number(idRol));
     res.status(200).json({ success: true });
   } catch (error: any) {
     res.status(400).json({ success: false, message: error.message });

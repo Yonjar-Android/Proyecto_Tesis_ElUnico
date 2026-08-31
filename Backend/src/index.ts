@@ -14,10 +14,11 @@ import reporteRoutes from "./routes/reporte.routes.js";
 import cajaRoutes from "./routes/caja.routes.js";
 import servicioRoutes from "./routes/service.routes.js"
 import cors from "cors";
-import { authMiddleware } from "./authMiddleware/authMiddleware.js";
+import { authMiddleware, requireRole } from "./authMiddleware/authMiddleware.js";
 import usuarioRoutes from "./routes/usuario.routes.js";
 import devolucionesRoutes from "./routes/devoluciones.routes.js";
 import salidasRoutes from "./routes/salidas_Inventario.js";
+import mantenimientoRoutes from "./routes/mantenimiento.routes.js";
 
 //dotenv.config();
 
@@ -48,7 +49,12 @@ app.use("/api/reportes", authMiddleware, reporteRoutes);
 app.use("/api/usuarios", authMiddleware, usuarioRoutes);
 app.use("/api/devoluciones", authMiddleware, devolucionesRoutes);
 app.use("/api/salidas_inventario", authMiddleware, salidasRoutes);
+app.use("/api/mantenimiento", authMiddleware, mantenimientoRoutes);
 
 app.listen(PORT, () => {
     console.log(`Servidor iniciado en http://localhost:${PORT}`);
+
+    app.use("/api/mantenimiento", authMiddleware, requireRole("Administrador"), mantenimientoRoutes);
+app.use("/api/usuarios", authMiddleware, requireRole("Administrador"), usuarioRoutes);
+app.use("/api/reportes", authMiddleware, requireRole("Administrador"), reporteRoutes);
 });

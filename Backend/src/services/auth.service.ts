@@ -39,13 +39,20 @@ async function enviarCorreoRecuperacion(email: string, usuario: string, contrase
 }
 
 export async function loginService(usuario: string, password: string) {
-  const rows: any = await login(usuario);
+  const user: any = await login(usuario);
 
-  if (rows.length === 0) {
+  if (!user) {
     return null;
   }
 
-  const storedPassword = rows[0].Contrasena;
+  // Bloqueo por usuario inactivo — antes de revisar la contraseña
+  if (!user.Activo) {
+    const error: any = new Error("USUARIO_INACTIVO");
+    error.code = "USUARIO_INACTIVO";
+    throw error;
+  }
+
+  const storedPassword = user.Contrasena;
 
   if (typeof storedPassword === "string" && storedPassword.startsWith("$2")) {
     const valid = await bcrypt.compare(password, storedPassword);
@@ -56,17 +63,24 @@ export async function loginService(usuario: string, password: string) {
     return null;
   }
 
-  const { Contrasena, ...safeUser } = rows[0];
+  const { Contrasena, ...safeUser } = user;
   return safeUser;
 }
 
 export async function resetPasswordByEmail(email: string) {
-  const rows: any = await findUserByEmail(email);
-  if (rows.length === 0) {
+  const user: any = await findUserByEmail(email);
+
+  if (!user) {
     return null;
   }
 
-  const user = rows[0];
+  // Bloqueo por usuario inactivo — antes de generar/enviar la contraseña nueva
+  if (!user.Activo) {
+    const error: any = new Error("USUARIO_INACTIVO");
+    error.code = "USUARIO_INACTIVO";
+    throw error;
+  }
+
   const originalPassword = user.Contrasena;
   const nuevaContrasena = generarContrasenaTemporal(8);
   const hashedPassword = await bcrypt.hash(nuevaContrasena, 10);

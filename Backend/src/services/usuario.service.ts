@@ -29,7 +29,7 @@ export async function crearUsuario(nombreUsuario: string, correo: string, passwo
   }
 
   const existente: any = await findUserByEmail(correo);
-  if (existente.length > 0) {
+  if (existente) {
     throw new Error("Ya existe un usuario registrado con ese correo.");
   }
 
@@ -41,7 +41,7 @@ export async function listarRoles() {
   return await obtenerRolesModel();
 }
 
-export async function actualizarUsuario(id: number, nombreUsuario: string, correo: string) {
+export async function actualizarUsuario(id: number, nombreUsuario: string, correo: string, idRol: number) {
   if (!id || isNaN(id)) {
     throw new Error("Usuario inválido.");
   }
@@ -51,8 +51,11 @@ export async function actualizarUsuario(id: number, nombreUsuario: string, corre
   if (!correo || !emailRegex.test(correo)) {
     throw new Error("Ingresa un correo válido.");
   }
+  if (!idRol || isNaN(idRol)) {
+    throw new Error("Debes seleccionar un rol.");
+  }
 
-  const filas = await actualizarUsuarioModel(id, nombreUsuario, correo);
+  const filas = await actualizarUsuarioModel(id, nombreUsuario, correo, idRol);
   if (filas === 0) {
     throw new Error("No se encontró el usuario a actualizar.");
   }

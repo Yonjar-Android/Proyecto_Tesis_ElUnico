@@ -1,80 +1,143 @@
-import { useEffect, useState } from "react";
-import { Database, Upload, CheckCircle2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Database, Upload, CheckCircle2, XCircle } from "lucide-react";
+import {
+  listarRespaldos,
+  crearRespaldo,
+  descargarRespaldo,
+  eliminarRespaldo,
+  restaurarDesdeArchivo,
+  restaurarDesdeHistorial,
+  type RespaldoBD,
+} from "../../services/mantenimiento.service";
 import "./Mantenimiento.css";
 
-interface Respaldo {
-  id: number;
-  fecha: string;
-  tamano: string;
-  estado: "Exitoso" | "Fallido";
+function formatearFecha(fechaIso: string) {
+  const fecha = new Date(fechaIso);
+  const dia = String(fecha.getDate()).padStart(2, "0");
+  const mes = String(fecha.getMonth() + 1).padStart(2, "0");
+  const anio = fecha.getFullYear();
+  const horas = String(fecha.getHours()).padStart(2, "0");
+  const minutos = String(fecha.getMinutes()).padStart(2, "0");
+  return `${dia}/${mes}/${anio} - ${horas}:${minutos}`;
+}
+
+function formatearTamano(bytes: number) {
+  if (bytes < 1024) return `${bytes} B`;
+  const kb = bytes / 1024;
+  if (kb < 1024) return `${kb.toFixed(1)} KB`;
+  return `${(kb / 1024).toFixed(1)} MB`;
 }
 
 export default function Mantenimiento() {
-  const [respaldos, setRespaldos] = useState<Respaldo[]>([]);
-  const [ultimoRespaldo, setUltimoRespaldo] = useState<string>("");
+  const [respaldos, setRespaldos] = useState<RespaldoBD[]>([]);
+  const [cargando, setCargando] = useState(true);
   const [creandoRespaldo, setCreandoRespaldo] = useState(false);
   const [restaurando, setRestaurando] = useState(false);
+  const [error, setError] = useState("");
+  const [mensajeExito, setMensajeExito] = useState("");
+
+  const inputArchivoRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     cargarHistorial();
   }, []);
 
   async function cargarHistorial() {
+    setCargando(true);
     try {
-      // TODO: reemplazar con la llamada real al backend
-      // const res = await fetch("/api/mantenimiento/respaldos");
-      // const data = await res.json();
-      // setRespaldos(data.respaldos);
-      // setUltimoRespaldo(data.ultimoRespaldo);
-
-      // Datos de ejemplo mientras se conecta el backend
-      setRespaldos([
-        { id: 1, fecha: "05/05/2026 - 14:00", tamano: "42.5 MB", estado: "Exitoso" },
-        { id: 2, fecha: "05/05/2026 - 08:00", tamano: "41.8 MB", estado: "Exitoso" },
-      ]);
-      setUltimoRespaldo("Hoy a las 08:00 AM");
+      const data = await listarRespaldos();
+      setRespaldos(data);
     } catch (err) {
       console.error("Error al cargar el historial de respaldos:", err);
+      setError("No se pudo cargar el historial de respaldos.");
+    } finally {
+      setCargando(false);
     }
   }
 
+  const ultimoRespaldoExitoso = respaldos.find((r) => r.estado === "Exitoso");
+
   async function handleCrearRespaldo() {
+    setError("");
+    setMensajeExito("");
     setCreandoRespaldo(true);
     try {
-      // TODO: reemplazar con la llamada real al backend
-      // await fetch("/api/mantenimiento/respaldos", { method: "POST" });
-      // await cargarHistorial();
-      console.log("Creando respaldo...");
-    } catch (err) {
-      console.error("Error al crear el respaldo:", err);
+      await crearRespaldo();
+      setMensajeExito("Respaldo creado correctamente.");
+      await cargarHistorial();
+    } catch (err: any) {
+      setError(err?.response?.data?.mensaje ?? "Error al crear el respaldo.");
     } finally {
       setCreandoRespaldo(false);
     }
   }
 
-  async function handleRestaurar() {
+  function handleAbrirSelectorArchivo() {
+    inputArchivoRef.current?.click();
+  }
+
+  async function handleArchivoSeleccionado(e: React.ChangeEvent<HTMLInputElement>) {
+    const archivo = e.target.files?.[0];
+    e.target.value = "";
+    if (!archivo) return;
+
+    const confirmado = window.confirm(
+      `¿Restaurar la base de datos desde "${archivo.name}"? Esto reemplazará los datos actuales y no se puede deshacer.`
+    );
+    if (!confirmado) return;
+
+    setError("");
+    setMensajeExito("");
     setRestaurando(true);
     try {
-      // TODO: reemplazar con la llamada real al backend
-      // await fetch("/api/mantenimiento/restaurar", { method: "POST" });
-      console.log("Restaurando respaldo...");
-    } catch (err) {
-      console.error("Error al restaurar:", err);
+      await restaurarDesdeArchivo(archivo);
+      setMensajeExito("Base de datos restaurada correctamente.");
+    } catch (err: any) {
+      setError(err?.response?.data?.mensaje ?? "Error al restaurar la base de datos.");
     } finally {
       setRestaurando(false);
     }
   }
 
-  function handleDescargar(id: number) {
-    // TODO: reemplazar con la llamada real al backend
-    // window.open(`/api/mantenimiento/respaldos/${id}/descargar`, "_blank");
-    console.log("Descargando respaldo", id);
+  async function handleRestaurarDesdeHistorial(id: number, nombreArchivo: string) {
+    const confirmado = window.confirm(
+      `¿Restaurar la base de datos usando el respaldo "${nombreArchivo}"? Esto reemplazará los datos actuales y no se puede deshacer.`
+    );
+    if (!confirmado) return;
+
+    setError("");
+    setMensajeExito("");
+    setRestaurando(true);
+    try {
+      await restaurarDesdeHistorial(id);
+      setMensajeExito("Base de datos restaurada correctamente.");
+    } catch (err: any) {
+      setError(err?.response?.data?.mensaje ?? "Error al restaurar la base de datos.");
+    } finally {
+      setRestaurando(false);
+    }
   }
 
-  function handleEliminar(id: number) {
-    // TODO: reemplazar con la llamada real al backend
-    // await fetch(`/api/mantenimiento/respaldos/${id}`, { method: "DELETE" });
-    setRespaldos((prev) => prev.filter((r) => r.id !== id));
+  async function handleDescargar(id: number, nombreArchivo: string) {
+    try {
+      await descargarRespaldo(id, nombreArchivo);
+    } catch (err) {
+      console.error("Error al descargar el respaldo:", err);
+      setError("No se pudo descargar el respaldo.");
+    }
+  }
+
+  async function handleEliminar(id: number) {
+    const confirmado = window.confirm("¿Eliminar este respaldo? Esta acción no se puede deshacer.");
+    if (!confirmado) return;
+
+    try {
+      await eliminarRespaldo(id);
+      setRespaldos((prev) => prev.filter((r) => r.id !== id));
+    } catch (err) {
+      console.error("Error al eliminar el respaldo:", err);
+      setError("No se pudo eliminar el respaldo.");
+    }
   }
 
   return (
@@ -88,7 +151,7 @@ export default function Mantenimiento() {
           <button
             className="btn-respaldo btn-crear"
             onClick={handleCrearRespaldo}
-            disabled={creandoRespaldo}
+            disabled={creandoRespaldo || restaurando}
           >
             <Database size={18} />
             {creandoRespaldo ? "Creando..." : "Crear nuevo respaldo"}
@@ -96,18 +159,38 @@ export default function Mantenimiento() {
 
           <button
             className="btn-respaldo btn-restaurar"
-            onClick={handleRestaurar}
-            disabled={restaurando}
+            onClick={handleAbrirSelectorArchivo}
+            disabled={creandoRespaldo || restaurando}
           >
             <Upload size={18} />
-            {restaurando ? "Restaurando..." : "Restaurar"}
+            {restaurando ? "Restaurando..." : "Restaurar desde archivo"}
           </button>
+
+          <input
+            ref={inputArchivoRef}
+            type="file"
+            accept=".sql"
+            style={{ display: "none" }}
+            onChange={handleArchivoSeleccionado}
+          />
         </div>
 
-        {ultimoRespaldo && (
+        {ultimoRespaldoExitoso && (
           <div className="ultimo-respaldo">
             <span className="punto-verde" />
-            Último respaldo realizado: <strong>{ultimoRespaldo}</strong>
+            Último respaldo realizado: <strong>{formatearFecha(ultimoRespaldoExitoso.fecha_respaldo)}</strong>
+          </div>
+        )}
+
+        {mensajeExito && (
+          <div className="ultimo-respaldo" style={{ color: "#2e7d32" }}>
+            <CheckCircle2 size={16} /> {mensajeExito}
+          </div>
+        )}
+
+        {error && (
+          <div className="ultimo-respaldo" style={{ color: "#e5484d" }}>
+            <XCircle size={16} /> {error}
           </div>
         )}
       </div>
@@ -129,7 +212,13 @@ export default function Mantenimiento() {
               </tr>
             </thead>
             <tbody>
-              {respaldos.length === 0 ? (
+              {cargando ? (
+                <tr>
+                  <td colSpan={4} className="tabla-vacia">
+                    Cargando historial...
+                  </td>
+                </tr>
+              ) : respaldos.length === 0 ? (
                 <tr>
                   <td colSpan={4} className="tabla-vacia">
                     No hay respaldos registrados aún.
@@ -138,26 +227,45 @@ export default function Mantenimiento() {
               ) : (
                 respaldos.map((respaldo) => (
                   <tr key={respaldo.id}>
-                    <td>{respaldo.fecha}</td>
-                    <td>{respaldo.tamano}</td>
+                    <td>{formatearFecha(respaldo.fecha_respaldo)}</td>
+                    <td>{formatearTamano(respaldo.tamano_bytes)}</td>
                     <td>
                       <span
                         className={`estado-badge ${
                           respaldo.estado === "Exitoso" ? "estado-exitoso" : "estado-fallido"
                         }`}
+                        title={respaldo.mensaje_error ?? undefined}
                       >
-                        <CheckCircle2 size={14} />
+                        {respaldo.estado === "Exitoso" ? (
+                          <CheckCircle2 size={14} />
+                        ) : (
+                          <XCircle size={14} />
+                        )}
                         {respaldo.estado}
                       </span>
                     </td>
                     <td className="col-acciones">
-                      <button
-                        className="accion-link"
-                        onClick={() => handleDescargar(respaldo.id)}
-                      >
-                        Descargar
-                      </button>
-                      <span className="accion-separador">|</span>
+                      {respaldo.estado === "Exitoso" ? (
+                        <>
+                          <button
+                            className="accion-link"
+                            onClick={() => handleDescargar(respaldo.id, respaldo.nombre_archivo)}
+                          >
+                            Descargar
+                          </button>
+                          <span className="accion-separador">|</span>
+                          <button
+                            className="accion-link"
+                            onClick={() =>
+                              handleRestaurarDesdeHistorial(respaldo.id, respaldo.nombre_archivo)
+                            }
+                            disabled={restaurando}
+                          >
+                            Restaurar
+                          </button>
+                          <span className="accion-separador">|</span>
+                        </>
+                      ) : null}
                       <button
                         className="accion-link accion-eliminar"
                         onClick={() => handleEliminar(respaldo.id)}
