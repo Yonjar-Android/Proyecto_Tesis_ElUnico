@@ -6,9 +6,14 @@ import ModalEditarCliente from "./ModalEditarCliente";
 import ModalAgregarCliente from "./ModalAgregarCliente"
 import ModalAbonarCliente from "./ModalAbonarCliente";
 import { crearDetalleAbono } from "../../services/detalle_abono.service";
-import { SquarePen, CreditCard } from "lucide-react";
+import { SquarePen, CreditCard,HelpCircle } from "lucide-react";
 import { formatearMoneda, formatearTelefono } from "../FuncionAuxiliar"
 import Notificacion, { type TipoNotificacion } from "../../components/Notification/Notification";
+import ModalAyuda from "../ModalAyuda";
+
+// tus imágenes de ayuda para esta interfaz en particular
+import ayudaClientes1 from "../../assets/ayuda/cliente/Diapositiva1.png";
+import ayudaClientes2 from "../../assets/ayuda/cliente/Diapositiva2.png";
 
 interface Cliente {
 
@@ -47,6 +52,21 @@ function Cliente(){
             buscar();
     
         }, []);
+
+        const [modalAyudaAbierto, setModalAyudaAbierto] = useState(false);
+
+const imagenesAyudaClientes = [
+  {
+    src: ayudaClientes1,
+    titulo: "",
+    descripcion: "",
+  },
+  {
+    src: ayudaClientes2,
+    titulo: "",
+    descripcion: "",
+  },
+];
     
     
     const buscar = async () => {
@@ -105,15 +125,17 @@ return (
                   )}
         <div className="cliente-content">
       <div className="cliente-top-part">
-        <h1 className="cliente-title">Clientes</h1>
-        <button
-    className="cliente-add-btn"
-    onClick={() => setModalAbierto(true)}
->
-    <span className="cliente-add-icon">✦</span>
-    Agregar cliente
-</button>
-      </div>
+  <h1 className="cliente-title">Clientes</h1>
+  <div style={{ display: "flex", gap: "8px" }}>
+    <button className="cliente-add-btn" onClick={() => setModalAyudaAbierto(true)}>
+      <HelpCircle size={18} />
+    </button>
+    <button className="cliente-add-btn" onClick={() => setModalAbierto(true)}>
+      <span className="cliente-add-icon">✦</span>
+      Agregar cliente
+    </button>
+  </div>
+</div>
 
       <div className="cliente-table-container">
         <div className="cliente-search-wrapper">
@@ -260,6 +282,13 @@ return (
             return false;
         }
     }}
+/>
+
+<ModalAyuda
+  abierto={modalAyudaAbierto}
+  titulo="Ayuda: Gestión de clientes"
+  imagenes={imagenesAyudaClientes}
+  onClose={() => setModalAyudaAbierto(false)}
 />
 
 <ModalAbonarCliente

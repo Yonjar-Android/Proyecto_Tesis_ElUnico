@@ -4,9 +4,14 @@ import { useEffect, useState } from "react";
 import ModalAgregarServicio from "./ModalAgregarServicio";
 import type { PaginatedResponse } from "../../models/PaginatedResponse";
 import ModalEditarServicio from "./ModalEditarServicio";
-import { SquarePen } from 'lucide-react'
+import { SquarePen, HelpCircle } from 'lucide-react'
 import { formatearMoneda } from "../FuncionAuxiliar";
 import Notificacion, { type TipoNotificacion } from "../../components/Notification/Notification";
+import ModalAyuda from "../ModalAyuda"; // ajusta la ruta
+
+// tus imágenes de ayuda para esta interfaz en particular
+import ayudaServicios1 from "../../assets/ayuda/servicio/Diapositiva5.png";
+import ayudaServicios2 from "../../assets/ayuda/servicio/Diapositiva6.png";
 
 interface Servicio {
     id: number;
@@ -37,6 +42,21 @@ const [notif, setNotif] = useState<{ mensaje: string; tipo: TipoNotificacion } |
         console.log("hola");
       buscar();
     }, []);
+
+    const [modalAyudaAbierto, setModalAyudaAbierto] = useState(false);
+
+const imagenesAyudaProveedores = [
+  {
+    src: ayudaServicios1,
+    titulo: "",
+    descripcion: "",
+  },
+  {
+    src: ayudaServicios2,
+    titulo: "",
+    descripcion: "",
+  },
+];
 
 const buscar = async () => {
   try {
@@ -96,10 +116,15 @@ useEffect(() => {
         <div className="categoria-content">
       <div className="categoria-top-part">
         <h1 className="categoria-title">Servicios</h1>
-        <button className="categoria-add-btn"
-        onClick={() => setModalAbierto(true)}>
-          <span className="categoria-add-icon">✦</span> Agregar servicio
-        </button>
+        <div style={{ display: "flex", gap: "8px" }}>
+          <button className="categoria-add-btn" onClick={() => setModalAyudaAbierto(true)}>
+            <HelpCircle size={18} />
+          </button>
+          <button className="categoria-add-btn"
+          onClick={() => setModalAbierto(true)}>
+            <span className="categoria-add-icon">✦</span> Agregar servicio
+          </button>
+        </div>
       </div>
 
       <div className="categoria-table-container">
@@ -185,6 +210,13 @@ useEffect(() => {
       }
 
       }
+      />
+
+      <ModalAyuda
+        abierto={modalAyudaAbierto}
+        titulo="Ayuda: Gestión de proveedores"
+        imagenes={imagenesAyudaProveedores}
+        onClose={() => setModalAyudaAbierto(false)}
       />
 
       <ModalEditarServicio 

@@ -4,9 +4,14 @@ import { useEffect, useState } from "react";
 import type { PaginatedResponse } from "../../models/PaginatedResponse";
 import ModalAgregarProveedor from "./ModalAgregarProveedor";
 import ModalEditarProveedor from "./ModalEditarProveedor";
-import { SquarePen } from "lucide-react";
+import { SquarePen, HelpCircle } from "lucide-react";
 import { formatearTelefono } from "../FuncionAuxiliar";
 import Notificacion, { type TipoNotificacion } from "../../components/Notification/Notification";
+import ModalAyuda from "../ModalAyuda"; // ajusta la ruta
+
+// tus imágenes de ayuda para esta interfaz en particular
+import ayudaClientes1 from "../../assets/ayuda/proveedor/Diapositiva3.png";
+import ayudaClientes2 from "../../assets/ayuda/proveedor/Diapositiva4.png";
 
 interface Proveedor {
 
@@ -39,6 +44,21 @@ function Proveedor(){
             buscar();
     
         }, []);
+
+    const [modalAyudaAbierto, setModalAyudaAbierto] = useState(false);
+
+const imagenesAyudaClientes = [
+  {
+    src: ayudaClientes1,
+    titulo: "",
+    descripcion: "",
+  },
+  {
+    src: ayudaClientes2,
+    titulo: "",
+    descripcion: "",
+  },
+];
     
     
     const buscar = async () => {
@@ -96,15 +116,20 @@ return (
                     />
                   )}
         <div className="proveedor-content">
-      <div className="proveedor-top-part">
+<div className="proveedor-top-part">
         <h1 className="proveedor-title">Proveedores</h1>
-        <button
-    className="proveedor-add-btn"
-    onClick={() => setModalAbierto(true)}
->
-    <span className="proveedor-add-icon">✦</span>
-    Agregar proveedor
-</button>
+        <div style={{ display: "flex", gap: "8px" }}>
+          <button className="proveedor-add-btn" onClick={() => setModalAyudaAbierto(true)}>
+            <HelpCircle size={18} />
+          </button>
+          <button
+              className="proveedor-add-btn"
+              onClick={() => setModalAbierto(true)}
+          >
+              <span className="proveedor-add-icon">✦</span>
+              Agregar proveedor
+          </button>
+        </div>
       </div>
 
       <div className="proveedor-table-container">
@@ -210,6 +235,13 @@ return (
         }
       }}
       />
+
+      <ModalAyuda
+  abierto={modalAyudaAbierto}
+  titulo="Ayuda: Gestión de proveedores"
+  imagenes={imagenesAyudaClientes}
+  onClose={() => setModalAyudaAbierto(false)}
+/>
 
       <ModalEditarProveedor
     abierto={modalEditarAbierto}
