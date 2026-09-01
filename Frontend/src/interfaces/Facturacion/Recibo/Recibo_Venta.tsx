@@ -50,6 +50,7 @@ export default function ReciboVenta({ datos }: Props) {
     <div className={styles.recibo}>
       <div className={styles.encabezado}>
         <h2>{NEGOCIO.nombre}</h2>
+        <p>RUC: 441-120274-0000U</p>
         <p>{NEGOCIO.direccion}</p>
       </div>
 
@@ -72,10 +73,10 @@ export default function ReciboVenta({ datos }: Props) {
           <span>HORA:</span>
           <span>{datos.hora}</span>
         </div>
-        <div className={styles.filaDato}>
-          <span>PAGO:</span>
-          <span>{datos.tipoPago}</span>
-        </div>
+<div className={styles.filaDato}>
+  <span>PAGO:</span>
+  <span>{datos.tipoPago === "Credito" ? "Crédito" : datos.tipoPago}</span>
+</div>
         <div className={styles.filaDato}>
           <span>CLIENTE:</span>
           <span>{datos.clienteNombre}</span>
@@ -94,7 +95,7 @@ export default function ReciboVenta({ datos }: Props) {
       <div className={styles.filaEncabezadoArticulos}>
         <span>CANT.</span>
         <span>P.UNIT.</span>
-        <span>IMPORTE</span>
+        <span>SUBTOTAL</span>
       </div>
 
       <div className={styles.separador} />
@@ -117,12 +118,10 @@ export default function ReciboVenta({ datos }: Props) {
         <span>C${formatearMoneda(subtotal)}</span>
       </div>
 
-      {descuentoTotal > 0 && (
         <div className={styles.filaTotal}>
           <span>DESCUENTO:</span>
           <span>-C${formatearMoneda(descuentoTotal)}</span>
         </div>
-      )}
 
       <div className={`${styles.filaTotal} ${styles.filaTotalFinal}`}>
         <span>TOTAL:</span>

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import "./ConteoBilletes.css";
+import { formatearMoneda } from "../FuncionAuxiliar";
 
 interface ConteoBilletesProps {
   tasaCambio: number;
@@ -78,7 +79,7 @@ export default function ConteoBilletes({ tasaCambio, onTotalChange }: ConteoBill
       <div className="conteo-columna">
         <h4 className="conteo-titulo">
           <span className="punto-cordobas" /> Córdobas
-          <span className="conteo-subtotal-mini">C${subtotalCordobas.toLocaleString()}</span>
+          <span className="conteo-subtotal-mini">C${formatearMoneda(subtotalCordobas).toLocaleString()}</span>
         </h4>
         {DENOMINACIONES_CORDOBAS.map((d) => (
           <div className="conteo-fila" key={`cordoba-${d}`}>
@@ -100,7 +101,7 @@ export default function ConteoBilletes({ tasaCambio, onTotalChange }: ConteoBill
       <div className="conteo-columna">
         <h4 className="conteo-titulo">
           <span className="punto-dolares" /> US Dólares
-          <span className="conteo-tasa">Tasa de cambio: 1USD = C${tasaCambio.toFixed(2)}</span>
+          <span className="conteo-tasa">Tasa de cambio: 1USD = C${formatearMoneda(tasaCambio)}</span>
         </h4>
         {DENOMINACIONES_DOLARES.map((d) => (
           <div className="conteo-fila" key={`dolar-${d}`}>
@@ -118,16 +119,16 @@ export default function ConteoBilletes({ tasaCambio, onTotalChange }: ConteoBill
           </div>
         ))}
         <div className="conteo-subtotal-equiv">
-          Subtotal equiv. <strong>C${subtotalDolaresEquivalente.toFixed(2)}</strong>
-          <span>${subtotalDolares.toFixed(2)} USD</span>
+          Subtotal equiv. <strong>C${formatearMoneda(subtotalDolaresEquivalente)}</strong>
+          <span>${formatearMoneda(subtotalDolares)} USD</span>
         </div>
       </div>
 
       <div className="conteo-gran-total">
         <span>Gran total contado</span>
-        <strong>C${granTotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}</strong>
+        <strong>C${formatearMoneda(granTotal)}</strong>
         <span className="conteo-total-usd">
-          ≈ ${(granTotal / tasaCambio).toFixed(2)} USD
+          ≈ ${formatearMoneda((granTotal / tasaCambio))} USD
         </span>
       </div>
     </div>

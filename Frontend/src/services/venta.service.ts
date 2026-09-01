@@ -8,6 +8,7 @@ export const crearVenta = async (
     Id_cliente: number,
     Tipo_Pago: string,
     Total: number,
+    RecibidoCordobas:number,
     Detalles: DetalleVenta[]
 ) => {
 
@@ -15,6 +16,7 @@ export const crearVenta = async (
         Id_cliente,
         Tipo_Pago,
         Total,
+        RecibidoCordobas,
         Detalles
     }, {
             headers: {

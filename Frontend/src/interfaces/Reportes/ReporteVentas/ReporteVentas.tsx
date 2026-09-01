@@ -240,7 +240,7 @@ useEffect(() => {
               <tr>
                 <th>Fecha</th>
                 <th>Cliente</th>
-                <th>Estado</th>
+                <th>Tipo de pago</th>
                 <th className="reporte-th-derecha">Monto</th>
                 <th className="reporte-th-derecha">Acciones</th>
               </tr>

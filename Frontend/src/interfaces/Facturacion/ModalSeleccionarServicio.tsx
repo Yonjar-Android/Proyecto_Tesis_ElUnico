@@ -4,6 +4,7 @@ import styles from "./ModalSeleccionarServicio.module.css";
 import { buscarServicios } from "../../services/servicio.service";
 import type { Servicio } from "../../models/Servicio";
 import type { PaginatedResponse } from "../../models/PaginatedResponse";
+import { formatearMoneda } from "../FuncionAuxiliar";
 
 interface Props {
   abierto: boolean;
@@ -93,7 +94,7 @@ function ModalSeleccionarServicio({ abierto, onClose, onSeleccionar }: Props) {
                       </span>
                     )}
                   </td>
-                  <td>C${servicio.Precio}</td>
+                  <td>C${formatearMoneda(servicio.Precio)}</td>
                   <td className={styles.tdAccion}>
                     <button
                       className={styles.btn}

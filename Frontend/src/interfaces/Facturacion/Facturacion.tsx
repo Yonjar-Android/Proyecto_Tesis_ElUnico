@@ -70,6 +70,7 @@ function Facturacion() {
     Direccion: "",
     Saldo_Deuda: 0,
     NCliente: 0,
+    NCedula: ""
   });
 
   const [notif, setNotif] = useState<{ mensaje: string; tipo: TipoNotificacion } | null>(null);
@@ -266,6 +267,7 @@ function Facturacion() {
         Number(clienteSeleccionado?.id),
         tipoPago,
         totalGeneral,
+        _detalle.dineroRecibido,
         items.map((item) =>
           item.tipo === "producto"
             ? {

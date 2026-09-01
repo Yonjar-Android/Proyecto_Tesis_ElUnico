@@ -12,6 +12,7 @@ export interface DetalleConfirmacionVenta {
   montoRecibidoDolares: number;
   cambioCordobas: number;
   tasaCambio: number;
+  dineroRecibido:number;
 }
 
 interface Props {
@@ -68,7 +69,7 @@ function ModalConfirmarVenta({
       ? numDolaresRecibido * TASA_CAMBIO
       : numCordobasRecibido + numDolaresRecibido * TASA_CAMBIO;
 
-   const cambioCordobas = Math.max(0, recibidoEnCordobas - totalVenta);
+  const cambioCordobas = Math.max(0, recibidoEnCordobas - totalVenta);
   const faltanteCordobas = Math.max(0, totalVenta - recibidoEnCordobas);
 
   function cerrar() {
@@ -118,6 +119,7 @@ function ModalConfirmarVenta({
         tipoMonedaRecibida === "cordobas" ? 0 : numDolaresRecibido,
       cambioCordobas: Number(formatearMoneda(Number(cambioCordobas))),
       tasaCambio: TASA_CAMBIO,
+      dineroRecibido: recibidoEnCordobas
     };
 
     const exito = await onConfirmar(detalle, setError);

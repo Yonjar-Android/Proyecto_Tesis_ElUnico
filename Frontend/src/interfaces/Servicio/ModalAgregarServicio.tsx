@@ -1,7 +1,6 @@
 import { useState } from "react";
 import "../Categoria/ModalAgregarCategoria.css";
 
-
 interface Props {
   abierto: boolean;
   onClose: () => void;

@@ -54,6 +54,7 @@ export const crearVenta = async (
     idUsuario: number,
     tipoPago: string,
     total: number,
+    recibidoCordobas:number,
     detalles: DetalleVentaInput[]
 ) => {
 
@@ -135,6 +136,17 @@ for (const detalle of detalles) {
         ]
     );
 
+}
+
+if (tipoPago === "Credito") {
+    const deuda = total - recibidoCordobas;
+
+    await connection.query(
+        `UPDATE clientes
+         SET Saldo_Deuda = COALESCE(Saldo_Deuda, 0) + ?
+         WHERE id = ?`,
+        [deuda, idCliente]
+    );
 }
 
         await connection.commit();

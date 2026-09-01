@@ -4,6 +4,7 @@ import { Plus, Pencil, AlertTriangle, FileDown } from "lucide-react";
 import EgresoModal from "./EgresoModal";
 import { obtenerSesionActiva } from "../../services/caja.service";
 import "./Caja.css";
+import { formatearMoneda } from "../FuncionAuxiliar";
 
 interface SesionCaja {
   id_sesion: number;
@@ -113,19 +114,19 @@ const [egresoEditando, setEgresoEditando] = useState<Egreso | null>(null);
           <div className="caja-resumen-grid">
   <div className="caja-resumen-card">
     <span>Monto de apertura</span>
-    <strong>C${sesionActiva.monto_apertura_cordobas.toLocaleString()}</strong>
+    <strong>C${formatearMoneda(sesionActiva.monto_apertura_cordobas)}</strong>
   </div>
   <div className="caja-resumen-card">
     <span>Ingresos del día</span>
-    <strong className="valor-verde">C${ingresosDia.toLocaleString()}</strong>
+    <strong className="valor-verde">C${formatearMoneda(ingresosDia)}</strong>
   </div>
   <div className="caja-resumen-card">
     <span>Egresos del día</span>
-    <strong className="valor-rojo">- C${totalEgresos.toLocaleString()}</strong>
+    <strong className="valor-rojo">- C${formatearMoneda(totalEgresos)}</strong>
   </div>
   <div className="caja-resumen-card caja-resumen-neto">
     <span>Neto del día</span>
-    <strong>C${netoDia.toLocaleString()}</strong>
+    <strong>C${formatearMoneda(netoDia)}</strong>
   </div>
 </div>
 
@@ -153,7 +154,7 @@ const [egresoEditando, setEgresoEditando] = useState<Egreso | null>(null);
                       </p>
                     </div>
                     <div className="movimiento-derecha">
-  <span className="movimiento-monto">- C${egreso.monto_cordobas}</span>
+  <span className="movimiento-monto">- C${formatearMoneda(egreso.monto_cordobas)}</span>
   <button
     className="movimiento-eliminar"
     onClick={() => setEgresoEditando(egreso)}
@@ -165,7 +166,7 @@ const [egresoEditando, setEgresoEditando] = useState<Egreso | null>(null);
                 ))}
                 <div className="caja-total-egresos">
                   <span>Total egresos</span>
-                  <strong>- C${totalEgresos.toLocaleString()}</strong>
+                  <strong>- C${formatearMoneda(totalEgresos)}</strong>
                 </div>
               </>
             )}

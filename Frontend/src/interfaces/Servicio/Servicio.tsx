@@ -214,7 +214,7 @@ useEffect(() => {
 
       <ModalAyuda
         abierto={modalAyudaAbierto}
-        titulo="Ayuda: Gestión de proveedores"
+        titulo="Ayuda: Gestión de servicios"
         imagenes={imagenesAyudaProveedores}
         onClose={() => setModalAyudaAbierto(false)}
       />

@@ -5,6 +5,7 @@ import ConteoBilletes from "./ConteoBilletes";
 import type { DesgloseItem } from "./ConteoBilletes";
 import { cerrarCaja, obtenerResumenCierre, obtenerSesionActiva } from "../../services/caja.service";
 import "./AperturaCierre.css";
+import { formatearMoneda } from "../FuncionAuxiliar";
 
 export default function CierreCaja() {
   const navigate = useNavigate();
@@ -105,19 +106,19 @@ export default function CierreCaja() {
       <div className="cierre-resumen-sistema">
         <div>
           <span>Apertura</span>
-          <strong>C${totalSistema.montoApertura.toLocaleString()}</strong>
+          <strong>C${formatearMoneda(totalSistema.montoApertura)}</strong>
         </div>
         <div>
           <span>+ Ingresos</span>
-          <strong className="valor-verde-cierre">C${totalSistema.ingresos.toLocaleString()}</strong>
+          <strong className="valor-verde-cierre">C${formatearMoneda(totalSistema.ingresos)}</strong>
         </div>
         <div>
           <span>- Egresos</span>
-          <strong className="valor-rojo-cierre">C${totalSistema.egresos.toLocaleString()}</strong>
+          <strong className="valor-rojo-cierre">C${formatearMoneda(totalSistema.egresos)}</strong>
         </div>
         <div className="cierre-esperado">
           <span>Efectivo esperado</span>
-          <strong>C${totalSistema.efectivoEsperado.toLocaleString()}</strong>
+          <strong>C${formatearMoneda(totalSistema.efectivoEsperado)}</strong>
         </div>
       </div>
 
