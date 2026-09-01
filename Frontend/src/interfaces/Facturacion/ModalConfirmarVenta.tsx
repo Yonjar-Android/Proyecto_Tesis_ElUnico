@@ -251,7 +251,9 @@ function ModalConfirmarVenta({
             Cancelar
           </button>
 
-          <button className="btn-guardar confirmar-venta-btn" onClick={confirmar}>
+          <button 
+          disabled={tipoPago === "Credito" ? false : recibidoEnCordobas < totalVenta}
+          className="btn-guardar confirmar-venta-btn" onClick={confirmar}>
             ✓ Confirmar
           </button>
         </div>

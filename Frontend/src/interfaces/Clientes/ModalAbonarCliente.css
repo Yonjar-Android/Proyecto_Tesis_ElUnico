@@ -115,6 +115,11 @@
   font-weight: 700;
 }
 
+.abono-btn-registrar:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .abono-modal .modal-body {
   padding: 16px 22px 4px;
   max-height: 70vh;

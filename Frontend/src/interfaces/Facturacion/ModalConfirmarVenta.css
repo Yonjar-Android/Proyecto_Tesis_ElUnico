@@ -91,6 +91,11 @@
   gap: 0.4rem;
 }
 
+.confirmar-venta-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .moneda-selector {
   display: flex;
   gap: 6px;

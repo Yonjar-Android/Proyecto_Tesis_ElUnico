@@ -284,7 +284,9 @@ const registrar = async () => {
             Cancelar
           </button>
 
-          <button className="btn-guardar abono-btn-registrar" onClick={registrar}>
+          <button className="btn-guardar abono-btn-registrar" onClick={registrar}
+          disabled={recibidoEnCordobas < montoAbonarNumero || montoAbonarNumero <= 0 || recibidoEnCordobas <= 0}
+          >
             Registrar abono
           </button>
         </div>
