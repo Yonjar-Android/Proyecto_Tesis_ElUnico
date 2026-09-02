@@ -1,4 +1,5 @@
 import styles from "./Recibo_Venta.module.css";
+import type { ArticuloRecibo, DatosRecibo } from "../../../models/Recibo";
 
 // Datos fijos del negocio — ajusta esto a los datos reales de tu empresa
 // (idealmente muévelo a un archivo de configuración compartido)
@@ -8,25 +9,6 @@ const NEGOCIO = {
   sucursal: "Sucursal Central",
   direccion: "DE LA ROLTER 1C AL NORTE",
 };
-
-  export interface ArticuloRecibo {
-    nombre: string;
-    cantidad: number;
-    precioUnitario: number;
-    descuento: number; // descuento individual guardado en el detalle_factura
-    tipoDescuento: "porcentaje" | "fijo"; // tipo de descuento guardado en el detalle_factura
-  }
-
-export interface DatosRecibo {
-  ticketNumero: string | number;
-  cajero: string;
-  fecha: string;
-  hora: string;
-  tipoPago: string;
-  clienteNombre: string;
-  clienteCedula?: string; // si el cliente no tiene cédula registrada, no se muestra la fila
-  articulos: ArticuloRecibo[];
-}
 
 function formatearMoneda(valor: number): string {
   return valor.toLocaleString("es-NI", {
@@ -138,6 +120,81 @@ const total = subtotal - descuentoTotal;
         <span>TOTAL:</span>
         <span>C${formatearMoneda(total)}</span>
       </div>
+
+      {datos.devoluciones.length > 0 && (
+        <>
+          <div className={styles.separador} />
+
+          <div className={styles.tituloArticulos}>PRODUCTOS DEVUELTOS</div>
+          <p className={styles.notaDevolucion}>
+            Los montos ya incluyen el precio neto en caso de haberse aplicado un descuento en la venta original.
+          </p>
+
+          {datos.devoluciones.map((devolucion) => {
+            const totalDevolucion = devolucion.detalles.reduce(
+              (acc, d) => acc + d.subtotal,
+              0
+            );
+
+            return (
+              <div key={devolucion.idDevolucion} className={styles.bloqueDevolucion}>
+                <div className={styles.filaDato}>
+                  <span>DEVOLUCIÓN #{devolucion.idDevolucion}:</span>
+                  <span>{devolucion.fecha}</span>
+                </div>
+                <div className={styles.filaDato}>
+                  <span>MOTIVO:</span>
+                  <span>{devolucion.motivo}</span>
+                </div>
+                {devolucion.observacion && (
+                  <div className={styles.filaDato}>
+                    <span>OBSERVACIÓN:</span>
+                    <span>{devolucion.observacion}</span>
+                  </div>
+                )}
+
+                <div className={styles.filaEncabezadoArticulos}>
+                  <span>CANT.</span>
+                  <span>P.UNIT.</span>
+                  <span>SUBTOTAL</span>
+                </div>
+
+                {devolucion.detalles.map((detalle, index) => (
+                  <div key={index} className={styles.articulo}>
+                    <div className={styles.nombreArticulo}>{detalle.nombreProducto}</div>
+                    <div className={styles.filaArticulo}>
+                      <span>{detalle.cantidad.toFixed(2)}X</span>
+                      <span>C${formatearMoneda(detalle.precioUnitario)}</span>
+                      <span>C${formatearMoneda(detalle.subtotal)}</span>
+                    </div>
+                  </div>
+                ))}
+
+                <div className={styles.filaTotal}>
+                  <span>TOTAL DEVUELTO:</span>
+                  <span>-C${formatearMoneda(totalDevolucion)}</span>
+                </div>
+
+                <div className={styles.separador} />
+              </div>
+            );
+          })}
+
+          {datos.devoluciones.length > 0 && (
+  <div className={`${styles.filaTotal} ${styles.filaTotalFinal}`}>
+    <span>TOTAL DEVUELTO (GENERAL):</span>
+    <span>
+      -C${formatearMoneda(
+        datos.devoluciones.reduce(
+          (acc, dev) => acc + dev.detalles.reduce((s, d) => s + d.subtotal, 0),
+          0
+        )
+      )}
+    </span>
+  </div>
+)}
+        </>
+      )}
     </div>
   );
 }

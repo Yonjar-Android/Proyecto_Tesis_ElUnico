@@ -73,3 +73,14 @@
   font-weight: bold;
   font-size: 13px;
 }
+
+.notaDevolucion {
+  font-size: 0.7rem;
+  color: #6b7280;
+  margin: 0.2rem 0 0.5rem;
+  font-style: italic;
+}
+
+.bloqueDevolucion {
+  margin-bottom: 0.5rem;
+}

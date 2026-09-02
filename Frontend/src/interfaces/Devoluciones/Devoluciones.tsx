@@ -295,7 +295,7 @@ function Devoluciones() {
                         {max === 0 ? "Sin disponible" : `Máx. ${max}`}
                       </span>
                     </td>
-                    <td>{formatearMoneda(montoADevolver(item))}</td>
+                    <td className={styles.tdSubtotal}>{formatearMoneda(montoADevolver(item))}</td>
                   </tr>
                 );
               })}

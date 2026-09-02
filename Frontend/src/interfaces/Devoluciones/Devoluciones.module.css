@@ -297,6 +297,11 @@
   cursor: not-allowed;
 }
 
+.tdSubtotal {
+  font-weight: 700;
+  color: #111;
+}
+
 /* Responsive */
 
 @media (max-width: 720px) {

@@ -28,6 +28,23 @@ export interface ReciboVentaDTO {
   clienteNombre: string;
   clienteCedula?: string;
   articulos: ArticuloRecibo[];
+  devoluciones: DevolucionDTO[];
+}
+
+interface DetalleDevolucionDTO {
+    nombreProducto: string;
+    cantidad: number;
+    precioUnitario: number; // neto, ya con descuento de la venta original aplicado
+    subtotal: number;
+}
+
+interface DevolucionDTO {
+    idDevolucion: number;
+    fecha: string;
+    motivo: string;
+    observacion?: string;
+    estado: string;
+    detalles: DetalleDevolucionDTO[];
 }
 
 function formatearFecha(fecha: Date) {
@@ -72,7 +89,6 @@ export const crearVenta = async (
 
         // Verificar stock
         for (const detalle of detalles) {
-            console.log(detalle)
             if(detalle.Id_producto != null && detalle.Id_servicio == null){
             const [rows]: any = await connection.query(
                 "SELECT Nombre, Stock FROM productos WHERE id = ?",
@@ -335,22 +351,68 @@ export const obtenerReciboVenta = async (idVenta: number): Promise<ReciboVentaDT
             [idVenta]
         );
 
+        const [devolucionRows]: any = await connection.query(
+    `
+    SELECT
+        dev.id          AS idDevolucion,
+        dev.Fecha       AS Fecha,
+        dev.Motivo      AS Motivo,
+        dev.Observacion AS Observacion,
+        dev.Estado      AS Estado,
+        dd.Cantidad     AS Cantidad,
+        dd.Precio_Venta AS PrecioVenta,
+        dd.Subtotal     AS Subtotal,
+        p.Nombre        AS ProductoNombre
+    FROM devoluciones dev
+    INNER JOIN detalle_devolucion dd ON dd.Id_devolucion = dev.id
+    LEFT JOIN productos p ON p.id = dd.Id_producto
+    WHERE dev.Id_venta = ?
+    ORDER BY dev.Fecha ASC, dev.id ASC
+    `,
+    [idVenta]
+);
+
+const devolucionesMap = new Map<number, DevolucionDTO>();
+
+for (const row of devolucionRows) {
+    if (!devolucionesMap.has(row.idDevolucion)) {
+        devolucionesMap.set(row.idDevolucion, {
+            idDevolucion: row.idDevolucion,
+            fecha: formatearFecha(row.Fecha),
+            motivo: row.Motivo,
+            observacion: row.Observacion ?? undefined,
+            estado: row.Estado,
+            detalles: [],
+        });
+    }
+
+    devolucionesMap.get(row.idDevolucion)!.detalles.push({
+        nombreProducto: row.ProductoNombre ?? "",
+        cantidad: Number(row.Cantidad),
+        precioUnitario: Number(row.PrecioVenta),
+        subtotal: Number(row.Subtotal),
+    });
+}
+
+const devoluciones = Array.from(devolucionesMap.values());
+
         return {
-            ticketNumero: venta.idVenta,
-            cajero: venta.CajeroNombre,
-            fecha: formatearFecha(venta.Fecha),
-            hora: formatearHora(venta.Fecha),
-            tipoPago: venta.Tipo_Pago,
-            clienteNombre: `${venta.ClienteNombre} ${venta.ClienteApellido}`,
-            clienteCedula: undefined, // pendiente hasta que exista la columna
-            articulos: detalleRows.map((d: any) => ({
-                nombre: d.ProductoNombre ?? d.ServicioNombre ?? "",
-                cantidad: Number(d.Cantidad),
-                precioUnitario: Number(d.Precio_Venta),
-                descuento: Number(d.Descuento),
-                tipoDescuento: d.Tipo_Descuento
-            })),
-        };
+    ticketNumero: venta.idVenta,
+    cajero: venta.CajeroNombre,
+    fecha: formatearFecha(venta.Fecha),
+    hora: formatearHora(venta.Fecha),
+    tipoPago: venta.Tipo_Pago,
+    clienteNombre: `${venta.ClienteNombre} ${venta.ClienteApellido}`,
+    clienteCedula: undefined,
+    articulos: detalleRows.map((d: any) => ({
+        nombre: d.ProductoNombre ?? d.ServicioNombre ?? "",
+        cantidad: Number(d.Cantidad),
+        precioUnitario: Number(d.Precio_Venta),
+        descuento: Number(d.Descuento),
+        tipoDescuento: d.Tipo_Descuento,
+    })),
+    devoluciones, // 👈 nuevo
+};
 
     } finally {
         connection.release();

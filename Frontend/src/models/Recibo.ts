@@ -15,4 +15,21 @@ export interface DatosRecibo {
   clienteNombre: string;
   clienteCedula?: string; // si el cliente no tiene cédula registrada, no se muestra la fila
   articulos: ArticuloRecibo[];
+  devoluciones: DevolucionDTO[];
+}
+
+export interface DetalleDevolucionDTO {
+    nombreProducto: string;
+    cantidad: number;
+    precioUnitario: number; // neto, ya con descuento de la venta original aplicado
+    subtotal: number;
+}
+
+export interface DevolucionDTO {
+    idDevolucion: number;
+    fecha: string;
+    motivo: string;
+    observacion?: string;
+    estado: string;
+    detalles: DetalleDevolucionDTO[];
 }

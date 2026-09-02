@@ -1,5 +1,6 @@
 import { createPortal } from "react-dom";
-import ReciboVenta, { type DatosRecibo } from "./Recibo/Recibo_Venta";
+import ReciboVenta from "./Recibo/Recibo_Venta";
+import type { DatosRecibo } from "../../models/Recibo";
 import styles from "./ModalConfirmarImpresion.module.css";
 
 interface Props {
