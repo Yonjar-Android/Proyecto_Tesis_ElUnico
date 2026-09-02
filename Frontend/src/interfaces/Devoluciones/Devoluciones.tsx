@@ -4,6 +4,7 @@ import { crearDevolucion} from "../../services/devoluciones.service";
 import type {CrearDevolucionData} from "../../services/devoluciones.service"
 import { buscarFacturaParaDevolucion} from "../../services/venta.service";
 import Notificacion, { type TipoNotificacion } from "../../components/Notification/Notification";
+import { formatearMoneda } from "../FuncionAuxiliar";
 
 // Motivo de la devolución. Se muestra como <select>; ajusta la lista según tu negocio.
 const MOTIVOS_DEVOLUCION = [
@@ -22,6 +23,9 @@ interface ItemFactura {
     cantidadComprada: number;
     cantidadDevuelta: number;
     cantidadADevolver: number;
+    precioVenta: number,
+    descuento: number,
+    tipoDescuento: string,
 }
 
 interface FacturaEncontrada {
@@ -73,10 +77,8 @@ function Devoluciones() {
     const data = await buscarFacturaParaDevolucion(
         Number(numeroFactura.trim())
     );
-    console.log(data)
-
     setFactura(data);
-    setItems(data.items);
+    setItems(data.items.map((item: ItemFactura) => ({ ...item, cantidadADevolver: 0 })));
 
     if (data.items.length === 0) {
         setError(
@@ -116,7 +118,12 @@ function Devoluciones() {
     );
   };
 
+  function montoADevolver(item: ItemFactura) {
+  return item.precioVenta * item.cantidadADevolver;
+}
+
   const totalADevolver = items.reduce((suma, item) => suma + item.cantidadADevolver, 0);
+  const montoTotalADevolver = items.reduce((suma, item) => suma + montoADevolver(item), 0);
 
   const limpiar = () => {
     setNumeroFactura("");
@@ -253,9 +260,11 @@ function Devoluciones() {
             <thead>
               <tr>
                 <th>Producto</th>
-                <th>Cantidad comprada</th>
-                <th>Cantidad ya devuelta</th>
-                <th>Cantidad a devolver</th>
+                <th>Precio</th>
+                <th>Cant. comprada</th>
+                <th>Cant. ya devuelta</th>
+                <th>Cant. a devolver</th>
+                <th>Monto a devolver</th>
               </tr>
             </thead>
             <tbody>
@@ -269,6 +278,7 @@ function Devoluciones() {
                         <span className={styles.nombreMarca}>{item.nombreMarca}</span>
                       )}
                     </td>
+                    <td>{formatearMoneda(item.precioVenta)}</td>
                     <td>{item.cantidadComprada}</td>
                     <td>{item.cantidadDevuelta}</td>
                     <td className={styles.tdCantidad}>
@@ -285,6 +295,7 @@ function Devoluciones() {
                         {max === 0 ? "Sin disponible" : `Máx. ${max}`}
                       </span>
                     </td>
+                    <td>{formatearMoneda(montoADevolver(item))}</td>
                   </tr>
                 );
               })}
@@ -340,6 +351,12 @@ function Devoluciones() {
           </button>
 
           <div className={styles.totalDevolucion}>
+
+            <div className={styles.totalLinea}>
+  <span>Total a devolver</span>
+  <span>C${formatearMoneda(montoTotalADevolver)}</span>
+</div>
+
             <div className={styles.totalLinea}>
               <span>Unidades a devolver</span>
               <span>{totalADevolver}</span>

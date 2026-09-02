@@ -207,6 +207,7 @@ export const buscarFacturaParaDevolucion = async (
             dv.Cantidad AS cantidadComprada,
             dv.Precio_Venta AS precioVenta,
             dv.Descuento AS descuento,
+            dv.Tipo_descuento AS tipoDescuento,
 
             COALESCE(
                 SUM(dd.Cantidad),
@@ -248,17 +249,35 @@ export const buscarFacturaParaDevolucion = async (
             const cantidadDevuelta =
                 Number(item.cantidadDevuelta);
 
+                const precioVenta = Number(item.precioVenta);
+            const descuento = Number(item.descuento);
+            const tipoDescuento = item.tipoDescuento;
+
+            let precioFinal = precioVenta;
+
+            if (cantidadComprada > 0) {
+                if (tipoDescuento === "porcentaje") {
+            precioFinal =
+            precioVenta - (precioVenta * descuento / 100);
+                } else if (tipoDescuento === "fijo") {
+                    precioFinal =
+                        precioVenta - descuento;
+                }
+            }
+
             return {
-                idDetalleVenta: item.idDetalleVenta,
-                idProducto: item.idProducto,
-                nombreProducto: item.nombreProducto,
-                nombreMarca: item.nombreMarca,
-                cantidadComprada,
-                cantidadDevuelta,
-                cantidadADevolver:
-                    cantidadComprada - cantidadDevuelta,
-                precioVenta: Number(item.precioVenta) - Number(item.descuento),
-            };
+    idDetalleVenta: item.idDetalleVenta,
+    idProducto: item.idProducto,
+    nombreProducto: item.nombreProducto,
+    nombreMarca: item.nombreMarca,
+    cantidadComprada,
+    cantidadDevuelta,
+    cantidadADevolver:
+        cantidadComprada - cantidadDevuelta,
+    precioVenta: precioFinal,
+    descuento,
+    tipoDescuento,
+};
         })
         .filter(
             (item: any) => item.cantidadADevolver > 0

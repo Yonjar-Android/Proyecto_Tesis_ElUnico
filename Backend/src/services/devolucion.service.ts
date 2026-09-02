@@ -216,50 +216,74 @@ export const crearDevolucion = async (
 
         for (const detalle of data.detalles) {
 
-            const [detalleVentaRows]: any = await connection.query(
-                `
-                SELECT
-                    Id_producto,
-                    Id_servicio,
-                    Precio_Venta
-                FROM detalle_venta
-                WHERE id = ?
-                  AND Id_venta = ?
-                `,
-                [
-                    detalle.Id_detalle_venta,
-                    data.Id_venta
-                ]
-            );
+    const [detalleVentaRows]: any = await connection.query(
+        `
+        SELECT
+            Id_producto,
+            Id_servicio,
+            Precio_Venta,
+            Descuento,
+            Tipo_descuento
+        FROM detalle_venta
+        WHERE id = ?
+          AND Id_venta = ?
+        `,
+        [
+            detalle.Id_detalle_venta,
+            data.Id_venta
+        ]
+    );
 
-            const detalleVenta = detalleVentaRows[0];
+    if (detalleVentaRows.length === 0) {
+        throw new Error(
+            `El detalle de venta ${detalle.Id_detalle_venta} no existe.`
+        );
+    }
 
-            const cantidad = Number(detalle.Cantidad);
-            const precioVenta = Number(detalleVenta.Precio_Venta);
-            const subtotal = cantidad * precioVenta;
+    const detalleVenta = detalleVentaRows[0];
 
-            await connection.query(
-                `
-                INSERT INTO detalle_devolucion (
-                    Id_devolucion,
-                    Id_detalle_venta,
-                    Id_producto,
-                    Cantidad,
-                    Precio_Venta,
-                    Subtotal
-                )
-                VALUES (?, ?, ?, ?, ?, ?)
-                `,
-                [
-                    idDevolucion,
-                    detalle.Id_detalle_venta,
-                    detalleVenta.Id_producto,
-                    cantidad,
-                    precioVenta,
-                    subtotal
-                ]
-            );
-        }
+    const cantidad = Number(detalle.Cantidad);
+    const precioOriginal = Number(detalleVenta.Precio_Venta);
+    const descuento = Number(detalleVenta.Descuento) || 0;
+    const tipoDescuento = detalleVenta.Tipo_descuento;
+
+    let precioVenta = precioOriginal;
+
+    if (tipoDescuento === "porcentaje") {
+        precioVenta =
+            precioOriginal - (precioOriginal * descuento / 100);
+    } else if (tipoDescuento === "fijo") {
+        precioVenta =
+            precioOriginal - descuento;
+    }
+
+    // Evitar precios negativos por algún dato incorrecto
+    precioVenta = Math.max(precioVenta, 0);
+
+    const subtotal = cantidad * precioVenta;
+
+    await connection.query(
+        `
+        INSERT INTO detalle_devolucion (
+            Id_devolucion,
+            Id_detalle_venta,
+            Id_producto,
+            Cantidad,
+            Precio_Venta,
+            Subtotal
+        )
+        VALUES (?, ?, ?, ?, ?, ?)
+        `,
+        [
+            idDevolucion,
+            detalle.Id_detalle_venta,
+            detalleVenta.Id_producto,
+            cantidad,
+            precioVenta,
+            subtotal
+        ]
+    );
+}
 
         // ==========================================
         // CONFIRMAR TRANSACCIÓN

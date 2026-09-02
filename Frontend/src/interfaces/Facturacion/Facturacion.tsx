@@ -129,13 +129,13 @@ function Facturacion() {
     setPrecio("0.00");
     setTipoDescuento("fijo");
     setError("");
-    setNumReferencia("");
   };
 
   const cancelarEdicion = () => {
     setIndiceEditando(null);
     limpiarCamposItem();
     setError("");
+    setNumReferencia("");
   };
 
   const editarItem = (index: number) => {
@@ -705,6 +705,9 @@ const totalGeneral = subtotalGeneral - descuentoGeneral;
         onClose={() => setModalClienteAbierto(false)}
         onSeleccionar={(cliente) => {
           setClienteSeleccionado(cliente);
+          if (cliente.id === 10 && tipoPago === "Credito") {
+            setTipoPago("Contado");
+          }
           setModalClienteAbierto(false);
         }}
       />

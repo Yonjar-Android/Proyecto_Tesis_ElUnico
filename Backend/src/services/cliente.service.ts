@@ -35,6 +35,11 @@ export const buscarClientes = async (
         SELECT *
         FROM clientes
         ${where}
+        ORDER BY 
+        CASE 
+            WHEN Nombre = 'Cliente' AND Apellido = 'General' THEN 0
+            ELSE 1
+        END
         LIMIT ? OFFSET ?
         `,
         [...params, perPage, offset]
