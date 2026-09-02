@@ -81,6 +81,7 @@ function Facturacion() {
   const [tipoDescuento, setTipoDescuento] = useState<TipoDescuento>("fijo");
   const [precio, setPrecio] = useState("0.00");
   const [tipoPago, setTipoPago] = useState("Contado");
+  const [numReferencia, setNumReferencia] = useState<string | null>("");
   const [clienteSeleccionado, setClienteSeleccionado] = useState<Cliente>({
     id: 10,
     Nombre: "Cliente",
@@ -126,6 +127,9 @@ function Facturacion() {
     setCantidad("1");
     setDescuento("0.00");
     setPrecio("0.00");
+    setTipoDescuento("fijo");
+    setError("");
+    setNumReferencia("");
   };
 
   const cancelarEdicion = () => {
@@ -292,6 +296,11 @@ const totalGeneral = subtotalGeneral - descuentoGeneral;
       return;
     }
 
+    if (tipoPago === "Transferencia" && !numReferencia?.trim()) {
+  setError("Ingresa el número de referencia de la transferencia.");
+  return;
+}
+
     setError("");
     setModalConfirmarAbierto(true);
   };
@@ -306,6 +315,7 @@ const totalGeneral = subtotalGeneral - descuentoGeneral;
         tipoPago,
         totalGeneral,
         _detalle.dineroRecibido,
+        numReferencia ?? "",
         items.map((item) =>
           item.tipo === "producto"
             ? {
@@ -507,22 +517,42 @@ const totalGeneral = subtotalGeneral - descuentoGeneral;
 
         <div className="factura-fila-doble">
           <div className="factura-card">
-            <div className="factura-campo">
-              <label>
-                Tipo de Pago <span style={{ color: "#e5484d" }}>*</span>
-              </label>
-              <select value={tipoPago} onChange={(e) => setTipoPago(e.target.value)}>
-                <option value="Contado">Contado</option>
-                <option
-  value="Credito"
-  disabled={clienteSeleccionado.id === 10}
->
-  Crédito
-</option>
-                <option value="Transferencia">Transferencia</option>
-              </select>
-            </div>
-          </div>
+  <div className="factura-campo">
+    <label>
+      Tipo de Pago <span style={{ color: "#e5484d" }}>*</span>
+    </label>
+    <select
+      value={tipoPago}
+      onChange={(e) => {
+        const nuevoTipo = e.target.value;
+        setTipoPago(nuevoTipo);
+        if (nuevoTipo !== "Transferencia") {
+          setNumReferencia("");
+        }
+      }}
+    >
+      <option value="Contado">Contado</option>
+      <option value="Credito" disabled={clienteSeleccionado.id === 10}>
+        Crédito
+      </option>
+      <option value="Transferencia">Transferencia</option>
+    </select>
+  </div>
+
+  {tipoPago === "Transferencia" && (
+    <div className="factura-campo" style={{ marginTop: "0.9rem" }}>
+      <label>
+        Número de Referencia <span style={{ color: "#e5484d" }}>*</span>
+      </label>
+      <input
+        type="text"
+        value={numReferencia ?? ""}
+        onChange={(e) => setNumReferencia(e.target.value)}
+        placeholder="Ej. 000123456"
+      />
+    </div>
+  )}
+</div>
 
           <div className="factura-card">
             <div className="factura-campo">

@@ -15,6 +15,7 @@ export const postVenta = async (req: Request, res: Response) => {
             Tipo_Pago,
             Total,
             RecibidoCordobas,
+            Num_referencia,
             Detalles
         } = req.body;
 
@@ -24,6 +25,7 @@ export const postVenta = async (req: Request, res: Response) => {
     Tipo_Pago,
     Number(Total),
     RecibidoCordobas,
+    Num_referencia,
     Detalles
 );
 

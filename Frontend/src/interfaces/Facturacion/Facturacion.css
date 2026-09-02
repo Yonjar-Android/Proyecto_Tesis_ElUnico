@@ -42,6 +42,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1.25rem;
+  margin-bottom: 1rem;
 }
 
 .factura-fila-doble .factura-card {

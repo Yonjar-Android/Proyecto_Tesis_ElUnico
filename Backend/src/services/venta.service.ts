@@ -56,6 +56,7 @@ export const crearVenta = async (
     tipoPago: string,
     total: number,
     recibidoCordobas:number,
+    numReferencia: string,
     detalles: DetalleVentaInput[]
 ) => {
 
@@ -102,14 +103,15 @@ if (sesionRows.length === 0) {
         const [venta]: any = await connection.query(
             `
             INSERT INTO ventas
-            (Id_cliente, Id_usuario, Fecha, Tipo_Pago, Total)
-            VALUES (?, ?, ?, ?, ?)
+            (Id_cliente, Id_usuario, Fecha, Tipo_Pago, Num_referencia, Total)
+            VALUES (?, ?, ?, ?, ?, ?)
             `,
             [
                 idCliente,
                 idUsuario,
                 new Date(),
                 tipoPago,
+                numReferencia,
                 total
             ]
         );
