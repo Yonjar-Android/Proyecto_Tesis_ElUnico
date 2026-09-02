@@ -10,7 +10,6 @@ const MOTIVOS_DEVOLUCION = [
   "Producto defectuoso",
   "Error en la venta",
   "Producto incorrecto",
-  "Cliente ya no lo requiere",
   "Otro",
 ];
 
@@ -74,9 +73,9 @@ function Devoluciones() {
     const data = await buscarFacturaParaDevolucion(
         Number(numeroFactura.trim())
     );
+    console.log(data)
 
     setFactura(data);
-    console.log(data);
     setItems(data.items);
 
     if (data.items.length === 0) {

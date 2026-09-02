@@ -295,7 +295,7 @@ function Compras() {
 
           <div className="compra-campo compra-campo-factura">
             <label>
-              N° Factura
+              N° Factura <span style={{ color: "#e5484d" }}>*</span>
             </label>
             <input
               type="text"

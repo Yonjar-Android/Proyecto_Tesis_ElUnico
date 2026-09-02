@@ -45,6 +45,23 @@ export const crearCompra = async (
 
         await connection.beginTransaction();
 
+        const [facturaExistente]: any = await connection.query(
+    `
+    SELECT id
+    FROM compras
+    WHERE Id_proveedor = ?
+      AND NFactura = ?
+    LIMIT 1
+    `,
+    [idProveedor, nFactura.trim()]
+);
+
+if (facturaExistente.length > 0) {
+    throw new Error(
+        "Ya existe una compra registrada con ese número de factura para este proveedor."
+    );
+}
+
         const [compra]: any = await connection.query(
             `
             INSERT INTO compras
