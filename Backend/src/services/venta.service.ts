@@ -6,6 +6,7 @@ interface DetalleVentaInput {
     Precio_Venta: number;
     Descuento: number,
     Subtotal: number;
+    Tipo_Descuento: "porcentaje" | "fijo";
     Id_servicio: number;
 }
 
@@ -116,14 +117,13 @@ if (sesionRows.length === 0) {
         const idVenta = venta.insertId;
 
         // Crear detalles
-        // Crear detalles
 for (const detalle of detalles) {
 
     await connection.query(
         `
         INSERT INTO detalle_venta
-        (Id_venta, Id_producto, Id_servicio, Cantidad, Precio_Venta, Descuento, Subtotal)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+        (Id_venta, Id_producto, Id_servicio, Cantidad, Precio_Venta, Descuento, Tipo_Descuento, Subtotal)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         `,
         [
             idVenta,
@@ -132,6 +132,7 @@ for (const detalle of detalles) {
             detalle.Cantidad,
             detalle.Precio_Venta,
             detalle.Descuento,
+            detalle.Tipo_Descuento,
             detalle.Subtotal
         ]
     );
@@ -202,6 +203,8 @@ export const buscarFacturaParaDevolucion = async (
             p.Nombre AS nombreProducto,
             m.Nombre_marca AS nombreMarca,
             dv.Cantidad AS cantidadComprada,
+            dv.Precio_Venta AS precioVenta,
+            dv.Descuento AS descuento,
 
             COALESCE(
                 SUM(dd.Cantidad),
@@ -251,7 +254,8 @@ export const buscarFacturaParaDevolucion = async (
                 cantidadComprada,
                 cantidadDevuelta,
                 cantidadADevolver:
-                    cantidadComprada - cantidadDevuelta
+                    cantidadComprada - cantidadDevuelta,
+                precioVenta: Number(item.precioVenta) - Number(item.descuento),
             };
         })
         .filter(
@@ -299,6 +303,7 @@ export const obtenerReciboVenta = async (idVenta: number): Promise<ReciboVentaDT
                 dv.Cantidad       AS Cantidad,
                 dv.Precio_Venta   AS Precio_Venta,
                 dv.Descuento      AS Descuento,
+                dv.Tipo_descuento   AS Tipo_Descuento,
                 p.Nombre          AS ProductoNombre,
                 s.Nombre_servicio AS ServicioNombre
             FROM detalle_venta dv
@@ -322,6 +327,7 @@ export const obtenerReciboVenta = async (idVenta: number): Promise<ReciboVentaDT
                 cantidad: Number(d.Cantidad),
                 precioUnitario: Number(d.Precio_Venta),
                 descuento: Number(d.Descuento),
+                tipoDescuento: d.Tipo_Descuento
             })),
         };
 

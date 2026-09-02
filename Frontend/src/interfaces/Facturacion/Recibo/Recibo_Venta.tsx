@@ -9,12 +9,13 @@ const NEGOCIO = {
   direccion: "DE LA ROLTER 1C AL NORTE",
 };
 
-export interface ArticuloRecibo {
-  nombre: string;
-  cantidad: number;
-  precioUnitario: number;
-  descuento: number; // descuento individual guardado en el detalle_factura
-}
+  export interface ArticuloRecibo {
+    nombre: string;
+    cantidad: number;
+    precioUnitario: number;
+    descuento: number; // descuento individual guardado en el detalle_factura
+    tipoDescuento: "porcentaje" | "fijo"; // tipo de descuento guardado en el detalle_factura
+  }
 
 export interface DatosRecibo {
   ticketNumero: string | number;
@@ -43,8 +44,18 @@ export default function ReciboVenta({ datos }: Props) {
     (acc, a) => acc + a.cantidad * a.precioUnitario,
     0
   );
-  const descuentoTotal = datos.articulos.reduce((acc, a) => acc + a.descuento, 0);
-  const total = subtotal - descuentoTotal;
+
+  const descuentoTotal = datos.articulos.reduce(
+  (acc, a) => acc + descuentoLineaArticulo(a),
+  0
+);
+const total = subtotal - descuentoTotal;
+
+  function descuentoLineaArticulo(articulo: ArticuloRecibo): number {
+  return articulo.tipoDescuento == "porcentaje"
+    ? (articulo.precioUnitario * (articulo.descuento / 100)) * articulo.cantidad
+    : articulo.descuento * articulo.cantidad;
+}
 
   return (
     <div className={styles.recibo}>

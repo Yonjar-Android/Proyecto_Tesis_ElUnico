@@ -2,6 +2,7 @@ export interface ArticuloRecibo {
   nombre: string;
   cantidad: number;
   precioUnitario: number;
+  tipoDescuento: "porcentaje" | "fijo";
   descuento: number; // descuento individual guardado en el detalle_factura
 }
 

@@ -120,31 +120,6 @@
   width: 140px;
 }
 
-.factura-campo-descuento {
-  width: 140px;
-}
-
-.factura-selector-btn {
-  width: 100%;
-  box-sizing: border-box;
-  text-align: left;
-  border: 1px solid #e5e7eb;
-  background: #f9fafb;
-  border-radius: 8px;
-  padding: 0.65rem 0.85rem;
-  font-size: 0.9rem;
-  color: #111;
-  font-family: inherit;
-  cursor: pointer;
-}
-
-.factura-selector-btn:hover {
-  background: #f3f4f6;
-}
-
-.factura-selector-placeholder {
-  color: #9ca3af;
-}
 
 .factura-precio-input {
   display: flex;
@@ -170,6 +145,74 @@
 .factura-precio-input input:focus {
   outline: none;
 }
+
+.factura-campo-descuento {
+  width: 150px;
+}
+
+.factura-descuento-grupo {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0; /* quita el padding heredado de .factura-precio-input */
+  overflow: hidden;
+}
+
+.factura-descuento-tipo {
+  flex: 0 0 auto;
+  appearance: none;
+  -webkit-appearance: none;
+  border: none;
+  border-right: 1px solid #e5e7eb;
+  background: #f3f4f6;
+  color: #374151;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.65rem 0.5rem;
+  cursor: pointer;
+}
+
+.factura-descuento-tipo:focus {
+  outline: none;
+}
+
+.factura-descuento-grupo input {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: 100%;
+  border: none;
+  background: transparent;
+  padding: 0 0.5em;
+  font-size: 0.9rem;
+}
+
+.factura-descuento-grupo input:focus {
+  outline: none;
+}
+
+.factura-selector-btn {
+  width: 100%;
+  box-sizing: border-box;
+  text-align: left;
+  border: 1px solid #e5e7eb;
+  background: #f9fafb;
+  border-radius: 8px;
+  padding: 0.65rem 0.85rem;
+  font-size: 0.9rem;
+  color: #111;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.factura-selector-btn:hover {
+  background: #f3f4f6;
+}
+
+.factura-selector-placeholder {
+  color: #9ca3af;
+}
+
 
 .factura-btn-agregar {
   background-color: #e5484d;

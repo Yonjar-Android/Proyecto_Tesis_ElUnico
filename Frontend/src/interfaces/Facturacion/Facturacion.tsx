@@ -17,12 +17,15 @@ import Notificacion, { type TipoNotificacion } from "../../components/Notificati
 import ModalConfirmarImpresion from "./ModalConfirmarImpresion";
 import { type DatosRecibo } from "../../models/Recibo";
 
+type TipoDescuento = "porcentaje" | "fijo";
+
 type ItemVenta =
   | {
       tipo: "producto";
       producto: ProductoListado;
       cantidad: number;
       descuento: number;
+      tipoDescuento: TipoDescuento;
       precio: number;
     }
   | {
@@ -30,6 +33,7 @@ type ItemVenta =
       servicio: Servicio;
       cantidad: number;
       descuento: number;
+      tipoDescuento: TipoDescuento;
       precio: number;
     };
 
@@ -40,12 +44,26 @@ function formatearFecha(fecha: Date) {
   return `${dia}-${mes}-${anio}`;
 }
 
+function soloEnteros(valor: string) {
+  return valor.replace(/[^0-9]/g, "");
+}
+
+function descuentoUnitario(item: ItemVenta) {
+  return item.tipoDescuento === "porcentaje"
+    ? item.precio * (item.descuento / 100)
+    : item.descuento;
+}
+
+function descuentoLinea(item: ItemVenta) {
+  return descuentoUnitario(item) * item.cantidad;
+}
+
 function subtotalBruto(item: ItemVenta) {
   return item.cantidad * item.precio;
 }
 
 function subtotalNeto(item: ItemVenta) {
-  return subtotalBruto(item) - item.descuento;
+  return subtotalBruto(item) - descuentoLinea(item);
 }
 
 function Facturacion() {
@@ -60,6 +78,7 @@ function Facturacion() {
 
   const [cantidad, setCantidad] = useState("1");
   const [descuento, setDescuento] = useState("0.00");
+  const [tipoDescuento, setTipoDescuento] = useState<TipoDescuento>("fijo");
   const [precio, setPrecio] = useState("0.00");
   const [tipoPago, setTipoPago] = useState("Contado");
   const [clienteSeleccionado, setClienteSeleccionado] = useState<Cliente>({
@@ -176,9 +195,26 @@ function Facturacion() {
     }
 
     if (isNaN(Number(descuento)) || Number(descuento) < 0) {
-      setError("Ingresa un descuento válido.");
-      return;
-    }
+  setError("Ingresa un descuento válido.");
+  return;
+}
+
+if (tipoDescuento === "porcentaje" && Number(descuento) > 50) {
+  setError("El porcentaje de descuento no puede ser mayor a 50%.");
+  return;
+}
+
+const descuentoUnitarioIngresado =
+  tipoDescuento === "porcentaje"
+    ? Number(precio) * (Number(descuento) / 100)
+    : Number(descuento);
+
+if (descuentoUnitarioIngresado > Number(precio)) {
+  setError("El descuento no puede ser mayor al precio unitario.");
+  return;
+}
+
+
 
     const subtotalLinea = Number(cantidad) * Number(precio);
 
@@ -211,6 +247,7 @@ function Facturacion() {
             producto: productoSeleccionado as ProductoListado,
             cantidad: Number(cantidad),
             descuento: Number(descuento),
+            tipoDescuento: tipoDescuento,
             precio: Number(precio),
           }
         : {
@@ -218,6 +255,7 @@ function Facturacion() {
             servicio: servicioSeleccionado as Servicio,
             cantidad: Number(cantidad),
             descuento: Number(descuento),
+            tipoDescuento: tipoDescuento,
             precio: Number(precio),
           };
 
@@ -234,9 +272,9 @@ function Facturacion() {
     limpiarCamposItem();
   };
 
-  const subtotalGeneral = items.reduce((suma, item) => suma + subtotalBruto(item), 0);
-  const descuentoGeneral = items.reduce((suma, item) => suma + item.descuento, 0);
-  const totalGeneral = subtotalGeneral - descuentoGeneral;
+const subtotalGeneral = items.reduce((suma, item) => suma + subtotalBruto(item), 0);
+const descuentoGeneral = items.reduce((suma, item) => suma + descuentoLinea(item), 0);
+const totalGeneral = subtotalGeneral - descuentoGeneral;
 
   const cancelar = () => {
     setItems([]);
@@ -275,6 +313,7 @@ function Facturacion() {
                 Cantidad: item.cantidad,
                 Precio_Venta: item.precio,
                 Descuento: item.descuento,
+                Tipo_Descuento: item.tipoDescuento,
                 Subtotal: subtotalNeto(item),
               }
             : {
@@ -282,6 +321,7 @@ function Facturacion() {
                 Cantidad: item.cantidad,
                 Precio_Venta: item.precio,
                 Descuento: item.descuento,
+                Tipo_Descuento: item.tipoDescuento,
                 Subtotal: subtotalNeto(item),
               }
         )
@@ -426,19 +466,28 @@ function Facturacion() {
               </div>
             </div>
 
-            <div className="factura-campo factura-campo-descuento">
-              <label>Descuento</label>
-              <div className="factura-precio-input">
-                <span>C$</span>
-                <input
-                  type="number"
-                  step="1"
-                  min="0"
-                  value={descuento}
-                  onChange={(e) => setDescuento(e.target.value)}
-                />
-              </div>
-            </div>
+<div className="factura-campo factura-campo-descuento">
+  <label>Descuento</label>
+  <div className="factura-precio-input factura-descuento-grupo">
+    <select
+      className="factura-descuento-tipo"
+      value={tipoDescuento}
+      onChange={(e) => setTipoDescuento(e.target.value as TipoDescuento)}
+    >
+      <option value="fijo">C$</option>
+      <option value="porcentaje">%</option>
+    </select>
+    <input
+      type="number"
+      step="1"
+      min="0"
+      max={tipoDescuento === "porcentaje" ? 50 : undefined}
+      maxLength={tipoDescuento === "porcentaje" ? 2 : undefined}
+      value={descuento}
+      onChange={(e) => setDescuento(soloEnteros(e.target.value))}
+    />
+  </div>
+</div>
 
             <button className="factura-btn-agregar" onClick={guardarItem}>
               {indiceEditando !== null ? "Actualizar" : "Agregar"}
@@ -525,8 +574,12 @@ function Facturacion() {
                   <td>{item.cantidad}</td>
                   <td>C${formatearMoneda(item.precio)}</td>
                   <td>
-                    {item.descuento > 0 ? `- C$${formatearMoneda(item.descuento)}` : "—"}
-                  </td>
+  {item.descuento > 0
+    ? item.tipoDescuento === "porcentaje"
+      ? `${item.descuento}% (- C$${formatearMoneda(descuentoLinea(item))})`
+      : `- C$${formatearMoneda(descuentoLinea(item))}`
+    : "—"}
+</td>
                   <td className="factura-td-subtotal">C${formatearMoneda(subtotalNeto(item))}</td>
                   <td className="factura-td-accion">
                     <button
