@@ -8,9 +8,10 @@ import type { Cliente } from "../../../models/Cliente";
 import type { PaginatedResponse } from "../../../models/PaginatedResponse";
 import { formatearMoneda } from "../../FuncionAuxiliar";
 import ModalConfirmarImpresion from "../../Facturacion/ModalConfirmarImpresion"; // ajusta ruta
-import type { DatosRecibo } from "../../Facturacion/Recibo/Recibo_Venta";
+import type { DatosRecibo } from "../../../models/Recibo";
 import { Printer } from "lucide-react";
 import { obtenerReciboVenta } from "../../../services/venta.service";
+import ModalSeleccionarCliente from "../../Facturacion/ModalSeleccionarCliente";
 
 export interface RespuestaReporteVentas extends PaginatedResponse<VentaReporte> {
   TotalRegistros: number;
@@ -44,8 +45,8 @@ function ReporteVentas() {
   const [ventas, setVentas] = useState<VentaReporte[]>([]);
   const [fechaInicio, setFechaInicio] = useState("");
   const [fechaFin, setFechaFin] = useState("");
-  const [clienteId, setClienteId] = useState("");
-  const [clientes] = useState<Cliente[]>([]);
+  const [clienteSeleccionado, setClienteSeleccionado] = useState<Cliente | null>(null);
+const [modalClienteAbierto, setModalClienteAbierto] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [perPage] = useState(10);
   const [lastPage, setLastPage] = useState(1);
@@ -104,11 +105,16 @@ useEffect(() => {
 
   const buscar = async () => {
     try {
+
+      const search = clienteSeleccionado
+  ? `${clienteSeleccionado.Nombre} ${clienteSeleccionado.Apellido}`
+  : "";
+
       const response: RespuestaReporteVentas = await obtenerReporteVentasPorPeriodo(
-        "",
+        search,
         fechaInicio,
         fechaFin,
-        clienteId,
+        "",
         currentPage,
         perPage
       );
@@ -211,16 +217,31 @@ useEffect(() => {
   </div>
 
   <div className="reporte-campo">
-    <label>▽ Cliente</label>
-    <select value={clienteId} onChange={(e) => setClienteId(e.target.value)}>
-      <option value="">Todas las opciones</option>
-      {clientes.map((cliente) => (
-        <option key={cliente.id} value={cliente.id}>
-          {cliente.Nombre} {cliente.Apellido}
-        </option>
-      ))}
-    </select>
+  <label>▽ Cliente</label>
+  <div className="reporte-selector-cliente">
+    <button
+      type="button"
+      className="factura-selector-btn"
+      onClick={() => setModalClienteAbierto(true)}
+    >
+      {clienteSeleccionado
+        ? `${clienteSeleccionado.Nombre} ${clienteSeleccionado.Apellido}`
+        : "Todos los clientes"}
+    </button>
+
+    {clienteSeleccionado && (
+      <button
+        type="button"
+        className="reporte-btn-limpiar-cliente"
+        onClick={() => setClienteSeleccionado(null)}
+        aria-label="Quitar filtro de cliente"
+        title="Quitar filtro"
+      >
+        ✕
+      </button>
+    )}
   </div>
+</div>
 
   <button
     className="reporte-btn-filtrar"
@@ -328,8 +349,19 @@ useEffect(() => {
   datos={datosRecibo}
   onClose={() => setModalReciboAbierto(false)}
 />
+
+
+  <ModalSeleccionarCliente
+  abierto={modalClienteAbierto}
+  onClose={() => setModalClienteAbierto(false)}
+  onSeleccionar={(cliente) => {
+    setClienteSeleccionado(cliente);
+    setModalClienteAbierto(false);
+  }}
+/>
     </div>
   );
+
 }
 
 export default ReporteVentas;

@@ -3,14 +3,13 @@ import "../Reportes.css";
 import IconoBarras from "../IconoBarras";
 import { IconoCuboOutline, IconoCarrito } from "../IconosReporte";
 import { obtenerReporteComprasPorPeriodo, /*exportarReporteCompras*/ } from "../../../services/reporte.service";
-import { buscarProveedores } from "../../../services/proveedor.service";
 import type { Proveedor } from "../../../models/Proveedor";
-import type { PaginatedResponse } from "../../../models/PaginatedResponse";
 import type { CompraReporte, RespuestaReporteCompras } from "../../../models/CompraReporte";
 import { formatearMoneda } from "../../FuncionAuxiliar";
 import ModalDetalleCompra, { type DetalleCompraDTO } from "./ModalDetalleCompras";
 import { FileText } from "lucide-react";
 import { obtenerDetalleCompra } from "../../../services/compra.service";
+import ModalSeleccionarProveedor from "../../Compras/ModalSeleccionarProveedor";
 
 export const formatearFecha = (fecha: string): string => {
   const date = new Date(fecha);
@@ -38,8 +37,8 @@ function ReporteCompras() {
   const [compras, setCompras] = useState<CompraReporte[]>([]);
   const [fechaInicio, setFechaInicio] = useState("");
   const [fechaFin, setFechaFin] = useState("");
-  const [proveedorId, setProveedorId] = useState("");
-  const [proveedores, setProveedores] = useState<Proveedor[]>([]);
+  const [proveedorSeleccionado, setProveedorSeleccionado] = useState<Proveedor | null>(null);
+  const [modalProveedorAbierto, setModalProveedorAbierto] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [perPage] = useState(5);
   const [lastPage, setLastPage] = useState(1);
@@ -88,32 +87,25 @@ function ReporteCompras() {
   }
 };
 
-  // Carga el combo de proveedores una sola vez.
-  useEffect(() => {
-    buscarProveedores("", 1, 100)
-      .then((res: PaginatedResponse<Proveedor>) => setProveedores(res.data))
-      .catch((error) => console.error(error));
-  }, []);
+const buscar = async () => {
+  try {
+    const response: RespuestaReporteCompras = await obtenerReporteComprasPorPeriodo(
+      "",
+      fechaInicio,
+      fechaFin,
+      proveedorSeleccionado?.id ?? 0,
+      currentPage,
+      perPage
+    );
 
-  const buscar = async () => {
-    try {
-      const response: RespuestaReporteCompras = await obtenerReporteComprasPorPeriodo(
-        "",
-        fechaInicio,
-        fechaFin,
-        Number(proveedorId),
-        currentPage,
-        perPage
-      );
-
-      setCompras(response.data);
-      setLastPage(response.last_page);
-      setRegistrosTotales(response.TotalRegistros);
-      setTotalCompras(response.TotalCompras);
-    } catch (error) {
-      console.error(error);
-    }
-  };
+    setCompras(response.data);
+    setLastPage(response.last_page);
+    setRegistrosTotales(response.TotalRegistros);
+    setTotalCompras(response.TotalCompras);
+  } catch (error) {
+    console.error(error);
+  }
+};
 
   useEffect(() => {
     buscar();
@@ -193,16 +185,31 @@ function ReporteCompras() {
   </div>
 
           <div className="reporte-campo">
-            <label>▽ Proveedor</label>
-            <select value={proveedorId} onChange={(e) => setProveedorId(e.target.value)}>
-              <option value="">Todas las opciones</option>
-              {proveedores.map((proveedor) => (
-                <option key={proveedor.id} value={proveedor.id}>
-                  {proveedor.Nombre_Empresa}
-                </option>
-              ))}
-            </select>
-          </div>
+  <label>▽ Proveedor</label>
+  <div className="reporte-selector-cliente">
+    <button
+      type="button"
+      className="factura-selector-btn"
+      onClick={() => setModalProveedorAbierto(true)}
+    >
+      {proveedorSeleccionado
+        ? proveedorSeleccionado.Nombre_Empresa
+        : "Todos los proveedores"}
+    </button>
+
+    {proveedorSeleccionado && (
+      <button
+        type="button"
+        className="reporte-btn-limpiar-cliente"
+        onClick={() => setProveedorSeleccionado(null)}
+        aria-label="Quitar filtro de proveedor"
+        title="Quitar filtro"
+      >
+        ✕
+      </button>
+    )}
+  </div>
+</div>
 
           <button
             className="reporte-btn-filtrar"
@@ -295,6 +302,15 @@ function ReporteCompras() {
   abierto={modalDetalleAbierto}
   datos={detalleCompra}
   onClose={() => setModalDetalleAbierto(false)}
+/>
+
+<ModalSeleccionarProveedor
+  abierto={modalProveedorAbierto}
+  onClose={() => setModalProveedorAbierto(false)}
+  onSeleccionar={(proveedor) => {
+    setProveedorSeleccionado(proveedor);
+    setModalProveedorAbierto(false);
+  }}
 />
     </div>
   );

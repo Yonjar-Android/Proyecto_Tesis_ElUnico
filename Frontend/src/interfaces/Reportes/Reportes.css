@@ -455,3 +455,29 @@
   color: #e5484d;
   font-size: 13px;
 }
+
+.reporte-selector-cliente {
+  display: flex;
+  align-items: stretch;
+  gap: 0.4rem;
+}
+
+.reporte-selector-cliente .factura-selector-btn {
+  flex: 1;
+}
+
+.reporte-btn-limpiar-cliente {
+  flex: 0 0 auto;
+  border: 1px solid #e5e7eb;
+  background: #f9fafb;
+  border-radius: 8px;
+  padding: 0 0.75rem;
+  color: #6b7280;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.reporte-btn-limpiar-cliente:hover {
+  background: #f3f4f6;
+  color: #e5484d;
+}

@@ -221,7 +221,17 @@ export const obtenerReporteVentas = async (
         params.push(tipoPago);
     }
 
-    // Estadísticas
+    // Subquery: total devuelto por venta, agregado para no duplicar filas
+    const devolucionesSubquery = `
+        SELECT
+            dev.Id_venta AS Id_venta,
+            COALESCE(SUM(dd.Subtotal), 0) AS TotalDevuelto
+        FROM devoluciones dev
+        INNER JOIN detalle_devolucion dd ON dd.Id_devolucion = dev.id
+        GROUP BY dev.Id_venta
+    `;
+
+    // Estadísticas (usando el total neto = Total - devuelto)
     const [estadisticas]: any = await pool.query(
         `
         SELECT
@@ -231,18 +241,20 @@ export const obtenerReporteVentas = async (
                 SUM(
                     CASE
                         WHEN v.Tipo_Pago = 'CONTADO'
-                        THEN v.Total
+                        THEN v.Total - COALESCE(devt.TotalDevuelto, 0)
                         ELSE 0
                     END
                 ),
                 0
             ) AS VentasContado,
 
-            COALESCE(SUM(v.Total),0) AS TotalVentas
+            COALESCE(SUM(v.Total - COALESCE(devt.TotalDevuelto, 0)), 0) AS TotalVentas
 
         FROM ventas v
         INNER JOIN clientes c
             ON v.Id_cliente = c.id
+        LEFT JOIN (${devolucionesSubquery}) devt
+            ON devt.Id_venta = v.id
 
         ${where}
         `,
@@ -262,12 +274,16 @@ export const obtenerReporteVentas = async (
             CONCAT(c.Nombre,' ',c.Apellido) AS Cliente,
             c.NCliente,
             v.Tipo_Pago,
-            v.Total
+            v.Total AS TotalOriginal,
+            COALESCE(devt.TotalDevuelto, 0) AS TotalDevuelto,
+            v.Total - COALESCE(devt.TotalDevuelto, 0) AS Total
 
         FROM ventas v
 
         INNER JOIN clientes c
             ON v.Id_cliente = c.id
+        LEFT JOIN (${devolucionesSubquery}) devt
+            ON devt.Id_venta = v.id
 
         ${where}
 
