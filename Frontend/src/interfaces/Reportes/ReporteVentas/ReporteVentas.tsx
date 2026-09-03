@@ -12,6 +12,10 @@ import type { DatosRecibo } from "../../../models/Recibo";
 import { Printer } from "lucide-react";
 import { obtenerReciboVenta } from "../../../services/venta.service";
 import ModalSeleccionarCliente from "../../Facturacion/ModalSeleccionarCliente";
+import { 
+    descargarReporteVentasExcel, 
+    descargarArchivoExcel 
+} from "../../../services/reporteExcel.service.js";
 
 export interface RespuestaReporteVentas extends PaginatedResponse<VentaReporte> {
   TotalRegistros: number;
@@ -57,7 +61,9 @@ const [modalClienteAbierto, setModalClienteAbierto] = useState(false);
   const [totalVentas, setTotalVentas] = useState(0);
 
   const [modalReciboAbierto, setModalReciboAbierto] = useState(false);
-const [datosRecibo, setDatosRecibo] = useState<DatosRecibo | null>(null);
+  const [datosRecibo, setDatosRecibo] = useState<DatosRecibo | null>(null);
+    
+  const [exportando, setExportando] = useState(false);
 
 const imprimirTicket = async (idVenta: number) => {
   try {
@@ -96,13 +102,6 @@ useEffect(() => {
   validarFechas();
 }, [fechaInicio, fechaFin]);
 
-  // Carga el combo de clientes una sola vez.
-  /*useEffect(() => {
-    buscarClientes("", 1, 100)
-      .then((res: PaginatedResponse<ClienteOpcion>) => setClientes(res.data))
-      .catch((error) => console.error(error));
-  }, []);*/
-
   const buscar = async () => {
     try {
 
@@ -134,12 +133,30 @@ useEffect(() => {
   }, [currentPage]);
 
   const exportar = async () => {
-    try {
-      //await exportarReporteVentas(fechaInicio, fechaFin, clienteId);
-    } catch (error) {
-      console.error(error);
-    }
-  };
+        setExportando(true);
+        try {
+          const search = clienteSeleccionado
+          ? `${clienteSeleccionado.Nombre} ${clienteSeleccionado.Apellido}`
+          : "";
+          
+            // Obtener el blob del reporte Excel
+            const blob = await descargarReporteVentasExcel(search, fechaInicio, fechaFin);
+            
+            // Generar nombre del archivo con fecha actual
+            const fecha = new Date().toISOString().split('T')[0];
+            const nombreArchivo = `reporte_ventas_${fecha}.xlsx`;
+            
+            // Descargar el archivo
+            descargarArchivoExcel(blob, nombreArchivo);
+            
+            console.log('Reporte exportado exitosamente');
+        } catch (error) {
+            console.error('Error al exportar:', error);
+            alert('Error al exportar el reporte');
+        } finally {
+            setExportando(false);
+        }
+    };
 
   return (
     <div className="reporte-page">
@@ -150,10 +167,14 @@ useEffect(() => {
             <p className="reporte-subtitulo">Monitoreo de flujos y operaciones de la empresa.</p>
           </div>
 
-          <button className="reporte-btn-exportar" onClick={exportar}>
-            <IconoBarras />
-            Exportar Excel
-          </button>
+                    <button 
+                className="reporte-btn-exportar" 
+                onClick={exportar}
+                disabled={exportando}
+            >
+                <IconoBarras />
+                {exportando ? 'Exportando...' : 'Exportar Excel'}
+            </button>
         </div>
 
         <div className="reporte-stats-row">

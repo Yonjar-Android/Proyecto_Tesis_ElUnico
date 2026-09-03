@@ -5,6 +5,10 @@ import type { Cliente } from "../../../models/Cliente";
 import { obtenerReporteCuentasCobrar, /*exportarCuentasPorCobrar*/ } from "../../../services/reporte.service";
 import type { PaginatedResponse } from "../../../models/PaginatedResponse";
 import { formatearMoneda, formatearTelefono } from "../../FuncionAuxiliar";
+import { 
+    descargarReporteCuentasCobrarExcel, 
+    descargarArchivoExcel
+} from "../../../services/reporteExcel.service.js";
 
 export interface RespuestaClientesConDeuda extends PaginatedResponse<Cliente> {
     TotalClientesConDeuda: number;
@@ -21,6 +25,9 @@ function ReporteCuentasPorCobrar() {
 
   const [clientesConDeuda, setClientesConDeuda] = useState(0);
   const [totalSaldoPendiente, setTotalSaldoPendiente] = useState(0);
+
+    // Estado para manejar la carga durante la exportación
+    const [exportando, setExportando] = useState(false);
 
   const buscar = async () => {
     try {
@@ -49,12 +56,26 @@ function ReporteCuentasPorCobrar() {
   }, [searchTerm, currentPage]);
 
   const exportar = async () => {
-    try {
-      //await exportarCuentasPorCobrar(searchTerm);
-    } catch (error) {
-      console.error(error);
-    }
-  };
+        setExportando(true);
+        try {
+            // Obtener el blob del reporte Excel
+            const blob = await descargarReporteCuentasCobrarExcel(searchTerm);
+            
+            // Generar nombre del archivo con fecha actual
+            const fecha = new Date().toISOString().split('T')[0];
+            const nombreArchivo = `reporte_cuentas_cobrar_${fecha}.xlsx`;
+            
+            // Descargar el archivo
+            descargarArchivoExcel(blob, nombreArchivo);
+            
+            console.log('Reporte exportado exitosamente');
+        } catch (error) {
+            console.error('Error al exportar:', error);
+            alert('Error al exportar el reporte');
+        } finally {
+            setExportando(false);
+        }
+    };
 
   return (
     <div className="reporte-page">
@@ -67,10 +88,14 @@ function ReporteCuentasPorCobrar() {
             </p>
           </div>
 
-          <button className="reporte-btn-exportar" onClick={exportar}>
-            <IconoBarras />
-            Exportar Excel
-          </button>
+          <button 
+                className="reporte-btn-exportar" 
+                onClick={exportar}
+                disabled={exportando}
+            >
+                <IconoBarras />
+                {exportando ? 'Exportando...' : 'Exportar Excel'}
+            </button>
         </div>
 
         <div className="reporte-stats-row">

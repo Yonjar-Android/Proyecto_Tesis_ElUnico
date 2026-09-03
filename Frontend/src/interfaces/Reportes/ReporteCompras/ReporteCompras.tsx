@@ -10,6 +10,10 @@ import ModalDetalleCompra, { type DetalleCompraDTO } from "./ModalDetalleCompras
 import { FileText } from "lucide-react";
 import { obtenerDetalleCompra } from "../../../services/compra.service";
 import ModalSeleccionarProveedor from "../../Compras/ModalSeleccionarProveedor";
+import { 
+    descargarReporteComprasExcel, 
+    descargarArchivoExcel 
+} from "../../../services/reporteExcel.service.js";
 
 export const formatearFecha = (fecha: string): string => {
   const date = new Date(fecha);
@@ -49,6 +53,8 @@ function ReporteCompras() {
 
   const [registrosTotales, setRegistrosTotales] = useState(0);
   const [totalCompras, setTotalCompras] = useState(0);
+
+  const [exportando, setExportando] = useState(false);
 
   const validarFechas = (): boolean => {
     const hoy = obtenerFechaHoy();
@@ -112,12 +118,27 @@ const buscar = async () => {
   }, [currentPage]);
 
   const exportar = async () => {
-    try {
-      //await exportarReporteCompras(fechaInicio, fechaFin, proveedorId);
-    } catch (error) {
-      console.error(error);
-    }
-  };
+          setExportando(true);
+          try {
+            
+              // Obtener el blob del reporte Excel
+              const blob = await descargarReporteComprasExcel("", fechaInicio, fechaFin, proveedorSeleccionado?.id ?? 0);
+              
+              // Generar nombre del archivo con fecha actual
+              const fecha = new Date().toISOString().split('T')[0];
+              const nombreArchivo = `reporte_compras_${fecha}.xlsx`;
+              
+              // Descargar el archivo
+              descargarArchivoExcel(blob, nombreArchivo);
+              
+              console.log('Reporte exportado exitosamente');
+          } catch (error) {
+              console.error('Error al exportar:', error);
+              alert('Error al exportar el reporte');
+          } finally {
+              setExportando(false);
+          }
+      };
 
   return (
     <div className="reporte-page">

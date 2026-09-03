@@ -2,8 +2,12 @@ import { useEffect, useState } from "react";
 import "../Reportes.css";
 import IconoBarras from "../IconoBarras";
 import type { ProductoListado } from "../../../models/ProductoListado.js";
-import { obtenerReporteStockBajo, /*exportarStockBajo*/ } from "../../../services/reporte.service.js";
+import { obtenerReporteStockBajo} from "../../../services/reporte.service.js";
 import { formatearMoneda } from "../../FuncionAuxiliar";
+import { 
+    descargarReporteStockBajoExcel, 
+    descargarArchivoExcel 
+} from "../../../services/reporteExcel.service.js";
 
 export interface ReporteProductoStock {
     id: number;
@@ -39,6 +43,9 @@ function ReporteStockBajo() {
   const [productosEnRiesgo, setProductosEnRiesgo] = useState(0);
   const [totalProductosEvaluados, setTotalProductosEvaluados] = useState(0);
 
+  // Estado para manejar la carga durante la exportación
+    const [exportando, setExportando] = useState(false);
+
   const buscar = async () => {
     try {
       const response: ReporteProductosStockResponse = await obtenerReporteStockBajo(
@@ -66,12 +73,26 @@ function ReporteStockBajo() {
   }, [searchTerm, currentPage]);
 
   const exportar = async () => {
-    try {
-      //await exportarStockBajo(searchTerm);
-    } catch (error) {
-      console.error(error);
-    }
-  };
+        setExportando(true);
+        try {
+            // Obtener el blob del reporte Excel
+            const blob = await descargarReporteStockBajoExcel(searchTerm);
+            
+            // Generar nombre del archivo con fecha actual
+            const fecha = new Date().toISOString().split('T')[0];
+            const nombreArchivo = `reporte_stock_bajo_${fecha}.xlsx`;
+            
+            // Descargar el archivo
+            descargarArchivoExcel(blob, nombreArchivo);
+            
+            console.log('Reporte exportado exitosamente');
+        } catch (error) {
+            console.error('Error al exportar:', error);
+            alert('Error al exportar el reporte');
+        } finally {
+            setExportando(false);
+        }
+    };
 
   function renderStock(producto: ProductoListado) {
     if (producto.Stock === 0) {
@@ -108,10 +129,14 @@ function ReporteStockBajo() {
             </p>
           </div>
 
-          <button className="reporte-btn-exportar" onClick={exportar}>
-            <IconoBarras />
-            Exportar Excel
-          </button>
+          <button 
+                className="reporte-btn-exportar" 
+                onClick={exportar}
+                disabled={exportando}
+            >
+                <IconoBarras />
+                {exportando ? 'Exportando...' : 'Exportar Excel'}
+            </button>
         </div>
 
         <div className="reporte-stats-row">
