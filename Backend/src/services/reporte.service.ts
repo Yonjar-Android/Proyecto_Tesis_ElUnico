@@ -222,6 +222,8 @@ export const obtenerReporteVentas = async (
     }
 
     // Subquery: total devuelto por venta, agregado para no duplicar filas
+    // Se sigue necesitando para devoluciones PARCIALES (Estado sigue
+    // siendo 'Pagada' o 'Pendiente' pero ya se devolvió parte del dinero).
     const devolucionesSubquery = `
         SELECT
             dev.Id_venta AS Id_venta,
@@ -231,7 +233,17 @@ export const obtenerReporteVentas = async (
         GROUP BY dev.Id_venta
     `;
 
-    // Estadísticas (usando el total neto = Total - devuelto)
+    // Expresión reutilizable para el total neto de una venta:
+    // - Si Estado = 'Devuelta' -> el total no cuenta, es 0.
+    // - Si no -> Total original menos lo devuelto parcialmente (si aplica).
+    const totalNetoExpr = `
+        CASE
+            WHEN v.Estado = 'Devuelta' THEN 0
+            ELSE v.Total - COALESCE(devt.TotalDevuelto, 0)
+        END
+    `;
+
+    // Estadísticas (usando el total neto = 0 si Devuelta, o Total - devuelto)
     const [estadisticas]: any = await pool.query(
         `
         SELECT
@@ -241,14 +253,14 @@ export const obtenerReporteVentas = async (
                 SUM(
                     CASE
                         WHEN v.Tipo_Pago = 'CONTADO'
-                        THEN v.Total - COALESCE(devt.TotalDevuelto, 0)
+                        THEN ${totalNetoExpr}
                         ELSE 0
                     END
                 ),
                 0
             ) AS VentasContado,
 
-            COALESCE(SUM(v.Total - COALESCE(devt.TotalDevuelto, 0)), 0) AS TotalVentas
+            COALESCE(SUM(${totalNetoExpr}), 0) AS TotalVentas
 
         FROM ventas v
         INNER JOIN clientes c
@@ -274,9 +286,10 @@ export const obtenerReporteVentas = async (
             CONCAT(c.Nombre,' ',c.Apellido) AS Cliente,
             c.NCliente,
             v.Tipo_Pago,
+            v.Estado,
             v.Total AS TotalOriginal,
             COALESCE(devt.TotalDevuelto, 0) AS TotalDevuelto,
-            v.Total - COALESCE(devt.TotalDevuelto, 0) AS Total
+            ${totalNetoExpr} AS Total
 
         FROM ventas v
 

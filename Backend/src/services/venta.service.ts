@@ -115,12 +115,18 @@ const [sesionRows]: any = await connection.query(
 if (sesionRows.length === 0) {
     throw new Error("No se puede registrar la venta: no hay una sesión de caja abierta.");
 }
+    let estado = "Pagada"; // Estado por defecto
+
+        if(tipoPago === "Credito"){
+            estado = "Pendiente"; // Cambiar estado si es crédito
+        }
+        
         // Crear venta
         const [venta]: any = await connection.query(
             `
             INSERT INTO ventas
-            (Id_cliente, Id_usuario, Fecha, Tipo_Pago, Num_referencia, Total)
-            VALUES (?, ?, ?, ?, ?, ?)
+            (Id_cliente, Id_usuario, Fecha, Tipo_Pago, Num_referencia, Estado, Total)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
             `,
             [
                 idCliente,
@@ -128,6 +134,7 @@ if (sesionRows.length === 0) {
                 new Date(),
                 tipoPago,
                 numReferencia,
+                estado,
                 total
             ]
         );

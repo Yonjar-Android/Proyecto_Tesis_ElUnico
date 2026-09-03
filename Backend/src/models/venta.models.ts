@@ -4,6 +4,7 @@ export interface Venta {
     Id_usuario: number,
     Fecha: Date,
     Tipo_Pago:string,
+    Estado:string,
     Total: number,
 }
 
