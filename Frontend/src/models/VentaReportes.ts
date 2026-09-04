@@ -10,8 +10,9 @@ export interface VentaReporte {
   id: number;
   Fecha: string;
   Cliente: string;
+  Estado: string | "Pendiente" | "Pagada" | "Devuelta";
   NCliente: number;
-  Tipo_Pago: "Contado" | "Credito";
+  Tipo_Pago: "Contado" | "Credito" | "Transferencia";
   Total: number;
 }
 

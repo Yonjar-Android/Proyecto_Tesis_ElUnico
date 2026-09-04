@@ -100,14 +100,30 @@
 
 /* Fila de filtros/búsqueda */
 .reporte-filtro-row {
+  flex-direction: column;
+  align-items: stretch;
+  margin-bottom: .75em;
+}
+
+.reporte-filtro-fila-1,
+.reporte-filtro-fila-2 {
   display: flex;
   align-items: flex-end;
   gap: 1rem;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  padding: 1rem 1.25rem;
-  margin-bottom: 1.25rem;
   flex-wrap: wrap;
+}
+
+.reporte-filtro-fila-2 {
+  padding-top: 0.25rem;
+  border-top: 1px solid #f1f5f9;
+}
+
+.reporte-filtro-fila-2 .reporte-campo {
+  flex: 0 1 200px;
+}
+
+.reporte-filtro-fila-2 .reporte-btn-filtrar {
+  flex-shrink: 0;
 }
 
 .reporte-campo {
@@ -410,6 +426,54 @@
   display: inline-block;
   background-color: #fef3c7;
   color: #b45309;
+  border-radius: 6px;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.reporte-badge-transferencia {
+  display: inline-block;
+  background-color: #dbeafe;
+  color: #2563eb;
+  border-radius: 6px;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+/*Badges de estados*/
+
+/* Badges de estado */
+
+.reporte-badge-pagada {
+  display: inline-block;
+  background-color: #d1fae5;
+  color: #059669;
+  border-radius: 6px;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.reporte-badge-pendiente {
+  display: inline-block;
+  background-color: #fef3c7;
+  color: #b45309;
+  border-radius: 6px;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.reporte-badge-devuelta {
+  display: inline-block;
+  background-color: #fee2e2;
+  color: #dc2626;
   border-radius: 6px;
   padding: 0.2rem 0.6rem;
   font-size: 0.72rem;

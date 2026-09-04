@@ -50,11 +50,13 @@ function ReporteVentas() {
   const [fechaInicio, setFechaInicio] = useState("");
   const [fechaFin, setFechaFin] = useState("");
   const [clienteSeleccionado, setClienteSeleccionado] = useState<Cliente | null>(null);
-const [modalClienteAbierto, setModalClienteAbierto] = useState(false);
+  const [modalClienteAbierto, setModalClienteAbierto] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [perPage] = useState(10);
   const [lastPage, setLastPage] = useState(1);
   const [errorFechas, setErrorFechas] = useState("");
+  const [tipoPago, setTipoPago] = useState("");
+  const [estado, setEstado] = useState("");
 
   const [registrosTotales, setRegistrosTotales] = useState(0);
   const [ventasContado, setVentasContado] = useState(0);
@@ -103,30 +105,31 @@ useEffect(() => {
 }, [fechaInicio, fechaFin]);
 
   const buscar = async () => {
-    try {
+  try {
 
-      const search = clienteSeleccionado
-  ? `${clienteSeleccionado.Nombre} ${clienteSeleccionado.Apellido}`
-  : "";
+    const search = clienteSeleccionado
+      ? `${clienteSeleccionado.Nombre} ${clienteSeleccionado.Apellido}`
+      : "";
 
-      const response: RespuestaReporteVentas = await obtenerReporteVentasPorPeriodo(
-        search,
-        fechaInicio,
-        fechaFin,
-        "",
-        currentPage,
-        perPage
-      );
+    const response: RespuestaReporteVentas = await obtenerReporteVentasPorPeriodo(
+      search,
+      fechaInicio,
+      fechaFin,
+      tipoPago,
+      estado,
+      currentPage,
+      perPage
+    );
 
-      setVentas(response.data);
-      setLastPage(response.last_page);
-      setRegistrosTotales(response.TotalRegistros);
-      setVentasContado(response.VentasContado);
-      setTotalVentas(response.TotalVentas);
-    } catch (error) {
-      console.error(error);
-    }
-  };
+    setVentas(response.data);
+    setLastPage(response.last_page);
+    setRegistrosTotales(response.TotalRegistros);
+    setVentasContado(response.VentasContado);
+    setTotalVentas(response.TotalVentas);
+  } catch (error) {
+    console.error(error);
+  }
+};
 
   useEffect(() => {
     buscar();
@@ -140,7 +143,7 @@ useEffect(() => {
           : "";
           
             // Obtener el blob del reporte Excel
-            const blob = await descargarReporteVentasExcel(search, fechaInicio, fechaFin);
+            const blob = await descargarReporteVentasExcel(search, fechaInicio, fechaFin, tipoPago, estado);
             
             // Generar nombre del archivo con fecha actual
             const fecha = new Date().toISOString().split('T')[0];
@@ -209,79 +212,109 @@ useEffect(() => {
           </div>
         </div>
 
-        <div className="reporte-filtro-row">
-  <div className="reporte-fechas-grupo">
-    <div className="reporte-fechas-fila">
-      <div className="reporte-campo">
-        <label>📅 Fecha inicio</label>
-        <input
-          type="date"
-          value={fechaInicio}
-          max={obtenerFechaHoy()}
-          onChange={(e) => setFechaInicio(e.target.value)}
-        />
+<div className="reporte-filtro-row">
+  <div className="reporte-filtro-fila-1">
+    <div className="reporte-fechas-grupo">
+      <div className="reporte-fechas-fila">
+        <div className="reporte-campo">
+          <label>📅 Fecha inicio</label>
+          <input
+            type="date"
+            value={fechaInicio}
+            max={obtenerFechaHoy()}
+            onChange={(e) => setFechaInicio(e.target.value)}
+          />
+        </div>
+
+        <div className="reporte-campo">
+          <label>📅 Fecha fin</label>
+          <input
+            type="date"
+            value={fechaFin}
+            min={fechaInicio || undefined}
+            max={obtenerFechaHoy()}
+            onChange={(e) => setFechaFin(e.target.value)}
+          />
+        </div>
       </div>
 
-      <div className="reporte-campo">
-        <label>📅 Fecha fin</label>
-        <input
-          type="date"
-          value={fechaFin}
-          min={fechaInicio || undefined}
-          max={obtenerFechaHoy()}
-          onChange={(e) => setFechaFin(e.target.value)}
-        />
-      </div>
+      {errorFechas && <span className="reporte-error-fechas">{errorFechas}</span>}
     </div>
 
-    {errorFechas && <span className="reporte-error-fechas">{errorFechas}</span>}
-  </div>
+    <div className="reporte-campo">
+      <label>▽ Cliente</label>
+      <div className="reporte-selector-cliente">
+        <button
+          type="button"
+          className="factura-selector-btn"
+          onClick={() => setModalClienteAbierto(true)}
+        >
+          {clienteSeleccionado
+            ? `${clienteSeleccionado.Nombre} ${clienteSeleccionado.Apellido}`
+            : "Todos los clientes"}
+        </button>
 
-  <div className="reporte-campo">
-  <label>▽ Cliente</label>
-  <div className="reporte-selector-cliente">
-    <button
-      type="button"
-      className="factura-selector-btn"
-      onClick={() => setModalClienteAbierto(true)}
+        {clienteSeleccionado && (
+          <button
+            type="button"
+            className="reporte-btn-limpiar-cliente"
+            onClick={() => setClienteSeleccionado(null)}
+            aria-label="Quitar filtro de cliente"
+            title="Quitar filtro"
+          >
+            ✕
+          </button>
+        )}
+
+            <button
+      className="reporte-btn-filtrar"
+      onClick={() => {
+        if (!validarFechas()) return;
+        setCurrentPage(1);
+        buscar();
+      }}
     >
-      {clienteSeleccionado
-        ? `${clienteSeleccionado.Nombre} ${clienteSeleccionado.Apellido}`
-        : "Todos los clientes"}
+      🔍 Filtrar Datos
     </button>
+      </div>
+    </div>
+  </div>
 
-    {clienteSeleccionado && (
-      <button
-        type="button"
-        className="reporte-btn-limpiar-cliente"
-        onClick={() => setClienteSeleccionado(null)}
-        aria-label="Quitar filtro de cliente"
-        title="Quitar filtro"
+  <div className="reporte-filtro-fila-2">
+    <div className="reporte-campo">
+      <label>💳 Tipo de pago</label>
+      <select
+        value={tipoPago}
+        onChange={(e) => setTipoPago(e.target.value)}
       >
-        ✕
-      </button>
-    )}
+        <option value="">Todos</option>
+        <option value="CONTADO">Contado</option>
+        <option value="TRANSFERENCIA">Transferencia</option>
+        <option value="CREDITO">Crédito</option>
+      </select>
+    </div>
+
+    <div className="reporte-campo">
+      <label>📌 Estado</label>
+      <select
+        value={estado}
+        onChange={(e) => setEstado(e.target.value)}
+      >
+        <option value="">Todos</option>
+        <option value="Pagada">Pagada</option>
+        <option value="Devuelta">Devuelta</option>
+        <option value="Pendiente">Pendiente</option>
+      </select>
+    </div>
   </div>
 </div>
-
-  <button
-    className="reporte-btn-filtrar"
-    onClick={() => {
-      if (!validarFechas()) return;
-      setCurrentPage(1);
-      buscar();
-    }}
-  >
-    🔍 Filtrar Datos
-  </button>
-</div>
-
         <div className="reporte-card-tabla">
           <table className="reporte-tabla">
             <thead>
               <tr>
                 <th>Fecha</th>
                 <th>Cliente</th>
+                <th>Estado</th>
                 <th>Tipo de pago</th>
                 <th className="reporte-th-derecha">Monto</th>
                 <th className="reporte-th-derecha">Acciones</th>
@@ -295,12 +328,27 @@ useEffect(() => {
                   <td>
                     <span
                       className={
-                        venta.Tipo_Pago === "Contado"
-                          ? "reporte-badge-contado"
-                          : "reporte-badge-credito"
+                        venta.Estado === "Pagada"
+                          ? "reporte-badge-pagada"
+                          : venta.Estado === "Pendiente"
+                          ? "reporte-badge-pendiente"
+                          : "reporte-badge-devuelta"
                       }
                     >
-                      {venta.Tipo_Pago === "Contado" ? "Contado" : "Crédito"}
+                      {venta.Estado}
+                    </span>
+                  </td>
+                  <td>
+                    <span
+                      className={
+                          venta.Tipo_Pago === "Contado"
+                          ? "reporte-badge-contado"
+                          : venta.Tipo_Pago === "Credito"
+                          ? "reporte-badge-credito"
+                          : "reporte-badge-transferencia"
+                      }
+                    >
+                      {venta.Tipo_Pago}
                     </span>
                   </td>
                   <td className="reporte-td-derecha">C$ {formatearMoneda(venta.Total)}</td>

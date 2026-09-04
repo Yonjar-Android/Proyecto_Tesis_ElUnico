@@ -179,6 +179,7 @@ export const obtenerReporteVentas = async (
     fechaInicio: string = "",
     fechaFin: string = "",
     tipoPago: string = "",
+    estado: string = "",
     page: number = 1,
     perPage: number = 10
 ) => {
@@ -221,9 +222,13 @@ export const obtenerReporteVentas = async (
         params.push(tipoPago);
     }
 
+    // Estado (Pagada, Devuelta, Pendiente)
+    if (estado !== "" && estado.toUpperCase() !== "TODOS") {
+        where += " AND v.Estado = ?";
+        params.push(estado);
+    }
+
     // Subquery: total devuelto por venta, agregado para no duplicar filas
-    // Se sigue necesitando para devoluciones PARCIALES (Estado sigue
-    // siendo 'Pagada' o 'Pendiente' pero ya se devolvió parte del dinero).
     const devolucionesSubquery = `
         SELECT
             dev.Id_venta AS Id_venta,
@@ -233,9 +238,6 @@ export const obtenerReporteVentas = async (
         GROUP BY dev.Id_venta
     `;
 
-    // Expresión reutilizable para el total neto de una venta:
-    // - Si Estado = 'Devuelta' -> el total no cuenta, es 0.
-    // - Si no -> Total original menos lo devuelto parcialmente (si aplica).
     const totalNetoExpr = `
         CASE
             WHEN v.Estado = 'Devuelta' THEN 0
@@ -243,7 +245,6 @@ export const obtenerReporteVentas = async (
         END
     `;
 
-    // Estadísticas (usando el total neto = 0 si Devuelta, o Total - devuelto)
     const [estadisticas]: any = await pool.query(
         `
         SELECT
@@ -273,10 +274,8 @@ export const obtenerReporteVentas = async (
         params
     );
 
-    // Total para la paginación
     const total = estadisticas[0].TotalRegistros;
 
-    // Datos del reporte
     const [rows]: any = await pool.query(
         `
         SELECT

@@ -37,6 +37,7 @@ export const generateReporteVentasPorPeriodoExcel = async(
     fechaInicio: string = "",
     fechaFin: string = "",
     tipoPago: string = "",
+    estado: string = ""
 
 ): Promise<ExcelJS.Buffer> => {
     const reportData = await obtenerReporteVentas(
@@ -44,6 +45,7 @@ export const generateReporteVentasPorPeriodoExcel = async(
         fechaInicio,
         fechaFin,
         tipoPago,
+        estado,
         1,
         1000000 // Un número grande para obtener todos
     );

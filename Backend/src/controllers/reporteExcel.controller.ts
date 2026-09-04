@@ -91,7 +91,8 @@ export const descargarReporteVentasPorPeriodo = async (req: Request, res: Respon
             search = "", 
             fechaInicio = "", 
             fechaFin = "",
-            tipoPago = ""
+            tipoPago = "",
+            estado = ""
         } = req.query;
 
         console.log('Generando reporte de ventas por período...');
@@ -102,7 +103,8 @@ export const descargarReporteVentasPorPeriodo = async (req: Request, res: Respon
             search as string,
             fechaInicio as string,
             fechaFin as string,
-            tipoPago as string
+            tipoPago as string,
+            estado as string
         );
 
         // Configurar headers para la descarga

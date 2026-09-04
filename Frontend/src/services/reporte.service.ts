@@ -50,6 +50,7 @@ export const obtenerReporteVentasPorPeriodo = async (
     fechaInicio: string = "",
     fechaFin: string = "",
     tipoPago: string = "",
+    estado: string = "",
     page: number = 1,
     perPage: number = 10
 ): Promise<RespuestaReporteVentas> => {
@@ -62,12 +63,13 @@ export const obtenerReporteVentasPorPeriodo = async (
                 fechaInicio,
                 fechaFin,
                 tipoPago,
+                estado,
                 page,
                 perPage
             },
             headers: {
-            Authorization: `Bearer ${token}`
-        }
+                Authorization: `Bearer ${token}`
+            }
         }
     );
 

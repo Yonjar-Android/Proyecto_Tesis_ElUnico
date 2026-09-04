@@ -58,14 +58,16 @@ export const descargarReporteVentasExcel = async (
     search: string = "",
     fechaInicio: string = "",
     fechaFin: string = "",
-    tipoPago: string = ""
+    tipoPago: string = "",
+    estado: string = ""
 ): Promise<Blob> => {
     const response = await axiosInstance.get(`${API}/excel/ventas-por-periodo`, {
         params: { 
             search, 
             fechaInicio, 
             fechaFin,
-            tipoPago 
+            tipoPago,
+            estado
         },
         headers: { Authorization: `Bearer ${token}` },
         responseType: 'blob'
