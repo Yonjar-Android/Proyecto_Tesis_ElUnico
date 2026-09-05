@@ -5,8 +5,9 @@ import { useNavigate } from "react-router-dom";
 import type { PaginatedResponse } from "../../models/PaginatedResponse";
 import { buscarProductos } from "../../services/producto.service";
 import type { ProductoListado } from "../../models/ProductoListado";
-import { SquarePen } from "lucide-react";
+import { SquarePen, HelpCircle } from "lucide-react";
 import { formatearMoneda } from "../FuncionAuxiliar";
+import { Joyride, type Step } from "react-joyride";
 
 function Inventario() {
   const navigate = useNavigate();
@@ -16,6 +17,29 @@ function Inventario() {
   const [total, setTotal] = useState(0);
   const [lastPage, setLastPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
+
+  // Tour de ayuda
+
+const [tourActivo, setTourActivo] = useState(false);
+
+const pasosTour: Step[] = [
+  {
+    target: '[data-tour="agregar-producto"]',
+    content: "Desde aquí navegas a otra pantalla para registrar un nuevo producto.",
+  },
+  {
+    target: '[data-tour="buscar-producto"]',
+    content: "Aquí puedes filtrar productos por nombre, código o por categoría.",
+  },
+  {
+    target: '[data-tour="tabla-productos"]',
+    content: "En esta tabla se muestran todos los productos registrados.",
+  },
+  {
+    target: '[data-tour="paginación-producto"]',
+    content: "Con estos botones puedes navegar entre las páginas de productos para buscar alguno que no aparezca en la lista actual.",
+  },
+];
 
   const buscar = async () => {
     try {
@@ -51,6 +75,9 @@ function Inventario() {
     <div className="inventario-page">
       <div className="inventario-header-banda">
         <h1>Inventario</h1>
+        <button className="inventario-help-btn" onClick={() => setTourActivo(true)}>
+        <HelpCircle size={18} />
+        </button>
       </div>
 
       <div className="inventario-status-row">
@@ -62,7 +89,7 @@ function Inventario() {
       <div className="inventario-contenido">
         <div className="inventario-card-grande">
           <div className="inventario-listado-top">
-            <div className="inventario-search-wrapper">
+            <div className="inventario-search-wrapper" data-tour="buscar-producto">
               <span className="inventario-search-icon">🔍</span>
               <input
                 className="inventario-search-input"
@@ -74,12 +101,13 @@ function Inventario() {
               />
             </div>
 
-            <button className="inventario-agregar-btn" onClick={() => navigate("/inventario/crear")}>
+            <button className="inventario-agregar-btn" onClick={() => navigate("/inventario/crear")}
+              data-tour="agregar-producto">
               + Agregar producto
             </button>
           </div>
 
-          <table className="inventario-tabla">
+          <table className="inventario-tabla" data-tour="tabla-productos">
             <thead>
               <tr>
                 <th>Producto</th>
@@ -123,7 +151,7 @@ function Inventario() {
             </tbody>
           </table>
 
-          <div className="inventario-footer">
+          <div className="inventario-footer" data-tour="paginación-producto">
             <span className="inventario-count">
               Mostrando {productos.length} de {total} productos
             </span>
@@ -173,6 +201,24 @@ function Inventario() {
           </div>
         </div>
       </div>
+
+      <Joyride
+  steps={pasosTour}
+  run={tourActivo}
+  continuous
+  locale={{
+    back: "Atrás",
+    close: "Cerrar",
+    last: "Finalizar",
+    next: "Siguiente",
+    skip: "Omitir",
+  }}
+  onEvent={(data) => {
+    if (data.type === "tour:end") {
+      setTourActivo(false);
+    }
+  }}
+/>
     </div>
   );
 }

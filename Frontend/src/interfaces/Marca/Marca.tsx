@@ -4,8 +4,9 @@ import ModalAgregarMarca from "./ModalAgregarMarca";
 import type { PaginatedResponse } from "../../models/PaginatedResponse";
 import ModalEditarMarca from "./ModalEditarMarca";
 import "./Marca.css";
-import { SquarePen } from 'lucide-react'
+import { HelpCircle, SquarePen } from 'lucide-react'
 import Notificacion, { type TipoNotificacion } from "../../components/Notification/Notification";
+import { Joyride, type Step } from "react-joyride";
 
 interface Marca {
 
@@ -31,6 +32,26 @@ const [modalEditarAbierto, setModalEditarAbierto] = useState(false);
 const [marcaSeleccionada, setMarcaSeleccionada] = useState<Marca | null>(null);
 
 const [notif, setNotif] = useState<{ mensaje: string; tipo: TipoNotificacion } | null>(null);
+
+ const [tourActivo, setTourActivo] = useState(false);
+ const pasosTour: Step[] = [
+  {
+    target: '[data-tour="agregar-marca"]',
+    content: "Desde aquí abres una ventana para registrar una nueva marca.",
+  },
+  {
+    target: '[data-tour="buscar-marca"]',
+    content: "Aquí puedes buscar marcas por su nombre.",
+  },
+  {
+    target: '[data-tour="tabla-marca"]',
+    content: "Aquí puedes ver la lista de marcas registradas.",
+  },
+  {
+    target: '[data-tour="paginacion-marca"]',
+    content: "Con estos botones puedes navegar entre las páginas de marcas para buscar alguna que no aparezca en la lista actual.",
+  },
+];
 
     useEffect(() => {
 
@@ -60,8 +81,6 @@ const buscar = async () => {
         currentPage,
         perPage
     );
-
-    console.log(response)
 
       setMarcas(response.data);
       setTotal(response.total);
@@ -99,17 +118,22 @@ useEffect(() => {
         <div className="marca-content">
       <div className="marca-top-part">
         <h1 className="marca-title">Marcas</h1>
+<div style={{ display: "flex", gap: "8px" }}>
+        <button className="categoria-add-btn" onClick={() => setTourActivo(true)}>
+            <HelpCircle size={18} />
+          </button>
         <button
     className="marca-add-btn"
+    data-tour="agregar-marca"
     onClick={() => setModalAbierto(true)}
 >
     <span className="marca-add-icon">✦</span>
     Agregar marca
 </button>
+</div>
       </div>
-
       <div className="marca-table-container">
-        <div className="marca-search-wrapper">
+        <div className="marca-search-wrapper" data-tour="buscar-marca">
           <span className="marca-search-icon">🔍</span>
           <input
     className="marca-search-input"
@@ -121,7 +145,7 @@ useEffect(() => {
 />
         </div>
 
-        <table className="marca-table">
+        <table className="marca-table" data-tour="tabla-marca">
           <thead>
             <tr>
               <th className="marca-th">NOMBRE DE MARCA</th>
@@ -149,7 +173,7 @@ useEffect(() => {
           <tfoot>
             <tr>
               <td colSpan={2}>
-                <div className="marca-footer">
+                <div className="marca-footer" data-tour="paginacion-marca">
                   <span className="marca-count">
                     Mostrando {marcas.length} de {total} marcas
                   </span>
@@ -175,6 +199,24 @@ useEffect(() => {
         </table>
       </div>
       </div>
+
+                  <Joyride
+  steps={pasosTour}
+  run={tourActivo}
+  continuous
+  locale={{
+    back: "Atrás",
+    close: "Cerrar",
+    last: "Finalizar",
+    next: "Siguiente",
+    skip: "Omitir",
+  }}
+  onEvent={(data) => {
+    if (data.type === "tour:end") {
+      setTourActivo(false);
+    }
+  }}
+/>
 
           <ModalAgregarMarca
     abierto={modalAbierto}

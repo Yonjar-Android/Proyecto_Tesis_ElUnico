@@ -5,6 +5,8 @@ import type {CrearDevolucionData} from "../../services/devoluciones.service"
 import { buscarFacturaParaDevolucion} from "../../services/venta.service";
 import Notificacion, { type TipoNotificacion } from "../../components/Notification/Notification";
 import { formatearMoneda } from "../FuncionAuxiliar";
+import { Joyride, type Step } from "react-joyride";
+import { HelpCircle } from "lucide-react";
 
 // Motivo de la devolución. Se muestra como <select>; ajusta la lista según tu negocio.
 const MOTIVOS_DEVOLUCION = [
@@ -61,6 +63,26 @@ function Devoluciones() {
   const [error, setError] = useState("");
 
   const [notif, setNotif] = useState<{ mensaje: string; tipo: TipoNotificacion } | null>(null);
+
+   const [tourActivo, setTourActivo] = useState(false);
+ const pasosTour: Step[] = [
+  {
+    target: '[data-tour="devolucion-buscar"]',
+    content: "Aquí puedes buscar una factura para así cargar sus datos y registrar una devolución.",
+  },
+  {
+    target: '[data-tour="devolucion-tabla"]',
+    content: "Aquí puede visualizar la información de la factura e ingresar la cantidad de productos a devolver.",
+  },
+  {
+    target: '[data-tour="devolucion-cancelar"]',
+    content: "Desde aquí cancela la devolución en curso.",
+  },
+  {
+    target: '[data-tour="devolucion-registrar"]',
+    content: "Aquí puedes registrar la devolución.",
+  },
+];
 
   const buscarFactura = async () => {
     if (!numeroFactura.trim()) {
@@ -198,15 +220,21 @@ function Devoluciones() {
       )}
       <div className={styles.contenido}>
         <div className={styles.header}>
-          <h1>Devoluciones</h1>
+          <div className="header-help">
+            <h1>Devoluciones</h1>
+            <button className="categoria-add-btn" onClick={() => setTourActivo(true)}>
+            <HelpCircle size={18} />
+          </button>
+          </div>
+          
           <p className={styles.subtitulo}>
             Busca una factura y registra la devolución de los productos correspondientes.
           </p>
         </div>
 
         <div className={styles.card}>
-          <div className={styles.filaBuscar}>
-            <div className={`${styles.campo} ${styles.campoBuscar}`}>
+          <div className={styles.filaBuscar} data-tour="devolucion-buscar">
+            <div className={`${styles.campo} ${styles.campoBuscar}`} >
               <label>
                 Buscar factura <span className={styles.requerido}>*</span>
               </label>
@@ -255,7 +283,7 @@ function Devoluciones() {
           </div>
         )}
 
-        <div className={`${styles.card} ${styles.cardTabla}`}>
+        <div className={`${styles.card} ${styles.cardTabla}`}  data-tour="devolucion-tabla"> 
           <table className={styles.tabla}>
             <thead>
               <tr>
@@ -346,7 +374,7 @@ function Devoluciones() {
         {error && <span className={styles.errorText}>{error}</span>}
 
         <div className={styles.footer}>
-          <button className={styles.btnCancelar} onClick={limpiar}>
+          <button className={styles.btnCancelar} onClick={limpiar} data-tour="devolucion-cancelar">
             Cancelar
           </button>
 
@@ -366,12 +394,31 @@ function Devoluciones() {
               className={styles.btnRegistrar}
               onClick={registrarDevolucion}
               disabled={!factura || totalADevolver === 0}
+              data-tour="devolucion-registrar"
             >
               Registrar devolución
             </button>
           </div>
         </div>
       </div>
+
+                  <Joyride
+  steps={pasosTour}
+  run={tourActivo}
+  continuous
+  locale={{
+    back: "Atrás",
+    close: "Cerrar",
+    last: "Finalizar",
+    next: "Siguiente",
+    skip: "Omitir",
+  }}
+  onEvent={(data) => {
+    if (data.type === "tour:end") {
+      setTourActivo(false);
+    }
+  }}
+/>
     </div>
   );
 }

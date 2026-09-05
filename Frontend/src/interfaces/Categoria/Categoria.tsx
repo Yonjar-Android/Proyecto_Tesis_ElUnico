@@ -4,8 +4,9 @@ import { useEffect, useState } from "react";
 import ModalAgregarCategoria from "./ModalAgregarCategoria";
 import type { PaginatedResponse } from "../../models/PaginatedResponse";
 import ModalEditarCategoria from "./ModalEditarCategoria";
-import { SquarePen } from 'lucide-react'
+import { SquarePen, HelpCircle } from 'lucide-react'
 import Notificacion, { type TipoNotificacion } from "../../components/Notification/Notification";
+import { Joyride, type Step } from "react-joyride";
 
 interface Categoria {
 
@@ -31,6 +32,26 @@ const [categoriaSeleccionada, setCategoriaSeleccionada] = useState<Categoria | n
 const [searchTerm, setSearchTerm] = useState<string>("");
 
 const [notif, setNotif] = useState<{ mensaje: string; tipo: TipoNotificacion } | null>(null);
+
+ const [tourActivo, setTourActivo] = useState(false);
+ const pasosTour: Step[] = [
+  {
+    target: '[data-tour="agregar-categoria"]',
+    content: "Desde aquí abres una ventana para registrar una nueva categoria.",
+  },
+  {
+    target: '[data-tour="buscar-categoria"]',
+    content: "Aquí puedes buscar categorias por su nombre.",
+  },
+  {
+    target: '[data-tour="tabla-categoria"]',
+    content: "Aquí puedes ver la lista de categorias registradas.",
+  },
+  {
+    target: '[data-tour="paginacion-categoria"]',
+    content: "Con estos botones puedes navegar entre las páginas de categorias para buscar alguna que no aparezca en la lista actual.",
+  },
+];
 
     useEffect(() => { 
       buscar();
@@ -94,14 +115,21 @@ useEffect(() => {
         <div className="categoria-content">
       <div className="categoria-top-part">
         <h1 className="categoria-title">Categorías</h1>
+
+        <div style={{ display: "flex", gap: "8px" }}>
+        <button className="categoria-add-btn" onClick={() => setTourActivo(true)}>
+            <HelpCircle size={18} />
+          </button>
         <button className="categoria-add-btn"
+        data-tour="agregar-categoria"
         onClick={() => setModalAbierto(true)}>
           <span className="categoria-add-icon">✦</span> Agregar categoría
         </button>
+        </div>
       </div>
 
       <div className="categoria-table-container">
-        <div className="categoria-search-wrapper">
+        <div className="categoria-search-wrapper" data-tour="buscar-categoria">
           <span className="categoria-search-icon">🔍</span>
           <input
             className="categoria-search-input"
@@ -113,7 +141,7 @@ useEffect(() => {
           />
         </div>
 
-        <table className="categoria-table">
+        <table className="categoria-table" data-tour="tabla-categoria">
           <thead>
             <tr>
               <th className="categoria-th">NOMBRE DE CATEGORIA</th>
@@ -141,7 +169,7 @@ useEffect(() => {
           <tfoot>
             <tr>
               <td colSpan={2}>
-                <div className="categoria-footer">
+                <div className="categoria-footer" data-tour="paginacion-categoria">
                   <span className="categoria-count">
                     Mostrando {categorias.length} de {total} categorías
                   </span>
@@ -159,6 +187,24 @@ useEffect(() => {
         </table>
       </div>
       </div>
+
+                        <Joyride
+  steps={pasosTour}
+  run={tourActivo}
+  continuous
+  locale={{
+    back: "Atrás",
+    close: "Cerrar",
+    last: "Finalizar",
+    next: "Siguiente",
+    skip: "Omitir",
+  }}
+  onEvent={(data) => {
+    if (data.type === "tour:end") {
+      setTourActivo(false);
+    }
+  }}
+/>
 
       <ModalAgregarCategoria
       abierto={modalAbierto}

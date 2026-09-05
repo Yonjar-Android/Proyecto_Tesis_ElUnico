@@ -18,6 +18,15 @@
   color: #111;
 }
 
+.header-help {
+  width: 100%;
+  display: flex;
+  Justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
 .factura-subtitulo {
   margin: 0 0 0.2rem;
   font-size: 0.88rem;
@@ -380,6 +389,11 @@
 
 .factura-btn-vender:hover {
   background-color: #047857;
+}
+
+.factura-btn-vender:disabled {
+  background-color: #9ca3af;
+  cursor: not-allowed;
 }
 
 .error-text {

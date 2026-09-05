@@ -10,12 +10,13 @@ import type { Cliente } from "../../models/Cliente";
 import type { ProductoListado } from "../../models/ProductoListado";
 import type { Servicio } from "../../models/Servicio";
 import { crearVenta, obtenerReciboVenta } from "../../services/venta.service";
-import { SquarePen, Trash2 } from "lucide-react";
+import { HelpCircle, SquarePen, Trash2 } from "lucide-react";
 import { obtenerSesionActiva } from "../../services/caja.service";
 import { formatearMoneda } from "../FuncionAuxiliar"
 import Notificacion, { type TipoNotificacion } from "../../components/Notification/Notification";
 import ModalConfirmarImpresion from "./ModalConfirmarImpresion";
 import { type DatosRecibo } from "../../models/Recibo";
+import { Joyride, type Step } from "react-joyride";
 
 type TipoDescuento = "porcentaje" | "fijo";
 
@@ -67,6 +68,27 @@ function subtotalNeto(item: ItemVenta) {
 }
 
 function Facturacion() {
+
+ const [tourActivo, setTourActivo] = useState(false);
+ const pasosTour: Step[] = [
+  {
+    target: '[data-tour="agregar-producto-servicio"]',
+    content: "Acá puede seleccionar si desea agregar un producto o un servicio desde el input inferior.",
+  },
+  {
+    target: '[data-tour="agregar-producto"]',
+    content: "Desde aquí agrega un producto o servicio que desea facturar una vez seleccionado e ingresada la información.",
+  },
+  {
+    target: '[data-tour="cancelar-venta"]',
+    content: "Aquí puedes cancelar la venta en curso.",
+  },
+  {
+    target: '[data-tour="realizar-venta"]',
+    content: "Con este botón abres una ventana para ingresar el dinero recibido antes de confirmar la venta.",
+  },
+];
+
   const [tipoSeleccion, setTipoSeleccion] = useState<"producto" | "servicio">(
     "producto"
   );
@@ -379,7 +401,13 @@ const totalGeneral = subtotalGeneral - descuentoGeneral;
               ⚠ La caja está cerrada. Debe abrir una sesión de caja antes de facturar.
             </div>
           )}
-          <h1>Ventas</h1>
+          <div className="header-help">
+            <h1>Ventas</h1>
+             <button className="categoria-add-btn" onClick={() => setTourActivo(true)}>
+            <HelpCircle size={18} />
+          </button>
+          </div>
+          
           <p className="factura-subtitulo">
             Registre los productos y complete el pago de la transacción.
           </p>
@@ -387,7 +415,7 @@ const totalGeneral = subtotalGeneral - descuentoGeneral;
         </div>
 
         <div className="factura-card">
-          <div className="factura-tipo-toggle">
+          <div className="factura-tipo-toggle" data-tour="agregar-producto-servicio">
             <button
               type="button"
               className={
@@ -499,7 +527,7 @@ const totalGeneral = subtotalGeneral - descuentoGeneral;
   </div>
 </div>
 
-            <button className="factura-btn-agregar" onClick={guardarItem}>
+            <button className="factura-btn-agregar" onClick={guardarItem} data-tour="agregar-producto">
               {indiceEditando !== null ? "Actualizar" : "Agregar"}
             </button>
 
@@ -643,7 +671,9 @@ const totalGeneral = subtotalGeneral - descuentoGeneral;
         {error && <span className="error-text">{error}</span>}
 
         <div className="factura-footer">
-          <button className="factura-btn-cancelar" onClick={cancelar}>
+          <button className="factura-btn-cancelar" 
+          data-tour="cancelar-venta"
+          onClick={cancelar}>
             Cancelar
           </button>
 
@@ -668,12 +698,31 @@ const totalGeneral = subtotalGeneral - descuentoGeneral;
               onClick={realizarVenta}
               disabled={!cajaAbierta}
               title={!cajaAbierta ? "La caja está cerrada" : undefined}
+              data-tour="realizar-venta"
             >
               Realizar Venta
             </button>
           </div>
         </div>
       </div>
+
+            <Joyride
+  steps={pasosTour}
+  run={tourActivo}
+  continuous
+  locale={{
+    back: "Atrás",
+    close: "Cerrar",
+    last: "Finalizar",
+    next: "Siguiente",
+    skip: "Omitir",
+  }}
+  onEvent={(data) => {
+    if (data.type === "tour:end") {
+      setTourActivo(false);
+    }
+  }}
+/>
 
       <ModalSeleccionarProducto
         abierto={modalProductoAbierto}

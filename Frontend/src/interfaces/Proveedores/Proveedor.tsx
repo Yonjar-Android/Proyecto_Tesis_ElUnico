@@ -7,11 +7,7 @@ import ModalEditarProveedor from "./ModalEditarProveedor";
 import { SquarePen, HelpCircle } from "lucide-react";
 import { formatearTelefono } from "../FuncionAuxiliar";
 import Notificacion, { type TipoNotificacion } from "../../components/Notification/Notification";
-import ModalAyuda from "../ModalAyuda"; // ajusta la ruta
-
-// tus imágenes de ayuda para esta interfaz en particular
-import ayudaClientes1 from "../../assets/ayuda/proveedor/Diapositiva3.png";
-import ayudaClientes2 from "../../assets/ayuda/proveedor/Diapositiva4.png";
+import { Joyride, type Step } from "react-joyride";
 
 interface Proveedor {
 
@@ -23,6 +19,30 @@ interface Proveedor {
 }
 
 function Proveedor(){
+
+  
+// Tour de ayuda
+
+const [tourActivo, setTourActivo] = useState(false);
+
+const pasosTour: Step[] = [
+  {
+    target: '[data-tour="agregar-proveedor"]',
+    content: "Desde aquí abres una ventana para registrar un nuevo proveedor.",
+  },
+  {
+    target: '[data-tour="buscar-proveedor"]',
+    content: "Aquí puedes buscar proveedores por razón social o contacto.",
+  },
+  {
+    target: '[data-tour="tabla-proveedor"]',
+    content: "En esta tabla se muestran todos los proveedores registrados.",
+  },
+  {
+    target: '[data-tour="paginación-proveedor"]',
+    content: "Con estos botones puedes navegar entre las páginas de proveedores para buscar alguno que no aparezca en la lista actual.",
+  },
+];
 
     const [proveedores, setProveedores] = useState<Proveedor[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
@@ -44,22 +64,6 @@ function Proveedor(){
             buscar();
     
         }, []);
-
-    const [modalAyudaAbierto, setModalAyudaAbierto] = useState(false);
-
-const imagenesAyudaClientes = [
-  {
-    src: ayudaClientes1,
-    titulo: "",
-    descripcion: "",
-  },
-  {
-    src: ayudaClientes2,
-    titulo: "",
-    descripcion: "",
-  },
-];
-    
     
     const buscar = async () => {
         try {
@@ -119,11 +123,12 @@ return (
 <div className="proveedor-top-part">
         <h1 className="proveedor-title">Proveedores</h1>
         <div style={{ display: "flex", gap: "8px" }}>
-          <button className="proveedor-add-btn" onClick={() => setModalAyudaAbierto(true)}>
-            <HelpCircle size={18} />
-          </button>
+          <button className="proveedor-add-btn" onClick={() => setTourActivo(true)}>
+  <HelpCircle size={18} />
+</button>
           <button
               className="proveedor-add-btn"
+              data-tour="agregar-proveedor"
               onClick={() => setModalAbierto(true)}
           >
               <span className="proveedor-add-icon">✦</span>
@@ -133,7 +138,7 @@ return (
       </div>
 
       <div className="proveedor-table-container">
-        <div className="proveedor-search-wrapper">
+        <div className="proveedor-search-wrapper" data-tour="buscar-proveedor">
           <span className="proveedor-search-icon">🔍</span>
           <input
     className="proveedor-search-input"
@@ -145,7 +150,7 @@ return (
 />
         </div>
 
-        <table className="proveedor-table">
+        <table className="proveedor-table" data-tour="tabla-proveedor">
           <thead>
             <tr>
               <th className="proveedor-th">RAZÓN SOCIAL</th>
@@ -188,7 +193,7 @@ return (
                   <span className="proveedor-count">
                     Mostrando {proveedores.length} de {total} proveedores
                   </span>
-                  <div className="proveedor-pagination">
+                  <div className="proveedor-pagination" data-tour="paginación-proveedor">
                     <button className="proveedor-page-btn" onClick={() => setCurrentPage(1)} disabled={currentPage === 1}>
                       «
                     </button>
@@ -236,11 +241,22 @@ return (
       }}
       />
 
-      <ModalAyuda
-  abierto={modalAyudaAbierto}
-  titulo="Ayuda: Gestión de proveedores"
-  imagenes={imagenesAyudaClientes}
-  onClose={() => setModalAyudaAbierto(false)}
+<Joyride
+  steps={pasosTour}
+  run={tourActivo}
+  continuous
+  locale={{
+    back: "Atrás",
+    close: "Cerrar",
+    last: "Finalizar",
+    next: "Siguiente",
+    skip: "Omitir",
+  }}
+  onEvent={(data) => {
+    if (data.type === "tour:end") {
+      setTourActivo(false);
+    }
+  }}
 />
 
       <ModalEditarProveedor

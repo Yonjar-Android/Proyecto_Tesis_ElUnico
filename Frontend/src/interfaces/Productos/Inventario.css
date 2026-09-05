@@ -4,6 +4,21 @@
   margin-bottom: 1.25rem;
 }
 
+.inventario-help-btn{
+    display: flex;
+  align-items: end;
+  gap: 0.4rem;
+  background-color: #E94D61;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.5rem 1.1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
 .inventario-search-wrapper {
   flex: 1;
   display: flex;

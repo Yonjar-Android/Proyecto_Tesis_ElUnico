@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import styles from "./SalidasInventario.module.css";
-import { Trash2 } from "lucide-react";
+import { Trash2, HelpCircle } from "lucide-react";
 import ModalSeleccionarProducto from "../Facturacion/ModalSeleccionarProducto";
 import type { ProductoListado } from "../../models/ProductoListado";
 import Notificacion, { type TipoNotificacion } from "../../components/Notification/Notification";
-
 import {
   crearSalida,
 //  obtenerHistorialSalidas,
 } from "../../services/salidas_Invenario.service";
+import { Joyride, type Step } from "react-joyride";
 
 // Tipo de salida. Ajusta la lista según tu negocio.
 const TIPOS_SALIDA = [
@@ -65,6 +65,30 @@ function SalidasInventario() {
   const [cargandoHistorial, setCargandoHistorial] = useState(true);
 
   const [notif, setNotif] = useState<{ mensaje: string; tipo: TipoNotificacion } | null>(null);
+
+  const [tourActivo, setTourActivo] = useState(false);
+ const pasosTour: Step[] = [
+  {
+    target: '[data-tour="seleccionar-producto-salidas"]',
+    content: "Desde aquí abres una ventana para seleccionar un producto.",
+  },
+  {
+    target: '[data-tour="agregar-producto-salidas"]',
+    content: "Aquí puedes agregar un producto a la salida a registrar.",
+  },
+  {
+    target: '[data-tour="tabla-salidas"]',
+    content: "Aquí puedes ver la lista de productos a los cuales quieres registrar una salida.",
+  },
+  {
+    target: '[data-tour="cancelar-salida"]',
+    content: "Acá puedes cancelar la salida en curso.",
+  },
+  {
+    target: '[data-tour="registrar-salida"]',
+    content: "Acá puedes registrar la salida una vez hayas agregado los productos.",
+  },
+];
 
   useEffect(() => {
     const cargarHistorial = async () => {
@@ -174,7 +198,12 @@ function SalidasInventario() {
                   )}
       <div className={styles.contenido}>
         <div className={styles.header}>
+          <div className={styles.header_help}>
           <h1>Salidas de Inventario</h1>
+          <button className="categoria-add-btn" onClick={() => setTourActivo(true)}>
+            <HelpCircle size={18} />
+          </button>
+          </div>
           <p className={styles.subtitulo}>
             Registra salidas de productos por daño, pérdida, uso interno u otros ajustes.
           </p>
@@ -196,7 +225,7 @@ function SalidasInventario() {
               </select>
             </div>
 
-            <div className={styles.campo}>
+            <div className={styles.campo} data-tour="seleccionar-producto-salidas">
               <label>
                 Producto <span className={styles.requerido}>*</span>
               </label>
@@ -224,7 +253,9 @@ function SalidasInventario() {
               />
             </div>
 
-            <button type="button" className={styles.btnAgregar} onClick={agregarProducto}>
+            <button type="button" className={styles.btnAgregar} onClick={agregarProducto} 
+            data-tour="agregar-producto-salidas"
+            >
               Agregar
             </button>
           </div>
@@ -240,7 +271,7 @@ function SalidasInventario() {
           </div>
         </div>
 
-        <div className={`${styles.card} ${styles.cardTabla}`}>
+        <div className={`${styles.card} ${styles.cardTabla}`}  data-tour="tabla-salidas">
           <table className={styles.tabla}>
             <thead>
               <tr>
@@ -281,7 +312,7 @@ function SalidasInventario() {
         {error && <span className={styles.errorText}>{error}</span>}
 
         <div className={styles.footer}>
-          <button className={styles.btnCancelar} onClick={cancelar}>
+          <button className={styles.btnCancelar} onClick={cancelar} data-tour="cancelar-salida">
             Cancelar
           </button>
 
@@ -289,6 +320,7 @@ function SalidasInventario() {
             className={styles.btnRegistrar}
             onClick={registrarSalida}
             disabled={items.length === 0}
+            data-tour="registrar-salida"
           >
             Registrar salida
           </button>
@@ -331,6 +363,24 @@ function SalidasInventario() {
           </div>
         </div>*/}
       </div> 
+
+                  <Joyride
+  steps={pasosTour}
+  run={tourActivo}
+  continuous
+  locale={{
+    back: "Atrás",
+    close: "Cerrar",
+    last: "Finalizar",
+    next: "Siguiente",
+    skip: "Omitir",
+  }}
+  onEvent={(data) => {
+    if (data.type === "tour:end") {
+      setTourActivo(false);
+    }
+  }}
+/>
 
       <ModalSeleccionarProducto
         abierto={modalProductoAbierto}

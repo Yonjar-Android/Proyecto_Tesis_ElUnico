@@ -5,9 +5,10 @@ import type { ProductoListado } from "../../models/ProductoListado";
 import { crearCompra } from "../../services/compra.service";
 import ModalSeleccionarProducto from "../Facturacion/ModalSeleccionarProducto";
 import ModalSeleccionarProveedor from "./ModalSeleccionarProveedor";
-import { SquarePen, Trash2 } from "lucide-react";
+import { SquarePen, Trash2, HelpCircle } from "lucide-react";
 import { formatearMoneda } from "../FuncionAuxiliar"
 import Notificacion, { type TipoNotificacion } from "../../components/Notification/Notification";
+import { Joyride, type Step } from "react-joyride";
 
 interface ItemCompra {
   producto: ProductoListado,
@@ -40,6 +41,36 @@ function Compras() {
 
   const [error, setError] = useState("");
   const [notif, setNotif] = useState<{ mensaje: string; tipo: TipoNotificacion } | null>(null);
+
+  const [tourActivo, setTourActivo] = useState(false);
+
+ const pasosTour: Step[] = [
+  {
+    target: '[data-tour="compras-producto"]',
+    content: "Aquí se abre una ventana para seleccionar el producto que desea agregar a la venta.",
+  },
+  {
+    target: '[data-tour="compras-agregar"]',
+    content: "Acá se agrega el producto seleccionado a la factura.",
+  },
+  {
+    target: '[data-tour="compras-proveedor"]',
+    content: "Aquí se abre una ventana para seleccionar el proveedor al que desea realizar la compra.",
+  },
+  {
+    target: '[data-tour="compras-tabla"]',
+    content: "En esta tabla puede visualizar la información de la compra que desea registrar.",
+  },
+  {
+    target: '[data-tour="compras-cancelar"]',
+    content: "Desde aquí cancela la compra en curso.",
+  },
+  {
+    target: '[data-tour="compras-registrar"]',
+    content: "Aquí puedes registrar la compra una vez ingresado todos los datos.",
+  },
+];
+
   
   const limpiarCamposProducto = () => {
     setProductoSeleccionado(null);
@@ -191,12 +222,17 @@ function Compras() {
             )}
         <div className="factura-contenido">
       <div className="factura-header">
-        <h1>Gestión de Compras</h1>
+        <div className="header-help">
+            <h1>Gestión de Compras</h1>
+            <button className="categoria-add-btn" onClick={() => setTourActivo(true)}>
+            <HelpCircle size={18} />
+          </button>
+          </div>
       </div>
 
       <div className="factura-card">
         <div className="compra-fila-formulario">
-          <div className="compra-campo compra-campo-producto">
+          <div className="compra-campo compra-campo-producto" data-tour="compras-producto">
             <label>
               Producto <span style={{ color: "#e5484d" }}>*</span>
             </label>
@@ -244,7 +280,7 @@ function Compras() {
               />
             </div>
           </div>
-          <button className="factura-btn-agregar" onClick={guardarProducto}>
+          <button className="factura-btn-agregar" onClick={guardarProducto} data-tour="compras-agregar">
               {indiceEditando !== null ? "Actualizar" : "Agregar"}
             </button>
 
@@ -260,7 +296,7 @@ function Compras() {
         </div>
 
         <div className="compra-fila-formulario">
-          <div className="compra-campo compra-campo-producto">
+          <div className="compra-campo compra-campo-producto" data-tour="compras-proveedor">
             <label>
               Proveedor <span style={{ color: "#e5484d" }}>*</span>
             </label>
@@ -324,7 +360,7 @@ function Compras() {
       </div>
 
 
-      <div className="factura-card factura-card-tabla">
+      <div className="factura-card factura-card-tabla" data-tour="compras-tabla">
         <table className="factura-tabla">
           <thead>
             <tr>
@@ -383,7 +419,7 @@ function Compras() {
       {error && <span className="error-text">{error}</span>}
 
       <div className="factura-footer">
-        <button className="factura-btn-cancelar" onClick={cancelar}>
+        <button className="factura-btn-cancelar" onClick={cancelar} data-tour="compras-cancelar">
           Cancelar
         </button>
 
@@ -393,7 +429,7 @@ function Compras() {
             <span className="factura-total-monto">C${formatearMoneda(total)}</span>
           </div>
 
-          <button className="factura-btn-vender" onClick={confirmarCompra}>
+          <button className="factura-btn-vender" onClick={confirmarCompra} disabled={items.length == 0} data-tour="compras-registrar">
             Realizar Compra
           </button>
         </div>
@@ -419,6 +455,24 @@ function Compras() {
           setModalProveedorAbierto(false);
         }}
       />
+
+                  <Joyride
+  steps={pasosTour}
+  run={tourActivo}
+  continuous
+  locale={{
+    back: "Atrás",
+    close: "Cerrar",
+    last: "Finalizar",
+    next: "Siguiente",
+    skip: "Omitir",
+  }}
+  onEvent={(data) => {
+    if (data.type === "tour:end") {
+      setTourActivo(false);
+    }
+  }}
+/>
     </div>
   );
 }

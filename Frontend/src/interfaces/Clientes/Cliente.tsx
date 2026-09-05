@@ -6,14 +6,10 @@ import ModalEditarCliente from "./ModalEditarCliente";
 import ModalAgregarCliente from "./ModalAgregarCliente"
 import ModalAbonarCliente from "./ModalAbonarCliente";
 import { crearDetalleAbono } from "../../services/detalle_abono.service";
-import { SquarePen, CreditCard,HelpCircle } from "lucide-react";
+import { SquarePen, CreditCard, HelpCircle } from "lucide-react";
 import { formatearMoneda, formatearTelefono } from "../FuncionAuxiliar"
 import Notificacion, { type TipoNotificacion } from "../../components/Notification/Notification";
-import ModalAyuda from "../ModalAyuda";
-
-// tus imágenes de ayuda para esta interfaz en particular
-import ayudaClientes1 from "../../assets/ayuda/cliente/Diapositiva1.png";
-import ayudaClientes2 from "../../assets/ayuda/cliente/Diapositiva2.png";
+import { Joyride, type Step } from "react-joyride";
 
 interface Cliente {
 
@@ -46,28 +42,32 @@ function Cliente(){
     const [clienteSeleccionado, setClienteSeleccionado] = useState<Cliente | null>(null);
 
     const [notif, setNotif] = useState<{ mensaje: string; tipo: TipoNotificacion } | null>(null);
+
+     const [tourActivo, setTourActivo] = useState(false);
+ const pasosTour: Step[] = [
+  {
+    target: '[data-tour="agregar-cliente"]',
+    content: "Desde aquí abres una ventana para registrar un nuevo cliente.",
+  },
+  {
+    target: '[data-tour="buscar-cliente"]',
+    content: "Aquí puedes buscar clientes por su nombre o número de cliente.",
+  },
+  {
+    target: '[data-tour="tabla-cliente"]',
+    content: "Aquí puedes ver la lista de clientes registrados.",
+  },
+  {
+    target: '[data-tour="paginacion-cliente"]',
+    content: "Con estos botones puedes navegar entre las páginas de clientes para buscar alguno que no aparezca en la lista actual.",
+  },
+];
     
         useEffect(() => {
     
             buscar();
     
         }, []);
-
-        const [modalAyudaAbierto, setModalAyudaAbierto] = useState(false);
-
-const imagenesAyudaClientes = [
-  {
-    src: ayudaClientes1,
-    titulo: "",
-    descripcion: "",
-  },
-  {
-    src: ayudaClientes2,
-    titulo: "",
-    descripcion: "",
-  },
-];
-    
     
     const buscar = async () => {
         try {
@@ -127,10 +127,10 @@ return (
       <div className="cliente-top-part">
   <h1 className="cliente-title">Clientes</h1>
   <div style={{ display: "flex", gap: "8px" }}>
-    <button className="cliente-add-btn" onClick={() => setModalAyudaAbierto(true)}>
+    <button className="cliente-add-btn" onClick={() => setTourActivo(true)}>
       <HelpCircle size={18} />
     </button>
-    <button className="cliente-add-btn" onClick={() => setModalAbierto(true)}>
+    <button className="cliente-add-btn" onClick={() => setModalAbierto(true)} data-tour="agregar-cliente">
       <span className="cliente-add-icon">✦</span>
       Agregar cliente
     </button>
@@ -138,7 +138,7 @@ return (
 </div>
 
       <div className="cliente-table-container">
-        <div className="cliente-search-wrapper">
+        <div className="cliente-search-wrapper" data-tour="buscar-cliente">
           <span className="cliente-search-icon">🔍</span>
           <input
     className="cliente-search-input"
@@ -150,7 +150,7 @@ return (
 />
         </div>
 
-        <table className="cliente-table">
+        <table className="cliente-table" data-tour="tabla-cliente">
           <thead>
             <tr>
               <th className="cliente-th">CÓDIGO</th>
@@ -200,7 +200,7 @@ return (
           <tfoot>
             <tr>
               <td colSpan={6}>
-                <div className="cliente-footer">
+                <div className="cliente-footer" data-tour="paginacion-cliente">
                   <span className="cliente-count">
                     Mostrando {clientes.length} de {total} clientes
                   </span>
@@ -284,11 +284,22 @@ return (
     }}
 />
 
-<ModalAyuda
-  abierto={modalAyudaAbierto}
-  titulo="Ayuda: Gestión de clientes"
-  imagenes={imagenesAyudaClientes}
-  onClose={() => setModalAyudaAbierto(false)}
+                        <Joyride
+  steps={pasosTour}
+  run={tourActivo}
+  continuous
+  locale={{
+    back: "Atrás",
+    close: "Cerrar",
+    last: "Finalizar",
+    next: "Siguiente",
+    skip: "Omitir",
+  }}
+  onEvent={(data) => {
+    if (data.type === "tour:end") {
+      setTourActivo(false);
+    }
+  }}
 />
 
 <ModalAbonarCliente

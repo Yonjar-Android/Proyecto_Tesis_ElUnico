@@ -7,11 +7,8 @@ import ModalEditarServicio from "./ModalEditarServicio";
 import { SquarePen, HelpCircle } from 'lucide-react'
 import { formatearMoneda } from "../FuncionAuxiliar";
 import Notificacion, { type TipoNotificacion } from "../../components/Notification/Notification";
-import ModalAyuda from "../ModalAyuda"; // ajusta la ruta
+import { Joyride, type Step } from "react-joyride";
 
-// tus imágenes de ayuda para esta interfaz en particular
-import ayudaServicios1 from "../../assets/ayuda/servicio/Diapositiva5.png";
-import ayudaServicios2 from "../../assets/ayuda/servicio/Diapositiva6.png";
 
 interface Servicio {
     id: number;
@@ -43,18 +40,20 @@ const [notif, setNotif] = useState<{ mensaje: string; tipo: TipoNotificacion } |
       buscar();
     }, []);
 
-    const [modalAyudaAbierto, setModalAyudaAbierto] = useState(false);
+ const [tourActivo, setTourActivo] = useState(false);
 
-const imagenesAyudaProveedores = [
+ const pasosTour: Step[] = [
   {
-    src: ayudaServicios1,
-    titulo: "",
-    descripcion: "",
+    target: '[data-tour="agregar-servicio"]',
+    content: "Desde aquí abres una ventana para registrar un nuevo servicio.",
   },
   {
-    src: ayudaServicios2,
-    titulo: "",
-    descripcion: "",
+    target: '[data-tour="buscar-servicio"]',
+    content: "Aquí puedes buscar servicios por su nombre.",
+  },
+  {
+    target: '[data-tour="paginacion-servicio"]',
+    content: "Con estos botones puedes navegar entre las páginas de servicios para buscar alguno que no aparezca en la lista actual.",
   },
 ];
 
@@ -117,10 +116,11 @@ useEffect(() => {
       <div className="categoria-top-part">
         <h1 className="categoria-title">Servicios</h1>
         <div style={{ display: "flex", gap: "8px" }}>
-          <button className="categoria-add-btn" onClick={() => setModalAyudaAbierto(true)}>
+          <button className="categoria-add-btn" onClick={() => setTourActivo(true)}>
             <HelpCircle size={18} />
           </button>
           <button className="categoria-add-btn"
+          data-tour="agregar-servicio"
           onClick={() => setModalAbierto(true)}>
             <span className="categoria-add-icon">✦</span> Agregar servicio
           </button>
@@ -128,7 +128,7 @@ useEffect(() => {
       </div>
 
       <div className="categoria-table-container">
-        <div className="categoria-search-wrapper">
+        <div className="categoria-search-wrapper" data-tour="buscar-servicio">
           <span className="categoria-search-icon">🔍</span>
           <input
             className="categoria-search-input"
@@ -176,7 +176,7 @@ useEffect(() => {
                   <span className="categoria-count">
                     Mostrando {servicios.length} de {total} servicios
                   </span>
-                  <div className="categoria-pagination">
+                  <div className="categoria-pagination" data-tour="paginacion-servicio">
                     <button className="categoria-page-btn" onClick={() => setCurrentPage(1)} disabled={currentPage === 1}>«</button>
                     <button className="categoria-page-btn" onClick={() => setCurrentPage(currentPage - 1)} disabled={currentPage === 1}>‹</button>
                     <button className="categoria-page-btn categoria-page-btn--active">{currentPage}</button>
@@ -212,12 +212,23 @@ useEffect(() => {
       }
       />
 
-      <ModalAyuda
-        abierto={modalAyudaAbierto}
-        titulo="Ayuda: Gestión de servicios"
-        imagenes={imagenesAyudaProveedores}
-        onClose={() => setModalAyudaAbierto(false)}
-      />
+      <Joyride
+  steps={pasosTour}
+  run={tourActivo}
+  continuous
+  locale={{
+    back: "Atrás",
+    close: "Cerrar",
+    last: "Finalizar",
+    next: "Siguiente",
+    skip: "Omitir",
+  }}
+  onEvent={(data) => {
+    if (data.type === "tour:end") {
+      setTourActivo(false);
+    }
+  }}
+/>
 
       <ModalEditarServicio 
       abierto={modalEditarAbierto}
