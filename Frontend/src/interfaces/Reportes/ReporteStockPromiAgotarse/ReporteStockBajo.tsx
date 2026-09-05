@@ -8,6 +8,8 @@ import {
     descargarReporteStockBajoExcel, 
     descargarArchivoExcel 
 } from "../../../services/reporteExcel.service.js";
+import { Joyride, type Step } from "react-joyride";
+import { HelpCircle } from 'lucide-react';
 
 export interface ReporteProductoStock {
     id: number;
@@ -45,6 +47,26 @@ function ReporteStockBajo() {
 
   // Estado para manejar la carga durante la exportación
     const [exportando, setExportando] = useState(false);
+
+  const [tourActivo, setTourActivo] = useState(false);
+ const pasosTour: Step[] = [
+  {
+    target: '[data-tour="exportar-reporte"]',
+    content: "Desde aquí puedes exportar el reporte de stock bajo a Excel.",
+  },
+  {
+    target: '[data-tour="filtrar-reporte"]',
+    content: "Aquí puedes buscar productos con stock bajo por su nombre, código o categoría.",
+  },
+  {
+    target: '[data-tour="tabla-reporte"]',
+    content: "Aquí puedes ver la lista de productos con stock bajo.",
+  },
+  {
+    target: '[data-tour="paginacion-reporte"]',
+    content: "Con estos botones puedes navegar entre las páginas de productos con stock bajo para buscar alguno que no aparezca en la lista actual.",
+  },
+];
 
   const buscar = async () => {
     try {
@@ -129,14 +151,21 @@ function ReporteStockBajo() {
             </p>
           </div>
 
+          <div style={{ display: "flex", gap: "8px" }}>
+        <button className="categoria-add-btn" onClick={() => setTourActivo(true)}>
+            <HelpCircle size={18} />
+          </button>
+
           <button 
                 className={styles["reporte-btn-exportar"]}
                 onClick={exportar}
                 disabled={exportando}
+                data-tour="exportar-reporte"
             >
                 <IconoBarras />
                 {exportando ? 'Exportando...' : 'Exportar Excel'}
             </button>
+            </div>
         </div>
 
         <div className={styles["reporte-stats-row"]}>
@@ -153,7 +182,7 @@ function ReporteStockBajo() {
           </div>
         </div>
 
-        <div className={styles["reporte-buscador-simple"]}>
+        <div className={styles["reporte-buscador-simple"]} data-tour="filtrar-reporte">
           <span className={styles["reporte-buscador-icono"]}>🔍</span>
           <input
             type="text"
@@ -166,7 +195,7 @@ function ReporteStockBajo() {
           />
         </div>
 
-        <div className={styles["reporte-card-tabla"]}>
+        <div className={styles["reporte-card-tabla"]} data-tour="tabla-reporte">
           <table className={styles["reporte-tabla"]}>
             <thead>
               <tr>
@@ -194,7 +223,7 @@ function ReporteStockBajo() {
             </tbody>
           </table>
 
-          <div className={styles["reporte-footer"]}>
+          <div className={styles["reporte-footer"]} data-tour="paginacion-reporte">
             <span className={styles["reporte-count"]}>
               Mostrando {productos.length} de {total} productos
             </span>
@@ -231,6 +260,24 @@ function ReporteStockBajo() {
           </div>
         </div>
       </div>
+
+      <Joyride
+  steps={pasosTour}
+  run={tourActivo}
+  continuous
+  locale={{
+    back: "Atrás",
+    close: "Cerrar",
+    last: "Finalizar",
+    next: "Siguiente",
+    skip: "Omitir",
+  }}
+  onEvent={(data) => {
+    if (data.type === "tour:end") {
+      setTourActivo(false);
+    }
+  }}
+/>
     </div>
   );
 }

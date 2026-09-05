@@ -9,13 +9,14 @@ import type { PaginatedResponse } from "../../../models/PaginatedResponse";
 import { formatearMoneda } from "../../FuncionAuxiliar";
 import ModalConfirmarImpresion from "../../Facturacion/ModalConfirmarImpresion"; // ajusta ruta
 import type { DatosRecibo } from "../../../models/Recibo";
-import { Printer } from "lucide-react";
+import { Printer, HelpCircle } from "lucide-react";
 import { obtenerReciboVenta } from "../../../services/venta.service";
 import ModalSeleccionarCliente from "../../Facturacion/ModalSeleccionarCliente";
 import { 
     descargarReporteVentasExcel, 
     descargarArchivoExcel 
 } from "../../../services/reporteExcel.service.js";
+import { Joyride, type Step } from "react-joyride";
 
 export interface RespuestaReporteVentas extends PaginatedResponse<VentaReporte> {
   TotalRegistros: number;
@@ -66,6 +67,26 @@ function ReporteVentas() {
   const [datosRecibo, setDatosRecibo] = useState<DatosRecibo | null>(null);
     
   const [exportando, setExportando] = useState(false);
+
+  const [tourActivo, setTourActivo] = useState(false);
+ const pasosTour: Step[] = [
+  {
+    target: '[data-tour="exportar-reporte"]',
+    content: "Desde aquí puedes exportar el reporte de ventas a Excel.",
+  },
+  {
+    target: '[data-tour="filtrar-reporte"]',
+    content: "Aquí puedes buscar ventas por su fecha, cliente, tipo de pago o estado de la factura.",
+  },
+  {
+    target: '[data-tour="tabla-reporte"]',
+    content: "Aquí puedes ver la lista de ventas registradas.",
+  },
+  {
+    target: '[data-tour="paginacion-reporte"]',
+    content: "Con estos botones puedes navegar entre las páginas de ventas para buscar alguna que no aparezca en la lista actual.",
+  },
+];
 
 const imprimirTicket = async (idVenta: number) => {
   try {
@@ -170,14 +191,21 @@ useEffect(() => {
             <p className={styles["reporte-subtitulo"]}>Monitoreo de flujos y operaciones de la empresa.</p>
           </div>
 
+                    <div style={{ display: "flex", gap: "8px" }}>
+        <button className="categoria-add-btn" onClick={() => setTourActivo(true)}>
+            <HelpCircle size={18} />
+          </button>
+
                     <button 
                 className={styles["reporte-btn-exportar"]}
                 onClick={exportar}
                 disabled={exportando}
+                data-tour="exportar-reporte"
             >
                 <IconoBarras />
                 {exportando ? 'Exportando...' : 'Exportar Excel'}
             </button>
+            </div>
         </div>
 
         <div className={styles["reporte-stats-row"]}>
@@ -212,7 +240,7 @@ useEffect(() => {
           </div>
         </div>
 
-<div className={styles["reporte-filtro-row"]}>
+<div className={styles["reporte-filtro-row"]} data-tour="filtrar-reporte">
   <div className={styles["reporte-filtro-fila-1"]}>
     <div className={styles["reporte-fechas-grupo"]}>
       <div className={styles["reporte-fechas-fila"]}>
@@ -308,7 +336,7 @@ useEffect(() => {
     </div>
   </div>
 </div>
-        <div className={styles["reporte-card-tabla"]}>
+        <div className={styles["reporte-card-tabla"]} data-tour="tabla-reporte">
           <table className={styles["reporte-tabla"]}>
             <thead>
               <tr>
@@ -373,7 +401,7 @@ useEffect(() => {
             </div>
           )}
 
-          <div className={styles["reporte-footer"]}>
+          <div className={styles["reporte-footer"]} data-tour="paginacion-reporte">
             <span className={styles["reporte-pagina-info"]}>
               Página <strong>{currentPage}</strong> de <strong>{lastPage}</strong>
             </span>
@@ -413,6 +441,25 @@ useEffect(() => {
           </div>
         </div>
       </div>
+
+                              <Joyride
+  steps={pasosTour}
+  run={tourActivo}
+  continuous
+  locale={{
+    back: "Atrás",
+    close: "Cerrar",
+    last: "Finalizar",
+    next: "Siguiente",
+    skip: "Omitir",
+  }}
+  onEvent={(data) => {
+    if (data.type === "tour:end") {
+      setTourActivo(false);
+    }
+  }}
+/>
+
       <ModalConfirmarImpresion
   abierto={modalReciboAbierto}
   datos={datosRecibo}

@@ -7,13 +7,14 @@ import type { Proveedor } from "../../../models/Proveedor";
 import type { CompraReporte, RespuestaReporteCompras } from "../../../models/CompraReporte";
 import { formatearMoneda } from "../../FuncionAuxiliar";
 import ModalDetalleCompra, { type DetalleCompraDTO } from "./ModalDetalleCompras";
-import { FileText } from "lucide-react";
+import { FileText, HelpCircle } from "lucide-react";
 import { obtenerDetalleCompra } from "../../../services/compra.service";
 import ModalSeleccionarProveedor from "../../Compras/ModalSeleccionarProveedor";
 import { 
     descargarReporteComprasExcel, 
     descargarArchivoExcel 
 } from "../../../services/reporteExcel.service.js";
+import { Joyride, type Step } from "react-joyride";
 
 export const formatearFecha = (fecha: string): string => {
   const date = new Date(fecha);
@@ -55,6 +56,27 @@ function ReporteCompras() {
   const [totalCompras, setTotalCompras] = useState(0);
 
   const [exportando, setExportando] = useState(false);
+
+   const [tourActivo, setTourActivo] = useState(false);
+ const pasosTour: Step[] = [
+  {
+    target: '[data-tour="exportar-reporte"]',
+    content: "Desde aquí puedes exportar el reporte de compras a Excel.",
+  },
+  {
+    target: '[data-tour="filtrar-reporte"]',
+    content: "Aquí puedes buscar compras por su fecha o proveedor.",
+  },
+  {
+    target: '[data-tour="tabla-reporte"]',
+    content: "Aquí puedes ver la lista de compras registradas.",
+  },
+  {
+    target: '[data-tour="paginacion-reporte"]',
+    content: "Con estos botones puedes navegar entre las páginas de compras para buscar alguna que no aparezca en la lista actual.",
+  },
+];
+
 
   const validarFechas = (): boolean => {
     const hoy = obtenerFechaHoy();
@@ -149,10 +171,17 @@ const buscar = async () => {
             <p className={styles["reporte-subtitulo"]}>Monitoreo de flujos y operaciones de la empresa.</p>
           </div>
 
-          <button className={styles["reporte-btn-exportar"]} onClick={exportar}>
+          <div style={{ display: "flex", gap: "8px" }}>
+        <button className="categoria-add-btn" onClick={() => setTourActivo(true)}>
+            <HelpCircle size={18} />
+          </button>
+
+          <button className={styles["reporte-btn-exportar"]} onClick={exportar}
+            data-tour="exportar-reporte">
             <IconoBarras />
             Exportar Excel
           </button>
+          </div>
         </div>
 
         <div className={styles["reporte-stats-row"]}>
@@ -177,7 +206,7 @@ const buscar = async () => {
           </div>
         </div>
 
-        <div className={styles["reporte-filtro-row"]}>
+        <div className={styles["reporte-filtro-row"]} data-tour="filtrar-reporte">
           <div className={styles["reporte-fechas-grupo"]}>
     <div className={styles["reporte-fechas-fila"]}>
       <div className={styles["reporte-campo"]}>
@@ -243,7 +272,7 @@ const buscar = async () => {
           </button>
         </div>
 
-        <div className={styles["reporte-card-tabla"]}>
+        <div className={styles["reporte-card-tabla"]} data-tour="tabla-reporte">
           <table className={styles["reporte-tabla"]}>
             <thead>
               <tr>
@@ -279,7 +308,7 @@ const buscar = async () => {
             </div>
           )}
 
-          <div className={styles["reporte-footer"]}>
+          <div className={styles["reporte-footer"]} data-tour="paginacion-reporte">
             <span className={styles["reporte-pagina-info"]}>
               Página <strong>{currentPage}</strong> de <strong>{lastPage}</strong>
             </span>
@@ -319,6 +348,24 @@ const buscar = async () => {
           </div>
         </div>
       </div>
+
+                              <Joyride
+  steps={pasosTour}
+  run={tourActivo}
+  continuous
+  locale={{
+    back: "Atrás",
+    close: "Cerrar",
+    last: "Finalizar",
+    next: "Siguiente",
+    skip: "Omitir",
+  }}
+  onEvent={(data) => {
+    if (data.type === "tour:end") {
+      setTourActivo(false);
+    }
+  }}
+/>
       <ModalDetalleCompra
   abierto={modalDetalleAbierto}
   datos={detalleCompra}

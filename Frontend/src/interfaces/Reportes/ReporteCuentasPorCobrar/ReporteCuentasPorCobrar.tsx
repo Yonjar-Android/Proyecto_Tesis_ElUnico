@@ -9,6 +9,8 @@ import {
     descargarReporteCuentasCobrarExcel, 
     descargarArchivoExcel
 } from "../../../services/reporteExcel.service.js";
+import { Joyride, type Step } from "react-joyride";
+import { HelpCircle } from 'lucide-react';
 
 export interface RespuestaClientesConDeuda extends PaginatedResponse<Cliente> {
     TotalClientesConDeuda: number;
@@ -28,6 +30,26 @@ function ReporteCuentasPorCobrar() {
 
     // Estado para manejar la carga durante la exportación
     const [exportando, setExportando] = useState(false);
+
+      const [tourActivo, setTourActivo] = useState(false);
+ const pasosTour: Step[] = [
+  {
+    target: '[data-tour="exportar-reporte"]',
+    content: "Desde aquí puedes exportar el reporte de cuentas por cobrar a Excel.",
+  },
+  {
+    target: '[data-tour="filtrar-reporte"]',
+    content: "Aquí puedes buscar clientes con deuda por su nombre o número de cliente.",
+  },
+  {
+    target: '[data-tour="tabla-reporte"]',
+    content: "Aquí puedes ver la lista de clientes con deuda.",
+  },
+  {
+    target: '[data-tour="paginacion-reporte"]',
+    content: "Con estos botones puedes navegar entre las páginas de clientes con deuda para buscar alguno que no aparezca en la lista actual.",
+  },
+];
 
   const buscar = async () => {
     try {
@@ -88,14 +110,21 @@ function ReporteCuentasPorCobrar() {
             </p>
           </div>
 
+          <div style={{ display: "flex", gap: "8px" }}>
+        <button className="categoria-add-btn" onClick={() => setTourActivo(true)}>
+            <HelpCircle size={18} />
+          </button>
+
           <button 
                 className={styles["reporte-btn-exportar"]}
                 onClick={exportar}
                 disabled={exportando}
+                data-tour="exportar-reporte"
             >
                 <IconoBarras />
                 {exportando ? 'Exportando...' : 'Exportar Excel'}
             </button>
+            </div>
         </div>
 
         <div className={styles["reporte-stats-row"]}>
@@ -112,7 +141,7 @@ function ReporteCuentasPorCobrar() {
           </div>
         </div>
 
-        <div className={styles["reporte-filtro-row"]}>
+        <div className={styles["reporte-filtro-row"]} data-tour="filtrar-reporte">
           <div className={styles["reporte-campo"]}>
             <label>Cliente / Buscar</label>
             <input
@@ -127,7 +156,7 @@ function ReporteCuentasPorCobrar() {
           </div>
         </div>
 
-        <div className={styles["reporte-card-tabla"]}>
+        <div className={styles["reporte-card-tabla"]} data-tour="tabla-reporte">
           <table className={styles["reporte-tabla"]}>
             <thead>
               <tr>
@@ -153,7 +182,7 @@ function ReporteCuentasPorCobrar() {
             </tbody>
           </table>
 
-          <div className={styles["reporte-footer"]}>
+          <div className={styles["reporte-footer"]} data-tour="paginacion-reporte">
             <span className={styles["reporte-count"]}>
               Mostrando {clientes.length} de {total} clientes con deuda
             </span>
@@ -193,6 +222,24 @@ function ReporteCuentasPorCobrar() {
           </div>
         </div>
       </div>
+
+<Joyride
+  steps={pasosTour}
+  run={tourActivo}
+  continuous
+  locale={{
+    back: "Atrás",
+    close: "Cerrar",
+    last: "Finalizar",
+    next: "Siguiente",
+    skip: "Omitir",
+  }}
+  onEvent={(data) => {
+    if (data.type === "tour:end") {
+      setTourActivo(false);
+    }
+  }}
+/>
     </div>
   );
 }
