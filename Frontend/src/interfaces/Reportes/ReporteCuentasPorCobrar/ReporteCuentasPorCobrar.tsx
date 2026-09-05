@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import "../Reportes.css";
+import styles from "./ReporteCuentasPorCobrar.module.css";
 import IconoBarras from "../IconoBarras";
 import type { Cliente } from "../../../models/Cliente";
 import { obtenerReporteCuentasCobrar, /*exportarCuentasPorCobrar*/ } from "../../../services/reporte.service";
@@ -78,18 +78,18 @@ function ReporteCuentasPorCobrar() {
     };
 
   return (
-    <div className="reporte-page">
-      <div className="reporte-contenido">
-        <div className="reporte-header">
+    <div className={styles["reporte-page"]}>
+      <div className={styles["reporte-contenido"]}>
+        <div className={styles["reporte-header"]}>
           <div>
             <h1>Reporte de Cuentas por Cobrar</h1>
-            <p className="reporte-subtitulo">
+            <p className={styles["reporte-subtitulo"]}>
               Monitoreo de clientes con saldo pendiente y saldos en morosidad.
             </p>
           </div>
 
           <button 
-                className="reporte-btn-exportar" 
+                className={styles["reporte-btn-exportar"]}
                 onClick={exportar}
                 disabled={exportando}
             >
@@ -98,22 +98,22 @@ function ReporteCuentasPorCobrar() {
             </button>
         </div>
 
-        <div className="reporte-stats-row">
-          <div className="reporte-stat-card">
-            <span className="reporte-stat-label">Clientes con deuda</span>
-            <span className="reporte-stat-valor">{clientesConDeuda}</span>
+        <div className={styles["reporte-stats-row"]}>
+          <div className={styles["reporte-stat-card"]}>
+            <span className={styles["reporte-stat-label"]}>Clientes con deuda</span>
+            <span className={styles["reporte-stat-valor"]}>{clientesConDeuda}</span>
           </div>
 
-          <div className="reporte-stat-card reporte-stat-card--oscura">
-            <span className="reporte-stat-label">Total saldo pendiente</span>
-            <span className="reporte-stat-valor">
+          <div className={`${styles["reporte-stat-card"]} ${styles["reporte-stat-card--oscura"]}`}>
+            <span className={styles["reporte-stat-label"]}>Total saldo pendiente</span>
+            <span className={styles["reporte-stat-valor"]}>
               C$ {formatearMoneda(totalSaldoPendiente)}
             </span>
           </div>
         </div>
 
-        <div className="reporte-filtro-row">
-          <div className="reporte-campo">
+        <div className={styles["reporte-filtro-row"]}>
+          <div className={styles["reporte-campo"]}>
             <label>Cliente / Buscar</label>
             <input
               type="text"
@@ -125,31 +125,27 @@ function ReporteCuentasPorCobrar() {
               }}
             />
           </div>
-
-          <button className="reporte-btn-filtrar" onClick={buscar}>
-            Filtrar Datos
-          </button>
         </div>
 
-        <div className="reporte-card-tabla">
-          <table className="reporte-tabla">
+        <div className={styles["reporte-card-tabla"]}>
+          <table className={styles["reporte-tabla"]}>
             <thead>
               <tr>
                 <th>Código</th>
                 <th>Nombre</th>
                 <th>Apellido</th>
                 <th>Contacto</th>
-                <th className="reporte-th-derecha">Crédito Pendiente</th>
+                <th className={styles["reporte-th-derecha"]}>Crédito Pendiente</th>
               </tr>
             </thead>
             <tbody>
               {clientes.map((cliente) => (
                 <tr key={cliente.id}>
                   <td>{cliente.NCliente}</td>
-                  <td className="reporte-td-nombre">{cliente.Nombre}</td>
+                  <td className={styles["reporte-td-nombre"]}>{cliente.Nombre}</td>
                   <td>{cliente.Apellido}</td>
                   <td>{formatearTelefono(cliente.Telefono) || "Sin contacto"}</td>
-                  <td className="reporte-td-derecha">
+                  <td className={styles["reporte-td-derecha"]}>
                     C$ {formatearMoneda(cliente.Saldo_Deuda)}
                   </td>
                 </tr>
@@ -157,37 +153,37 @@ function ReporteCuentasPorCobrar() {
             </tbody>
           </table>
 
-          <div className="reporte-footer">
-            <span className="reporte-count">
+          <div className={styles["reporte-footer"]}>
+            <span className={styles["reporte-count"]}>
               Mostrando {clientes.length} de {total} clientes con deuda
             </span>
-            <div className="reporte-pagination">
+            <div className={styles["reporte-pagination"]}>
               <button
-                className="reporte-page-btn"
+                className={styles["reporte-page-btn"]}
                 onClick={() => setCurrentPage(1)}
                 disabled={currentPage === 1}
               >
                 «
               </button>
               <button
-                className="reporte-page-btn"
+                className={styles["reporte-page-btn"]}
                 onClick={() => setCurrentPage((p) => p - 1)}
                 disabled={currentPage === 1}
               >
                 ‹
               </button>
-              <button className="reporte-page-btn reporte-page-btn--active">
+              <button className={`${styles["reporte-page-btn"]} ${styles["reporte-page-btn--active"]}`}>
                 {currentPage}
               </button>
               <button
-                className="reporte-page-btn"
+                className={styles["reporte-page-btn"]}
                 onClick={() => setCurrentPage((p) => p + 1)}
                 disabled={currentPage === lastPage || lastPage == 0}
               >
                 ›
               </button>
               <button
-                className="reporte-page-btn"
+                className={styles["reporte-page-btn"]}
                 onClick={() => setCurrentPage(lastPage)}
                 disabled={currentPage === lastPage || lastPage == 0}
               >

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import "../Reportes.css";
+import styles from "./ReporteVentas.module.css";
 import IconoBarras from "../IconoBarras";
 import { IconoCuboOutline, IconoTendencia } from "../IconosReporte";
 import { obtenerReporteVentasPorPeriodo, /*exportarReporteVentas*/ } from "../../../services/reporte.service";
@@ -162,16 +162,16 @@ useEffect(() => {
     };
 
   return (
-    <div className="reporte-page">
-      <div className="reporte-contenido">
-        <div className="reporte-header">
+    <div className={styles["reporte-page"]}>
+      <div className={styles["reporte-contenido"]}>
+        <div className={styles["reporte-header"]}>
           <div>
             <h1>Reporte de Ventas</h1>
-            <p className="reporte-subtitulo">Monitoreo de flujos y operaciones de la empresa.</p>
+            <p className={styles["reporte-subtitulo"]}>Monitoreo de flujos y operaciones de la empresa.</p>
           </div>
 
                     <button 
-                className="reporte-btn-exportar" 
+                className={styles["reporte-btn-exportar"]}
                 onClick={exportar}
                 disabled={exportando}
             >
@@ -180,43 +180,43 @@ useEffect(() => {
             </button>
         </div>
 
-        <div className="reporte-stats-row">
-          <div className="reporte-stat-card">
-            <div className="reporte-stat-header">
-              <span className="reporte-stat-label">Registros totales</span>
-              <span className="reporte-stat-icono">
+        <div className={styles["reporte-stats-row"]}>
+          <div className={styles["reporte-stat-card"]}>
+            <div className={styles["reporte-stat-header"]}>
+              <span className={styles["reporte-stat-label"]}>Registros totales</span>
+              <span className={styles["reporte-stat-icono"]}>
                 <IconoCuboOutline />
               </span>
             </div>
-            <span className="reporte-stat-valor">{registrosTotales}</span>
+            <span className={styles["reporte-stat-valor"]}>{registrosTotales}</span>
           </div>
 
-          <div className="reporte-stat-card">
-            <div className="reporte-stat-header">
-              <span className="reporte-stat-label">Ventas al contado</span>
-              <span className="reporte-stat-icono reporte-stat-icono--verde">
+          <div className={styles["reporte-stat-card"]}>
+            <div className={styles["reporte-stat-header"]}>
+              <span className={styles["reporte-stat-label"]}>Ventas al contado</span>
+              <span className={`${styles["reporte-stat-icono"]} ${styles["reporte-stat-icono--verde"]}`}>
                 <IconoTendencia />
               </span>
             </div>
-            <span className="reporte-stat-valor">C$ {formatearMoneda(ventasContado)}</span>
+            <span className={styles["reporte-stat-valor"]}>C$ {formatearMoneda(ventasContado)}</span>
           </div>
 
-          <div className="reporte-stat-card reporte-stat-card--oscura">
-            <div className="reporte-stat-header">
-              <span className="reporte-stat-label">Total ventas</span>
-              <span className="reporte-stat-icono">
+          <div className={`${styles["reporte-stat-card"]} ${styles["reporte-stat-card--oscura"]}`}>
+            <div className={styles["reporte-stat-header"]}>
+              <span className={styles["reporte-stat-label"]}>Total ventas</span>
+              <span className={styles["reporte-stat-icono"]}>
                 <IconoTendencia />
               </span>
             </div>
-            <span className="reporte-stat-valor">C$ {formatearMoneda(totalVentas)}</span>
+            <span className={styles["reporte-stat-valor"]}>C$ {formatearMoneda(totalVentas)}</span>
           </div>
         </div>
 
-<div className="reporte-filtro-row">
-  <div className="reporte-filtro-fila-1">
-    <div className="reporte-fechas-grupo">
-      <div className="reporte-fechas-fila">
-        <div className="reporte-campo">
+<div className={styles["reporte-filtro-row"]}>
+  <div className={styles["reporte-filtro-fila-1"]}>
+    <div className={styles["reporte-fechas-grupo"]}>
+      <div className={styles["reporte-fechas-fila"]}>
+        <div className={styles["reporte-campo"]}>
           <label>📅 Fecha inicio</label>
           <input
             type="date"
@@ -226,7 +226,7 @@ useEffect(() => {
           />
         </div>
 
-        <div className="reporte-campo">
+        <div className={styles["reporte-campo"]}>
           <label>📅 Fecha fin</label>
           <input
             type="date"
@@ -238,15 +238,15 @@ useEffect(() => {
         </div>
       </div>
 
-      {errorFechas && <span className="reporte-error-fechas">{errorFechas}</span>}
+      {errorFechas && <span className={styles["reporte-error-fechas"]}>{errorFechas}</span>}
     </div>
 
-    <div className="reporte-campo">
+    <div className={styles["reporte-campo"]}>
       <label>▽ Cliente</label>
-      <div className="reporte-selector-cliente">
+      <div className={styles["reporte-selector-cliente"]}>
         <button
           type="button"
-          className="factura-selector-btn"
+          className={styles["factura-selector-btn"]}
           onClick={() => setModalClienteAbierto(true)}
         >
           {clienteSeleccionado
@@ -257,7 +257,7 @@ useEffect(() => {
         {clienteSeleccionado && (
           <button
             type="button"
-            className="reporte-btn-limpiar-cliente"
+            className={styles["reporte-btn-limpiar-cliente"]}
             onClick={() => setClienteSeleccionado(null)}
             aria-label="Quitar filtro de cliente"
             title="Quitar filtro"
@@ -267,7 +267,7 @@ useEffect(() => {
         )}
 
             <button
-      className="reporte-btn-filtrar"
+      className={styles["reporte-btn-filtrar"]}
       onClick={() => {
         if (!validarFechas()) return;
         setCurrentPage(1);
@@ -280,8 +280,8 @@ useEffect(() => {
     </div>
   </div>
 
-  <div className="reporte-filtro-fila-2">
-    <div className="reporte-campo">
+  <div className={styles["reporte-filtro-fila-2"]}>
+    <div className={styles["reporte-campo"]}>
       <label>💳 Tipo de pago</label>
       <select
         value={tipoPago}
@@ -294,7 +294,7 @@ useEffect(() => {
       </select>
     </div>
 
-    <div className="reporte-campo">
+    <div className={styles["reporte-campo"]}>
       <label>📌 Estado</label>
       <select
         value={estado}
@@ -308,31 +308,31 @@ useEffect(() => {
     </div>
   </div>
 </div>
-        <div className="reporte-card-tabla">
-          <table className="reporte-tabla">
+        <div className={styles["reporte-card-tabla"]}>
+          <table className={styles["reporte-tabla"]}>
             <thead>
               <tr>
                 <th>Fecha</th>
                 <th>Cliente</th>
                 <th>Estado</th>
                 <th>Tipo de pago</th>
-                <th className="reporte-th-derecha">Monto</th>
-                <th className="reporte-th-derecha">Acciones</th>
+                <th className={styles["reporte-th-derecha"]}>Monto</th>
+                <th className={styles["reporte-th-derecha"]}>Acciones</th>
               </tr>
             </thead>
             <tbody>
               {ventas.map((venta) => (
                 <tr key={venta.id}>
                   <td>{formatearFecha(venta.Fecha)}</td>
-                  <td className="reporte-td-nombre">{venta.Cliente}</td>
+                  <td className={styles["reporte-td-nombre"]}>{venta.Cliente}</td>
                   <td>
                     <span
                       className={
                         venta.Estado === "Pagada"
-                          ? "reporte-badge-pagada"
+                          ? styles["reporte-badge-pagada"]
                           : venta.Estado === "Pendiente"
-                          ? "reporte-badge-pendiente"
-                          : "reporte-badge-devuelta"
+                          ? styles["reporte-badge-pendiente"]
+                          : styles["reporte-badge-devuelta"]
                       }
                     >
                       {venta.Estado}
@@ -342,19 +342,19 @@ useEffect(() => {
                     <span
                       className={
                           venta.Tipo_Pago === "Contado"
-                          ? "reporte-badge-contado"
+                          ? styles["reporte-badge-contado"]
                           : venta.Tipo_Pago === "Credito"
-                          ? "reporte-badge-credito"
-                          : "reporte-badge-transferencia"
+                          ? styles["reporte-badge-credito"]
+                          : styles["reporte-badge-transferencia"]
                       }
                     >
                       {venta.Tipo_Pago}
                     </span>
                   </td>
-                  <td className="reporte-td-derecha">C$ {formatearMoneda(venta.Total)}</td>
-                  <td className="reporte-td-derecha">
+                  <td className={styles["reporte-td-derecha"]}>C$ {formatearMoneda(venta.Total)}</td>
+                  <td className={styles["reporte-td-derecha"]}>
   <button
-    className="reporte-btn-imprimir"
+    className={styles["reporte-btn-imprimir"]}
     onClick={() => imprimirTicket(venta.id)}
     aria-label="Imprimir recibo"
     title="Imprimir recibo"
@@ -368,42 +368,42 @@ useEffect(() => {
           </table>
 
           {ventas.length === 0 && (
-            <div className="reporte-footer">
-              <span className="reporte-count">No hay ventas registradas en este rango.</span>
+            <div className={styles["reporte-footer"]}>
+              <span className={styles["reporte-count"]}>No hay ventas registradas en este rango.</span>
             </div>
           )}
 
-          <div className="reporte-footer">
-            <span className="reporte-pagina-info">
+          <div className={styles["reporte-footer"]}>
+            <span className={styles["reporte-pagina-info"]}>
               Página <strong>{currentPage}</strong> de <strong>{lastPage}</strong>
             </span>
-            <div className="reporte-pagination">
+            <div className={styles["reporte-pagination"]}>
               <button
-                className="reporte-page-btn"
+                className={styles["reporte-page-btn"]}
                 onClick={() => setCurrentPage(1)}
                 disabled={currentPage === 1}
               >
                 «
               </button>
               <button
-                className="reporte-page-btn"
+                className={styles["reporte-page-btn"]}
                 onClick={() => setCurrentPage((p) => p - 1)}
                 disabled={currentPage === 1}
               >
                 ‹
               </button>
-              <button className="reporte-page-btn reporte-page-btn--active">
+              <button className={`${styles["reporte-page-btn"]} ${styles["reporte-page-btn--active"]}`}>
                 {currentPage}
               </button>
               <button
-                className="reporte-page-btn"
+                className={styles["reporte-page-btn"]}
                 onClick={() => setCurrentPage((p) => p + 1)}
                 disabled={currentPage === lastPage || lastPage == 0}
               >
                 ›
               </button>
               <button
-                className="reporte-page-btn"
+                className={styles["reporte-page-btn"]}
                 onClick={() => setCurrentPage(lastPage)}
                 disabled={currentPage === lastPage || lastPage == 0}
               >

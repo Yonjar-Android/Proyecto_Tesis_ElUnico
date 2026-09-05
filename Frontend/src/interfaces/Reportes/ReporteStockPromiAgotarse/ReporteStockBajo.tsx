@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import "../Reportes.css";
+import styles from "./ReporteStockBajo.module.css";
 import IconoBarras from "../IconoBarras";
 import type { ProductoListado } from "../../../models/ProductoListado.js";
 import { obtenerReporteStockBajo} from "../../../services/reporte.service.js";
@@ -96,22 +96,22 @@ function ReporteStockBajo() {
 
   function renderStock(producto: ProductoListado) {
     if (producto.Stock === 0) {
-      return <span className="reporte-pill-critico">0 (CRÍTICO)</span>;
+      return <span className={styles["reporte-pill-critico"]}>0 (CRÍTICO)</span>;
     }
 
     if (producto.Stock === producto.Stock_min) {
       return (
-        <span className="reporte-pill-limite">{producto.Stock} (AL LÍMITE)</span>
+        <span className={styles["reporte-pill-limite"]}>{producto.Stock} (AL LÍMITE)</span>
       );
     }
 
     if (producto.Stock < producto.Stock_min) {
-      return <span className="reporte-pill-bajo">{producto.Stock} (BAJO)</span>;
+      return <span className={styles["reporte-pill-bajo"]}>{producto.Stock} (BAJO)</span>;
     }
 
     if (producto.Stock <= producto.Stock_min * 1.3) {
     return (
-      <span className="reporte-pill-moderado">{producto.Stock} (MODERADO)</span>
+      <span className={styles["reporte-pill-moderado"]}>{producto.Stock} (MODERADO)</span>
     );
   }
 
@@ -119,18 +119,18 @@ function ReporteStockBajo() {
   }
 
   return (
-    <div className="reporte-page">
-      <div className="reporte-contenido">
-        <div className="reporte-header">
+    <div className={styles["reporte-page"]}>
+      <div className={styles["reporte-contenido"]}>
+        <div className={styles["reporte-header"]}>
           <div>
             <h1>Reporte de Stock Próximo a Agotarse</h1>
-            <p className="reporte-subtitulo">
+            <p className={styles["reporte-subtitulo"]}>
               Monitoreo de inventario con existencias en o por debajo del stock mínimo.
             </p>
           </div>
 
           <button 
-                className="reporte-btn-exportar" 
+                className={styles["reporte-btn-exportar"]}
                 onClick={exportar}
                 disabled={exportando}
             >
@@ -139,22 +139,22 @@ function ReporteStockBajo() {
             </button>
         </div>
 
-        <div className="reporte-stats-row">
-          <div className="reporte-stat-card">
-            <span className="reporte-stat-label">Productos en riesgo / críticos</span>
-            <span className="reporte-stat-valor reporte-stat-valor--rojo">
+        <div className={styles["reporte-stats-row"]}>
+          <div className={styles["reporte-stat-card"]}>
+            <span className={styles["reporte-stat-label"]}>Productos en riesgo / críticos</span>
+            <span className={`${styles["reporte-stat-valor"]} ${styles["reporte-stat-valor--rojo"]}`}>
               {productosEnRiesgo}
             </span>
           </div>
 
-          <div className="reporte-stat-card reporte-stat-card--oscura">
-            <span className="reporte-stat-label">Total productos evaluados</span>
-            <span className="reporte-stat-valor">{totalProductosEvaluados}</span>
+          <div className={`${styles["reporte-stat-card"]} ${styles["reporte-stat-card--oscura"]}`}>
+            <span className={styles["reporte-stat-label"]}>Total productos evaluados</span>
+            <span className={styles["reporte-stat-valor"]}>{totalProductosEvaluados}</span>
           </div>
         </div>
 
-        <div className="reporte-buscador-simple">
-          <span className="reporte-buscador-icono">🔍</span>
+        <div className={styles["reporte-buscador-simple"]}>
+          <span className={styles["reporte-buscador-icono"]}>🔍</span>
           <input
             type="text"
             placeholder="Buscar por código, nombre o categoría..."
@@ -166,8 +166,8 @@ function ReporteStockBajo() {
           />
         </div>
 
-        <div className="reporte-card-tabla">
-          <table className="reporte-tabla">
+        <div className={styles["reporte-card-tabla"]}>
+          <table className={styles["reporte-tabla"]}>
             <thead>
               <tr>
                 <th>Producto</th>
@@ -181,10 +181,10 @@ function ReporteStockBajo() {
             <tbody>
               {productos.map((producto) => (
                 <tr key={producto.id}>
-                  <td className="reporte-td-nombre">{producto.Nombre}</td>
+                  <td className={styles["reporte-td-nombre"]}>{producto.Nombre}</td>
                   <td>{producto.id}</td>
                   <td>
-                    <span className="reporte-pill-categoria">{producto.Nombre_categoria}</span>
+                    <span className={styles["reporte-pill-categoria"]}>{producto.Nombre_categoria}</span>
                   </td>
                   <td>C${formatearMoneda(producto.Precio_venta)}</td>
                   <td>{producto.Stock_min}</td>
@@ -194,13 +194,13 @@ function ReporteStockBajo() {
             </tbody>
           </table>
 
-          <div className="reporte-footer">
-            <span className="reporte-count">
+          <div className={styles["reporte-footer"]}>
+            <span className={styles["reporte-count"]}>
               Mostrando {productos.length} de {total} productos
             </span>
-            <div className="reporte-pagination">
+            <div className={styles["reporte-pagination"]}>
               <button
-                className="reporte-page-btn"
+                className={styles["reporte-page-btn"]}
                 onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
               >
@@ -211,8 +211,8 @@ function ReporteStockBajo() {
                 <button
                   key={page}
                   className={
-                    "reporte-page-btn" +
-                    (page === currentPage ? " reporte-page-btn--active" : "")
+                    `${styles["reporte-page-btn"]}` +
+                    (page === currentPage ? ` ${styles["reporte-page-btn--active"]}` : "")
                   }
                   onClick={() => setCurrentPage(page)}
                 >
@@ -221,7 +221,7 @@ function ReporteStockBajo() {
               ))}
 
               <button
-                className="reporte-page-btn"
+                className={styles["reporte-page-btn"]}
                 onClick={() => setCurrentPage((p) => Math.min(lastPage, p + 1))}
                 disabled={currentPage === lastPage || lastPage == 0}
               >

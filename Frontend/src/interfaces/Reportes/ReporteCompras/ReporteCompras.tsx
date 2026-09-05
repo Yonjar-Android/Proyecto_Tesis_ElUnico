@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import "../Reportes.css";
+import styles from "./ReporteCompras.module.css";
 import IconoBarras from "../IconoBarras";
 import { IconoCuboOutline, IconoCarrito } from "../IconosReporte";
 import { obtenerReporteComprasPorPeriodo, /*exportarReporteCompras*/ } from "../../../services/reporte.service";
@@ -141,46 +141,46 @@ const buscar = async () => {
       };
 
   return (
-    <div className="reporte-page">
-      <div className="reporte-contenido">
-        <div className="reporte-header">
+    <div className={styles["reporte-page"]}>
+      <div className={styles["reporte-contenido"]}>
+        <div className={styles["reporte-header"]}>
           <div>
             <h1>Reporte de Compras</h1>
-            <p className="reporte-subtitulo">Monitoreo de flujos y operaciones de la empresa.</p>
+            <p className={styles["reporte-subtitulo"]}>Monitoreo de flujos y operaciones de la empresa.</p>
           </div>
 
-          <button className="reporte-btn-exportar" onClick={exportar}>
+          <button className={styles["reporte-btn-exportar"]} onClick={exportar}>
             <IconoBarras />
             Exportar Excel
           </button>
         </div>
 
-        <div className="reporte-stats-row">
-          <div className="reporte-stat-card">
-            <div className="reporte-stat-header">
-              <span className="reporte-stat-label">Registros totales</span>
-              <span className="reporte-stat-icono">
+        <div className={styles["reporte-stats-row"]}>
+          <div className={styles["reporte-stat-card"]}>
+            <div className={styles["reporte-stat-header"]}>
+              <span className={styles["reporte-stat-label"]}>Registros totales</span>
+              <span className={styles["reporte-stat-icono"]}>
                 <IconoCuboOutline />
               </span>
             </div>
-            <span className="reporte-stat-valor">{registrosTotales}</span>
+            <span className={styles["reporte-stat-valor"]}>{registrosTotales}</span>
           </div>
 
-          <div className="reporte-stat-card reporte-stat-card--oscura">
-            <div className="reporte-stat-header">
-              <span className="reporte-stat-label">Total compras</span>
-              <span className="reporte-stat-icono reporte-stat-icono--azul">
+          <div className={`${styles["reporte-stat-card"]} ${styles["reporte-stat-card--oscura"]}`}>
+            <div className={styles["reporte-stat-header"]}>
+              <span className={styles["reporte-stat-label"]}>Total compras</span>
+              <span className={`${styles["reporte-stat-icono"]} ${styles["reporte-stat-icono--azul"]}`}>
                 <IconoCarrito />
               </span>
             </div>
-            <span className="reporte-stat-valor">C$ {formatearMoneda(totalCompras)}</span>
+            <span className={styles["reporte-stat-valor"]}>C$ {formatearMoneda(totalCompras)}</span>
           </div>
         </div>
 
-        <div className="reporte-filtro-row">
-          <div className="reporte-fechas-grupo">
-    <div className="reporte-fechas-fila">
-      <div className="reporte-campo">
+        <div className={styles["reporte-filtro-row"]}>
+          <div className={styles["reporte-fechas-grupo"]}>
+    <div className={styles["reporte-fechas-fila"]}>
+      <div className={styles["reporte-campo"]}>
         <label>📅 Fecha inicio</label>
         <input
           type="date"
@@ -190,7 +190,7 @@ const buscar = async () => {
         />
       </div>
 
-      <div className="reporte-campo">
+      <div className={styles["reporte-campo"]}>
         <label>📅 Fecha fin</label>
         <input
           type="date"
@@ -202,15 +202,15 @@ const buscar = async () => {
       </div>
     </div>
 
-    {errorFechas && <span className="reporte-error-fechas">{errorFechas}</span>}
+    {errorFechas && <span className={styles["reporte-error-fechas"]}>{errorFechas}</span>}
   </div>
 
-          <div className="reporte-campo">
+          <div className={styles["reporte-campo"]}>
   <label>▽ Proveedor</label>
-  <div className="reporte-selector-cliente">
+  <div className={styles["reporte-selector-cliente"]}>
     <button
       type="button"
-      className="factura-selector-btn"
+      className={styles["factura-selector-btn"]}
       onClick={() => setModalProveedorAbierto(true)}
     >
       {proveedorSeleccionado
@@ -221,7 +221,7 @@ const buscar = async () => {
     {proveedorSeleccionado && (
       <button
         type="button"
-        className="reporte-btn-limpiar-cliente"
+        className={styles["reporte-btn-limpiar-cliente"]}
         onClick={() => setProveedorSeleccionado(null)}
         aria-label="Quitar filtro de proveedor"
         title="Quitar filtro"
@@ -233,7 +233,7 @@ const buscar = async () => {
 </div>
 
           <button
-            className="reporte-btn-filtrar"
+            className={styles["reporte-btn-filtrar"]}
             onClick={() => {
               setCurrentPage(1);
               buscar();
@@ -243,28 +243,28 @@ const buscar = async () => {
           </button>
         </div>
 
-        <div className="reporte-card-tabla">
-          <table className="reporte-tabla">
+        <div className={styles["reporte-card-tabla"]}>
+          <table className={styles["reporte-tabla"]}>
             <thead>
               <tr>
                 <th>Fecha</th>
-                <th className="reporte-td-centro">Proveedor</th>
-                <th className="reporte-td-centro">N° Factura</th>
-                <th className="reporte-th-derecha">Total</th>
-                <th className="reporte-th-derecha">Acciones</th>
+                <th className={styles["reporte-td-centro"]}>Proveedor</th>
+                <th className={styles["reporte-td-centro"]}>N° Factura</th>
+                <th className={styles["reporte-th-derecha"]}>Total</th>
+                <th className={styles["reporte-th-derecha"]}>Acciones</th>
               </tr>
             </thead>
             <tbody>
               {compras.map((compra) => (
                 <tr key={compra.id}>
                   <td>{formatearFecha(compra.Fecha)}</td>
-                  <td className="reporte-td-centro reporte-td-nombre">
+                  <td className={`${styles["reporte-td-centro"]} ${styles["reporte-td-nombre"]}`}>
                     {compra.Nombre_Empresa}
                   </td>
-                  <td className="reporte-td-factura">{compra.NFactura}</td>
-                  <td className="reporte-td-derecha">C$ {formatearMoneda(compra.Total)}</td>
-                  <td className="reporte-td-derecha">
-  <button className="reporte-btn-imprimir" onClick={() => verDetalleCompra(compra.id)} title="Ver detalles">
+                  <td className={styles["reporte-td-factura"]}>{compra.NFactura}</td>
+                  <td className={styles["reporte-td-derecha"]}>C$ {formatearMoneda(compra.Total)}</td>
+                  <td className={styles["reporte-td-derecha"]}>
+  <button className={styles["reporte-btn-imprimir"]} onClick={() => verDetalleCompra(compra.id)} title="Ver detalles">
     <FileText size={24} />
   </button>
 </td>
@@ -274,42 +274,42 @@ const buscar = async () => {
           </table>
 
           {compras.length === 0 && (
-            <div className="reporte-footer">
-              <span className="reporte-count">No hay compras registradas en este rango.</span>
+            <div className={styles["reporte-footer"]}>
+              <span className={styles["reporte-count"]}>No hay compras registradas en este rango.</span>
             </div>
           )}
 
-          <div className="reporte-footer">
-            <span className="reporte-pagina-info">
+          <div className={styles["reporte-footer"]}>
+            <span className={styles["reporte-pagina-info"]}>
               Página <strong>{currentPage}</strong> de <strong>{lastPage}</strong>
             </span>
-            <div className="reporte-pagination">
+            <div className={styles["reporte-pagination"]}>
               <button
-                className="reporte-page-btn"
+                className={styles["reporte-page-btn"]}
                 onClick={() => setCurrentPage(1)}
                 disabled={currentPage === 1}
               >
                 «
               </button>
               <button
-                className="reporte-page-btn"
+                className={styles["reporte-page-btn"]}
                 onClick={() => setCurrentPage((p) => p - 1)}
                 disabled={currentPage === 1}
               >
                 ‹
               </button>
-              <button className="reporte-page-btn reporte-page-btn--active">
+              <button className={`${styles["reporte-page-btn"]} ${styles["reporte-page-btn--active"]}`}>
                 {currentPage}
               </button>
               <button
-                className="reporte-page-btn"
+                className={styles["reporte-page-btn"]}
                 onClick={() => setCurrentPage((p) => p + 1)}
                 disabled={currentPage === lastPage || lastPage == 0}
               >
                 ›
               </button>
               <button
-                className="reporte-page-btn"
+                className={styles["reporte-page-btn"]}
                 onClick={() => setCurrentPage(lastPage)}
                 disabled={currentPage === lastPage || lastPage == 0}
               >

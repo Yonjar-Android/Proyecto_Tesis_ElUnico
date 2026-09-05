@@ -1,0 +1,257 @@
+.reporte-page {
+  min-height: 100vh;
+  background-color: #fff;
+}
+
+.reporte-contenido {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2rem;
+  box-sizing: border-box;
+}
+
+.reporte-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  text-align: left;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.reporte-header h1 {
+  margin: 0 0 0.3rem;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #111;
+}
+
+.reporte-subtitulo {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+.reporte-btn-exportar {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #fff;
+  border: 1px solid #059669;
+  color: #059669;
+  border-radius: 8px;
+  padding: 0.55rem 1.1rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.reporte-btn-exportar:hover {
+  background-color: #ecfdf5;
+}
+
+/* Tarjetas de estadísticas */
+.reporte-stats-row {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.reporte-stat-card {
+  flex: 1;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1.1rem 1.4rem;
+}
+
+.reporte-stat-card--oscura {
+  background-color: #0f172a;
+  border-color: #0f172a;
+}
+
+.reporte-stat-label {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #6b7280;
+  margin-bottom: 0.5rem;
+}
+
+.reporte-stat-card--oscura .reporte-stat-label {
+  color: #94a3b8;
+}
+
+.reporte-stat-valor {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #111;
+}
+
+.reporte-stat-card--oscura .reporte-stat-valor {
+  color: #fff;
+}
+
+.reporte-stat-valor--rojo {
+  color: #dc2626;
+}
+
+/* Buscador simple (reporte sin filtros de fecha) */
+.reporte-buscador-simple {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 0.65rem 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.reporte-buscador-simple input {
+  border: none;
+  outline: none;
+  width: 100%;
+  font-size: 0.9rem;
+  background: transparent;
+}
+
+.reporte-buscador-icono {
+  color: #9ca3af;
+  font-size: 0.85rem;
+}
+
+/* Tabla */
+.reporte-card-tabla {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.reporte-tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+.reporte-tabla thead tr {
+  background-color: #111;
+}
+
+.reporte-tabla th {
+  text-align: left;
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.72rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  padding: 0.75rem 1rem;
+}
+
+.reporte-tabla td {
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid #f1f5f9;
+  color: #374151;
+  text-align: left;
+}
+
+.reporte-td-nombre {
+  font-weight: 700;
+  color: #111;
+}
+
+.reporte-pill-categoria {
+  display: inline-block;
+  background-color: #eef2ff;
+  color: #4338ca;
+  border-radius: 6px;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.reporte-pill-critico {
+  display: inline-block;
+  background-color: #fee2e2;
+  color: #dc2626;
+  border-radius: 6px;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.reporte-pill-bajo {
+  display: inline-block;
+  background-color: #fef3c7;
+  color: #b45309;
+  border-radius: 6px;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.reporte-pill-limite {
+  display: inline-block;
+  background-color: #fef9c3;
+  color: #a16207;
+  border-radius: 6px;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.reporte-pill-moderado {
+  display: inline-block;
+  background-color: #dbeafe;
+  color: #2563eb;
+  border-radius: 6px;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+/* Footer + paginación */
+.reporte-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.9rem 1rem;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.reporte-count {
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+.reporte-pagination {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.reporte-page-btn {
+  background-color: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 0.4rem 0.85rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+  color: #374151;
+}
+
+.reporte-page-btn:hover {
+  background-color: #f9fafb;
+}
+
+.reporte-page-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.reporte-page-btn--active {
+  background-color: #111;
+  border-color: #111;
+  color: #fff;
+}

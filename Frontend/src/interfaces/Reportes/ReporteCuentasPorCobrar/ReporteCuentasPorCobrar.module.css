@@ -1,0 +1,251 @@
+.reporte-page {
+  min-height: 100vh;
+  background-color: #fff;
+}
+
+.reporte-contenido {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2rem;
+  box-sizing: border-box;
+}
+
+.reporte-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  text-align: left;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.reporte-header h1 {
+  margin: 0 0 0.3rem;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #111;
+}
+
+.reporte-subtitulo {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+.reporte-btn-exportar {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #fff;
+  border: 1px solid #059669;
+  color: #059669;
+  border-radius: 8px;
+  padding: 0.55rem 1.1rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.reporte-btn-exportar:hover {
+  background-color: #ecfdf5;
+}
+
+/* Tarjetas de estadísticas */
+.reporte-stats-row {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.reporte-stat-card {
+  flex: 1;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1.1rem 1.4rem;
+}
+
+.reporte-stat-card--oscura {
+  background-color: #0f172a;
+  border-color: #0f172a;
+}
+
+.reporte-stat-label {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #6b7280;
+  margin-bottom: 0.5rem;
+}
+
+.reporte-stat-card--oscura .reporte-stat-label {
+  color: #94a3b8;
+}
+
+.reporte-stat-valor {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #111;
+}
+
+.reporte-stat-card--oscura .reporte-stat-valor {
+  color: #fff;
+}
+
+/* Fila de filtros/búsqueda */
+.reporte-filtro-row {
+  flex-direction: column;
+  align-items: stretch;
+  margin-bottom: .75em;
+}
+
+.reporte-campo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  flex: 1;
+  min-width: 200px;
+}
+
+.reporte-campo label {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #6b7280;
+}
+
+.reporte-campo input {
+  box-sizing: border-box;
+  border: 1px solid #e5e7eb;
+  background: #f9fafb;
+  border-radius: 8px;
+  padding: 0.6rem 0.85rem;
+  font-size: 0.9rem;
+  font-family: inherit;
+  color: #111;
+}
+
+.reporte-campo input:focus {
+  outline: none;
+  border-color: #e5484d;
+  background: #fff;
+}
+
+.reporte-btn-filtrar {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background-color: #e5484d;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.65rem 1.2rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.reporte-btn-filtrar:hover {
+  background-color: #cf3d42;
+}
+
+/* Tabla */
+.reporte-card-tabla {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.reporte-tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+.reporte-tabla thead tr {
+  background-color: #111;
+}
+
+.reporte-tabla th {
+  text-align: left;
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.72rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  padding: 0.75rem 1rem;
+}
+
+.reporte-th-derecha {
+  text-align: right;
+}
+
+.reporte-tabla td {
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid #f1f5f9;
+  color: #374151;
+  text-align: left;
+}
+
+.reporte-td-nombre {
+  font-weight: 700;
+  color: #111;
+}
+
+.reporte-td-derecha {
+  text-align: right;
+  font-weight: 700;
+  color: #111;
+}
+
+/* Footer + paginación */
+.reporte-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.9rem 1rem;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.reporte-count {
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+.reporte-pagination {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.reporte-page-btn {
+  background-color: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 0.4rem 0.85rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+  color: #374151;
+}
+
+.reporte-page-btn:hover {
+  background-color: #f9fafb;
+}
+
+.reporte-page-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.reporte-page-btn--active {
+  background-color: #111;
+  border-color: #111;
+  color: #fff;
+}

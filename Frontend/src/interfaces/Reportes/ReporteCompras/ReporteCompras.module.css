@@ -94,36 +94,13 @@
   color: #fff;
 }
 
-.reporte-stat-valor--rojo {
-  color: #dc2626;
-}
-
 /* Fila de filtros/búsqueda */
 .reporte-filtro-row {
-  flex-direction: column;
-  align-items: stretch;
-  margin-bottom: .75em;
-}
-
-.reporte-filtro-fila-1,
-.reporte-filtro-fila-2 {
   display: flex;
   align-items: flex-end;
   gap: 1rem;
   flex-wrap: wrap;
-}
-
-.reporte-filtro-fila-2 {
-  padding-top: 0.25rem;
-  border-top: 1px solid #f1f5f9;
-}
-
-.reporte-filtro-fila-2 .reporte-campo {
-  flex: 0 1 200px;
-}
-
-.reporte-filtro-fila-2 .reporte-btn-filtrar {
-  flex-shrink: 0;
+  margin-bottom: .75em;
 }
 
 .reporte-campo {
@@ -181,30 +158,6 @@
   background-color: #cf3d42;
 }
 
-/* Buscador simple (reporte sin filtros de fecha) */
-.reporte-buscador-simple {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
-  padding: 0.65rem 1rem;
-  margin-bottom: 1.25rem;
-}
-
-.reporte-buscador-simple input {
-  border: none;
-  outline: none;
-  width: 100%;
-  font-size: 0.9rem;
-  background: transparent;
-}
-
-.reporte-buscador-icono {
-  color: #9ca3af;
-  font-size: 0.85rem;
-}
-
 /* Tabla */
 .reporte-card-tabla {
   border: 1px solid #e5e7eb;
@@ -254,46 +207,6 @@
   color: #111;
 }
 
-.reporte-pill-categoria {
-  display: inline-block;
-  background-color: #eef2ff;
-  color: #4338ca;
-  border-radius: 6px;
-  padding: 0.2rem 0.6rem;
-  font-size: 0.78rem;
-  font-weight: 600;
-}
-
-.reporte-pill-critico {
-  display: inline-block;
-  background-color: #fee2e2;
-  color: #dc2626;
-  border-radius: 6px;
-  padding: 0.2rem 0.6rem;
-  font-size: 0.78rem;
-  font-weight: 700;
-}
-
-.reporte-pill-bajo {
-  display: inline-block;
-  background-color: #fef3c7;
-  color: #b45309;
-  border-radius: 6px;
-  padding: 0.2rem 0.6rem;
-  font-size: 0.78rem;
-  font-weight: 700;
-}
-
-.reporte-pill-limite {
-  display: inline-block;
-  background-color: #fef9c3;
-  color: #a16207;
-  border-radius: 6px;
-  padding: 0.2rem 0.6rem;
-  font-size: 0.78rem;
-  font-weight: 700;
-}
-
 /* Footer + paginación */
 .reporte-footer {
   display: flex;
@@ -339,33 +252,6 @@
   color: #fff;
 }
 
-.reporte-pill-moderado {
-  display: inline-block;
-  background-color: #dbeafe;
-  color: #2563eb;
-  border-radius: 6px;
-  padding: 0.2rem 0.6rem;
-  font-size: 0.78rem;
-  font-weight: 700;
-}
-
-.reporte-campo select {
-  box-sizing: border-box;
-  border: 1px solid #e5e7eb;
-  background: #f9fafb;
-  border-radius: 8px;
-  padding: 0.6rem 0.85rem;
-  font-size: 0.9rem;
-  font-family: inherit;
-  color: #111;
-}
-
-.reporte-campo select:focus {
-  outline: none;
-  border-color: #e5484d;
-  background: #fff;
-}
-
 /* Ícono dentro de la tarjeta de estadística */
 .reporte-stat-header {
   display: flex;
@@ -390,10 +276,6 @@
   color: #fff;
 }
 
-.reporte-stat-icono--verde {
-  color: #059669;
-}
-
 .reporte-stat-card--oscura .reporte-stat-icono {
   background-color: #1e293b;
   color: #34d399;
@@ -408,77 +290,6 @@
   text-align: center;
   font-family: monospace;
   color: #9ca3af;
-}
-
-/* Badges de estado (Contado / Crédito) */
-.reporte-badge-contado {
-  display: inline-block;
-  background-color: #d1fae5;
-  color: #059669;
-  border-radius: 6px;
-  padding: 0.2rem 0.6rem;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.03em;
-}
-
-.reporte-badge-credito {
-  display: inline-block;
-  background-color: #fef3c7;
-  color: #b45309;
-  border-radius: 6px;
-  padding: 0.2rem 0.6rem;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.03em;
-}
-
-.reporte-badge-transferencia {
-  display: inline-block;
-  background-color: #dbeafe;
-  color: #2563eb;
-  border-radius: 6px;
-  padding: 0.2rem 0.6rem;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.03em;
-}
-
-/*Badges de estados*/
-
-/* Badges de estado */
-
-.reporte-badge-pagada {
-  display: inline-block;
-  background-color: #d1fae5;
-  color: #059669;
-  border-radius: 6px;
-  padding: 0.2rem 0.6rem;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.03em;
-}
-
-.reporte-badge-pendiente {
-  display: inline-block;
-  background-color: #fef3c7;
-  color: #b45309;
-  border-radius: 6px;
-  padding: 0.2rem 0.6rem;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.03em;
-}
-
-.reporte-badge-devuelta {
-  display: inline-block;
-  background-color: #fee2e2;
-  color: #dc2626;
-  border-radius: 6px;
-  padding: 0.2rem 0.6rem;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.03em;
 }
 
 /* Pie de página "Página X de Y" */
@@ -544,4 +355,23 @@
 .reporte-btn-limpiar-cliente:hover {
   background: #f3f4f6;
   color: #e5484d;
+}
+
+/* Clase compartida con el dominio de Facturación (duplicada aquí a propósito) */
+.factura-selector-btn {
+  width: 100%;
+  box-sizing: border-box;
+  text-align: left;
+  border: 1px solid #e5e7eb;
+  background: #f9fafb;
+  border-radius: 8px;
+  padding: 0.65rem 0.85rem;
+  font-size: 0.9rem;
+  color: #111;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.factura-selector-btn:hover {
+  background: #f3f4f6;
 }
