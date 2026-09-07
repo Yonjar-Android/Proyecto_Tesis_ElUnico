@@ -3,13 +3,8 @@ import "../Productos/ModalesSeleccion/ModalSeleccion.css";
 import styles from "./ModalHistorialAbonos.module.css";
 import { obtenerHistorialAbonos } from "../../services/abono.service";
 import type { FacturaCreditoPendiente, AbonoHistorial } from "../../models/Credito";
+import { formatearFecha, formatearMoneda } from "../FuncionAuxiliar";
 
-function formatearMoneda(valor: number) {
-  return valor.toLocaleString("en-US", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-}
 
 function claseBadge(estado: AbonoHistorial["estado_cuota_resultante"]): string {
   return estado === "pagada" ? styles.badgePagada : styles.badgePagadaParcial;
@@ -80,7 +75,7 @@ function ModalHistorialAbonos({ abierto, factura, onClose }: Props) {
                   {abonos.map((a) => (
                     <tr key={a.id}>
                       <td>#{a.numero_cuota}</td>
-                      <td>{a.fecha_abono}</td>
+                      <td>{formatearFecha(a.fecha_abono)}</td>
                       <td>C${formatearMoneda(a.monto_abonado)}</td>
                       <td>
                         {a.metodo_pago}

@@ -24,3 +24,16 @@ export function formatearTelefono(valor: string | number | null | undefined): st
 
   return `${numero.slice(0, 4)}-${numero.slice(4)}`;
 }
+
+export function formatearFecha(fecha: Date | string) {
+  if (typeof fecha === "string") {
+    const soloFecha = fecha.split("T")[0].split(" ")[0]; // "2026-09-07"
+    const [anio, mes, dia] = soloFecha.split("-");
+    return `${dia}-${mes}-${anio}`;
+  }
+
+  const dia = String(fecha.getDate()).padStart(2, "0");
+  const mes = String(fecha.getMonth() + 1).padStart(2, "0");
+  const anio = fecha.getFullYear();
+  return `${dia}-${mes}-${anio}`;
+}

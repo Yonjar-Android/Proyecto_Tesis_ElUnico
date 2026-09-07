@@ -465,3 +465,40 @@
   border-color: #e5484d;
   color: #fff;
 }
+
+/* --- Nuevas clases para distribuir los campos de crédito con más espacio --- */
+
+.factura-credito-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 1.25rem;
+  box-sizing: border-box;
+  margin-bottom: 1.25rem;
+}
+
+.factura-credito-titulo {
+  margin: 0 0 1rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: #6b7280;
+}
+
+.factura-credito-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.25rem;
+}
+
+@media (max-width: 900px) {
+  .factura-credito-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 500px) {
+  .factura-credito-grid {
+    grid-template-columns: 1fr;
+  }
+}

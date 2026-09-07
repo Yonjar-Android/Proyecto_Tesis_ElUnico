@@ -6,6 +6,7 @@
 
 .card {
   display: flex;
+  width: 100%;
   flex-direction: column;
   gap: 0.6rem;
   background: #fafafa;
@@ -36,8 +37,13 @@
   font-size: 1.05rem;
 }
 
+.spanFechaVencimiento {
+  width: 100%;
+}
+
 .avisoEstado {
   display: flex;
+  width: 100%;
   align-items: center;
   gap: 0.5rem;
   padding: 0.7rem 1rem;

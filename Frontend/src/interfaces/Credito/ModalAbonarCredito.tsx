@@ -7,7 +7,7 @@ import { registrarAbono } from "../../services/abono.service";
 import type { FacturaCreditoPendiente, CuotaInfo, DistribucionCuota } from "../../models/Credito";
 
 type TipoMoneda = "cordobas" | "dolares" | "mixto";
-type TipoPago = "Efectivo" | "Transferencia";
+type TipoPago = "Contado" | "Transferencia";
 
 const TASA_CAMBIO = 36.6;
 
@@ -64,7 +64,7 @@ function calcularDistribucion(
 function ModalAbonarCredito({ abierto, factura, onClose, onConfirmado }: Props) {
   const [cuotasPendientes, setCuotasPendientes] = useState<CuotaInfo[]>([]);
 
-  const [tipoPago, setTipoPago] = useState<TipoPago>("Efectivo");
+  const [tipoPago, setTipoPago] = useState<TipoPago>("Contado");
   const [numReferencia, setNumReferencia] = useState("");
 
   const [tipoMonedaRecibida, setTipoMonedaRecibida] = useState<TipoMoneda>("cordobas");
@@ -91,7 +91,7 @@ function ModalAbonarCredito({ abierto, factura, onClose, onConfirmado }: Props) 
     if (!abierto) return;
     buscarCuotasPendientes();
 
-    setTipoPago("Efectivo");
+    setTipoPago("Contado");
     setNumReferencia("");
     setTipoMonedaRecibida("cordobas");
     setMontoRecibidoCordobas("");
@@ -206,7 +206,7 @@ function ModalAbonarCredito({ abierto, factura, onClose, onConfirmado }: Props) 
                 if (nuevo !== "Transferencia") setNumReferencia("");
               }}
             >
-              <option value="Efectivo">Efectivo</option>
+              <option value="Contado">Contado</option>
               <option value="Transferencia">Transferencia</option>
             </select>
           </div>
@@ -319,7 +319,7 @@ function ModalAbonarCredito({ abierto, factura, onClose, onConfirmado }: Props) 
 
         <div className="modal-footer">
           <button className="btn-cancelar" onClick={cerrar} disabled={guardando}>Cancelar</button>
-          <button className="btn-guardar confirmar-venta-btn" onClick={confirmar} disabled={guardando}>
+          <button className="btn-guardar confirmar-venta-btn" onClick={confirmar} disabled={guardando || excedente > 0}>
             {guardando ? "Guardando..." : "✓ Confirmar Abono"}
           </button>
         </div>

@@ -146,7 +146,7 @@ export const registrarAbono = async (
             [idCreditoFactura]
         );
 
-        const nuevoEstadoFactura = pendientesRestantes[0].total === 0 ? "pagada" : "pagada_parcial";
+        const nuevoEstadoFactura = pendientesRestantes[0].total === 0 ? "pagada" : "pendiente";
 
         await connection.query(
             `UPDATE credito_factura SET estado = ? WHERE id = ?`,

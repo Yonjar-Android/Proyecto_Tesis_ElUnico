@@ -3,13 +3,7 @@ import "../Productos/ModalesSeleccion/ModalSeleccion.css";
 import styles from "./ModalSiguienteCuota.module.css";
 import { obtenerSiguienteCuota } from "../../services/cuota.service";
 import type { FacturaCreditoPendiente, CuotaInfo } from "../../models/Credito";
-
-function formatearMoneda(valor: number) {
-  return valor.toLocaleString("en-US", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-}
+import { formatearFecha, formatearMoneda } from "../FuncionAuxiliar";
 
 function diasEntre(fechaISO: string): number {
   const hoy = new Date();
@@ -88,8 +82,8 @@ function ModalSiguienteCuota({ abierto, factura, onClose, onAbonar }: Props) {
                   <strong>C${formatearMoneda(cuota.saldo_cuota)}</strong>
                 </div>
                 <div className={styles.fila}>
-                  <span>Fecha de vencimiento</span>
-                  <strong>{cuota.fecha_vencimiento}</strong>
+                  <span>Fecha de vencimiento </span>
+                  <strong>{formatearFecha(cuota.fecha_vencimiento)}</strong>
                 </div>
               </div>
 

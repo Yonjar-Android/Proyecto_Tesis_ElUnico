@@ -8,6 +8,7 @@ import ModalAbonarCredito from "./ModalAbonarCredito";
 import { buscarCreditosPendientes } from "../../services/credito.service";
 import type { PaginatedResponse } from "../../models/PaginatedResponse";
 import { formatearMoneda } from "../FuncionAuxiliar";
+import Notificacion, { type TipoNotificacion } from "../../components/Notification/Notification";
 
 function claseBadge(estado: FacturaCreditoPendiente["estado"]): string {
   return estado === "pendiente" ? styles.badgePendiente : styles.badgePagadaParcial;
@@ -32,6 +33,7 @@ function GestionCreditos() {
 
   const [menuAbiertoId, setMenuAbiertoId] = useState<number | null>(null);
   const menuRef = useRef<HTMLDivElement | null>(null);
+  const [notif, setNotif] = useState<{ mensaje: string; tipo: TipoNotificacion } | null>(null);
 
   const buscar = async () => {
     try {
@@ -116,13 +118,20 @@ function GestionCreditos() {
 
   function manejarAbonoConfirmado() {
     // Cuando el backend exista, aquí recargarías la factura afectada
-    // (o toda la lista) para reflejar el nuevo saldo_pendiente/estado.
     setModalAbonarAbierto(false);
+    setNotif({ mensaje: "Abono registrado correctamente", tipo: "exito" });
     buscar();
   }
 
   return (
     <div className={styles.container}>
+      {notif && (
+        <Notificacion
+          mensaje={notif.mensaje}
+          tipo={notif.tipo}
+          onCerrar={() => setNotif(null)}
+        />
+      )}
       <div className={styles.content}>
         <div className={styles.topPart}>
           <h1 className={styles.title}>Gestión de Crédito</h1>
@@ -145,8 +154,7 @@ function GestionCreditos() {
             <thead>
               <tr>
                 <th className={styles.th}>N.º FACTURA</th>
-                <th className={styles.th}>NOMBRE</th>
-                <th className={styles.th}>APELLIDO</th>
+                <th className={styles.th}>CLIENTE</th>
                 <th className={styles.th}>TOTAL DEUDA</th>
                 <th className={styles.th}>SALDO PENDIENTE</th>
                 <th className={styles.th}>ESTADO</th>
@@ -170,9 +178,9 @@ function GestionCreditos() {
                 facturas.map((f) => (
                   <tr key={f.id} className={styles.tr}>
                     <td className={styles.td}>{f.numero_factura}</td>
-                    <td className={styles.td}>{f.cliente_nombre}</td>
-                    <td className={styles.td}>{f.cliente_apellido}</td>
-                    <td className={styles.td}>C${formatearMoneda(f.total_deuda)}</td>
+                    <td className={styles.td}>
+                        {`${f.cliente_nombre} ${f.cliente_apellido}`}
+                    </td>                    <td className={styles.td}>C${formatearMoneda(f.total_deuda)}</td>
                     <td className={styles.td}>C${formatearMoneda(f.saldo_pendiente)}</td>
                     <td className={styles.td}>
                       <span className={`${styles.badge} ${claseBadge(f.estado)}`}>

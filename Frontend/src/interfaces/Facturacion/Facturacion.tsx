@@ -613,63 +613,6 @@ const confirmarVenta = async (
         />
       </div>
     )}
-
-    {tipoPago === "Credito" && (
-      <div className="factura-credito-campos" style={{ marginTop: "0.9rem" }}>
-        <div className="factura-campo">
-          <label>
-            Fecha de Inicio <span style={{ color: "#e5484d" }}>*</span>
-          </label>
-          <input
-            type="date"
-            value={fechaInicio}
-            onChange={(e) => setFechaInicio(e.target.value)}
-          />
-        </div>
-
-        <div className="factura-campo" style={{ marginTop: "0.9rem" }}>
-          <label>
-            Número de Cuotas <span style={{ color: "#e5484d" }}>*</span>
-          </label>
-          <input
-            type="number"
-            min={1}
-            value={numeroCuotas}
-            onChange={(e) => setNumeroCuotas(Number(e.target.value))}
-            placeholder="Ej. 24"
-          />
-        </div>
-
-        <div className="factura-campo" style={{ marginTop: "0.9rem" }}>
-          <label>
-            Frecuencia de Pago <span style={{ color: "#e5484d" }}>*</span>
-          </label>
-          <select
-            value={frecuencia}
-            onChange={(e) =>
-              setFrecuencia(e.target.value as CreditoInput["frecuencia"])
-            }
-          >
-            <option value="diario">Diaria</option>
-            <option value="semanal">Semanal</option>
-            <option value="quincenal">Quincenal</option>
-            <option value="mensual">Mensual</option>
-          </select>
-        </div>
-
-        <div className="factura-campo" style={{ marginTop: "0.9rem" }}>
-          <label>Monto Inicial</label>
-          <input
-            type="number"
-            min={0}
-            step="0.01"
-            value={montoInicial}
-            onChange={(e) => setMontoInicial(Number(e.target.value))}
-            placeholder="0.00"
-          />
-        </div>
-      </div>
-    )}
   </div>
 
   <div className="factura-card">
@@ -689,6 +632,66 @@ const confirmarVenta = async (
     </div>
   </div>
 </div>
+
+{tipoPago === "Credito" && (
+  <div className="factura-credito-card">
+    <p className="factura-credito-titulo">Datos del crédito</p>
+    <div className="factura-credito-grid">
+      <div className="factura-campo">
+        <label>
+          Fecha de Inicio <span style={{ color: "#e5484d" }}>*</span>
+        </label>
+        <input
+          type="date"
+          value={fechaInicio}
+          onChange={(e) => setFechaInicio(e.target.value)}
+        />
+      </div>
+
+      <div className="factura-campo">
+        <label>
+          Número de Cuotas <span style={{ color: "#e5484d" }}>*</span>
+        </label>
+        <input
+          type="number"
+          min={1}
+          value={numeroCuotas}
+          onChange={(e) => setNumeroCuotas(Number(e.target.value))}
+          placeholder="Ej. 24"
+        />
+      </div>
+
+      <div className="factura-campo">
+        <label>
+          Frecuencia de Pago <span style={{ color: "#e5484d" }}>*</span>
+        </label>
+        <select
+          value={frecuencia}
+          onChange={(e) =>
+            setFrecuencia(e.target.value as CreditoInput["frecuencia"])
+          }
+        >
+          <option value="diario">Diaria</option>
+          <option value="semanal">Semanal</option>
+          <option value="quincenal">Quincenal</option>
+          <option value="mensual">Mensual</option>
+        </select>
+      </div>
+
+      <div className="factura-campo">
+        <label>Monto Inicial</label>
+        <input
+          type="number"
+          min={0}
+          step="1"
+          value={montoInicial}
+          onChange={(e) => setMontoInicial(Number(e.target.value))}
+          placeholder="0.00"
+        />
+      </div>
+    </div>
+  </div>
+)}
 
         <div className="factura-card factura-card-tabla">
           <table className="factura-tabla">

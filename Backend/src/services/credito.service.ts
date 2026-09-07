@@ -17,7 +17,7 @@ export const buscarCreditosPendientes = async (
                 cli.Nombre LIKE ?
                 OR cli.Apellido LIKE ?
                 OR cli.NCedula LIKE ?
-                OR cf.id LIKE ?
+                OR cf.Id_venta LIKE ?
             )
         `;
 
