@@ -107,6 +107,11 @@ export default function Sidebar() {
           <span>Clientes</span>
         </NavLink>
 
+        <NavLink to="/credito" className="sidebar-link">
+          <Users size={20} />
+          <span>Gestión de Crédito</span>
+        </NavLink>
+
         <NavLink to="/proveedores" className="sidebar-link">
           <Truck size={20} />
           <span>Proveedores</span>

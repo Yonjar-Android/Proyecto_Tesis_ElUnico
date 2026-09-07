@@ -26,6 +26,7 @@ import Devoluciones from "./interfaces/Devoluciones/Devoluciones";
 import SalidasInventario from "./interfaces/SalidasInventario/SalidasInventario";
 import { CajaProvider } from "./context/CajaContext";
 import RutaProtegidaCaja from "./components/RutaProtegidaCaja";
+import Credito from "./interfaces/Credito/GestionCredito";
  
 function App() {
   return (
@@ -38,6 +39,7 @@ function App() {
             <Route path="/marcas" element={<Marca />} />
             <Route path="/categorias" element={<Categoria />} />
             <Route path="/clientes" element={<Cliente />} />
+            <Route path="/credito" element={<Credito />} />
             <Route path="/proveedores" element={<Proveedor />} />
             <Route path="/inventario" element={<Inventario />} />
             <Route path="/salidasInventario" element={<SalidasInventario />} />

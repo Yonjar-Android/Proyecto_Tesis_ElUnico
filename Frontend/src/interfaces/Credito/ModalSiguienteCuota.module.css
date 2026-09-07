@@ -1,0 +1,53 @@
+.estadoVacio {
+  text-align: center;
+  color: #8a8a8a;
+  padding: 1.5rem 0;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  background: #fafafa;
+  border-radius: 10px;
+  padding: 1rem 1.1rem;
+  margin-bottom: 1rem;
+}
+
+.fila {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.fila strong {
+  color: #1a1a1a;
+}
+
+.filaDestacada {
+  border-top: 1px dashed #d9d9d9;
+  padding-top: 0.6rem;
+  margin-top: 0.2rem;
+}
+
+.filaDestacada strong {
+  color: #6c5ce7;
+  font-size: 1.05rem;
+}
+
+.avisoEstado {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 1rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  background: #e6f7ec;
+  color: #1c8a4b;
+}
+
+.avisoVencida {
+  background: #fdeaea;
+  color: #c22b2b;
+}

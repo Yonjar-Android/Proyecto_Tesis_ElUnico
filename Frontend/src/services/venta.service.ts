@@ -10,7 +10,13 @@ export const crearVenta = async (
     Total: number,
     RecibidoCordobas:number,
     Num_referencia: string,
-    Detalles: DetalleVenta[]
+    Detalles: DetalleVenta[],
+    DatosCredito?: {  // ← NUEVO: Parámetro opcional
+        fecha_inicio: string;
+        numero_cuotas: number;
+        frecuencia: 'diario' | 'semanal' | 'quincenal' | 'mensual';
+        monto_inicial: number; // Agregado para el monto inicial del crédito
+    }
 ) => {
 
     const response = await axiosInstance.post(API, {
@@ -19,7 +25,8 @@ export const crearVenta = async (
         Total,
         RecibidoCordobas,
         Num_referencia,
-        Detalles
+        Detalles,
+        DatosCredito
     }, {
             headers: {
                 Authorization: `Bearer ${token}`

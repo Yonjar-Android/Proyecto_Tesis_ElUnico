@@ -72,9 +72,15 @@ export const crearVenta = async (
     idUsuario: number,
     tipoPago: string,
     total: number,
-    recibidoCordobas:number,
+    recibidoCordobas: number,
     numReferencia: string,
-    detalles: DetalleVentaInput[]
+    detalles: DetalleVentaInput[],
+    datosCredito?: {
+        fecha_inicio: string;
+        numero_cuotas: number;
+        frecuencia: 'diario' | 'semanal' | 'quincenal' | 'mensual';
+        monto_inicial: number; // Agregado para el monto inicial del crédito
+    }
 ) => {
 
     if (detalles.length === 0) {
@@ -89,38 +95,45 @@ export const crearVenta = async (
 
         // Verificar stock
         for (const detalle of detalles) {
-            if(detalle.Id_producto != null && detalle.Id_servicio == null){
-            const [rows]: any = await connection.query(
-                "SELECT Nombre, Stock FROM productos WHERE id = ?",
-                [detalle.Id_producto]
-            );
-
-            if (rows.length === 0) {
-                throw new Error("Uno de los productos no existe.");
-            }
-
-            if (rows[0].Stock < detalle.Cantidad) {
-                throw new Error(
-                    `Stock insuficiente para el producto "${rows[0].Nombre}". Stock disponible: ${rows[0].Stock}.`
+            if (detalle.Id_producto != null && detalle.Id_servicio == null) {
+                const [rows]: any = await connection.query(
+                    "SELECT Nombre, Stock FROM productos WHERE id = ?",
+                    [detalle.Id_producto]
                 );
+
+                if (rows.length === 0) {
+                    throw new Error("Uno de los productos no existe.");
+                }
+
+                if (rows[0].Stock < detalle.Cantidad) {
+                    throw new Error(
+                        `Stock insuficiente para el producto "${rows[0].Nombre}". Stock disponible: ${rows[0].Stock}.`
+                    );
+                }
             }
         }
-        }
-// Verificar que haya una sesión de caja abierta
-const [sesionRows]: any = await connection.query(
-    "SELECT id_sesion FROM sesiones_caja WHERE id_usuario = ? AND estado = 'Abierta' LIMIT 1",
-    [idUsuario]
-);
 
-if (sesionRows.length === 0) {
-    throw new Error("No se puede registrar la venta: no hay una sesión de caja abierta.");
-}
-    let estado = "Pagada"; // Estado por defecto
+        // Verificar que haya una sesión de caja abierta
+        const [sesionRows]: any = await connection.query(
+            "SELECT id_sesion FROM sesiones_caja WHERE id_usuario = ? AND estado = 'Abierta' LIMIT 1",
+            [idUsuario]
+        );
 
-        if(tipoPago === "Credito"){
-            estado = "Pendiente"; // Cambiar estado si es crédito
+        if (sesionRows.length === 0) {
+            throw new Error("No se puede registrar la venta: no hay una sesión de caja abierta.");
         }
-        
+
+        let estado = "Pagada";
+
+        if (tipoPago === "Credito") {
+            estado = "Pendiente";
+            
+            // Validar datos del crédito
+            if (!datosCredito) {
+                throw new Error("Los datos del crédito son requeridos.");
+            }
+        }
+
         // Crear venta
         const [venta]: any = await connection.query(
             `
@@ -142,38 +155,80 @@ if (sesionRows.length === 0) {
         const idVenta = venta.insertId;
 
         // Crear detalles
-for (const detalle of detalles) {
+        for (const detalle of detalles) {
+            await connection.query(
+                `
+                INSERT INTO detalle_venta
+                (Id_venta, Id_producto, Id_servicio, Cantidad, Precio_Venta, Descuento, Tipo_Descuento, Subtotal)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                `,
+                [
+                    idVenta,
+                    detalle.Id_producto ?? null,
+                    detalle.Id_servicio ?? null,
+                    detalle.Cantidad,
+                    detalle.Precio_Venta,
+                    detalle.Descuento,
+                    detalle.Tipo_Descuento,
+                    detalle.Subtotal
+                ]
+            );
+        }
 
-    await connection.query(
-        `
-        INSERT INTO detalle_venta
-        (Id_venta, Id_producto, Id_servicio, Cantidad, Precio_Venta, Descuento, Tipo_Descuento, Subtotal)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        `,
-        [
-            idVenta,
-            detalle.Id_producto ?? null,
-            detalle.Id_servicio ?? null,
-            detalle.Cantidad,
-            detalle.Precio_Venta,
-            detalle.Descuento,
-            detalle.Tipo_Descuento,
-            detalle.Subtotal
-        ]
-    );
+        // ============================================================
+        // CREAR CRÉDITO SI ES CRÉDITO
+        // ============================================================
+        if (tipoPago === "Credito" && datosCredito) {
+            const { fecha_inicio, numero_cuotas, frecuencia, monto_inicial } = datosCredito;
 
-}
+            // Calcular valores
+            const saldo_financiado = total - monto_inicial;
+            const monto_cuota = saldo_financiado / numero_cuotas;
 
-if (tipoPago === "Credito") {
-    const deuda = total - recibidoCordobas;
+            // Calcular fecha_fin según frecuencia
+            const fechaFin = calcularFechaFin(fecha_inicio, numero_cuotas, frecuencia);
 
-    await connection.query(
-        `UPDATE clientes
-         SET Saldo_Deuda = COALESCE(Saldo_Deuda, 0) + ?
-         WHERE id = ?`,
-        [deuda, idCliente]
-    );
-}
+            // Insertar credito_factura
+            const [credito]: any = await connection.query(
+                `
+                INSERT INTO credito_factura
+                (id_venta, total_deuda, monto_inicial, numero_cuotas, 
+                 fecha_inicio, fecha_fin, estado, frecuencia)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                `,
+                [
+                    idVenta,
+                    total,
+                    monto_inicial,
+                    numero_cuotas,
+                    fecha_inicio,
+                    fechaFin,
+                    'pendiente',
+                    frecuencia
+                ]
+            );
+
+            const idCredito = credito.insertId;
+
+            // Insertar cuotas
+            for (let i = 1; i <= numero_cuotas; i++) {
+                const fechaVencimiento = calcularFechaVencimiento(fecha_inicio, i, frecuencia);
+
+                await connection.query(
+                    `
+                    INSERT INTO cuota
+                    (id_credito_factura, numero_cuota, monto_a_pagar, fecha_vencimiento, estado)
+                    VALUES (?, ?, ?, ?, 'pendiente')
+                    `,
+                    [
+                        idCredito,
+                        i,
+                        monto_cuota,
+                        fechaVencimiento
+                    ]
+                );
+            }
+        }
 
         await connection.commit();
 
@@ -194,6 +249,56 @@ if (tipoPago === "Credito") {
     }
 
 };
+
+// ============================================================
+// FUNCIONES AUXILIARES PARA CÁLCULO DE FECHAS
+// ============================================================
+
+function calcularFechaFin(fechaInicio: string, numeroCuotas: number, frecuencia: string): string {
+    const fecha = new Date(fechaInicio);
+    
+    switch (frecuencia) {
+        case 'diario':
+            fecha.setDate(fecha.getDate() + numeroCuotas);
+            break;
+        case 'semanal':
+            fecha.setDate(fecha.getDate() + (numeroCuotas * 7));
+            break;
+        case 'quincenal':
+            fecha.setDate(fecha.getDate() + (numeroCuotas * 15));
+            break;
+        case 'mensual':
+            fecha.setMonth(fecha.getMonth() + numeroCuotas);
+            break;
+        default:
+            throw new Error(`Frecuencia no válida: ${frecuencia}`);
+    }
+    
+    return fecha.toISOString().split('T')[0];
+}
+
+function calcularFechaVencimiento(fechaInicio: string, numeroCuota: number, frecuencia: string): string {
+    const fecha = new Date(fechaInicio);
+    
+    switch (frecuencia) {
+        case 'diario':
+            fecha.setDate(fecha.getDate() + numeroCuota);
+            break;
+        case 'semanal':
+            fecha.setDate(fecha.getDate() + (numeroCuota * 7));
+            break;
+        case 'quincenal':
+            fecha.setDate(fecha.getDate() + (numeroCuota * 15));
+            break;
+        case 'mensual':
+            fecha.setMonth(fecha.getMonth() + numeroCuota);
+            break;
+        default:
+            throw new Error(`Frecuencia no válida: ${frecuencia}`);
+    }
+    
+    return fecha.toISOString().split('T')[0];
+}
 
 export const buscarFacturaParaDevolucion = async (
     idVenta: number

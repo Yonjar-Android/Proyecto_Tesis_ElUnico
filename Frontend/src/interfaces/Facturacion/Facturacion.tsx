@@ -38,12 +38,25 @@ type ItemVenta =
       precio: number;
     };
 
+    interface CreditoInput {
+    monto_inicial: number;
+    numero_cuotas: number;
+    fecha_inicio: string;
+    frecuencia: 'diario' | 'semanal' | 'quincenal' | 'mensual'; // ← nuevo campo
+}
+
 function formatearFecha(fecha: Date) {
   const dia = String(fecha.getDate()).padStart(2, "0");
   const mes = String(fecha.getMonth() + 1).padStart(2, "0");
   const anio = fecha.getFullYear();
   return `${dia}-${mes}-${anio}`;
 }
+
+const calcularFechaSiguienteDia = (): string => {
+  const hoy = new Date();
+  hoy.setDate(hoy.getDate() + 1);
+  return hoy.toISOString().split("T")[0]; // formato YYYY-MM-DD para <input type="date">
+};
 
 function soloEnteros(valor: string) {
   return valor.replace(/[^0-9]/g, "");
@@ -114,6 +127,11 @@ function Facturacion() {
     NCliente: 0,
     NCedula: ""
   });
+  
+  const [montoInicial, setMontoInicial] = useState<number>(1);
+  const [numeroCuotas, setNumeroCuotas] = useState<number>(1);
+  const [fechaInicio, setFechaInicio] = useState<string>("");
+  const [frecuencia, setFrecuencia] = useState<'diario' | 'semanal' | 'quincenal' | 'mensual'>('quincenal');
 
   const [notif, setNotif] = useState<{ mensaje: string; tipo: TipoNotificacion } | null>(null);
 
@@ -240,8 +258,6 @@ if (descuentoUnitarioIngresado > Number(precio)) {
   return;
 }
 
-
-
     const subtotalLinea = Number(cantidad) * Number(precio);
 
     if (Number(descuento) > subtotalLinea) {
@@ -327,11 +343,24 @@ const totalGeneral = subtotalGeneral - descuentoGeneral;
     setModalConfirmarAbierto(true);
   };
 
-  const confirmarVenta = async (
+const confirmarVenta = async (
     _detalle: DetalleConfirmacionVenta,
     setErrorModal: (mensaje: string) => void
   ): Promise<boolean> => {
     try {
+      // Preparar datos del crédito si aplica
+      let datosCredito = undefined;
+      
+      if (tipoPago === "Credito") {
+        
+        datosCredito = {
+          fecha_inicio: fechaInicio,
+          numero_cuotas: numeroCuotas,    
+          frecuencia: frecuencia,
+          monto_inicial: montoInicial,  
+        };
+      }
+
       const { idVenta } = await crearVenta(
         Number(clienteSeleccionado?.id),
         tipoPago,
@@ -356,8 +385,9 @@ const totalGeneral = subtotalGeneral - descuentoGeneral;
                 Tipo_Descuento: item.tipoDescuento,
                 Subtotal: subtotalNeto(item),
               }
-        )
-      );
+        ),
+        datosCredito  // ← Pasar los datos del crédito
+      );  
 
       const recibo = await obtenerReciboVenta(idVenta);
 
@@ -543,62 +573,122 @@ const totalGeneral = subtotalGeneral - descuentoGeneral;
           </div>
         </div>
 
-        <div className="factura-fila-doble">
-          <div className="factura-card">
-  <div className="factura-campo">
-    <label>
-      Tipo de Pago <span style={{ color: "#e5484d" }}>*</span>
-    </label>
-    <select
-      value={tipoPago}
-      onChange={(e) => {
-        const nuevoTipo = e.target.value;
-        setTipoPago(nuevoTipo);
-        if (nuevoTipo !== "Transferencia") {
-          setNumReferencia("");
-        }
-      }}
-    >
-      <option value="Contado">Contado</option>
-      <option value="Credito" disabled={clienteSeleccionado.id === 10}>
-        Crédito
-      </option>
-      <option value="Transferencia">Transferencia</option>
-    </select>
+<div className="factura-fila-doble">
+  <div className="factura-card">
+    <div className="factura-campo">
+      <label>
+        Tipo de Pago <span style={{ color: "#e5484d" }}>*</span>
+      </label>
+      <select
+        value={tipoPago}
+        onChange={(e) => {
+          const nuevoTipo = e.target.value;
+          setTipoPago(nuevoTipo);
+          if (nuevoTipo !== "Transferencia") {
+            setNumReferencia("");
+          }
+          if (nuevoTipo === "Credito") {
+            setFechaInicio(calcularFechaSiguienteDia());
+          }
+        }}
+      >
+        <option value="Contado">Contado</option>
+        <option value="Credito" disabled={clienteSeleccionado.id === 10}>
+          Crédito
+        </option>
+        <option value="Transferencia">Transferencia</option>
+      </select>
+    </div>
+
+    {tipoPago === "Transferencia" && (
+      <div className="factura-campo" style={{ marginTop: "0.9rem" }}>
+        <label>
+          Número de Referencia <span style={{ color: "#e5484d" }}>*</span>
+        </label>
+        <input
+          type="text"
+          value={numReferencia ?? ""}
+          onChange={(e) => setNumReferencia(e.target.value)}
+          placeholder="Ej. 000123456"
+        />
+      </div>
+    )}
+
+    {tipoPago === "Credito" && (
+      <div className="factura-credito-campos" style={{ marginTop: "0.9rem" }}>
+        <div className="factura-campo">
+          <label>
+            Fecha de Inicio <span style={{ color: "#e5484d" }}>*</span>
+          </label>
+          <input
+            type="date"
+            value={fechaInicio}
+            onChange={(e) => setFechaInicio(e.target.value)}
+          />
+        </div>
+
+        <div className="factura-campo" style={{ marginTop: "0.9rem" }}>
+          <label>
+            Número de Cuotas <span style={{ color: "#e5484d" }}>*</span>
+          </label>
+          <input
+            type="number"
+            min={1}
+            value={numeroCuotas}
+            onChange={(e) => setNumeroCuotas(Number(e.target.value))}
+            placeholder="Ej. 24"
+          />
+        </div>
+
+        <div className="factura-campo" style={{ marginTop: "0.9rem" }}>
+          <label>
+            Frecuencia de Pago <span style={{ color: "#e5484d" }}>*</span>
+          </label>
+          <select
+            value={frecuencia}
+            onChange={(e) =>
+              setFrecuencia(e.target.value as CreditoInput["frecuencia"])
+            }
+          >
+            <option value="diario">Diaria</option>
+            <option value="semanal">Semanal</option>
+            <option value="quincenal">Quincenal</option>
+            <option value="mensual">Mensual</option>
+          </select>
+        </div>
+
+        <div className="factura-campo" style={{ marginTop: "0.9rem" }}>
+          <label>Monto Inicial</label>
+          <input
+            type="number"
+            min={0}
+            step="0.01"
+            value={montoInicial}
+            onChange={(e) => setMontoInicial(Number(e.target.value))}
+            placeholder="0.00"
+          />
+        </div>
+      </div>
+    )}
   </div>
 
-  {tipoPago === "Transferencia" && (
-    <div className="factura-campo" style={{ marginTop: "0.9rem" }}>
+  <div className="factura-card">
+    <div className="factura-campo">
       <label>
-        Número de Referencia <span style={{ color: "#e5484d" }}>*</span>
+        Seleccionar Cliente <span style={{ color: "#e5484d" }}>*</span>
       </label>
-      <input
-        type="text"
-        value={numReferencia ?? ""}
-        onChange={(e) => setNumReferencia(e.target.value)}
-        placeholder="Ej. 000123456"
-      />
+      <button
+        type="button"
+        className="factura-selector-btn"
+        onClick={() => setModalClienteAbierto(true)}
+      >
+        {clienteSeleccionado
+          ? `${clienteSeleccionado.Nombre} ${clienteSeleccionado.Apellido}`
+          : "Cliente General"}
+      </button>
     </div>
-  )}
+  </div>
 </div>
-
-          <div className="factura-card">
-            <div className="factura-campo">
-              <label>
-                Seleccionar Cliente <span style={{ color: "#e5484d" }}>*</span>
-              </label>
-              <button
-                type="button"
-                className="factura-selector-btn"
-                onClick={() => setModalClienteAbierto(true)}
-              >
-                {clienteSeleccionado
-                  ? `${clienteSeleccionado.Nombre} ${clienteSeleccionado.Apellido}`
-                  : "Cliente General"}
-              </button>
-            </div>
-          </div>
-        </div>
 
         <div className="factura-card factura-card-tabla">
           <table className="factura-tabla">

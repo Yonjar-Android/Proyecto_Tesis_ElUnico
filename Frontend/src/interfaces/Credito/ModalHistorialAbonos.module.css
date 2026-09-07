@@ -1,0 +1,71 @@
+.modalHistorial {
+  display: flex;
+  flex-direction: column;
+  max-height: 85vh;
+  width: 100%;
+  max-width: 640px;
+}
+
+.modalBodyScroll {
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+}
+
+.clienteInfo {
+  color: #6b6b6b;
+  font-size: 0.9rem;
+  margin: -0.5rem 0 1rem 0;
+}
+
+.estadoVacio {
+  text-align: center;
+  color: #8a8a8a;
+  padding: 1.5rem 0;
+}
+
+.tablaWrapper {
+  overflow-x: auto;
+}
+
+.tabla {
+  width: 100%;
+  min-width: 520px;
+  border-collapse: collapse;
+}
+
+.tabla thead {
+  background: #f5f5f7;
+}
+
+.tabla th,
+.tabla td {
+  padding: 0.65rem 0.8rem;
+  text-align: left;
+  font-size: 0.85rem;
+  border-bottom: 1px solid #eee;
+  white-space: nowrap;
+}
+
+.referencia {
+  color: #8a8a8a;
+  font-size: 0.78rem;
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.badgePagada {
+  background: #e6f7ec;
+  color: #1c8a4b;
+}
+
+.badgePagadaParcial {
+  background: #e5f0ff;
+  color: #1a56c4;
+}

@@ -1,0 +1,78 @@
+.modalAbonar {
+  display: flex;
+  flex-direction: column;
+  max-height: 88vh;
+  width: 100%;
+  max-width: 620px !important;
+}
+
+.modalBodyScroll {
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+}
+
+.distribucionCard {
+  background: #fafafa;
+  border-radius: 10px;
+  padding: 1rem 1.1rem;
+  margin-top: 1rem;
+}
+
+.distribucionTitulo {
+  margin: 0 0 0.7rem 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.distribucionTablaWrapper {
+  max-height: 220px;
+  overflow-y: auto;
+  overflow-x: auto;
+}
+
+.distribucionTabla {
+  width: 100%;
+  min-width: 480px;
+  border-collapse: collapse;
+}
+
+.distribucionTabla th {
+  position: sticky;
+  top: 0;
+  background: #fafafa;
+}
+
+.distribucionTabla th,
+.distribucionTabla td {
+  padding: 0.5rem 0.6rem;
+  text-align: left;
+  font-size: 0.82rem;
+  border-bottom: 1px solid #eee;
+}
+
+.distribucionExcedente {
+  margin: 0.8rem 0 0 0;
+  color: #b25e09;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.badgePagada {
+  background: #e6f7ec;
+  color: #1c8a4b;
+}
+
+.badgePagadaParcial {
+  background: #e5f0ff;
+  color: #1a56c4;
+}

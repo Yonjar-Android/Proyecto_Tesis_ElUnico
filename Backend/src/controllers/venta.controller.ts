@@ -16,7 +16,8 @@ export const postVenta = async (req: Request, res: Response) => {
             Total,
             RecibidoCordobas,
             Num_referencia,
-            Detalles
+            Detalles,
+            DatosCredito
         } = req.body;
 
         const resultado = await crearVenta(
@@ -26,7 +27,8 @@ export const postVenta = async (req: Request, res: Response) => {
     Number(Total),
     RecibidoCordobas,
     Num_referencia,
-    Detalles
+    Detalles,
+    DatosCredito
 );
 
 res.status(201).json(resultado);

@@ -129,13 +129,6 @@ export const crearCliente = async (
         [nombre, apellido, telefono, direccion, saldo_deuda, Ncliente, Ncedula]
     );
 
-    const idCliente = result.insertId;
-
-    await pool.query(
-    "INSERT INTO abonos (Id_cliente, Total_deuda) VALUES (?, ?)",
-    [idCliente, saldo_deuda]
-    );
-
     return result;
 }
 
