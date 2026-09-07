@@ -3,7 +3,7 @@
   flex-direction: column;
   width: 240px;
   min-height: 100vh;
-  background: #e0475f;
+  background: #0047ab;
   padding: 24px 0;
   box-sizing: border-box;
   font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
@@ -49,7 +49,7 @@
 }
 
 .sidebar-link.active {
-  background: #14161a;
+  background: #ff8c00;
   color: #ffffff;
 }
 
@@ -70,27 +70,30 @@
 .sidebar-submenu {
   display: flex;
   flex-direction: column;
-  background: rgba(0, 0, 0, 0.15);
+  background: rgba(0, 0, 0, 0.18); /* O un azul más oscuro como #003682 */
   padding: 4px 0;
 }
 
 .sidebar-sublink {
+  display: block;
   padding: 10px 24px 10px 58px;
   color: #ffffff;
   text-decoration: none;
   font-size: 13.5px;
-  font-weight: 600;
-  opacity: 0.9;
-  transition: background 0.2s ease, opacity 0.2s ease;
+  font-weight: 500;
+  opacity: 0.85;
+  background: transparent;
+  transition: all 0.2s ease;
 }
 
 .sidebar-sublink:hover {
-  background: rgba(0, 0, 0, 0.15);
+  background: rgba(255, 255, 255, 0.1);
   opacity: 1;
 }
-
 .sidebar-sublink.active {
-  background: #14161a;
+  background: #ff8c00;
+  color: #ffffff;
+  font-weight: 700;
   opacity: 1;
 }
 
@@ -120,7 +123,7 @@
   height: 32px;
   min-width: 32px;
   border-radius: 50%;
-  background: #14161a;
+  background: #ff8c00;
   color: #ffffff;
   font-size: 12px;
   font-weight: 800;
@@ -141,7 +144,7 @@
   right: 12px;
   background: #ffffff;
   border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 10px 30px #ff8c00;
   overflow: hidden;
   z-index: 20;
   animation: dropdown-aparecer 0.15s ease;
@@ -171,7 +174,7 @@
   height: 40px;
   min-width: 40px;
   font-size: 14px;
-  background: #e04759;
+  background: #0047ab;
 }
 
 .usuario-dropdown-nombre {
@@ -209,7 +212,7 @@
 }
 
 .usuario-dropdown-logout {
-  color: #e04759;
+  color: #0047ab;
   border-top: 1px solid #eceef1;
 }
 

@@ -1,7 +1,9 @@
 .egreso-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  /* Fondo oscuro con toque azul y desenfoque */
+  background: rgba(10, 20, 35, 0.6);
+  backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -14,9 +16,11 @@
   max-width: 460px;
   background: #ffffff;
   border-radius: 16px;
+  /* Borde superior en azul corporativo para darle identidad */
+  border-top: 4px solid #0047ab;
   padding: 28px;
   position: relative;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 20px 50px rgba(0, 71, 171, 0.12), 0 10px 30px rgba(0, 0, 0, 0.15);
   font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
 }
 
@@ -28,16 +32,29 @@
   border: none;
   cursor: pointer;
   color: #8b8794;
+  padding: 4px;
+  border-radius: 6px;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.egreso-cerrar:hover {
+  color: #0047ab;
+  background: #f1f5f9;
 }
 
 .egreso-titulo {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   margin: 0 0 20px;
-  font-size: 17px;
+  font-size: 18px;
   font-weight: 800;
   color: #14161a;
+}
+
+/* Si el título tiene un icono */
+.egreso-titulo svg {
+  color: #0047ab;
 }
 
 .egreso-grid {
@@ -54,8 +71,9 @@
   display: block;
   font-size: 12px;
   font-weight: 700;
-  color: #6b6375;
+  color: #4b5563;
   text-transform: uppercase;
+  letter-spacing: 0.03em;
   margin-bottom: 6px;
 }
 
@@ -64,8 +82,8 @@
 .egreso-campo textarea {
   width: 100%;
   box-sizing: border-box;
-  background: #f7f7f8;
-  border: 1px solid #e5e4e7;
+  background: #f8fafc;
+  border: 1.5px solid #e2e8f0;
   border-radius: 10px;
   padding: 11px 14px;
   font-size: 14px;
@@ -73,41 +91,60 @@
   outline: none;
   font-family: inherit;
   resize: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 
+/* Foco en inputs: Resplandor en azul corporativo */
 .egreso-campo input:focus,
 .egreso-campo select:focus,
 .egreso-campo textarea:focus {
-  border-color: #e04759;
+  border-color: #0047ab;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(0, 71, 171, 0.15);
 }
 
 .egreso-monto-wrap {
   display: flex;
   align-items: center;
-  background: #f7f7f8;
-  border: 1px solid #e5e4e7;
+  background: #f8fafc;
+  border: 1.5px solid #e2e8f0;
   border-radius: 10px;
   padding: 0 14px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.egreso-monto-wrap:focus-within {
+  border-color: #0047ab;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(0, 71, 171, 0.15);
 }
 
 .egreso-monto-wrap span {
-  color: #8b8794;
-  font-weight: 600;
-  font-size: 14px;
+  color: #0047ab; /* Símbolo de moneda en azul corporativo */
+  font-weight: 700;
+  font-size: 15px;
 }
 
 .egreso-monto-wrap input {
   border: none;
   background: transparent;
   padding: 11px 8px;
+  width: 100%;
 }
 
+.egreso-monto-wrap input:focus {
+  box-shadow: none;
+  background: transparent;
+}
+
+/* Mensaje de error limpio */
 .egreso-error {
-  color: #e04759;
+  color: #dc2626;
   font-size: 13px;
-  background: #fdeaec;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
   border-radius: 8px;
-  padding: 8px 12px;
+  padding: 9px 13px;
   margin-bottom: 16px;
 }
 
@@ -115,24 +152,33 @@
   display: flex;
   justify-content: flex-end;
   gap: 12px;
+  margin-top: 8px;
 }
 
 .btn-egreso-cancelar {
-  background: none;
-  border: 1px solid #e5e4e7;
-  color: #14161a;
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  color: #475569;
   border-radius: 10px;
   padding: 10px 20px;
   font-size: 13.5px;
   font-weight: 600;
   cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 
+.btn-egreso-cancelar:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+  color: #0f172a;
+}
+
+/* Botón Guardar en Naranja corporativo */
 .btn-egreso-guardar {
   display: flex;
   align-items: center;
-  gap: 6px;
-  background: linear-gradient(135deg, #fc617b, #e04761);
+  gap: 8px;
+  background: linear-gradient(135deg, #ff8c00 0%, #ea7000 100%);
   color: #ffffff;
   border: none;
   border-radius: 10px;
@@ -140,11 +186,24 @@
   font-size: 13.5px;
   font-weight: 700;
   cursor: pointer;
+  box-shadow: 0 4px 12px rgba(255, 140, 0, 0.3);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.btn-egreso-guardar:hover:not(:disabled) {
+  background: linear-gradient(135deg, #ffa029 0%, #ff7300 100%);
+  box-shadow: 0 6px 18px rgba(255, 140, 0, 0.45);
+  transform: translateY(-1px);
+}
+
+.btn-egreso-guardar:active:not(:disabled) {
+  transform: translateY(0);
 }
 
 .btn-egreso-guardar:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+  box-shadow: none;
 }
 
 @media (max-width: 480px) {

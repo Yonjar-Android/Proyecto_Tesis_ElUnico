@@ -16,6 +16,8 @@ export default function AperturaCaja() {
  
   const [tasaCambio, setTasaCambio] = useState(36.62);
   const [totalContado, setTotalContado] = useState(0);
+  const [montoCordobas, setMontoCordobas] = useState(0); // <-- Córdobas contados
+  const [montoDolares, setMontoDolares] = useState(0);     // <-- Dólares contados
   const [, setDesglose] = useState<DesgloseItem[]>([]);
   const [observaciones, setObservaciones] = useState("");
   const [guardando, setGuardando] = useState(false);
@@ -30,11 +32,12 @@ export default function AperturaCaja() {
  
     setGuardando(true);
     try {
-      await abrirCaja(totalContado, tasaCambio, observaciones);
-      await refrescarCaja(); // actualiza el contexto ANTES de navegar, si no, RutaProtegidaCaja te rebota de vuelta aquí
+      // AQUÍ ESTABA EL ERROR: Ahora pasamos los 4 argumentos en orden
+      await abrirCaja(montoCordobas, montoDolares, tasaCambio, observaciones);
+      await refrescarCaja();
       navigate("/caja");
-    } catch (err) {
-      setError("No se pudo abrir la caja. Intenta de nuevo.");
+    } catch (err: any) {
+      setError(err?.response?.data?.message || err?.message || "No se pudo abrir la caja. Intenta de nuevo.");
     } finally {
       setGuardando(false);
     }
@@ -70,9 +73,11 @@ export default function AperturaCaja() {
  
         <ConteoBilletes
           tasaCambio={tasaCambio}
-          onTotalChange={(total, items) => {
+          onTotalChange={(total, items, cordobas, dolares) => {
             setTotalContado(total);
             setDesglose(items);
+            setMontoCordobas(cordobas || 0); // <-- Guarda los córdobas contados
+            setMontoDolares(dolares || 0);   // <-- Guarda los dólares contados
           }}
         />
  

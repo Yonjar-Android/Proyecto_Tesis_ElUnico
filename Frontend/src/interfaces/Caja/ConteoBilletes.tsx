@@ -2,9 +2,15 @@ import { useState, useEffect } from "react";
 import "./ConteoBilletes.css";
 import { formatearMoneda } from "../FuncionAuxiliar";
 
+// 1. Cambia la interfaz de las props al inicio del archivo:
 interface ConteoBilletesProps {
   tasaCambio: number;
-  onTotalChange: (totalCordobas: number, desglose: DesgloseItem[]) => void;
+  onTotalChange: (
+    totalCordobas: number,
+    desglose: DesgloseItem[],
+    subtotalCordobas: number,
+    subtotalDolares: number
+  ) => void;
 }
 
 export interface DesgloseItem {
@@ -34,7 +40,7 @@ export default function ConteoBilletes({ tasaCambio, onTotalChange }: ConteoBill
   const subtotalDolaresEquivalente = subtotalDolares * tasaCambio;
   const granTotal = subtotalCordobas + subtotalDolaresEquivalente;
 
-  useEffect(() => {
+    useEffect(() => {
     const desglose: DesgloseItem[] = [
       ...DENOMINACIONES_CORDOBAS.filter((d) => cantidadesCordobas[d] > 0).map((d) => ({
         moneda: "C$" as const,
@@ -49,7 +55,9 @@ export default function ConteoBilletes({ tasaCambio, onTotalChange }: ConteoBill
         subtotal: cantidadesDolares[d] * d * tasaCambio,
       })),
     ];
-    onTotalChange(granTotal, desglose);
+
+    // PASA granTotal, desglose, subtotalCordobas y subtotalDolares
+    onTotalChange(granTotal, desglose, subtotalCordobas, subtotalDolares);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cantidadesCordobas, cantidadesDolares, tasaCambio]);
 

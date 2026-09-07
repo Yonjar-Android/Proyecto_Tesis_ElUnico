@@ -21,7 +21,7 @@ export const getSesionActiva = async (req: Request, res: Response) => {
 
 export const postAperturaCaja = async (req: Request, res: Response) => {
   try {
-    const { montoAperturaCordobas, tasaCambio, observaciones } = req.body;
+    const { montoAperturaCordobas, montoAperturaDolares, tasaCambio, observaciones } = req.body;
     const idUsuario = (req as any).usuario?.id;
 
     if (!idUsuario) {
@@ -30,9 +30,10 @@ export const postAperturaCaja = async (req: Request, res: Response) => {
 
     const idSesion = await abrirCaja(
       idUsuario,
-      Number(montoAperturaCordobas),
-      Number(tasaCambio),
-      observaciones || ""
+      Number(montoAperturaCordobas) || 0,
+  Number(montoAperturaDolares) || 0,
+  Number(tasaCambio),
+  observaciones
     );
 
     res.status(201).json({ success: true, idSesion });

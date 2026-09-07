@@ -13,7 +13,7 @@ import {
   UserCog,
   Wallet,
 } from "lucide-react";
-import logo from "../assets/LogoTransparente1.png";
+import logo from "../assets/LogoAzulNaranja.png";
 import "./Sidebar.css";
 import { obtenerSesionActiva } from "../services/caja.service";
 import cajaModalStyles from "./CajaModal.module.css";
@@ -141,6 +141,7 @@ export default function Sidebar() {
           <div className="sidebar-submenu">
             <NavLink
               to="/caja"
+               end
               className={`sidebar-sublink ${!cajaSesionActiva ? "sidebar-sublink-disabled" : ""}`}
               onClick={(e) => {
                 if (!cajaSesionActiva) e.preventDefault();

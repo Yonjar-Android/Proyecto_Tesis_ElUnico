@@ -1,18 +1,30 @@
 import { pool } from "../config/database.js";
 
-// Ajusta el import de tu conexión/pool según cómo lo tengas en este archivo
-// import { pool } from "../config/database.js";
-
 export async function crearSesionCaja(
   idUsuario: number,
   montoAperturaCordobas: number,
+  montoAperturaDolares: number, // <-- NUEVO PARÁMETRO
   tasaCambio: number,
   observaciones: string
 ) {
   const [result]: any = await pool.query(
-    `INSERT INTO sesiones_caja (id_usuario, fecha_apertura, monto_apertura_cordobas, tasa_cambio, observaciones, estado)
-     VALUES (?, NOW(), ?, ?, ?, 'Abierta')`,
-    [idUsuario, montoAperturaCordobas, tasaCambio, observaciones]
+    `INSERT INTO sesiones_caja (
+       id_usuario, 
+       fecha_apertura, 
+       monto_apertura_cordobas, 
+       monto_apertura_dolares, 
+       tasa_cambio, 
+       observaciones, 
+       estado
+     )
+     VALUES (?, NOW(), ?, ?, ?, ?, 'Abierta')`,
+    [
+      idUsuario,
+      Number(montoAperturaCordobas) || 0,
+      Number(montoAperturaDolares) || 0,
+      Number(tasaCambio),
+      observaciones || null,
+    ]
   );
   return result.insertId;
 }
@@ -61,6 +73,7 @@ export async function buscarSesionActiva(idUsuario: number) {
 
   return { sesion, egresos, ingresosDia: Number(ingresos[0].total) };
 }
+
 export async function crearEgresoCaja(
   idSesion: number,
   tipoEgreso: string,
@@ -96,6 +109,8 @@ export async function obtenerResumenCierreModel(idUsuario: number) {
     return {
       sesion: null,
       montoApertura: 0,
+      montoAperturaCordobas: 0,
+      montoAperturaDolares: 0,
       ingresosDia: 0,
       totalEgresos: 0,
       efectivoEsperado: 0,
@@ -114,12 +129,25 @@ export async function obtenerResumenCierreModel(idUsuario: number) {
   );
   const ingresosDia = Number(ventasRows[0].total);
 
-  const montoApertura = Number(sesion.monto_apertura_cordobas);
-  const efectivoEsperado = montoApertura + ingresosDia - totalEgresos;
+  // Cálculo consolidado de apertura bimonetaria
+  const montoAperturaCordobas = Number(sesion.monto_apertura_cordobas) || 0;
+  const montoAperturaDolares = Number(sesion.monto_apertura_dolares) || 0;
+  const tasaCambio = Number(sesion.tasa_cambio) || 1;
 
-  return { sesion, montoApertura, ingresosDia, totalEgresos, efectivoEsperado };
+  const montoAperturaTotal = montoAperturaCordobas + (montoAperturaDolares * tasaCambio);
+  const efectivoEsperado = montoAperturaTotal + ingresosDia - totalEgresos;
+
+  return {
+    sesion,
+    montoApertura: montoAperturaTotal,
+    montoAperturaCordobas,
+    montoAperturaDolares,
+    ingresosDia,
+    totalEgresos,
+    efectivoEsperado,
+  };
 }
-  
+
 export async function actualizarEgresoCajaModel(
   idEgreso: number,
   tipoEgreso: string,
