@@ -1,123 +1,166 @@
-.modal-overlay{
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,.45);
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  /* Fondo oscuro con tinte azulado y desenfoque */
+  background: rgba(10, 20, 35, 0.6);
+  backdrop-filter: blur(4px);
 
-    display:flex;
-    justify-content:center;
-    align-items:center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 
-    z-index:999;
+  z-index: 999;
 }
 
-.modal{
-
-    width:620px;
-    background:white;
-    border-radius:24px;
-    overflow:hidden;
-    animation: aparecer .2s ease;
+.modal {
+  width: 620px;
+  max-width: 95vw;
+  background: #ffffff;
+  border-radius: 20px;
+  /* Detalle de acento superior en Azul Corporativo */
+  border-top: 4px solid #0047ab;
+  box-shadow: 0 20px 50px rgba(0, 71, 171, 0.12), 0 10px 30px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  animation: aparecer 0.2s ease;
 }
 
-.modal-header{
-
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-
-    padding:14px 35px;
-    border-bottom:1px solid #eee;
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 32px;
+  border-bottom: 1px solid #e2e8f0;
 }
 
-.modal-header h2{
-
-    font-size:24px;
-    font-weight:bold;
-    color:#4B5563;
-
+.modal-header h2 {
+  font-size: 22px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
 }
 
-.modal-body{
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    padding:35px;
-    
+.modal-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 22px;
+  color: #64748b;
+  padding: 4px;
+  border-radius: 6px;
+  line-height: 1;
+  transition: color 0.15s ease, background 0.15s ease;
 }
 
-.modal-body label{
-    display:inline-block;
-    margin-bottom:12px;
-    font-weight:bold;
-    color:#4B5563;
+.modal-close:hover {
+  color: #0047ab;
+  background: #f1f5f9;
 }
 
-.modal-body input{
-
-    width:100%;
-    padding:16px;
-    border-radius:14px;
-    border:1px solid #ddd;
-    font-size:16px;
-    color: #4B5563;
-    box-sizing:border-box;
-    background:#F9FAFB;
+.modal-body {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 28px 32px;
 }
 
-.modal-footer{
-
-    display:flex;
-    justify-content:space-between;
-    gap:20px;
-
-    padding:28px 35px;
-    border-top:1px solid #eee;
+.modal-body label {
+  display: inline-block;
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
 }
 
-.btn-cancelar{
-
-    flex:1;
-    height:60px;
-    border-radius:14px;
-    border:1px solid #ddd;
-    background:white;
-    cursor:pointer;
-    font-size:20px;
-    color:#4B5563;
+.modal-body input {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1.5px solid #e2e8f0;
+  font-size: 15px;
+  color: #0f172a;
+  box-sizing: border-box;
+  background: #f8fafc;
+  outline: none;
+  font-family: inherit;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 
-.btn-guardar{
-
-    flex:1;
-    height:60px;
-    border:none;
-    border-radius:14px;
-    background:#ef476f;
-    color:white;
-    cursor:pointer;
-    font-size:20px;
-    font-weight:600;
+/* Foco con resplandor en Azul Corporativo */
+.modal-body input:focus {
+  border-color: #0047ab;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(0, 71, 171, 0.15);
 }
 
-.modal-close{
-
-    background:none;
-    border:none;
-    cursor:pointer;
-    font-size:24px;
+.modal-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 32px 28px;
+  border-top: 1px solid #e2e8f0;
 }
 
-@keyframes aparecer{
+/* Botón Cancelar */
+.btn-cancelar {
+  flex: 1;
+  height: 52px;
+  border-radius: 12px;
+  border: 1.5px solid #cbd5e1;
+  background: #ffffff;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  color: #475569;
+  transition: all 0.15s ease;
+}
 
-    from{
+.btn-cancelar:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+  color: #0f172a;
+}
 
-        opacity:0;
-        transform:translateY(-10px);
-    }
+/* Botón Guardar (Naranja Corporativo de Acción) */
+.btn-guardar {
+  flex: 1;
+  height: 52px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #ff8c00 0%, #ea7000 100%);
+  color: #ffffff;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  box-shadow: 0 4px 12px rgba(255, 140, 0, 0.35);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
 
-    to{
+.btn-guardar:hover:not(:disabled) {
+  background: linear-gradient(135deg, #ffa029 0%, #ff7300 100%);
+  box-shadow: 0 6px 18px rgba(255, 140, 0, 0.45);
+  transform: translateY(-1px);
+}
 
-        opacity:1;
-        transform:translateY(0);
-    }
+.btn-guardar:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn-guardar:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+@keyframes aparecer {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
