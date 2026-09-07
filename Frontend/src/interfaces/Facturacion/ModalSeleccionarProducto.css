@@ -1,23 +1,37 @@
 /* Reutiliza .modal-overlay, .modal, .modal-close, .error-text ya existentes. */
 
-.seleccion-modal--ancho{
-  width: 740px;
+.seleccion-modal--ancho {
+  width: 760px;
+  max-width: 95vw;
 }
 
 .seleccion-modal .modal-header {
   padding: 18px 24px 14px;
+  border-bottom: 1px solid #e2e8f0;
 }
 
 .modal-close {
-  color:#111;
+  color: #64748b;
+  transition: color 0.15s ease;
+}
+
+.modal-close:hover {
+  color: #0047ab;
 }
 
 .seleccion-modal .modal-header h2 {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 1.1rem;
-  color: #111;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+}
+
+/* Icono del título en azul corporativo */
+.seleccion-modal .modal-header h2 svg {
+  color: #0047ab;
 }
 
 .seleccion-body {
@@ -25,20 +39,25 @@
   overflow-y: auto;
 }
 
+/* Buscador con foco en Azul Corporativo */
 .seleccion-buscador {
   width: 100%;
   box-sizing: border-box;
-  border: 1px solid #d1d5db;
+  background: #f8fafc;
+  border: 1.5px solid #e2e8f0;
   border-radius: 10px;
-  padding: 0.7rem 1rem;
+  padding: 0.75rem 1rem;
   font-size: 0.9rem;
+  color: #0f172a;
   margin-bottom: 14px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 
 .seleccion-buscador:focus {
   outline: none;
-  border-color: #6d5ef8;
-  box-shadow: 0 0 0 3px rgba(109, 94, 248, 0.12);
+  background: #ffffff;
+  border-color: #0047ab;
+  box-shadow: 0 0 0 3px rgba(0, 71, 171, 0.15);
 }
 
 .seleccion-tabla {
@@ -46,30 +65,57 @@
   border-collapse: collapse;
 }
 
-.seleccion-vacio {
-  text-align: center;
-  color: #9ca3af;
-  font-size: 0.85rem;
-  padding: 1.5rem 0;
+.seleccion-tabla th {
+  background-color: #f8fafc;
+  color: #475569;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 10px 12px;
+  border-bottom: 1px solid #e2e8f0;
 }
 
+.seleccion-tabla td {
+  padding: 11px 12px;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 0.88rem;
+  color: #1e293b;
+}
+
+.seleccion-tabla tr:hover td {
+  background-color: #f8fafc;
+}
+
+.seleccion-vacio {
+  text-align: center;
+  color: #94a3b8;
+  font-size: 0.88rem;
+  padding: 2rem 0;
+}
+
+/* Botón Seleccionar */
 .seleccion-btn {
-  background-color: #eff6ff;
-  color: #2563eb;
-  border: none;
+  background-color: rgba(0, 71, 171, 0.08);
+  color: #0047ab;
+  border: 1px solid rgba(0, 71, 171, 0.2);
   border-radius: 8px;
   padding: 0.45rem 1rem;
   font-size: 0.85rem;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
+  transition: all 0.15s ease;
 }
 
-.seleccion-btn:hover {
-  background-color: #dbeafe;
+.seleccion-btn:hover:not(:disabled) {
+  background-color: #0047ab;
+  color: #ffffff;
+  border-color: #0047ab;
+  box-shadow: 0 2px 8px rgba(0, 71, 171, 0.25);
 }
 
 .seleccion-btn:disabled {
-    opacity: 0.5;
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
@@ -78,59 +124,43 @@
   align-items: center;
   justify-content: space-between;
   padding: 14px 24px 18px;
-  border-top: 1px solid #f1f5f9;
+  border-top: 1px solid #e2e8f0;
   flex-wrap: wrap;
   gap: 0.6rem;
 }
 
 .seleccion-count {
-  font-size: 0.8rem;
-  color: #6b7280;
+  font-size: 0.82rem;
+  color: #64748b;
+  font-weight: 500;
 }
 
 .seleccion-pagination {
   display: flex;
-  gap: 0.3rem;
+  gap: 0.35rem;
 }
 
+/* Botones de Paginación limpios y modernos */
 .seleccion-page-btn {
-  background-color: #e5484d;
-  color: #fff;
-  border: none;
+  background-color: #ffffff;
+  color: #475569;
+  border: 1px solid #cbd5e1;
   border-radius: 6px;
-  width: 2rem;
-  height: 2rem;
-  font-size: 0.8rem;
-  font-weight: 700;
+  width: 2.1rem;
+  height: 2.1rem;
+  font-size: 0.82rem;
+  font-weight: 600;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
 }
 
-.seleccion-cantidad-input {
-  box-sizing: border-box;
-  border: 1px solid #e5e7eb;
-  background: #f9fafb;
-  border-radius: 8px;
-  padding: 0.65rem 0.85rem;
-  font-size: 0.9rem;
-  font-family: inherit;
-  color: #111;
-  width: 70px;
-  text-align: center;
-}
-
-.seleccion-cantidad-input:focus {
-  outline: none;
-  border-color: #e5484d;
-  background: #fff;
-}
-
-.seleccion-cantidad-input:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.seleccion-page-btn:hover {
-  background-color: #cf3d42;
+.seleccion-page-btn:hover:not(:disabled) {
+  background-color: #f1f5f9;
+  border-color: #94a3b8;
+  color: #0f172a;
 }
 
 .seleccion-page-btn:disabled {
@@ -138,8 +168,40 @@
   cursor: not-allowed;
 }
 
+/* Página activa en Azul Corporativo */
 .seleccion-page-btn--active {
-  background-color: #111;
+  background-color: #0047ab !important;
+  color: #ffffff !important;
+  border-color: #0047ab !important;
+  font-weight: 700;
+  box-shadow: 0 2px 6px rgba(0, 71, 171, 0.25);
+}
+
+/* Input de Cantidad con foco en Azul Corporativo */
+.seleccion-cantidad-input {
+  box-sizing: border-box;
+  border: 1.5px solid #cbd5e1;
+  background: #f8fafc;
+  border-radius: 8px;
+  padding: 0.55rem 0.75rem;
+  font-size: 0.9rem;
+  font-family: inherit;
+  color: #0f172a;
+  width: 70px;
+  text-align: center;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.seleccion-cantidad-input:focus {
+  border-color: #0047ab;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(0, 71, 171, 0.15);
+}
+
+.seleccion-cantidad-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .seleccion-th-stock {
@@ -148,25 +210,28 @@
 
 .seleccion-nombre-marca {
   display: block;
-  font-size: 0.72rem;
-  font-weight: 400;
-  color: #9ca3af;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #64748b;
   margin-top: 2px;
 }
 
+/* Píldoras de Stock nítidas */
 .seleccion-stock-pill {
   display: inline-block;
   min-width: 1.6rem;
   text-align: center;
   border-radius: 6px;
-  padding: 0.2rem 0.55rem;
+  padding: 0.2rem 0.6rem;
   font-size: 0.8rem;
   font-weight: 700;
-  background-color: #d1fae5;
-  color: #059669;
+  background-color: #f0fdf4;
+  color: #16a34a;
+  border: 1px solid #bbf7d0;
 }
 
 .seleccion-stock-pill--bajo {
-  background-color: #fef3c7;
+  background-color: #fffbeb;
   color: #b45309;
+  border: 1px solid #fde68a;
 }
