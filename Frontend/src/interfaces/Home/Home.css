@@ -2,15 +2,23 @@
   position: relative;
   width: 100%;
   min-height: 100vh;
-  background-image: url("../../assets/fondopantallaprincipal.png");
-  background-size: cover;
-  background-position: center;
+  background-color: #ffffff; /* Asegura fondo blanco alrededor de la imagen */
+  background-image: url("../../assets/EL\ UNICO.png");
+  
+  /* 1. Hace el fondo más pequeño y responsive (máx 520px de ancho) */
+  background-size: clamp(300px, 55vw, 680px) auto;
+  
+  /* 2. Desplaza la imagen hacia la zona inferior/media para despejar arriba */
+  background-position: center 58%;
   background-repeat: no-repeat;
+  
   display: flex;
   align-items: flex-start;
   justify-content: center;
   box-sizing: border-box;
-  padding-top: 60px;
+  
+  /* 3. Coloca el mensaje más arriba */
+  padding-top: 28px;
 }
 
 .home-overlay {
@@ -18,10 +26,12 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
-  padding: 24px 40px;
-  background: rgba(255, 255, 255, 0.75);
-  border-radius: 20px;
-  backdrop-filter: blur(4px);
+  padding: 16px 32px;
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(0, 71, 171, 0.12); /* Toque sutil con el azul de la marca */
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  backdrop-filter: blur(6px);
 }
 
 .home-welcome {
@@ -30,20 +40,26 @@
 
 .home-welcome h1 {
   font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-  font-size: 28px;
+  font-size: 26px;
   font-weight: 800;
-  color: #14161a;
+  color: #0047ab; /* Azul corporativo para un mejor acabado */
   margin: 0 0 4px;
 }
 
 .home-welcome p {
   font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-  font-size: 15px;
+  font-size: 14.5px;
   color: #4a4f57;
   margin: 0;
 }
 
 @media (max-width: 768px) {
+  .home-container {
+    padding-top: 20px;
+    background-size: 320px auto;
+    background-position: center 72%;
+  }
+
   .home-welcome h1 {
     font-size: 22px;
   }

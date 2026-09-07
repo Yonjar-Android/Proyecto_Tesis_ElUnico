@@ -19,11 +19,13 @@ export const obtenerSesionActiva = async () => {
 
 export const abrirCaja = async (
   montoAperturaCordobas: number,
+  montoAperturaDolares: number, // <-- NUEVO
   tasaCambio: number,
   observaciones: string
 ) => {
   const response = await axiosInstance.post(`${API}/apertura`, {
     montoAperturaCordobas,
+    montoAperturaDolares, // <-- Se envía al backend
     tasaCambio,
     observaciones,
   });

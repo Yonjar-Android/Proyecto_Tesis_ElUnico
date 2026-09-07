@@ -1,13 +1,14 @@
 .conteo-billetes {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 24px;
+  gap: 20px;
 }
 
 .conteo-columna {
-  background: #f7f7f8;
-  border-radius: 12px;
-  padding: 16px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 18px;
 }
 
 .conteo-titulo {
@@ -16,46 +17,59 @@
   gap: 8px;
   font-size: 14px;
   font-weight: 700;
-  color: #14161a;
-  margin: 0 0 12px;
+  color: #0f172a;
+  margin: 0 0 14px;
 }
 
-.punto-cordobas,
-.punto-dolares {
-  width: 8px;
-  height: 8px;
+/* Indicador para Córdobas (Azul corporativo) */
+.punto-cordobas {
+  width: 9px;
+  height: 9px;
   border-radius: 50%;
-  background: #e04759;
+  background: #0047ab;
   display: inline-block;
+  box-shadow: 0 0 0 2px rgba(0, 71, 171, 0.2);
 }
 
+/* Indicador para Dólares (Verde divisa) */
 .punto-dolares {
-  background: #14161a;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #16a34a;
+  display: inline-block;
+  box-shadow: 0 0 0 2px rgba(22, 163, 74, 0.2);
 }
 
 .conteo-subtotal-mini {
   margin-left: auto;
-  color: #e04759;
+  color: #0047ab; /* Azul en vez del rosado anterior */
   font-weight: 800;
+  font-size: 13.5px;
 }
 
 .conteo-tasa {
   margin-left: auto;
-  font-size: 11.5px;
-  color: #8b8794;
-  font-weight: 500;
+  font-size: 12px;
+  color: #64748b;
+  font-weight: 600;
 }
 
 .conteo-fila {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 6px 0;
+  padding: 8px 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.conteo-fila:last-of-type {
+  border-bottom: none;
 }
 
 .conteo-etiqueta {
   font-size: 13.5px;
-  color: #4a4f57;
+  color: #334155;
   font-weight: 600;
 }
 
@@ -65,67 +79,101 @@
   gap: 6px;
 }
 
+/* Botones + y - */
 .conteo-controles button {
-  width: 26px;
-  height: 26px;
+  width: 28px;
+  height: 28px;
   border-radius: 6px;
-  border: 1px solid #e5e4e7;
+  border: 1px solid #cbd5e1;
   background: #ffffff;
   cursor: pointer;
   font-size: 15px;
-  color: #14161a;
+  font-weight: 700;
+  color: #334155;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
 }
 
+.conteo-controles button:hover {
+  background: #f0f4fc;
+  border-color: #0047ab;
+  color: #0047ab;
+}
+
+.conteo-controles button:active {
+  background: #e2ebf9;
+}
+
+/* Input numérico */
 .conteo-controles input {
   width: 52px;
   text-align: center;
-  border: 1px solid #e5e4e7;
+  border: 1.5px solid #cbd5e1;
   border-radius: 6px;
   padding: 5px;
   font-size: 13.5px;
+  font-weight: 600;
+  color: #0f172a;
+  background: #ffffff;
   outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.conteo-controles input:focus {
+  border-color: #0047ab;
+  box-shadow: 0 0 0 2px rgba(0, 71, 171, 0.2);
 }
 
 .conteo-subtotal-equiv {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  margin-top: 12px;
+  margin-top: 14px;
   padding-top: 12px;
-  border-top: 1px solid #e5e4e7;
+  border-top: 1px solid #e2e8f0;
   font-size: 12.5px;
-  color: #6b6375;
+  color: #64748b;
 }
 
 .conteo-subtotal-equiv strong {
-  font-size: 15px;
-  color: #14161a;
+  font-size: 16px;
+  color: #0047ab;
+  font-weight: 800;
 }
 
+/* Gran Total del Conteo: Destacado en Azul El Único */
 .conteo-gran-total {
   grid-column: 1 / -1;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #14161a;
+  background: #0047ab;
   color: #ffffff;
-  border-radius: 12px;
+  border-radius: 14px;
   padding: 18px 24px;
+  box-shadow: 0 8px 20px rgba(0, 71, 171, 0.25);
 }
 
 .conteo-gran-total span:first-child {
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 700;
+  letter-spacing: 0.02em;
 }
 
+/* Cifra final destacada en Naranja corporativo */
 .conteo-gran-total strong {
-  font-size: 22px;
-  color: #e04759;
+  font-size: 24px;
+  font-weight: 800;
+  color: #ffa500;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
 }
 
 .conteo-total-usd {
   font-size: 12.5px;
-  color: #9ca3af;
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 500;
 }
 
 @media (max-width: 720px) {

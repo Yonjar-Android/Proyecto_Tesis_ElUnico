@@ -23,7 +23,7 @@ export default function Home() {
           <h1>
             {usuario ? `¡Bienvenido, ${usuario.Nombre_Usuario}!` : "¡Bienvenido!"}
           </h1>
-          <p>Sistema de gestión de repuestos de moto</p>
+          <p>Sistema de venta, servicios y gestión de repuestos de moto </p>
         </div>
 
       </div>

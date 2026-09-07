@@ -11,16 +11,29 @@ import {
 export async function abrirCaja(
   idUsuario: number,
   montoAperturaCordobas: number,
+  montoAperturaDolares: number, // <-- NUEVO
   tasaCambio: number,
   observaciones: string
 ) {
-  if (montoAperturaCordobas <= 0 || isNaN(montoAperturaCordobas)) {
+  const totalEnCordobas =
+    (Number(montoAperturaCordobas) || 0) +
+    (Number(montoAperturaDolares) || 0) * tasaCambio;
+
+  // Valida que el TOTAL contado (en C$ o USD) sea mayor a 0
+  if (totalEnCordobas <= 0 || isNaN(totalEnCordobas)) {
     throw new Error("El monto de apertura debe ser mayor a 0.");
   }
   if (tasaCambio <= 0 || isNaN(tasaCambio)) {
     throw new Error("La tasa de cambio debe ser válida.");
   }
-  return await crearSesionCaja(idUsuario, montoAperturaCordobas, tasaCambio, observaciones);
+
+  return await crearSesionCaja(
+    idUsuario,
+    montoAperturaCordobas || 0,
+    montoAperturaDolares || 0, // <-- Pasa los dólares al modelo
+    tasaCambio,
+    observaciones
+  );
 }
 
 export async function obtenerSesionActiva(idUsuario: number) {
