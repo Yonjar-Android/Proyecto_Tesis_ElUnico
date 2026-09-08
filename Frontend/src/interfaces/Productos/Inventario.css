@@ -207,41 +207,39 @@
   font-weight: 500;
 }
 
-/* Paginación limpia */
+/* Paginación estilo píldora (con «, ‹, ›, ») */
 .inventario-pagination {
   display: flex;
-  gap: 0.35rem;
+  align-items: center;
+  gap: 0.4rem;
   flex-wrap: wrap;
 }
 
 .inventario-page-btn {
-  background-color: #ffffff;
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
-  padding: 0.4rem 0.8rem;
-  font-size: 0.82rem;
+  background-color: #fbd7a8;
+  color: #c2740a;
+  border: none;
+  border-radius: 8px;
+  width: 2.1rem;
+  height: 2.1rem;
+  font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
-  color: #475569;
-  transition: all 0.15s ease;
+  transition: background-color 0.15s ease;
 }
 
 .inventario-page-btn:hover:not(:disabled) {
-  background-color: #f1f5f9;
-  border-color: #94a3b8;
-  color: #0f172a;
+  background-color: #f9c886;
 }
 
 .inventario-page-btn:disabled {
-  opacity: 0.4;
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
 /* Botón de página activo en Azul Corporativo */
 .inventario-page-btn--active {
   background-color: #0047ab !important;
-  border-color: #0047ab !important;
   color: #ffffff !important;
   font-weight: 700;
-  box-shadow: 0 2px 6px rgba(0, 71, 171, 0.25);
 }

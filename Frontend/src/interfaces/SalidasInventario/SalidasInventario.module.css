@@ -25,7 +25,7 @@
   margin: 0;
   font-size: 28px;
   font-weight: 700;
-  color: #111827;
+  color: #0047ab;
 }
 
 .header_help {
@@ -98,7 +98,7 @@
 .campo input[type="number"]:focus,
 .campo select:focus,
 .campo textarea:focus {
-  border-color: #9ca3af;
+  border-color: #0047ab;
 }
 
 .campo textarea {
@@ -139,7 +139,7 @@
 }
 
 .btnAgregar {
-  background-color: #e5484d;
+  background-color: #ff8c00;
   color: #ffffff;
   border: none;
   border-radius: 8px;
@@ -153,7 +153,7 @@
 }
 
 .btnAgregar:hover {
-  background-color: #d33c41;
+  background-color: #ea7000;
 }
 
 /* Tabla de items a registrar */
@@ -294,7 +294,7 @@
   margin: 0;
   font-size: 18px;
   font-weight: 700;
-  color: #111827;
+  color: #0047ab;
 }
 
 .estadoBadge {
@@ -317,8 +317,8 @@
 }
 
 .estadoPendiente {
-  background-color: #fdf3e3;
-  color: #b45309;
+  background-color: #fff3e0;
+  color: #ea7000;
 }
 
 /* Responsive */
