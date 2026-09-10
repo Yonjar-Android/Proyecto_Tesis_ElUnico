@@ -158,10 +158,22 @@ const pasosTour: Step[] = [
             <div className="inventario-pagination">
               <button
                 className="inventario-page-btn"
+                onClick={() => setCurrentPage(1)}
+                disabled={currentPage === 1}
+                aria-label="Primera página"
+                title="Primera página"
+              >
+                «
+              </button>
+
+              <button
+                className="inventario-page-btn"
                 onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
+                aria-label="Página anterior"
+                title="Anterior"
               >
-                Anterior
+                ‹
               </button>
 
               {Array.from(
@@ -194,8 +206,20 @@ const pasosTour: Step[] = [
                 className="inventario-page-btn"
                 onClick={() => setCurrentPage((p) => Math.min(lastPage, p + 1))}
                 disabled={currentPage === lastPage || lastPage === 0}
+                aria-label="Página siguiente"
+                title="Siguiente"
               >
-                Siguiente
+                ›
+              </button>
+
+              <button
+                className="inventario-page-btn"
+                onClick={() => setCurrentPage(lastPage)}
+                disabled={currentPage === lastPage || lastPage === 0}
+                aria-label="Última página"
+                title="Última página"
+              >
+                »
               </button>
             </div>
           </div>
