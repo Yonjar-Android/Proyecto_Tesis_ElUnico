@@ -174,17 +174,6 @@ return (
                 <td className="cliente-td cliente-td-actions">
 
                   <button
-                        className="cliente-abonar-btn"
-                        onClick={() => {
-                            setClienteSeleccionado(cliente);
-                            setModalAbonarAbierto(true);
-                       }}
-                       disabled={cliente.Saldo_Deuda == 0}
-                    >
-                        <CreditCard size={24} /> Abonar
-                  </button>
-
-                  <button
                         className="cliente-editar-btn"
                         onClick={() => {
                             setClienteSeleccionado(cliente);

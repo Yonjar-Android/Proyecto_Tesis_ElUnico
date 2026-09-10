@@ -4,7 +4,7 @@ import { crearDevolucion} from "../../services/devoluciones.service";
 import type {CrearDevolucionData} from "../../services/devoluciones.service"
 import { buscarFacturaParaDevolucion} from "../../services/venta.service";
 import Notificacion, { type TipoNotificacion } from "../../components/Notification/Notification";
-import { formatearMoneda } from "../FuncionAuxiliar";
+import { formatearMoneda, obtenerFechaHoy } from "../FuncionAuxiliar";
 import { Joyride, type Step } from "react-joyride";
 import { HelpCircle } from "lucide-react";
 
@@ -99,6 +99,18 @@ function Devoluciones() {
     const data = await buscarFacturaParaDevolucion(
         Number(numeroFactura.trim())
     );
+
+    const fechaCompra = new Date(data.fecha);
+    const fechaHoy = new Date();
+
+    const diferenciaMs = fechaHoy.getTime() - fechaCompra.getTime();
+    const diferenciaDias = diferenciaMs / (1000 * 60 * 60 * 24);
+
+    if (diferenciaDias > 1) {
+      setError("La devolución no es válida. El plazo máximo es de 1 día después de la compra.");
+      return;
+    }
+
     setFactura(data);
     setItems(data.items.map((item: ItemFactura) => ({ ...item, cantidadADevolver: 0 })));
 

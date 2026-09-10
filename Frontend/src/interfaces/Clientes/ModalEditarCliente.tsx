@@ -226,7 +226,6 @@ function ModalEditarCliente({ abierto, cliente, onClose, onEditar }: Props) {
 
           <div className="separador-opcional">Información opcional</div>
 
-          <div className="campo-fila">
             <div className="campo">
               <label>Teléfono</label>
               <div className="input-con-icono">
@@ -240,24 +239,6 @@ function ModalEditarCliente({ abierto, cliente, onClose, onEditar }: Props) {
                   onChange={(e) => setTelefono(e.target.value)}
                 />
               </div>
-            </div>
-
-            <div className="campo">
-              <label>Deuda de Crédito</label>
-              <div className="input-con-icono">
-                <span className="icono">
-                  <IconoTarjeta />
-                </span>
-                <input
-                  type="number"
-                  min={0}
-                  step={1}
-                  readOnly
-                  value={saldo_deuda}
-                  onChange={(e) => setSaldo_Deuda(e.target.value)}
-                />
-              </div>
-            </div>
           </div>
 
           <div className="campo">

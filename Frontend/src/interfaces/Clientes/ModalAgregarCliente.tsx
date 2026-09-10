@@ -221,7 +221,7 @@ if (Number(ncliente) <= 0) {
 
           <div className="separador-opcional">Información opcional</div>
 
-          <div className="campo-fila">
+
             <div className="campo">
               <label>Teléfono</label>
               <div className="input-con-icono">
@@ -235,23 +235,6 @@ if (Number(ncliente) <= 0) {
                   onChange={(e) => setTelefono(e.target.value)}
                 />
               </div>
-            </div>
-
-            <div className="campo">
-              <label>Deuda de Crédito</label>
-              <div className="input-con-icono">
-                <span className="icono">
-                  <IconoTarjeta />
-                </span>
-                <input
-                  type="number"
-                  value={saldo_deuda}
-                  step={1}
-                  min={0}
-                  onChange={(e) => setSaldo_Deuda(e.target.value)}
-                />
-              </div>
-            </div>
           </div>
 
           <div className="campo">

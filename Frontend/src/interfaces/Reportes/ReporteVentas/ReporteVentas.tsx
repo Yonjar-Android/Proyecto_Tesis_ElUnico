@@ -6,7 +6,7 @@ import { obtenerReporteVentasPorPeriodo, /*exportarReporteVentas*/ } from "../..
 import type { VentaReporte } from "../../../models/VentaReportes";
 import type { Cliente } from "../../../models/Cliente";
 import type { PaginatedResponse } from "../../../models/PaginatedResponse";
-import { formatearMoneda, formatearFecha } from "../../FuncionAuxiliar";
+import { formatearMoneda, formatearFecha, obtenerFechaHoy } from "../../FuncionAuxiliar";
 import ModalConfirmarImpresion from "../../Facturacion/ModalConfirmarImpresion"; // ajusta ruta
 import type { DatosRecibo } from "../../../models/Recibo";
 import { Printer, HelpCircle } from "lucide-react";
@@ -26,14 +26,6 @@ export interface RespuestaReporteVentas extends PaginatedResponse<VentaReporte> 
   TotalPendientePago:number;
   TotalAbonado:number;
 }
-
-const obtenerFechaHoy = (): string => {
-  const hoy = new Date();
-  const year = hoy.getFullYear();
-  const month = String(hoy.getMonth() + 1).padStart(2, "0");
-  const day = String(hoy.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-};
 
 function ReporteVentas() {
   const [ventas, setVentas] = useState<VentaReporte[]>([]);

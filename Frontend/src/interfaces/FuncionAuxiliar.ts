@@ -37,3 +37,11 @@ export function formatearFecha(fecha: Date | string) {
   const anio = fecha.getFullYear();
   return `${dia}-${mes}-${anio}`;
 }
+
+export const obtenerFechaHoy = (): string => {
+  const hoy = new Date();
+  const year = hoy.getFullYear();
+  const month = String(hoy.getMonth() + 1).padStart(2, "0");
+  const day = String(hoy.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};

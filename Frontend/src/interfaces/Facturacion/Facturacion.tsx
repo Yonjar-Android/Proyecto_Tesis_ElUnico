@@ -9,7 +9,7 @@ import ModalConfirmarVenta, {
 import type { Cliente } from "../../models/Cliente";
 import type { ProductoListado } from "../../models/ProductoListado";
 import type { Servicio } from "../../models/Servicio";
-import { crearVenta, obtenerReciboVenta } from "../../services/venta.service";
+import { crearVenta, obtenerReciboVenta, verificarLimiteCreditoPendiente  } from "../../services/venta.service";
 import { HelpCircle, SquarePen, Trash2 } from "lucide-react";
 import { obtenerSesionActiva } from "../../services/caja.service";
 import { formatearMoneda } from "../FuncionAuxiliar"
@@ -414,6 +414,55 @@ const confirmarVenta = async (
     setPrecio("0.00");
   };
 
+  const validarLimiteCreditoCliente = async (idCliente: number): Promise<boolean> => {
+  try {
+    await verificarLimiteCreditoPendiente(idCliente);
+    return true;
+  } catch (error: any) {
+    setError(
+      error?.response?.data?.mensaje ??
+        error?.message ??
+        "No fue posible verificar el límite de crédito del cliente."
+    );
+    return false;
+  }
+};
+
+const manejarCambioTipoPago = async (nuevoTipo: string) => {
+  if (nuevoTipo === "Credito") {
+    const puedeCredito = await validarLimiteCreditoCliente(Number(clienteSeleccionado.id));
+    if (!puedeCredito) return;
+  }
+
+  setError("");
+  setTipoPago(nuevoTipo);
+  if (nuevoTipo !== "Transferencia") {
+    setNumReferencia("");
+  }
+  if (nuevoTipo === "Credito") {
+    setFechaInicio(calcularFechaSiguienteDia());
+  }
+};
+
+const manejarSeleccionCliente = async (cliente: Cliente) => {
+  if (tipoPago === "Credito" && cliente.id !== 10) {
+    const puedeCredito = await validarLimiteCreditoCliente(Number(cliente.id));
+    if (!puedeCredito) {
+      setTipoPago("Contado");
+      setClienteSeleccionado(cliente);
+      setModalClienteAbierto(false);
+      return;
+    }
+  }
+
+  setClienteSeleccionado(cliente);
+  if (cliente.id === 10 && tipoPago === "Credito") {
+    setTipoPago("Contado");
+  }
+  setError("");
+  setModalClienteAbierto(false);
+};
+
   return (
     <div className="factura-page">
 
@@ -580,18 +629,9 @@ const confirmarVenta = async (
         Tipo de Pago <span style={{ color: "#e5484d" }}>*</span>
       </label>
       <select
-        value={tipoPago}
-        onChange={(e) => {
-          const nuevoTipo = e.target.value;
-          setTipoPago(nuevoTipo);
-          if (nuevoTipo !== "Transferencia") {
-            setNumReferencia("");
-          }
-          if (nuevoTipo === "Credito") {
-            setFechaInicio(calcularFechaSiguienteDia());
-          }
-        }}
-      >
+  value={tipoPago}
+  onChange={(e) => manejarCambioTipoPago(e.target.value)}
+>
         <option value="Contado">Contado</option>
         <option value="Credito" disabled={clienteSeleccionado.id === 10}>
           Crédito
@@ -843,16 +883,10 @@ const confirmarVenta = async (
       />
 
       <ModalSeleccionarCliente
-        abierto={modalClienteAbierto}
-        onClose={() => setModalClienteAbierto(false)}
-        onSeleccionar={(cliente) => {
-          setClienteSeleccionado(cliente);
-          if (cliente.id === 10 && tipoPago === "Credito") {
-            setTipoPago("Contado");
-          }
-          setModalClienteAbierto(false);
-        }}
-      />
+  abierto={modalClienteAbierto}
+  onClose={() => setModalClienteAbierto(false)}
+  onSeleccionar={manejarSeleccionCliente}
+/>
 
       <ModalConfirmarVenta
         abierto={modalConfirmarAbierto}

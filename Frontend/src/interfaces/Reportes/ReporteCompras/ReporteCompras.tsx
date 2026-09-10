@@ -5,7 +5,7 @@ import { IconoCuboOutline, IconoCarrito } from "../IconosReporte";
 import { obtenerReporteComprasPorPeriodo, /*exportarReporteCompras*/ } from "../../../services/reporte.service";
 import type { Proveedor } from "../../../models/Proveedor";
 import type { CompraReporte, RespuestaReporteCompras } from "../../../models/CompraReporte";
-import { formatearMoneda, formatearFecha } from "../../FuncionAuxiliar";
+import { formatearMoneda, formatearFecha, obtenerFechaHoy } from "../../FuncionAuxiliar";
 import ModalDetalleCompra, { type DetalleCompraDTO } from "./ModalDetalleCompras";
 import { FileText, HelpCircle } from "lucide-react";
 import { obtenerDetalleCompra } from "../../../services/compra.service";
@@ -15,14 +15,6 @@ import {
     descargarArchivoExcel 
 } from "../../../services/reporteExcel.service.js";
 import { Joyride, type Step } from "react-joyride";
-
-const obtenerFechaHoy = (): string => {
-  const hoy = new Date();
-  const year = hoy.getFullYear();
-  const month = String(hoy.getMonth() + 1).padStart(2, "0");
-  const day = String(hoy.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-};
 
 function ReporteCompras() {
   const [compras, setCompras] = useState<CompraReporte[]>([]);

@@ -530,3 +530,31 @@ const devoluciones = Array.from(devolucionesMap.values());
         connection.release();
     }
 };
+
+const LIMITE_VENTAS_CREDITO_PENDIENTES = 2;
+
+export const verificarLimiteCreditoPendiente = async (
+    idCliente: number
+): Promise<number> => {
+
+    const [rows]: any = await pool.query(
+        `
+        SELECT COUNT(*) AS Total
+        FROM ventas v
+        WHERE v.Id_cliente = ?
+          AND v.Tipo_Pago = 'CREDITO'
+          AND v.Estado = 'Pendiente'
+        `,
+        [idCliente]
+    );
+
+    const ventasPendientes = rows[0].Total;
+
+    if (ventasPendientes >= LIMITE_VENTAS_CREDITO_PENDIENTES) {
+        throw new Error(
+            `El cliente ya cuenta con ${ventasPendientes} ventas al crédito pendientes de pago, no es posible registrar otra venta al crédito.`
+        );
+    }
+
+    return ventasPendientes;
+};

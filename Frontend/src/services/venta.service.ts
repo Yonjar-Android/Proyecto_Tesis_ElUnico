@@ -61,3 +61,13 @@ export const obtenerReciboVenta = async (idVenta: number) => {
 
     return response.data;
 };
+
+export const verificarLimiteCreditoPendiente = async (idCliente: number) => {
+    const response = await axiosInstance.get(`${API}/${idCliente}/ventasPendientes`, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
+
+    return response.data;
+};

@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { crearVenta, buscarFacturaParaDevolucion, obtenerReciboVenta } from "../services/venta.service.js";
+import { crearVenta, buscarFacturaParaDevolucion, obtenerReciboVenta, verificarLimiteCreditoPendiente } from "../services/venta.service.js";
 
 export const postVenta = async (req: Request, res: Response) => {
     try {
@@ -93,3 +93,25 @@ export const getReciboVenta = async (
 
     }
 };
+
+export const getVentasPendientes= async (
+    req: Request,
+    res: Response
+) => {
+
+    try {
+
+        const { id } = req.params;
+
+        const resultado = await verificarLimiteCreditoPendiente(
+            Number(id)
+        );
+
+        res.json(resultado);
+
+    } catch(error:any){
+        res.status(400).json({
+            mensaje: error.message
+        });
+    }
+}
