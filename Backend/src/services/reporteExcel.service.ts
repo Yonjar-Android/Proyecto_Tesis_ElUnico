@@ -1,5 +1,5 @@
 import ExcelJS from "exceljs";
-import { obtenerReporteProductosStock, obtenerReporteClientesConDeuda, obtenerReporteVentas, obtenerReporteCompras }
+import { obtenerReporteProductosStock, obtenerReporteFacturasConDeuda, obtenerReporteVentas, obtenerReporteCompras }
  from "./reporte.service.js";
 import { generateExcelReport, ReportType } from "../utils/excelGenerator.js";
 
@@ -23,7 +23,7 @@ export const generateClientesDeudaExcel = async (
     search: string = ""
 ): Promise<ExcelJS.Buffer> => {
     // Obtener todos los datos sin paginación
-    const reportData = await obtenerReporteClientesConDeuda(
+    const reportData = await obtenerReporteFacturasConDeuda(
         search,
         1,
         1000000 // Un número grande para obtener todos

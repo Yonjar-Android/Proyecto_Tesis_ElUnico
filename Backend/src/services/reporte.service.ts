@@ -101,7 +101,7 @@ export const obtenerReporteProductosStock = async (
     };
 };
 
-export const obtenerReporteClientesConDeuda = async (
+export const obtenerReporteFacturasConDeuda = async (
     search: string = "",
     page: number = 1,
     perPage: number = 10
@@ -123,28 +123,48 @@ export const obtenerReporteClientesConDeuda = async (
         params.push(`%${search}%`, `%${search}%`);
     }
 
-    // Estadísticas generales (sobre TODOS los clientes con saldo pendiente, sin aplicar la búsqueda)
+    // Total abonado por crédito
+    const abonosSubquery = `
+        SELECT id_credito_factura, SUM(monto_abonado) AS total_abonado
+        FROM abono
+        GROUP BY id_credito_factura
+    `;
+
+    // Próxima cuota a pagar por crédito: la de menor numero_cuota aún pendiente/pagada_parcial
+    const proximaCuotaSubquery = `
+        SELECT
+            cu.id_credito_factura,
+            cu.fecha_vencimiento AS ProximaFechaPago,
+            cu.numero_cuota AS ProximaCuotaNumero,
+            cu.monto_a_pagar AS ProximaCuotaMonto
+        FROM cuota cu
+        INNER JOIN (
+            SELECT id_credito_factura, MIN(numero_cuota) AS numero_cuota
+            FROM cuota
+            WHERE estado IN ('pendiente', 'pagada_parcial')
+            GROUP BY id_credito_factura
+        ) prim
+            ON prim.id_credito_factura = cu.id_credito_factura
+            AND prim.numero_cuota = cu.numero_cuota
+    `;
+
+    // Estadísticas generales (sobre TODAS las facturas con saldo pendiente, sin aplicar la búsqueda)
     const [estadisticas]: any = await pool.query(
         `
         SELECT
-            COUNT(*) AS TotalClientesConDeuda,
-            COALESCE(SUM(SaldoCliente), 0) AS TotalSaldoPendiente
+            COUNT(*) AS TotalFacturasConDeuda,
+            COALESCE(SUM(SaldoFactura), 0) AS TotalSaldoPendiente
         FROM (
             SELECT
-                cli.id,
-                COALESCE(SUM(cf.total_deuda), 0) - COALESCE(SUM(ab.total_abonado), 0) AS SaldoCliente
-            FROM clientes cli
-            INNER JOIN ventas v ON v.Id_cliente = cli.id
+                cf.id,
+                cf.total_deuda - COALESCE(ab.total_abonado, 0) AS SaldoFactura
+            FROM ventas v
             INNER JOIN credito_factura cf ON cf.id_venta = v.id
                 AND cf.estado IN ('pendiente', 'pagada_parcial')
-            LEFT JOIN (
-                SELECT id_credito_factura, SUM(monto_abonado) AS total_abonado
-                FROM abono
-                GROUP BY id_credito_factura
-            ) ab ON ab.id_credito_factura = cf.id
-            GROUP BY cli.id
-            HAVING SaldoCliente > 0
+            LEFT JOIN (${abonosSubquery}) ab
+                ON ab.id_credito_factura = cf.id
         ) sub
+        WHERE SaldoFactura > 0
         `
     );
 
@@ -154,54 +174,64 @@ export const obtenerReporteClientesConDeuda = async (
         SELECT COUNT(*) AS total
         FROM (
             SELECT
-                cli.id,
-                COALESCE(SUM(cf.total_deuda), 0) - COALESCE(SUM(ab.total_abonado), 0) AS SaldoCliente
-            FROM clientes cli
-            INNER JOIN ventas v ON v.Id_cliente = cli.id
+                cf.id,
+                cf.total_deuda - COALESCE(ab.total_abonado, 0) AS SaldoFactura
+            FROM ventas v
+            INNER JOIN clientes cli ON cli.id = v.Id_cliente
             INNER JOIN credito_factura cf ON cf.id_venta = v.id
                 AND cf.estado IN ('pendiente', 'pagada_parcial')
-            LEFT JOIN (
-                SELECT id_credito_factura, SUM(monto_abonado) AS total_abonado
-                FROM abono
-                GROUP BY id_credito_factura
-            ) ab ON ab.id_credito_factura = cf.id
+            LEFT JOIN (${abonosSubquery}) ab
+                ON ab.id_credito_factura = cf.id
             WHERE 1 = 1
             ${whereBusqueda}
-            GROUP BY cli.id
-            HAVING SaldoCliente > 0
         ) sub
+        WHERE SaldoFactura > 0
         `,
         params
     );
 
     const total = countRows[0].total;
 
-    // Clientes con deuda (créditos pendientes/parciales agregados por cliente)
+    // Facturas con deuda, una fila por factura/crédito
     const [rows]: any = await pool.query(
         `
         SELECT
-            cli.id,
+            v.id AS IdVenta,
+            v.Fecha AS FechaVenta,
+
+            cli.id AS IdCliente,
             cli.NCliente,
             cli.Nombre,
             cli.Apellido,
             cli.Telefono,
             cli.Direccion,
             cli.NCedula,
-            COALESCE(SUM(cf.total_deuda), 0) - COALESCE(SUM(ab.total_abonado), 0) AS Saldo_Deuda
-        FROM clientes cli
-        INNER JOIN ventas v ON v.Id_cliente = cli.id
+
+            cf.id AS IdCreditoFactura,
+            cf.total_deuda AS TotalDeuda,
+            cf.estado AS EstadoCredito,
+            cf.numero_cuotas AS NumeroCuotas,
+            cf.frecuencia AS Frecuencia,
+
+            COALESCE(ab.total_abonado, 0) AS TotalAbonado,
+            cf.total_deuda - COALESCE(ab.total_abonado, 0) AS Saldo_Deuda,
+
+            prox.ProximaFechaPago,
+            prox.ProximaCuotaNumero,
+            prox.ProximaCuotaMonto
+
+        FROM ventas v
+        INNER JOIN clientes cli ON cli.id = v.Id_cliente
         INNER JOIN credito_factura cf ON cf.id_venta = v.id
             AND cf.estado IN ('pendiente', 'pagada_parcial')
-        LEFT JOIN (
-            SELECT id_credito_factura, SUM(monto_abonado) AS total_abonado
-            FROM abono
-            GROUP BY id_credito_factura
-        ) ab ON ab.id_credito_factura = cf.id
+        LEFT JOIN (${abonosSubquery}) ab
+            ON ab.id_credito_factura = cf.id
+        LEFT JOIN (${proximaCuotaSubquery}) prox
+            ON prox.id_credito_factura = cf.id
         WHERE 1 = 1
         ${whereBusqueda}
-        GROUP BY cli.id
         HAVING Saldo_Deuda > 0
-        ORDER BY Saldo_Deuda DESC, cli.Nombre ASC
+        ORDER BY Saldo_Deuda DESC, prox.ProximaFechaPago ASC
         LIMIT ? OFFSET ?
         `,
         [...params, perPage, offset]
@@ -213,7 +243,7 @@ export const obtenerReporteClientesConDeuda = async (
         per_page: perPage,
         total,
         last_page: Math.ceil(total / perPage),
-        TotalClientesConDeuda: estadisticas[0].TotalClientesConDeuda,
+        TotalFacturasConDeuda: estadisticas[0].TotalFacturasConDeuda,
         TotalSaldoPendiente: estadisticas[0].TotalSaldoPendiente
     };
 };

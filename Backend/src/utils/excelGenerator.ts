@@ -29,14 +29,15 @@ export const generateExcelReport = async (
         numColumnas = 8;
     } else if (reportType === 'clientes_deuda') {
         worksheet.columns = [
+            { header: 'N° Factura', key: 'IdVenta', width: 12, style: { numFmt: '0' } },
             { header: 'N° Cliente', key: 'NCliente', width: 15, style: { numFmt: '@' } },
             { header: 'Nombre', key: 'Nombre', width: 25 },
             { header: 'Apellido', key: 'Apellido', width: 25 },
-            { header: 'Email', key: 'Email', width: 30 },
             { header: 'Teléfono', key: 'Telefono', width: 15, style: { numFmt: '@' } },
-            { header: 'Saldo Deuda', key: 'Saldo_Deuda', width: 15, style: { numFmt: '#,##0.00' } }
+            { header: 'Crédito Pendiente', key: 'Saldo_Deuda', width: 18, style: { numFmt: '#,##0.00' } },
+            { header: 'Próx. Fecha de Pago', key: 'ProximaFechaPago', width: 20, style: { numFmt: 'DD/MM/YYYY' } }
         ];
-        numColumnas = 6;
+        numColumnas = 7;
     } else if (reportType === 'ventas_por_periodo') {
         worksheet.columns = [
             { header: 'ID Venta', key: 'id', width: 10, style: { numFmt: '0' } },
@@ -96,13 +97,14 @@ export const generateExcelReport = async (
                 excelRow.Stock_min = Number(row.Stock_min);
                 excelRow.Fecha_vencimiento = row.Fecha_vencimiento ? new Date(row.Fecha_vencimiento) : null;
             } else if (reportType === 'clientes_deuda') {
+                excelRow.IdVenta = Number(row.IdVenta);
                 excelRow.NCliente = row.NCliente ? String(row.NCliente) : '';
                 excelRow.Nombre = row.Nombre;
                 excelRow.Apellido = row.Apellido;
-                excelRow.Email = row.Email;
                 excelRow.Telefono = row.Telefono ? String(row.Telefono) : '';
                 excelRow.Saldo_Deuda = Number(row.Saldo_Deuda);
-            } else if (reportType === 'ventas_por_periodo') {
+                excelRow.ProximaFechaPago = row.ProximaFechaPago ? new Date(row.ProximaFechaPago) : null;
+            }else if (reportType === 'ventas_por_periodo') {
                 excelRow.id = Number(row.id);
                 excelRow.Fecha = row.Fecha ? new Date(row.Fecha) : null;
                 excelRow.Cliente = row.Cliente;
@@ -192,7 +194,7 @@ export const generateExcelReport = async (
         });
     } else if (reportType === 'clientes_deuda') {
         const stats = [
-            { label: 'Total Clientes:', value: reportData.TotalClientesConDeuda, format: '0' },
+            { label: 'Total Facturas:', value: reportData.TotalFacturasConDeuda, format: '0' },
             { label: 'Saldo Pendiente:', value: reportData.TotalSaldoPendiente, format: '#,##0.00' }
         ];
         
@@ -307,13 +309,17 @@ export const generateExcelReport = async (
                     row.getCell(8).numFmt = 'DD/MM/YYYY';
                 }
             }
-        } else if (reportType === 'clientes_deuda') {
-            if (rowNumber <= reportData.data.length + 1) {
-                row.getCell(1).numFmt = '@'; // N° Cliente
-                row.getCell(5).numFmt = '@'; // Teléfono
-                row.getCell(6).numFmt = '#,##0.00'; // Saldo Deuda
-            }
-        } else if (reportType === 'ventas_por_periodo') {
+            } else if (reportType === 'clientes_deuda') {
+                if (rowNumber <= reportData.data.length + 1) {
+                    row.getCell(1).numFmt = '0'; // N° Factura
+                    row.getCell(2).numFmt = '@'; // N° Cliente
+                 row.getCell(5).numFmt = '@'; // Teléfono
+                    row.getCell(6).numFmt = '#,##0.00'; // Crédito Pendiente
+                if (row.getCell(7).value instanceof Date) {
+                    row.getCell(7).numFmt = 'DD/MM/YYYY'; // Próxima fecha de pago
+                }
+                }
+            } else if (reportType === 'ventas_por_periodo') {
             if (rowNumber <= reportData.data.length + 1) {
                 row.getCell(1).numFmt = '0'; // ID Venta
                 if (row.getCell(2).value instanceof Date) {

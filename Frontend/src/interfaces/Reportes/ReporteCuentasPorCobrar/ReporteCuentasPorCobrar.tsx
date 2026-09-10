@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import styles from "./ReporteCuentasPorCobrar.module.css";
 import IconoBarras from "../IconoBarras";
-import type { Cliente } from "../../../models/Cliente";
+import type { FacturaConDeuda } from "../../../models/FacturaConDeuda.js";
 import { obtenerReporteCuentasCobrar, /*exportarCuentasPorCobrar*/ } from "../../../services/reporte.service";
 import type { PaginatedResponse } from "../../../models/PaginatedResponse";
-import { formatearMoneda, formatearTelefono } from "../../FuncionAuxiliar";
+import { formatearMoneda, formatearTelefono, formatearFecha } from "../../FuncionAuxiliar";
 import { 
     descargarReporteCuentasCobrarExcel, 
     descargarArchivoExcel
@@ -12,13 +12,13 @@ import {
 import { Joyride, type Step } from "react-joyride";
 import { HelpCircle } from 'lucide-react';
 
-export interface RespuestaClientesConDeuda extends PaginatedResponse<Cliente> {
-    TotalClientesConDeuda: number;
+export interface RespuestaFacturasConDeuda extends PaginatedResponse<FacturaConDeuda> {
+    TotalFacturasConDeuda: number;
     TotalSaldoPendiente: number;
 }
 
 function ReporteCuentasPorCobrar() {
-  const [clientes, setClientes] = useState<Cliente[]>([]);
+  const [facturas, setFacturas] = useState<FacturaConDeuda[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [perPage] = useState(10);
@@ -53,16 +53,18 @@ function ReporteCuentasPorCobrar() {
 
   const buscar = async () => {
     try {
-      const response: RespuestaClientesConDeuda = await obtenerReporteCuentasCobrar(
+      const response: RespuestaFacturasConDeuda = await obtenerReporteCuentasCobrar(
         searchTerm,
         currentPage,
         perPage
       );
 
-      setClientes(response.data);
+      console.log(response);
+
+      setFacturas(response.data);
       setTotal(response.total);
       setLastPage(response.last_page);
-      setClientesConDeuda(response.TotalClientesConDeuda);
+      setClientesConDeuda(response.TotalFacturasConDeuda);
       setTotalSaldoPendiente(response.TotalSaldoPendiente);
     } catch (error) {
       console.error(error);
@@ -129,7 +131,7 @@ function ReporteCuentasPorCobrar() {
 
         <div className={styles["reporte-stats-row"]}>
           <div className={styles["reporte-stat-card"]}>
-            <span className={styles["reporte-stat-label"]}>Clientes con deuda</span>
+            <span className={styles["reporte-stat-label"]}>Facturas</span>
             <span className={styles["reporte-stat-valor"]}>{clientesConDeuda}</span>
           </div>
 
@@ -160,23 +162,23 @@ function ReporteCuentasPorCobrar() {
           <table className={styles["reporte-tabla"]}>
             <thead>
               <tr>
-                <th>Código</th>
-                <th>Nombre</th>
-                <th>Apellido</th>
+                <th>N° Factura</th>
+                <th>Cliente</th>
                 <th>Contacto</th>
                 <th className={styles["reporte-th-derecha"]}>Crédito Pendiente</th>
+                <th>Prox. Fecha de Pago</th>
               </tr>
             </thead>
             <tbody>
-              {clientes.map((cliente) => (
-                <tr key={cliente.id}>
-                  <td>{cliente.NCliente}</td>
-                  <td className={styles["reporte-td-nombre"]}>{cliente.Nombre}</td>
-                  <td>{cliente.Apellido}</td>
-                  <td>{formatearTelefono(cliente.Telefono) || "Sin contacto"}</td>
+              {facturas.map((factura) => (
+                <tr key={factura.IdVenta}>
+                  <td>{factura.IdVenta}</td>
+                  <td className={styles["reporte-td-nombre"]}>{factura.Nombre} {factura.Apellido} #{factura.NCliente}</td>
+                  <td>{formatearTelefono(factura.Telefono) || "Sin contacto"}</td>
                   <td className={styles["reporte-td-derecha"]}>
-                    C$ {formatearMoneda(cliente.Saldo_Deuda)}
+                    C$ {formatearMoneda(factura.Saldo_Deuda)}
                   </td>
+                  <td>{formatearFecha(factura.ProximaFechaPago)}</td>
                 </tr>
               ))}
             </tbody>
@@ -184,7 +186,7 @@ function ReporteCuentasPorCobrar() {
 
           <div className={styles["reporte-footer"]} data-tour="paginacion-reporte">
             <span className={styles["reporte-count"]}>
-              Mostrando {clientes.length} de {total} clientes con deuda
+              Mostrando {facturas.length} de {total} facturas
             </span>
             <div className={styles["reporte-pagination"]}>
               <button

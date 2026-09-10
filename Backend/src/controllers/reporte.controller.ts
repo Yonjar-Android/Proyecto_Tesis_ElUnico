@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import {
     obtenerReporteProductosStock,
-    obtenerReporteClientesConDeuda,
+    obtenerReporteFacturasConDeuda,
     obtenerReporteVentas,
     obtenerReporteCompras
 } from "../services/reporte.service.js";
@@ -38,7 +38,7 @@ export const obtenerReporteCuentasCobrar = async(req: Request, res: Response) =>
             const page = Number(req.query.page) || 1;
             const perPage = Number(req.query.perPage) || 10;
     
-            const resultado = await obtenerReporteClientesConDeuda(
+            const resultado = await obtenerReporteFacturasConDeuda(
                 search,
                 page,
                 perPage
