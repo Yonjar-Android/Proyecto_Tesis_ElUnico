@@ -6,7 +6,7 @@ import { obtenerReporteVentasPorPeriodo, /*exportarReporteVentas*/ } from "../..
 import type { VentaReporte } from "../../../models/VentaReportes";
 import type { Cliente } from "../../../models/Cliente";
 import type { PaginatedResponse } from "../../../models/PaginatedResponse";
-import { formatearMoneda } from "../../FuncionAuxiliar";
+import { formatearMoneda, formatearFecha } from "../../FuncionAuxiliar";
 import ModalConfirmarImpresion from "../../Facturacion/ModalConfirmarImpresion"; // ajusta ruta
 import type { DatosRecibo } from "../../../models/Recibo";
 import { Printer, HelpCircle } from "lucide-react";
@@ -22,21 +22,10 @@ export interface RespuestaReporteVentas extends PaginatedResponse<VentaReporte> 
   TotalRegistros: number;
   VentasContado: number;
   TotalVentas: number;
+  VentasTransferencia:number;
+  TotalPendientePago:number;
+  TotalAbonado:number;
 }
-
-export const formatearFecha = (fecha: string): string => {
-  const date = new Date(fecha);
-
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-
-  const hours = String(date.getHours()).padStart(2, "0");
-  const minutes = String(date.getMinutes()).padStart(2, "0");
-  const seconds = String(date.getSeconds()).padStart(2, "0");
-
-  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-};
 
 const obtenerFechaHoy = (): string => {
   const hoy = new Date();
@@ -62,6 +51,9 @@ function ReporteVentas() {
   const [registrosTotales, setRegistrosTotales] = useState(0);
   const [ventasContado, setVentasContado] = useState(0);
   const [totalVentas, setTotalVentas] = useState(0);
+  const [ventasTransferencia, setVentasTranferencia] = useState(0);
+  const [totalPendientePago, setTotalPendientePago] = useState(0);
+  const [totalAbonado, setTotalAbonado] = useState(0);
 
   const [modalReciboAbierto, setModalReciboAbierto] = useState(false);
   const [datosRecibo, setDatosRecibo] = useState<DatosRecibo | null>(null);
@@ -147,6 +139,9 @@ useEffect(() => {
     setRegistrosTotales(response.TotalRegistros);
     setVentasContado(response.VentasContado);
     setTotalVentas(response.TotalVentas);
+    setVentasTranferencia(response.VentasTransferencia);
+    setTotalPendientePago(response.TotalPendientePago);
+    setTotalAbonado(response.TotalAbonado);
   } catch (error) {
     console.error(error);
   }
@@ -208,37 +203,69 @@ useEffect(() => {
             </div>
         </div>
 
-        <div className={styles["reporte-stats-row"]}>
-          <div className={styles["reporte-stat-card"]}>
-            <div className={styles["reporte-stat-header"]}>
-              <span className={styles["reporte-stat-label"]}>Registros totales</span>
-              <span className={styles["reporte-stat-icono"]}>
-                <IconoCuboOutline />
-              </span>
-            </div>
-            <span className={styles["reporte-stat-valor"]}>{registrosTotales}</span>
-          </div>
+<div className={styles["reporte-stats-row"]}>
+  <div className={styles["reporte-stat-card"]}>
+    <div className={styles["reporte-stat-header"]}>
+      <span className={styles["reporte-stat-label"]}>Registros totales</span>
+      <span className={styles["reporte-stat-icono"]}>
+        <IconoCuboOutline />
+      </span>
+    </div>
+    <span className={styles["reporte-stat-valor"]}>{registrosTotales}</span>
+  </div>
 
-          <div className={styles["reporte-stat-card"]}>
-            <div className={styles["reporte-stat-header"]}>
-              <span className={styles["reporte-stat-label"]}>Ventas al contado</span>
-              <span className={`${styles["reporte-stat-icono"]} ${styles["reporte-stat-icono--verde"]}`}>
-                <IconoTendencia />
-              </span>
-            </div>
-            <span className={styles["reporte-stat-valor"]}>C$ {formatearMoneda(ventasContado)}</span>
-          </div>
+  <div className={styles["reporte-stat-card"]}>
+    <div className={styles["reporte-stat-header"]}>
+      <span className={styles["reporte-stat-label"]}>Ventas al contado</span>
+      <span className={`${styles["reporte-stat-icono"]} ${styles["reporte-stat-icono--verde"]}`}>
+        <IconoTendencia />
+      </span>
+    </div>
+    <span className={styles["reporte-stat-valor"]}>C$ {formatearMoneda(ventasContado)}</span>
+  </div>
 
-          <div className={`${styles["reporte-stat-card"]} ${styles["reporte-stat-card--oscura"]}`}>
-            <div className={styles["reporte-stat-header"]}>
-              <span className={styles["reporte-stat-label"]}>Total ventas</span>
-              <span className={styles["reporte-stat-icono"]}>
-                <IconoTendencia />
-              </span>
-            </div>
-            <span className={styles["reporte-stat-valor"]}>C$ {formatearMoneda(totalVentas)}</span>
-          </div>
-        </div>
+  <div className={styles["reporte-stat-card"]}>
+    <div className={styles["reporte-stat-header"]}>
+      <span className={styles["reporte-stat-label"]}>Ventas por transferencia</span>
+      <span className={`${styles["reporte-stat-icono"]} ${styles["reporte-stat-icono--azul"]}`}>
+        <IconoTendencia />
+      </span>
+    </div>
+    <span className={styles["reporte-stat-valor"]}>C$ {formatearMoneda(ventasTransferencia)}</span>
+  </div>
+</div>
+
+<div className={styles["reporte-stats-row"]}>
+  <div className={`${styles["reporte-stat-card"]} ${styles["reporte-stat-card--oscura"]}`}>
+    <div className={styles["reporte-stat-header"]}>
+      <span className={styles["reporte-stat-label"]}>Total ventas</span>
+      <span className={styles["reporte-stat-icono"]}>
+        <IconoTendencia />
+      </span>
+    </div>
+    <span className={styles["reporte-stat-valor"]}>C$ {formatearMoneda(totalVentas)}</span>
+  </div>
+
+  <div className={styles["reporte-stat-card"]}>
+    <div className={styles["reporte-stat-header"]}>
+      <span className={styles["reporte-stat-label"]}>Pendiente de pago</span>
+      <span className={`${styles["reporte-stat-icono"]} ${styles["reporte-stat-icono--ambar"]}`}>
+        <IconoTendencia />
+      </span>
+    </div>
+    <span className={styles["reporte-stat-valor"]}>C$ {formatearMoneda(totalPendientePago)}</span>
+  </div>
+
+  <div className={styles["reporte-stat-card"]}>
+    <div className={styles["reporte-stat-header"]}>
+      <span className={styles["reporte-stat-label"]}>Total abonado</span>
+      <span className={`${styles["reporte-stat-icono"]} ${styles["reporte-stat-icono--verde"]}`}>
+        <IconoTendencia />
+      </span>
+    </div>
+    <span className={styles["reporte-stat-valor"]}>C$ {formatearMoneda(totalAbonado)}</span>
+  </div>
+</div>
 
 <div className={styles["reporte-filtro-row"]} data-tour="filtrar-reporte">
   <div className={styles["reporte-filtro-fila-1"]}>
@@ -376,7 +403,7 @@ useEffect(() => {
                           : styles["reporte-badge-transferencia"]
                       }
                     >
-                      {venta.Tipo_Pago}
+                      {venta.Tipo_Pago == "Credito" ? "Crédito" : venta.Tipo_Pago}
                     </span>
                   </td>
                   <td className={styles["reporte-td-derecha"]}>C$ {formatearMoneda(venta.Total)}</td>

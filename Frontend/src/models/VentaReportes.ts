@@ -4,6 +4,9 @@ export interface RespuestaReporteVentas extends PaginatedResponse<VentaReporte> 
   TotalRegistros: number;
   VentasContado: number;
   TotalVentas: number;
+  VentasTransferencia:number;
+  TotalPendientePago:number;
+  TotalAbonado:number;
 }
 
 export interface VentaReporte {

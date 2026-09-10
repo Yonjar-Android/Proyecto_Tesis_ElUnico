@@ -1,4 +1,5 @@
 import { pool } from "../config/database.js";
+import { addOneDay } from "./funcionAuxiliar.js";
 
 export const obtenerReporteProductosStock = async (
     search: string = "",
@@ -108,34 +109,42 @@ export const obtenerReporteClientesConDeuda = async (
 
     const offset = (page - 1) * perPage;
 
-    let where = `
-        WHERE Saldo_Deuda > 0
-    `;
-
+    let whereBusqueda = "";
     const params: any[] = [];
 
     if (search.trim() !== "") {
-        where += `
+        whereBusqueda = `
             AND (
-                NCliente LIKE ?
-                OR CONCAT(Nombre, ' ', Apellido) LIKE ?
+                cli.NCliente LIKE ?
+                OR CONCAT(cli.Nombre, ' ', cli.Apellido) LIKE ?
             )
         `;
 
-        params.push(
-            `%${search}%`,
-            `%${search}%`
-        );
+        params.push(`%${search}%`, `%${search}%`);
     }
 
-    // Estadísticas generales
+    // Estadísticas generales (sobre TODOS los clientes con saldo pendiente, sin aplicar la búsqueda)
     const [estadisticas]: any = await pool.query(
         `
         SELECT
             COUNT(*) AS TotalClientesConDeuda,
-            COALESCE(SUM(Saldo_Deuda), 0) AS TotalSaldoPendiente
-        FROM clientes
-        WHERE Saldo_Deuda > 0
+            COALESCE(SUM(SaldoCliente), 0) AS TotalSaldoPendiente
+        FROM (
+            SELECT
+                cli.id,
+                COALESCE(SUM(cf.total_deuda), 0) - COALESCE(SUM(ab.total_abonado), 0) AS SaldoCliente
+            FROM clientes cli
+            INNER JOIN ventas v ON v.Id_cliente = cli.id
+            INNER JOIN credito_factura cf ON cf.id_venta = v.id
+                AND cf.estado IN ('pendiente', 'pagada_parcial')
+            LEFT JOIN (
+                SELECT id_credito_factura, SUM(monto_abonado) AS total_abonado
+                FROM abono
+                GROUP BY id_credito_factura
+            ) ab ON ab.id_credito_factura = cf.id
+            GROUP BY cli.id
+            HAVING SaldoCliente > 0
+        ) sub
         `
     );
 
@@ -143,21 +152,56 @@ export const obtenerReporteClientesConDeuda = async (
     const [countRows]: any = await pool.query(
         `
         SELECT COUNT(*) AS total
-        FROM clientes
-        ${where}
+        FROM (
+            SELECT
+                cli.id,
+                COALESCE(SUM(cf.total_deuda), 0) - COALESCE(SUM(ab.total_abonado), 0) AS SaldoCliente
+            FROM clientes cli
+            INNER JOIN ventas v ON v.Id_cliente = cli.id
+            INNER JOIN credito_factura cf ON cf.id_venta = v.id
+                AND cf.estado IN ('pendiente', 'pagada_parcial')
+            LEFT JOIN (
+                SELECT id_credito_factura, SUM(monto_abonado) AS total_abonado
+                FROM abono
+                GROUP BY id_credito_factura
+            ) ab ON ab.id_credito_factura = cf.id
+            WHERE 1 = 1
+            ${whereBusqueda}
+            GROUP BY cli.id
+            HAVING SaldoCliente > 0
+        ) sub
         `,
         params
     );
 
     const total = countRows[0].total;
 
-    // Clientes con deuda
+    // Clientes con deuda (créditos pendientes/parciales agregados por cliente)
     const [rows]: any = await pool.query(
         `
-        SELECT *
-        FROM clientes
-        ${where}
-        ORDER BY Saldo_Deuda DESC, Nombre ASC
+        SELECT
+            cli.id,
+            cli.NCliente,
+            cli.Nombre,
+            cli.Apellido,
+            cli.Telefono,
+            cli.Direccion,
+            cli.NCedula,
+            COALESCE(SUM(cf.total_deuda), 0) - COALESCE(SUM(ab.total_abonado), 0) AS Saldo_Deuda
+        FROM clientes cli
+        INNER JOIN ventas v ON v.Id_cliente = cli.id
+        INNER JOIN credito_factura cf ON cf.id_venta = v.id
+            AND cf.estado IN ('pendiente', 'pagada_parcial')
+        LEFT JOIN (
+            SELECT id_credito_factura, SUM(monto_abonado) AS total_abonado
+            FROM abono
+            GROUP BY id_credito_factura
+        ) ab ON ab.id_credito_factura = cf.id
+        WHERE 1 = 1
+        ${whereBusqueda}
+        GROUP BY cli.id
+        HAVING Saldo_Deuda > 0
+        ORDER BY Saldo_Deuda DESC, cli.Nombre ASC
         LIMIT ? OFFSET ?
         `,
         [...params, perPage, offset]
@@ -204,16 +248,16 @@ export const obtenerReporteVentas = async (
         );
     }
 
-    // Fecha inicio
+    // Fecha inicial
     if (fechaInicio !== "") {
         where += " AND v.Fecha >= ?";
-        params.push(fechaInicio);
+        params.push(`${fechaInicio} 00:00:00`);
     }
 
-    // Fecha fin
+    // Fecha final
     if (fechaFin !== "") {
-        where += " AND v.Fecha <= ?";
-        params.push(fechaFin);
+        where += " AND v.Fecha < ?";
+        params.push(addOneDay(fechaFin));
     }
 
     // Tipo de pago
@@ -238,10 +282,39 @@ export const obtenerReporteVentas = async (
         GROUP BY dev.Id_venta
     `;
 
+    // Subquery: total abonado por venta (a través del crédito asociado)
+    const abonosSubquery = `
+        SELECT
+            cf.id_venta AS Id_venta,
+            cf.total_deuda AS TotalDeuda,
+            COALESCE(SUM(ab.monto_abonado), 0) AS TotalAbonado
+        FROM credito_factura cf
+        LEFT JOIN abono ab ON ab.id_credito_factura = cf.id
+        GROUP BY cf.id_venta, cf.total_deuda
+    `;
+
+    // Neto para AGREGADOS (estadísticas): una venta Devuelta no debe sumar al total de ventas
     const totalNetoExpr = `
         CASE
             WHEN v.Estado = 'Devuelta' THEN 0
             ELSE v.Total - COALESCE(devt.TotalDevuelto, 0)
+        END
+    `;
+
+    // Monto para MOSTRAR en cada fila: si está Devuelta, se muestra el monto original de la factura
+    const totalMostrarExpr = `
+        CASE
+            WHEN v.Estado = 'Devuelta' THEN v.Total
+            ELSE v.Total - COALESCE(devt.TotalDevuelto, 0)
+        END
+    `;
+
+    // Pendiente de pago: deuda del crédito (o el total de la venta si no hay registro de crédito) menos lo abonado
+    const pendientePagoExpr = `
+        CASE
+            WHEN v.Estado = 'Pendiente'
+            THEN COALESCE(abt.TotalDeuda, v.Total) - COALESCE(abt.TotalAbonado, 0)
+            ELSE 0
         END
     `;
 
@@ -261,13 +334,30 @@ export const obtenerReporteVentas = async (
                 0
             ) AS VentasContado,
 
-            COALESCE(SUM(${totalNetoExpr}), 0) AS TotalVentas
+            COALESCE(
+                SUM(
+                    CASE
+                        WHEN v.Tipo_Pago = 'TRANSFERENCIA'
+                        THEN ${totalNetoExpr}
+                        ELSE 0
+                    END
+                ),
+                0
+            ) AS VentasTransferencia,
+
+            COALESCE(SUM(${totalNetoExpr}), 0) AS TotalVentas,
+
+            COALESCE(SUM(${pendientePagoExpr}), 0) AS TotalPendientePago,
+
+            COALESCE(SUM(abt.TotalAbonado), 0) AS TotalAbonado
 
         FROM ventas v
         INNER JOIN clientes c
             ON v.Id_cliente = c.id
         LEFT JOIN (${devolucionesSubquery}) devt
             ON devt.Id_venta = v.id
+        LEFT JOIN (${abonosSubquery}) abt
+            ON abt.Id_venta = v.id
 
         ${where}
         `,
@@ -288,7 +378,9 @@ export const obtenerReporteVentas = async (
             v.Estado,
             v.Total AS TotalOriginal,
             COALESCE(devt.TotalDevuelto, 0) AS TotalDevuelto,
-            ${totalNetoExpr} AS Total
+            ${totalMostrarExpr} AS Total,
+            COALESCE(abt.TotalAbonado, 0) AS TotalAbonado,
+            ${pendientePagoExpr} AS PendientePago
 
         FROM ventas v
 
@@ -296,6 +388,8 @@ export const obtenerReporteVentas = async (
             ON v.Id_cliente = c.id
         LEFT JOIN (${devolucionesSubquery}) devt
             ON devt.Id_venta = v.id
+        LEFT JOIN (${abonosSubquery}) abt
+            ON abt.Id_venta = v.id
 
         ${where}
 
@@ -315,7 +409,10 @@ export const obtenerReporteVentas = async (
 
         TotalRegistros: estadisticas[0].TotalRegistros,
         VentasContado: estadisticas[0].VentasContado,
-        TotalVentas: estadisticas[0].TotalVentas
+        VentasTransferencia: estadisticas[0].VentasTransferencia,
+        TotalVentas: estadisticas[0].TotalVentas,
+        TotalPendientePago: estadisticas[0].TotalPendientePago,
+        TotalAbonado: estadisticas[0].TotalAbonado
     };
 };
 
@@ -350,15 +447,15 @@ export const obtenerReporteCompras = async (
 
     // Fecha inicial
     if (fechaInicio !== "") {
-        where += " AND c.Fecha >= ?";
-        params.push(fechaInicio);
-    }
+    where += " AND c.Fecha >= ?";
+    params.push(`${fechaInicio} 00:00:00`);
+}
 
     // Fecha final
     if (fechaFin !== "") {
-        where += " AND c.Fecha <= ?";
-        params.push(fechaFin);
-    }
+    where += " AND c.Fecha < ?";
+    params.push(addOneDay(fechaFin));
+}
 
     // Proveedor
     if (Id_proveedor !== null && Id_proveedor > 0) {

@@ -226,6 +226,9 @@ export const generateExcelReport = async (
         const stats = [
             { label: 'Total Registros:', value: reportData.TotalRegistros, format: '0' },
             { label: 'Ventas Contado:', value: reportData.VentasContado, format: '#,##0.00' },
+            { label: 'Ventas Transferencia:', value: reportData.VentasTransferencia, format: '#,##0.00' },
+            { label: 'Total Abonado:', value: reportData.TotalAbonado, format: '#,##0.00' },
+            { label: 'Total Pendiente:', value: reportData.TotalPendientePago, format: '#,##0.00' },
             { label: 'Total Ventas:', value: reportData.TotalVentas, format: '#,##0.00' }
         ];
         

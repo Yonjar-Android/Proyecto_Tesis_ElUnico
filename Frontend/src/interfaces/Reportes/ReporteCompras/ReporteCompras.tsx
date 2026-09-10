@@ -5,7 +5,7 @@ import { IconoCuboOutline, IconoCarrito } from "../IconosReporte";
 import { obtenerReporteComprasPorPeriodo, /*exportarReporteCompras*/ } from "../../../services/reporte.service";
 import type { Proveedor } from "../../../models/Proveedor";
 import type { CompraReporte, RespuestaReporteCompras } from "../../../models/CompraReporte";
-import { formatearMoneda } from "../../FuncionAuxiliar";
+import { formatearMoneda, formatearFecha } from "../../FuncionAuxiliar";
 import ModalDetalleCompra, { type DetalleCompraDTO } from "./ModalDetalleCompras";
 import { FileText, HelpCircle } from "lucide-react";
 import { obtenerDetalleCompra } from "../../../services/compra.service";
@@ -15,20 +15,6 @@ import {
     descargarArchivoExcel 
 } from "../../../services/reporteExcel.service.js";
 import { Joyride, type Step } from "react-joyride";
-
-export const formatearFecha = (fecha: string): string => {
-  const date = new Date(fecha);
-
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-
-  const hours = String(date.getHours()).padStart(2, "0");
-  const minutes = String(date.getMinutes()).padStart(2, "0");
-  const seconds = String(date.getSeconds()).padStart(2, "0");
-
-  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-};
 
 const obtenerFechaHoy = (): string => {
   const hoy = new Date();

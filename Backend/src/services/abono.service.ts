@@ -153,6 +153,13 @@ export const registrarAbono = async (
             [nuevoEstadoFactura, idCreditoFactura]
         );
 
+        const nuevoEstadoFactura2 = pendientesRestantes[0].total === 0 ? "Pagada" : "Pendiente";
+
+        await connection.query(
+            `UPDATE ventas SET Estado = ? WHERE id = ?`,
+            [nuevoEstadoFactura2, idCreditoFactura]
+        );
+
         await connection.commit();
 
         return {
