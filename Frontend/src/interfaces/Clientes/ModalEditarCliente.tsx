@@ -8,6 +8,7 @@ import {
   IconoUbicacion,
 } from "./IconosCliente";
 import Cliente from "./Cliente";
+import { validarCedula } from "./ValidarCedula";
 
 interface Props {
   abierto: boolean;
@@ -130,16 +131,9 @@ function ModalEditarCliente({ abierto, cliente, onClose, onEditar }: Props) {
       return;
     }
 
-    if(cedula == "" && Number(saldo_deuda) > 0){
-      setError("El campo número de cédula es obligatorio para un cliente con una deuda");
+    if(!validarCedula(cedula)){
+      setError("Debe ingresar un número de cédula válido.");
       return;
-    }
-
-    if(cedula != "" && Number(saldo_deuda) > 0){
-      if(cedula.trim().length != 14){
-        setError("Debe ingresar un número de cédula válido");
-        return;
-      }
     }
 
     const exito = await onEditar(

@@ -7,6 +7,7 @@ import {
   IconoTarjeta,
   IconoUbicacion,
 } from "./IconosCliente";
+import { validarCedula } from "./ValidarCedula";
 
 interface Props {
   abierto: boolean;
@@ -122,16 +123,9 @@ if (Number(ncliente) <= 0) {
       return;
     }
 
-    if(cedula == "" && Number(saldo_deuda) > 0){
-      setError("El campo número de cédula es obligatorio para un cliente con una deuda");
+    if(!validarCedula(cedula)){
+      setError("Debe ingresar un número de cédula válido.");
       return;
-    }
-
-    if(cedula != "" && Number(saldo_deuda) > 0){
-      if(cedula.trim().length != 14){
-        setError("Debe ingresar un número de cédula válido");
-        return;
-      }
     }
 
 
