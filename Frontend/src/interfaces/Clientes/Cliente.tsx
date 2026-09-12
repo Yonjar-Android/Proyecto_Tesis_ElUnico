@@ -58,6 +58,10 @@ function Cliente(){
     content: "Aquí puedes ver la lista de clientes registrados.",
   },
   {
+    target: '[data-tour="editar-cliente"]',
+    content: "Con el botón editar abres una ventana donde puedes editar la información del cliente.",
+  },
+  {
     target: '[data-tour="paginacion-cliente"]',
     content: "Con estos botones puedes navegar entre las páginas de clientes para buscar alguno que no aparezca en la lista actual.",
   },
@@ -171,10 +175,11 @@ return (
                 {formatearTelefono(cliente.Telefono.trim()) === "" ? "Sin contacto" : formatearTelefono(cliente.Telefono)}
                 </td>
                 <td className="cliente-td">{formatearMoneda(cliente.Saldo_Deuda)}</td>
-                <td className="cliente-td cliente-td-actions">
+                <td className="cliente-td cliente-td-actions" >
 
                   <button
                         className="cliente-editar-btn"
+                        data-tour="editar-cliente"
                         onClick={() => {
                             setClienteSeleccionado(cliente);
                             setModalEditarAbierto(true);
@@ -189,11 +194,11 @@ return (
           <tfoot>
             <tr>
               <td colSpan={6}>
-                <div className="cliente-footer" data-tour="paginacion-cliente">
+                <div className="cliente-footer">
                   <span className="cliente-count">
                     Mostrando {clientes.length} de {total} clientes
                   </span>
-                  <div className="cliente-pagination">
+                  <div className="cliente-pagination"  data-tour="paginacion-cliente"> 
                     <button className="cliente-page-btn" onClick={() => setCurrentPage(1)} disabled={currentPage === 1}>
                       «
                     </button>

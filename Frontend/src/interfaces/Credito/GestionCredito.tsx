@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import styles from "./GestionCreditos.module.css";
-import { CreditCard, MoreVertical, History, Clock } from "lucide-react";
+import { CreditCard, MoreVertical, History, Clock, HelpCircle } from "lucide-react";
 import type { FacturaCreditoPendiente } from "../../models/Credito";
 import ModalHistorialAbonos from "./ModalHistorialAbonos";
 import ModalSiguienteCuota from "./ModalSiguienteCuota";
@@ -9,6 +9,7 @@ import { buscarCreditosPendientes } from "../../services/credito.service";
 import type { PaginatedResponse } from "../../models/PaginatedResponse";
 import { formatearMoneda } from "../FuncionAuxiliar";
 import Notificacion, { type TipoNotificacion } from "../../components/Notification/Notification";
+import { Joyride, type Step } from "react-joyride";
 
 function claseBadge(estado: FacturaCreditoPendiente["estado"]): string {
   return estado === "pendiente" ? styles.badgePendiente : styles.badgePagadaParcial;
@@ -34,6 +35,26 @@ function GestionCreditos() {
   const [menuAbiertoId, setMenuAbiertoId] = useState<number | null>(null);
   const menuRef = useRef<HTMLDivElement | null>(null);
   const [notif, setNotif] = useState<{ mensaje: string; tipo: TipoNotificacion } | null>(null);
+
+  const [tourActivo, setTourActivo] = useState(false);
+  const pasosTour: Step[] = [
+  {
+    target: '[data-tour="buscar-credito"]',
+    content: "Acá puede buscar la factura que desea pagar por su número, cliente o número de cédula del cliente.",
+  },
+  {
+    target: '[data-tour="tabla-credito"]',
+    content: "Aquí puedes ver la lista de facturas pendientes de pago y la información del cliente.",
+  },
+  {
+    target: '[data-tour="tabla-botones-credito"]',
+    content: "Con estos botones tienes las opciones de abonar, ver la siguiente fecha de pago y los abonos que se han realizado.",
+  },
+  {
+    target: '[data-tour="paginacion-credito"]',
+    content: "Con estos botones puedes navegar entre las páginas de clientes para buscar alguno que no aparezca en la lista actual.",
+  },
+  ];
 
   const buscar = async () => {
     try {
@@ -135,10 +156,13 @@ function GestionCreditos() {
       <div className={styles.content}>
         <div className={styles.topPart}>
           <h1 className={styles.title}>Gestión de Crédito</h1>
+          <button className="cliente-add-btn" onClick={() => setTourActivo(true)}>
+            <HelpCircle size={18} />
+          </button>
         </div>
 
         <div className={styles.tableContainer}>
-          <div className={styles.searchWrapper}>
+          <div className={styles.searchWrapper} data-tour="buscar-credito">
             <span className={styles.searchIcon}>🔍</span>
             <input
               className={styles.searchInput}
@@ -150,7 +174,7 @@ function GestionCreditos() {
             />
           </div>
 
-          <table className={styles.table}>
+          <table className={styles.table} data-tour="tabla-credito">
             <thead>
               <tr>
                 <th className={styles.th}>N.º FACTURA</th>
@@ -188,7 +212,7 @@ function GestionCreditos() {
                       </span>
                     </td>
                     <td className={styles.tdActions}>
-                      <div className={styles.accionesWrapper}>
+                      <div className={styles.accionesWrapper} data-tour="tabla-botones-credito">
                         <button
                           className={styles.abonarBtn}
                           onClick={() => abrirAbonar(f)}
@@ -235,7 +259,7 @@ function GestionCreditos() {
                     <span className={styles.count}>
                       Mostrando {facturas.length} de {total} facturas
                     </span>
-                    <div className={styles.pagination}>
+                    <div className={styles.pagination}  data-tour="paginacion-credito">
                       <button
                         className={styles.pageBtn}
                         onClick={() => setCurrentPage(1)}
@@ -275,6 +299,24 @@ function GestionCreditos() {
           </table>
         </div>
       </div>
+
+      <Joyride
+  steps={pasosTour}
+  run={tourActivo}
+  continuous
+  locale={{
+    back: "Atrás",
+    close: "Cerrar",
+    last: "Finalizar",
+    next: "Siguiente",
+    skip: "Omitir",
+  }}
+  onEvent={(data) => {
+    if (data.type === "tour:end") {
+      setTourActivo(false);
+    }
+  }}
+/>
 
       {facturaSeleccionada && (
         <>

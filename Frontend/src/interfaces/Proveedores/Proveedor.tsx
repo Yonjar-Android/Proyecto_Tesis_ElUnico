@@ -39,6 +39,10 @@ const pasosTour: Step[] = [
     content: "En esta tabla se muestran todos los proveedores registrados.",
   },
   {
+    target: '[data-tour="editar-proveedor"]',
+    content: "Con el botón editar abres una ventana donde puedes editar la información del proveedor.",
+  },
+  {
     target: '[data-tour="paginación-proveedor"]',
     content: "Con estos botones puedes navegar entre las páginas de proveedores para buscar alguno que no aparezca en la lista actual.",
   },
@@ -175,6 +179,7 @@ return (
 
                   <button
                         className="proveedor-editar-btn"
+                        data-tour="editar-proveedor"
                         onClick={() => {
                             setProveedorSeleccionado(proveedor);
                             setModalEditarAbierto(true);

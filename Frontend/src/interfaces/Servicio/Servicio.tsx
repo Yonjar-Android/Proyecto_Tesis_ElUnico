@@ -52,6 +52,14 @@ const [notif, setNotif] = useState<{ mensaje: string; tipo: TipoNotificacion } |
     content: "Aquí puedes buscar servicios por su nombre.",
   },
   {
+    target: '[data-tour="tabla-servicio"]',
+    content: "En esta tabla se muestran todos los servicios registrados.",
+  },
+  {
+    target: '[data-tour="editar-servicio"]',
+    content: "Con el botón editar abres una ventana donde puedes editar la información del servicio.",
+  },
+  {
     target: '[data-tour="paginacion-servicio"]',
     content: "Con estos botones puedes navegar entre las páginas de servicios para buscar alguno que no aparezca en la lista actual.",
   },
@@ -140,7 +148,7 @@ useEffect(() => {
           />
         </div>
 
-        <table className="categoria-table">
+        <table className="categoria-table" data-tour="tabla-servicio">
           <thead>
             <tr>
               <th className="categoria-th">NOMBRE DEL SERVICIO</th>
@@ -158,6 +166,7 @@ useEffect(() => {
                 <td className="categoria-td categoria-td-actions">
                     <button
                         className="categoria-edit-btn"
+                        data-tour="editar-servicio"
                         onClick={() => {
                             setServicioSeleccionado(servicio);
                             setModalEditarAbierto(true);

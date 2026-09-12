@@ -93,6 +93,10 @@ function Facturacion() {
     content: "Desde aquí agrega un producto o servicio que desea facturar una vez seleccionado e ingresada la información.",
   },
   {
+    target: '[data-tour="botones-producto"]',
+    content: "Con estos botones puedes eliminar o editar el producto de la factura.",
+  },
+  {
     target: '[data-tour="cancelar-venta"]',
     content: "Aquí puedes cancelar la venta en curso.",
   },
@@ -112,7 +116,7 @@ function Facturacion() {
     useState<Servicio | null>(null);
 
   const [cantidad, setCantidad] = useState("1");
-  const [descuento, setDescuento] = useState("0.00");
+  const [descuento, setDescuento] = useState("0");
   const [tipoDescuento, setTipoDescuento] = useState<TipoDescuento>("fijo");
   const [precio, setPrecio] = useState("0.00");
   const [tipoPago, setTipoPago] = useState("Contado");
@@ -175,7 +179,18 @@ function Facturacion() {
     setIndiceEditando(null);
     limpiarCamposItem();
     setError("");
+    setTipoPago("Contado");
     setNumReferencia("");
+    setClienteSeleccionado({
+    id: 10,
+    Nombre: "Cliente",
+    Apellido: "General",
+    Telefono: "",
+    Direccion: "",
+    Saldo_Deuda: 0,
+    NCliente: 0,
+    NCedula: ""
+  })
   };
 
   const editarItem = (index: number) => {
@@ -192,8 +207,9 @@ function Facturacion() {
     }
 
     setCantidad(String(item.cantidad));
-    setDescuento(formatearMoneda(item.descuento));
-    setPrecio(formatearMoneda(item.precio));
+    setDescuento(item.descuento.toString());
+    console.log(item);
+    setPrecio(item.precio.toString());
     setIndiceEditando(index);
     setError("");
   };
@@ -397,6 +413,7 @@ const confirmarVenta = async (
       setModalReciboAbierto(true);
       setItems([]);
       setModalConfirmarAbierto(false);
+      cancelarEdicion();
       return true;
     } catch (error: any) {
       setNotif({ mensaje: "No se pudo registrar la venta", tipo: "error" });
@@ -772,7 +789,7 @@ const manejarSeleccionCliente = async (cliente: Cliente) => {
     : "—"}
 </td>
                   <td className="factura-td-subtotal">C${formatearMoneda(subtotalNeto(item))}</td>
-                  <td className="factura-td-accion">
+                  <td className="factura-td-accion" data-tour="botones-producto">
                     <button
                       className="factura-btn-editar"
                       onClick={() => editarItem(index)}

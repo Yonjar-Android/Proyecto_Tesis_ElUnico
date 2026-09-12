@@ -62,6 +62,10 @@ function Compras() {
     content: "En esta tabla puede visualizar la información de la compra que desea registrar.",
   },
   {
+    target: '[data-tour="botones-compras"]',
+    content: "Con estos botones puedes eliminar o editar el producto de la factura.",
+  },
+  {
     target: '[data-tour="compras-cancelar"]',
     content: "Desde aquí cancela la compra en curso.",
   },
@@ -387,7 +391,7 @@ function Compras() {
                 <td className="factura-td-subtotal">
                   C${(formatearMoneda(item.cantidad * item.precio_compra))}
                 </td>
-                <td className="factura-td-accion">
+                <td className="factura-td-accion" data-tour="botones-compras">
                   <button
                       className="factura-btn-editar"
                       onClick={() => editarItem(index)}

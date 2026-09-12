@@ -81,6 +81,10 @@ function SalidasInventario() {
     content: "Aquí puedes ver la lista de productos a los cuales quieres registrar una salida.",
   },
   {
+    target: '[data-tour="eliminar-salidas"]',
+    content: "Con este botón puedes eliminar el producto seleccionado para no registrarlo como salida.",
+  },
+  {
     target: '[data-tour="cancelar-salida"]',
     content: "Acá puedes cancelar la salida en curso.",
   },
@@ -293,6 +297,7 @@ function SalidasInventario() {
                   <td className={styles.tdAccion}>
                     <button
                       className={styles.btnEliminar}
+                      data-tour="eliminar-salidas"
                       onClick={() => eliminarItem(index)}
                       aria-label="Eliminar producto"
                     >

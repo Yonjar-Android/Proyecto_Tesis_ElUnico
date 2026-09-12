@@ -24,16 +24,20 @@ const [tourActivo, setTourActivo] = useState(false);
 
 const pasosTour: Step[] = [
   {
-    target: '[data-tour="agregar-producto"]',
-    content: "Desde aquí navegas a otra pantalla para registrar un nuevo producto.",
-  },
-  {
     target: '[data-tour="buscar-producto"]',
     content: "Aquí puedes filtrar productos por nombre, código o por categoría.",
   },
   {
+    target: '[data-tour="agregar-producto"]',
+    content: "Desde aquí navegas a otra pantalla para registrar un nuevo producto.",
+  },
+  {
     target: '[data-tour="tabla-productos"]',
     content: "En esta tabla se muestran todos los productos registrados.",
+  },
+  {
+    target: '[data-tour="editar-productos"]',
+    content: "Con el botón editar abres navegas a otra interfaz donde puedes editar la información del producto.",
   },
   {
     target: '[data-tour="paginación-producto"]',
@@ -138,6 +142,7 @@ const pasosTour: Step[] = [
                   </td>
                   <td className="inventario-td-acciones">
                     <button
+                      data-tour="editar-productos"
                       className="inventario-btn-icono"
                       onClick={() => navigate(`/inventario/editar/${producto.id}`)}
                       aria-label="Editar producto"
@@ -151,11 +156,11 @@ const pasosTour: Step[] = [
             </tbody>
           </table>
 
-          <div className="inventario-footer" data-tour="paginación-producto">
+          <div className="inventario-footer">
             <span className="inventario-count">
               Mostrando {productos.length} de {total} productos
             </span>
-            <div className="inventario-pagination">
+            <div className="inventario-pagination" data-tour="paginación-producto">
               <button
                 className="inventario-page-btn"
                 onClick={() => setCurrentPage(1)}
