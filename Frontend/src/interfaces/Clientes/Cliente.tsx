@@ -81,6 +81,8 @@ function Cliente(){
             currentPage,
             perPage
         );
+
+        console.log(response.data);
     
           setClientes(response.data);
           setTotal(response.total);
@@ -161,7 +163,7 @@ return (
               <th className="cliente-th">NOMBRE</th>
               <th className="cliente-th">APELLIDO</th>
               <th className="cliente-th">CONTACTO</th>
-              <th className="cliente-th">CRÉDITO</th>
+              <th className="cliente-th">DEUDA CRÉDITO</th>
               <th className="cliente-th cliente-th-actions">ACCIONES</th>
             </tr>
           </thead>

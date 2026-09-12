@@ -12,32 +12,49 @@ export const buscarClientes = async (
 
     if (search.trim() !== "") {
         where = `
-            WHERE NCliente LIKE ?
-               OR CONCAT(Nombre, ' ', Apellido) LIKE ?
-               OR Telefono LIKE ?
+            WHERE c.NCliente LIKE ?
+               OR CONCAT(c.Nombre, ' ', c.Apellido) LIKE ?
+               OR c.Telefono LIKE ?
         `;
         params.push(`%${search}%`, `%${search}%`, `%${search}%`);
     }
 
-    // Total de registros
+    // Subquery: deuda pendiente por cliente (créditos activos - abonos)
+    const deudaSubquery = `
+        SELECT
+            v.Id_cliente AS Id_cliente,
+            SUM(cf.total_deuda - COALESCE(ab.TotalAbonado, 0)) AS Deuda_Total
+        FROM credito_factura cf
+        INNER JOIN ventas v ON v.id = cf.id_venta
+        LEFT JOIN (
+            SELECT id_credito_factura, SUM(monto_abonado) AS TotalAbonado
+            FROM abono
+            GROUP BY id_credito_factura
+        ) ab ON ab.id_credito_factura = cf.id
+        WHERE cf.estado = 'Pendiente'
+        GROUP BY v.Id_cliente
+    `;
+
     const [countRows]: any = await pool.query(
         `SELECT COUNT(*) AS total
-         FROM clientes
+         FROM clientes c
          ${where}`,
         params
     );
 
     const total = countRows[0].total;
 
-    // Registros paginados
     const [rows] = await pool.query(
         `
-        SELECT *
-        FROM clientes
+        SELECT
+            c.*,
+            COALESCE(d.Deuda_Total, 0) AS Saldo_Deuda
+        FROM clientes c
+        LEFT JOIN (${deudaSubquery}) d ON d.Id_cliente = c.id
         ${where}
-        ORDER BY 
-        CASE 
-            WHEN Nombre = 'Cliente' AND Apellido = 'General' THEN 0
+        ORDER BY
+        CASE
+            WHEN c.Nombre = 'Cliente' AND c.Apellido = 'General' THEN 0
             ELSE 1
         END
         LIMIT ? OFFSET ?
@@ -45,7 +62,7 @@ export const buscarClientes = async (
         [...params, perPage, offset]
     );
 
-    return{
+    return {
         data: rows,
         current_page: page,
         per_page: perPage,
