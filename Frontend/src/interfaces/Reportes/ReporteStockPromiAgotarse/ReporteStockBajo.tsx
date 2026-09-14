@@ -203,6 +203,7 @@ function ReporteStockBajo() {
                 <th>Código</th>
                 <th>Categoría</th>
                 <th>Precio</th>
+                <th>Proveedor</th>
                 <th>Stock Min.</th>
                 <th>Stock Actual</th>
               </tr>
@@ -216,6 +217,8 @@ function ReporteStockBajo() {
                     <span className={styles["reporte-pill-categoria"]}>{producto.Nombre_categoria}</span>
                   </td>
                   <td>C${formatearMoneda(producto.Precio_venta)}</td>
+                  <td> {producto.Proveedor_reciente ?? ""} {producto.Proveedor_reciente && producto.Proveedor_principal && producto.Proveedor_reciente !== producto.Proveedor_principal && <br />} 
+                  {producto.Proveedor_principal && producto.Proveedor_principal !== producto.Proveedor_reciente ? producto.Proveedor_principal : ""} </td>
                   <td>{producto.Stock_min}</td>
                   <td>{renderStock(producto)}</td>
                 </tr>

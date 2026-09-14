@@ -44,6 +44,7 @@ export const buscarCreditosPendientes = async (
             cf.id,
             cf.id_venta,
             cf.total_deuda,
+            cf.monto_inicial,
             cf.estado,
             cli.Nombre AS cliente_nombre,
             cli.Apellido AS cliente_apellido,
@@ -73,7 +74,7 @@ export const buscarCreditosPendientes = async (
         cliente_apellido: r.cliente_apellido,
         cliente_cedula: r.cliente_cedula,
         total_deuda: Number(r.total_deuda),
-        saldo_pendiente: Number(r.total_deuda) - Number(r.total_abonado),
+        saldo_pendiente: Number(r.total_deuda) - r.monto_inicial - Number(r.total_abonado),
         estado: r.estado
     }));
 

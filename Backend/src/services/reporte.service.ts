@@ -66,29 +66,53 @@ export const obtenerReporteProductosStock = async (
 
     // Datos del reporte
     const [rows]: any = await pool.query(
-        `
-        SELECT
-            p.id,
-            p.Nombre,
-            p.Id_marca,
-            m.Nombre_marca,
-            p.Id_categoria,
-            c.Nombre_categoria,
-            p.Precio_venta,
-            p.Stock,
-            p.Stock_min,
-            p.Fecha_vencimiento
-        FROM productos p
-        INNER JOIN marcas m ON p.Id_marca = m.id
-        INNER JOIN categorias c ON p.Id_categoria = c.id
-        ${where}
-        ORDER BY
-            p.Stock ASC,
-            p.Nombre ASC
-        LIMIT ? OFFSET ?
-        `,
-        [...params, perPage, offset]
-    );
+    `
+    SELECT
+        p.id,
+        p.Nombre,
+        p.Id_marca,
+        m.Nombre_marca,
+        p.Id_categoria,
+        c.Nombre_categoria,
+        p.Precio_venta,
+        p.Stock,
+        p.Stock_min,
+        p.Fecha_vencimiento,
+
+        -- Proveedor de la compra más reciente
+        (
+            SELECT pr.Nombre_Empresa
+            FROM detalle_compra dc
+            INNER JOIN compras co ON co.id = dc.Id_compra
+            INNER JOIN proveedores pr ON pr.id = co.Id_proveedor
+            WHERE dc.Id_producto = p.id
+            ORDER BY co.Fecha DESC, co.id DESC
+            LIMIT 1
+        ) AS Proveedor_reciente,
+
+        -- Proveedor que más cantidad ha suministrado históricamente
+        (
+            SELECT pr2.Nombre_Empresa
+            FROM detalle_compra dc2
+            INNER JOIN compras co2 ON co2.id = dc2.Id_compra
+            INNER JOIN proveedores pr2 ON pr2.id = co2.Id_proveedor
+            WHERE dc2.Id_producto = p.id
+            GROUP BY co2.Id_proveedor, pr2.Nombre_Empresa
+            ORDER BY SUM(dc2.Cantidad) DESC
+            LIMIT 1
+        ) AS Proveedor_principal
+
+    FROM productos p
+    INNER JOIN marcas m ON p.Id_marca = m.id
+    INNER JOIN categorias c ON p.Id_categoria = c.id
+    ${where}
+    ORDER BY
+        p.Stock ASC,
+        p.Nombre ASC
+    LIMIT ? OFFSET ?
+    `,
+    [...params, perPage, offset]
+);
 
     return {
         data: rows,

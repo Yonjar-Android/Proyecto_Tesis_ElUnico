@@ -373,7 +373,7 @@ const confirmarVenta = async (
           fecha_inicio: fechaInicio,
           numero_cuotas: numeroCuotas,    
           frecuencia: frecuencia,
-          monto_inicial: montoInicial,  
+          monto_inicial: _detalle.dineroRecibido,  
         };
       }
 
@@ -733,18 +733,6 @@ const manejarSeleccionCliente = async (cliente: Cliente) => {
           <option value="quincenal">Quincenal</option>
           <option value="mensual">Mensual</option>
         </select>
-      </div>
-
-      <div className="factura-campo">
-        <label>Monto Inicial</label>
-        <input
-          type="number"
-          min={0}
-          step="1"
-          value={montoInicial}
-          onChange={(e) => setMontoInicial(Number(e.target.value))}
-          placeholder="0.00"
-        />
       </div>
     </div>
   </div>
