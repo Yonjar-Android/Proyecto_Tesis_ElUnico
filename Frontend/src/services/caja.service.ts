@@ -37,7 +37,10 @@ export interface SesionCajaActiva {
     id_sesion: number;
     fecha_apertura: string;
     monto_apertura_cordobas: number;
+    monto_apertura_dolares?: number;
     tasa_cambio: number;
+    total_ingresos_sistema?: number;
+    total_tarjeta_transferencia?: number;
     estado: string;
   } | null;
 }

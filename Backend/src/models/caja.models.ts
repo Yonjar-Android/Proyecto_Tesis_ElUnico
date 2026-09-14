@@ -58,7 +58,7 @@ export async function buscarSesionActiva(idUsuario: number) {
   const sesion = rows[0] || null;
 
   if (!sesion) {
-    return { sesion: null, egresos: [], ingresosDia: 0 };
+    return { sesion: null, egresos: [], ingresosDia: 0, transferencias: 0 };
   }
 
   const [egresos]: any = await pool.query(
@@ -66,12 +66,31 @@ export async function buscarSesionActiva(idUsuario: number) {
     [sesion.id_sesion]
   );
 
-  const [ingresos]: any = await pool.query(
-    `SELECT COALESCE(SUM(Total), 0) AS total FROM ventas WHERE Fecha >= ?`,
-    [sesion.fecha_apertura]
-  );
+  // total_ingresos_sistema y total_tarjeta_transferencia son actualizados por los triggers de la BD
+  let ingresosEfectivo = Number(sesion.total_ingresos_sistema) || 0;
+  let transferencias = Number(sesion.total_tarjeta_transferencia) || 0;
 
-  return { sesion, egresos, ingresosDia: Number(ingresos[0].total) };
+  // Respaldo en caso de que los acumuladores en la sesión no tengan valor pero haya ventas
+  if (ingresosEfectivo === 0 && transferencias === 0) {
+    const [desglose]: any = await pool.query(
+      `SELECT 
+        COALESCE(SUM(CASE WHEN Tipo_Pago = 'Contado' THEN Total ELSE 0 END), 0) AS contado,
+        COALESCE(SUM(CASE WHEN Tipo_Pago = 'Transferencia' THEN Total ELSE 0 END), 0) AS transferencias
+       FROM ventas WHERE Fecha >= ?`,
+      [sesion.fecha_apertura]
+    );
+    if (desglose && desglose.length > 0) {
+      ingresosEfectivo = Number(desglose[0].contado) || 0;
+      transferencias = Number(desglose[0].transferencias) || 0;
+    }
+  }
+
+  return {
+    sesion,
+    egresos,
+    ingresosDia: ingresosEfectivo,
+    transferencias: transferencias,
+  };
 }
 
 export async function crearEgresoCaja(

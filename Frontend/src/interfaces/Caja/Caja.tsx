@@ -14,6 +14,8 @@ interface SesionCaja {
   monto_apertura_usd?: number;
   monto_dolares?: number;
   tasa_cambio: number;
+  total_ingresos_sistema?: number;
+  total_tarjeta_transferencia?: number;
   estado: "Abierta" | "Cerrada";
 }
 
@@ -47,11 +49,21 @@ export default function Caja() {
       const data = await obtenerSesionActiva();
       setSesionActiva(data.sesion);
       setEgresos(data.egresos || []);
-      setIngresosDia(Number(data.ingresosDia) || 0);
 
-      // Desglose si tu backend lo provee
+      // Ingresos en efectivo del día
+      setIngresosDia(
+        Number(data.ingresosDia ?? data.sesion?.total_ingresos_sistema ?? 0)
+      );
+
+      // Ingresos por transferencias (banco / electrónico)
       setTransferencias(
-        Number(data.transferencias ?? data.total_transferencias ?? data.ingresosTransferencias ?? 0)
+        Number(
+          data.transferencias ??
+          data.sesion?.total_tarjeta_transferencia ??
+          data.total_transferencias ??
+          data.ingresosTransferencias ??
+          0
+        )
       );
       setIngresosDolares(
         Number(data.ingresosDolares ?? data.ingresos_dolares ?? 0)
