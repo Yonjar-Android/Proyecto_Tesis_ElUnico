@@ -10,7 +10,7 @@ import "./AperturaCierre.css";
 export default function AperturaCaja() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { refrescarCaja } = useCajaAbierta();
+  const { cajaAbierta, refrescarCaja } = useCajaAbierta();
  
   const mensajeCaja = (location.state as { mensajeCaja?: string } | null)?.mensajeCaja;
  
@@ -41,6 +41,33 @@ export default function AperturaCaja() {
     } finally {
       setGuardando(false);
     }
+  }
+
+  if (cajaAbierta === true) {
+    return (
+      <div className="apertura-container">
+        <h1 className="apertura-titulo">
+          <Wallet size={22} />
+          Apertura de Caja
+        </h1>
+        <div className="apertura-card" style={{ textAlign: "center", padding: "40px 20px" }}>
+          <div style={{ color: "#16a34a", fontSize: 44, marginBottom: 12 }}>✓</div>
+          <h2 style={{ fontSize: 20, color: "#0f172a", marginBottom: 8, fontWeight: 700 }}>
+            Ya existe una sesión de caja activa
+          </h2>
+          <p style={{ color: "#64748b", maxWidth: 460, margin: "0 auto 24px", fontSize: 14 }}>
+            No es posible realizar una nueva apertura mientras haya una caja abierta. Puedes continuar operando en el arqueo del día o realizar el cierre.
+          </p>
+          <button
+            className="btn-apertura-confirmar"
+            style={{ margin: "0 auto", display: "inline-flex" }}
+            onClick={() => navigate("/caja")}
+          >
+            Ir al Arqueo del día
+          </button>
+        </div>
+      </div>
+    );
   }
  
   return (

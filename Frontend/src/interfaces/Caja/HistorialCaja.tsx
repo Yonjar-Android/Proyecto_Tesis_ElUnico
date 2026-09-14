@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { History, FileSpreadsheet, FileText, Search, RefreshCw, AlertCircle } from "lucide-react";
-import { obtenerHistorialCajas, SesionHistorial } from "../../services/caja.service";
+import { obtenerHistorialCajas, type SesionHistorial } from "../../services/caja.service";
 import { formatearMoneda } from "../FuncionAuxiliar";
 import "./HistorialCaja.css";
 

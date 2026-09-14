@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus, Pencil, AlertTriangle, FileDown } from "lucide-react";
+import { Plus, Pencil, AlertTriangle } from "lucide-react";
 import EgresoModal from "./EgresoModal";
 import { obtenerSesionActiva } from "../../services/caja.service";
 import "./Caja.css";
@@ -33,11 +33,9 @@ export default function Caja() {
   const [sesionActiva, setSesionActiva] = useState<SesionCaja | null>(null);
   const [egresos, setEgresos] = useState<Egreso[]>([]);
   const [ingresosDia, setIngresosDia] = useState(0);
-  const [ingresosDolares, setIngresosDolares] = useState(0);
   const [transferencias, setTransferencias] = useState(0);
 
   const [modalEgresoAbierto, setModalEgresoAbierto] = useState(false);
-  const [tab, setTab] = useState<"arqueo" | "historial">("arqueo");
   const [egresoEditando, setEgresoEditando] = useState<Egreso | null>(null);
 
   useEffect(() => {
@@ -65,16 +63,12 @@ export default function Caja() {
           0
         )
       );
-      setIngresosDolares(
-        Number(data.ingresosDolares ?? data.ingresos_dolares ?? 0)
-      );
     } catch (error) {
       console.error(error);
       setSesionActiva(null);
       setEgresos([]);
       setIngresosDia(0);
       setTransferencias(0);
-      setIngresosDolares(0);
     }
   }
 
@@ -107,118 +101,6 @@ export default function Caja() {
       prev.map((e) => (e.id_egreso === egresoActualizado.id_egreso ? egresoActualizado : e))
     );
     setEgresoEditando(null);
-  }
-
-  // --- EXPORTAR A EXCEL ---
-  function exportarCierreExcel() {
-    if (!sesionActiva) return;
-
-    const fechaHoy = new Date().toLocaleDateString("es-NI", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    });
-
-    const horaActual = new Date().toLocaleTimeString("es-NI", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-
-    const excelTemplate = `
-      <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
-      <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-        <style>
-          body { font-family: Arial, sans-serif; font-size: 11pt; }
-          .empresa { font-size: 16pt; font-weight: bold; color: #0047ab; }
-          .th-col { background-color: #0047ab; color: #ffffff; font-weight: bold; padding: 8px; }
-          .th-egreso { background-color: #dc2626; color: #ffffff; font-weight: bold; padding: 8px; }
-          .td-lbl { background-color: #f8fafc; font-weight: bold; border: 1px solid #e2e8f0; padding: 6px 10px; }
-          .td-val { text-align: right; border: 1px solid #e2e8f0; padding: 6px 10px; }
-          .td-neto { background-color: #0047ab; color: #ffffff; font-weight: bold; font-size: 12pt; text-align: right; padding: 8px 10px; }
-          .td-neto-lbl { background-color: #0047ab; color: #ffffff; font-weight: bold; font-size: 12pt; padding: 8px 10px; }
-        </style>
-      </head>
-      <body>
-        <table>
-          <tr><td colspan="4" class="empresa">EL ÚNICO MOTO REPUESTOS</td></tr>
-          <tr><td colspan="4">REPORTE DE ARQUEO Y CIERRE DE CAJA</td></tr>
-          <tr><td colspan="4">Fecha: ${fechaHoy} ${horaActual} | Sesión: #${sesionActiva.id_sesion} | Tasa: C$${tasaCambio.toFixed(2)}</td></tr>
-          <tr><td colspan="4"></td></tr>
-
-          <tr>
-            <th colspan="2" class="th-col">CONCEPTO</th>
-            <th colspan="2" class="th-col">MONTO</th>
-          </tr>
-          <tr>
-            <td colspan="2" class="td-lbl">Apertura en Córdobas</td>
-            <td colspan="2" class="td-val">C$ ${formatearMoneda(aperturaCordobas)}</td>
-          </tr>
-          <tr>
-            <td colspan="2" class="td-lbl">Apertura en Dólares</td>
-            <td colspan="2" class="td-val">$ ${formatearMoneda(aperturaDolares)} USD (Equiv: C$ ${formatearMoneda(aperturaDolaresEnCordobas)})</td>
-          </tr>
-          <tr>
-            <td colspan="2" class="td-lbl">Ingresos en Efectivo (Ventas)</td>
-            <td colspan="2" class="td-val" style="color: #16a34a; font-weight: bold;">C$ ${formatearMoneda(ingresosDia)}</td>
-          </tr>
-          <tr>
-            <td colspan="2" class="td-lbl">Ingresos por Transferencias</td>
-            <td colspan="2" class="td-val" style="color: #0047ab; font-weight: bold;">C$ ${formatearMoneda(transferencias)}</td>
-          </tr>
-          <tr>
-            <td colspan="2" class="td-lbl">Total Egresos del Día</td>
-            <td colspan="2" class="td-val" style="color: #dc2626; font-weight: bold;">- C$ ${formatearMoneda(totalEgresos)}</td>
-          </tr>
-          <tr>
-            <td colspan="2" class="td-neto-lbl">TOTAL NETO EN CAJA (Apertura + Ingresos - Egresos)</td>
-            <td colspan="2" class="td-neto">C$ ${formatearMoneda(netoDia)}</td>
-          </tr>
-
-          <tr><td colspan="4"></td></tr>
-
-          <tr>
-            <th colspan="4" class="th-egreso">DETALLE DE EGRESOS REGISTRADOS (${egresos.length})</th>
-          </tr>
-          <tr style="background-color: #f1f5f9; font-weight: bold;">
-            <td>#</td>
-            <td>Concepto</td>
-            <td>Tipo</td>
-            <td style="text-align: right;">Monto</td>
-          </tr>
-          ${
-            egresos.length === 0
-              ? '<tr><td colspan="4" style="text-align: center; color: #888;">No hubo egresos registrados</td></tr>'
-              : egresos
-                  .map(
-                    (e, idx) => `
-            <tr>
-              <td>${idx + 1}</td>
-              <td>${e.concepto}</td>
-              <td>${e.tipo_egreso || "Egreso"}</td>
-              <td style="text-align: right; color: #dc2626;">- C$ ${formatearMoneda(e.monto_cordobas)}</td>
-            </tr>`
-                  )
-                  .join("")
-          }
-          <tr>
-            <td colspan="3" style="font-weight: bold; text-align: right; background-color: #f8fafc;">TOTAL EGRESOS:</td>
-            <td style="font-weight: bold; text-align: right; color: #dc2626; background-color: #f8fafc;">- C$ ${formatearMoneda(totalEgresos)}</td>
-          </tr>
-        </table>
-      </body>
-      </html>
-    `;
-
-    const blob = new Blob([excelTemplate], { type: "application/vnd.ms-excel;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `Cierre_Caja_${fechaHoy.replace(/\//g, "-")}_Sesion_${sesionActiva.id_sesion}.xls`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
   }
 
   return (
@@ -254,22 +136,11 @@ export default function Caja() {
       ) : (
         <>
           <div className="caja-tabs">
-            <button
-              className={`caja-tab ${tab === "arqueo" ? "caja-tab-activo" : ""}`}
-              onClick={() => setTab("arqueo")}
-            >
+            <button className="caja-tab caja-tab-activo">
               Arqueo del día
             </button>
-            <button
-              className={`caja-tab caja-tab-egresos ${tab === "arqueo" ? "caja-tab-egresos-activo" : ""}`}
-            >
+            <button className="caja-tab caja-tab-egresos caja-tab-egresos-activo">
               Egresos ({egresos.length})
-            </button>
-            <button
-              className={`caja-tab ${tab === "historial" ? "caja-tab-activo" : ""}`}
-              onClick={() => setTab("historial")}
-            >
-              Historial
             </button>
           </div>
 
@@ -364,11 +235,7 @@ export default function Caja() {
             )}
           </div>
 
-          <div className="caja-footer-acciones">
-            <button className="btn-exportar" onClick={exportarCierreExcel}>
-              <FileDown size={16} />
-              Exportar cierre a Excel
-            </button>
+          <div className="caja-footer-acciones" style={{ justifyContent: "flex-end" }}>
             <button className="btn-cerrar-caja" onClick={() => navigate("/caja/cierre")}>
               Cerrar caja
             </button>

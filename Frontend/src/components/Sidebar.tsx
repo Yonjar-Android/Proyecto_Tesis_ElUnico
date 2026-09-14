@@ -156,7 +156,14 @@ export default function Sidebar() {
               Arqueo del día
             </NavLink>
 
-            <NavLink to="/caja/apertura" className="sidebar-sublink">
+            <NavLink
+              to="/caja/apertura"
+              className={`sidebar-sublink ${cajaSesionActiva ? "sidebar-sublink-disabled" : ""}`}
+              onClick={(e) => {
+                if (cajaSesionActiva) e.preventDefault();
+              }}
+              title={cajaSesionActiva ? "Ya hay una sesión de caja activa" : undefined}
+            >
               Apertura de caja
             </NavLink>
 
@@ -169,6 +176,10 @@ export default function Sidebar() {
               title={!cajaSesionActiva ? "Debe abrir caja primero" : undefined}
             >
               Cierre de caja
+            </NavLink>
+
+            <NavLink to="/caja/historial" className="sidebar-sublink">
+              Historial de caja
             </NavLink>
           </div>
         )}

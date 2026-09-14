@@ -271,3 +271,123 @@
     grid-template-columns: repeat(2, 1fr);
   }
 }
+
+/* Modal de Cierre Exitoso y Exportación */
+.modal-cierre-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 16px;
+}
+
+.modal-cierre-content {
+  background: #ffffff;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 520px;
+  padding: 28px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  text-align: center;
+}
+
+.modal-cierre-icono {
+  width: 64px;
+  height: 64px;
+  background: #dcfce7;
+  color: #16a34a;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+}
+
+.modal-cierre-titulo {
+  font-size: 22px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 6px;
+}
+
+.modal-cierre-subtitulo {
+  font-size: 14px;
+  color: #64748b;
+  margin: 0 0 20px;
+}
+
+.modal-cierre-resumen-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 24px;
+  text-align: left;
+}
+
+.modal-cierre-resumen-item span {
+  display: block;
+  font-size: 11px;
+  text-transform: uppercase;
+  color: #64748b;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.modal-cierre-resumen-item strong {
+  font-size: 14px;
+  color: #1e293b;
+}
+
+.modal-cierre-acciones {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.btn-modal-exportar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 18px;
+  background-color: #107c41;
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-modal-exportar:hover {
+  background-color: #0c6b37;
+  transform: translateY(-1px);
+}
+
+.btn-modal-salir {
+  width: 100%;
+  padding: 11px 18px;
+  background-color: #f1f5f9;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-modal-salir:hover {
+  background-color: #e2e8f0;
+  color: #1e293b;
+}

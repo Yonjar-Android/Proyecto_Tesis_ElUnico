@@ -83,6 +83,8 @@ function App() {
                 </RutaProtegidaCaja>
               }
             />
+
+            <Route path="/caja/historial" element={<HistorialCaja />} />
  
             {/* Reportes */}
             <Route path="/reportes/cuentas-por-cobrar" element={<ReporteCuentasPorCobrar />} />
