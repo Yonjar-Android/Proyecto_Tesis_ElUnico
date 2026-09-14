@@ -564,3 +564,95 @@ export const obtenerReporteCompras = async (
         TotalCompras: estadisticas[0].TotalCompras
     };
 };
+
+export const obtenerReporteSalidasInventario = async (
+    search: string = "",
+    fechaInicio: string = "",
+    fechaFin: string = "",
+    page: number = 1,
+    perPage: number = 10
+) => {
+
+    const offset = (page - 1) * perPage;
+
+    let where = "WHERE 1=1";
+    const params: any[] = [];
+
+    // Búsqueda por producto o motivo de salida
+    if (search.trim() !== "") {
+        where += `
+            AND (
+                p.Nombre LIKE ?
+                OR d.Motivo LIKE ?
+            )
+        `;
+
+        params.push(
+            `%${search}%`,
+            `%${search}%`
+        );
+    }
+
+    // Fecha inicial
+    if (fechaInicio !== "") {
+        where += " AND s.Fecha >= ?";
+        params.push(`${fechaInicio} 00:00:00`);
+    }
+
+    // Fecha final
+    if (fechaFin !== "") {
+        where += " AND s.Fecha < ?";
+        params.push(addOneDay(fechaFin));
+    }
+
+    // Estadísticas
+    const [estadisticas]: any = await pool.query(
+        `
+        SELECT
+            COUNT(*) AS TotalRegistros,
+            COALESCE(SUM(d.Cantidad),0) AS TotalUnidadesSalidas
+        FROM detalle_otras_salidas_inventario d
+        INNER JOIN otras_salidas_inventario s
+            ON d.Id_salida = s.id
+        INNER JOIN productos p
+            ON d.Id_producto = p.id
+        ${where}
+        `,
+        params
+    );
+
+    const total = estadisticas[0].TotalRegistros;
+
+    // Datos paginados
+    const [rows]: any = await pool.query(
+        `
+        SELECT
+            d.id,
+            d.Id_salida,
+            s.Fecha,
+            d.Id_producto,
+            p.Nombre AS Nombre_Producto,
+            d.Motivo,
+            d.Cantidad
+        FROM detalle_otras_salidas_inventario d
+        INNER JOIN otras_salidas_inventario s
+            ON d.Id_salida = s.id
+        INNER JOIN productos p
+            ON d.Id_producto = p.id
+        ${where}
+        ORDER BY s.Fecha DESC, d.id DESC
+        LIMIT ? OFFSET ?
+        `,
+        [...params, perPage, offset]
+    );
+
+    return {
+        data: rows,
+        current_page: page,
+        per_page: perPage,
+        total,
+        last_page: Math.ceil(total / perPage),
+        TotalRegistros: estadisticas[0].TotalRegistros,
+        TotalUnidadesSalidas: estadisticas[0].TotalUnidadesSalidas
+    };
+};
