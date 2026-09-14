@@ -181,3 +181,29 @@ export async function actualizarEgresoCajaModel(
   );
   return result.affectedRows;
 }
+
+export async function listarHistorialCajasModel() {
+  const [rows]: any = await pool.query(
+    `SELECT 
+       sc.id_sesion,
+       sc.id_usuario,
+       COALESCE(u.Nombre_Usuario, 'Desconocido') AS usuario_nombre,
+       sc.fecha_apertura,
+       sc.fecha_cierre,
+       sc.monto_apertura_cordobas,
+       sc.monto_apertura_dolares,
+       sc.tasa_cambio,
+       sc.total_ingresos_sistema,
+       sc.total_egresos_sistema,
+       sc.total_neto_sistema,
+       sc.total_efectivo_contado,
+       sc.total_tarjeta_transferencia,
+       sc.diferencia,
+       sc.observaciones,
+       sc.estado
+     FROM sesiones_caja sc
+     LEFT JOIN usuarios u ON sc.id_usuario = u.id
+     ORDER BY sc.id_sesion DESC`
+  );
+  return rows;
+}

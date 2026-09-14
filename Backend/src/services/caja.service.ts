@@ -5,7 +5,8 @@ import {
   crearEgresoCaja,
   eliminarEgresoCajaModel,
   obtenerResumenCierreModel,
-  actualizarEgresoCajaModel
+  actualizarEgresoCajaModel,
+  listarHistorialCajasModel,
 } from "../models/caja.models.js";
 
 export async function abrirCaja(
@@ -135,4 +136,8 @@ export async function actualizarEgresoCaja(
     throw new Error("No se encontró el egreso a actualizar.");
   }
   return true;
+}
+
+export async function obtenerHistorialCajas() {
+  return await listarHistorialCajasModel();
 }

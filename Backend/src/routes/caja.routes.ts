@@ -7,6 +7,7 @@ import {
   postCierreCaja,
   getResumenCierreCaja,
   putEgresoCaja,  
+  getHistorialCajas,
 } from "../controllers/caja.controller.js";
 
 
@@ -14,6 +15,7 @@ import {
 const router = Router();
 
 router.get("/sesion-activa", getSesionActiva);
+router.get("/historial", getHistorialCajas);
 router.post("/apertura", postAperturaCaja);
 router.post("/egresos", postEgresoCaja);
 router.delete("/egresos/:id", deleteEgresoCaja);

@@ -7,6 +7,7 @@ import {
   cerrarCaja,
   obtenerResumenCierreCaja,
   actualizarEgresoCaja,
+  obtenerHistorialCajas,
 } from "../services/caja.service.js";
 
 export const getSesionActiva = async (req: Request, res: Response) => {
@@ -107,6 +108,15 @@ export const putEgresoCaja = async (req: Request, res: Response) => {
       observaciones || ""
     );
     res.status(200).json({ success: true });
+  } catch (error: any) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+};
+
+export const getHistorialCajas = async (req: Request, res: Response) => {
+  try {
+    const historial = await obtenerHistorialCajas();
+    res.status(200).json({ success: true, historial });
   } catch (error: any) {
     res.status(400).json({ success: false, message: error.message });
   }

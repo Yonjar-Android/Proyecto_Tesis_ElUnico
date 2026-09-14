@@ -22,6 +22,7 @@ import Usuario from "./interfaces/Usuario/Usuario";
 import Caja from "./interfaces/Caja/Caja";
 import AperturaCaja from "./interfaces/Caja/AperturaCaja";
 import CierreCaja from "./interfaces/Caja/CierreCaja";
+import HistorialCaja from "./interfaces/Caja/HistorialCaja";
 import Servicio from "./interfaces/Servicio/Servicio";
 import Devoluciones from "./interfaces/Devoluciones/Devoluciones";
 import SalidasInventario from "./interfaces/SalidasInventario/SalidasInventario";
