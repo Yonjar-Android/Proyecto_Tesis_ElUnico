@@ -4,11 +4,11 @@ import type { PoolConnection } from "mysql2/promise";
 interface DetalleSalida {
     Id_producto: number;
     Cantidad: number;
+    Motivo:string;
 }
 
 interface CrearSalidaData {
     Id_usuario: number;
-    Tipo_Salida: string;
     Observacion?: string | null;
     detalles: DetalleSalida[];
 }
@@ -31,10 +31,6 @@ export const crearSalida = async (
 
         if (!data.Id_usuario) {
             throw new Error("El usuario es obligatorio.");
-        }
-
-        if (!data.Tipo_Salida?.trim()) {
-            throw new Error("El tipo de salida es obligatorio.");
         }
 
         if (!data.detalles || data.detalles.length === 0) {
@@ -116,15 +112,13 @@ export const crearSalida = async (
             `
             INSERT INTO otras_salidas_inventario (
                 Id_usuario,
-                Tipo_Salida,
                 Observacion,
                 Estado
             )
-            VALUES (?, ?, ?, 'Completada')
+            VALUES (?, ?, 'Completada')
             `,
             [
                 data.Id_usuario,
-                data.Tipo_Salida.trim(),
                 data.Observacion?.trim() || null
             ]
         );
@@ -142,14 +136,16 @@ export const crearSalida = async (
                 INSERT INTO detalle_otras_salidas_inventario (
                     Id_salida,
                     Id_producto,
-                    Cantidad
+                    Cantidad,
+                    Motivo
                 )
-                VALUES (?, ?, ?)
+                VALUES (?, ?, ?, ?)
                 `,
                 [
                     idSalida,
                     detalle.Id_producto,
-                    detalle.Cantidad
+                    detalle.Cantidad,
+                    detalle.Motivo
                 ]
             );
         }

@@ -373,3 +373,86 @@ export const generateExcelReport = async (
     const buffer = await workbook.xlsx.writeBuffer();
     return buffer;
 };
+
+const bordeCompleto = () => ({
+    top: { style: 'thin' as const },
+    left: { style: 'thin' as const },
+    bottom: { style: 'thin' as const },
+    right: { style: 'thin' as const },
+});
+
+export const generateSalidasInventarioExcelReport = async (
+    reportData: any
+): Promise<ExcelJS.Buffer> => {
+    const workbook = new ExcelJS.Workbook();
+    workbook.creator = 'Sistema de Reportes';
+    workbook.created = new Date();
+
+    const worksheet = workbook.addWorksheet('Reporte');
+    const numColumnas = 4;
+
+    worksheet.columns = [
+        { header: 'Fecha', key: 'Fecha', width: 15, style: { numFmt: 'DD/MM/YYYY' } },
+        { header: 'Producto', key: 'Nombre_Producto', width: 30 },
+        { header: 'Motivo', key: 'Motivo', width: 25 },
+        { header: 'Cantidad', key: 'Cantidad', width: 12, style: { numFmt: '0' } },
+    ];
+
+    worksheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFF' }, size: 12 };
+    worksheet.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: '4F81BD' } };
+    worksheet.getRow(1).alignment = { vertical: 'middle', horizontal: 'center' };
+    worksheet.getRow(1).height = 25;
+
+    (reportData.data ?? []).forEach((row: any) => {
+        worksheet.addRow({
+            Fecha: row.Fecha ? new Date(row.Fecha) : null,
+            Nombre_Producto: row.Nombre_Producto,
+            Motivo: row.Motivo,
+            Cantidad: Number(row.Cantidad),
+        });
+    });
+
+    // Estadísticas a la derecha
+    const colStats = numColumnas + 2;
+    worksheet.getColumn(colStats).width = 25;
+    worksheet.getColumn(colStats + 1).width = 20;
+
+    const tituloStats = worksheet.getRow(1);
+    tituloStats.getCell(colStats).value = 'ESTADÍSTICAS';
+    tituloStats.getCell(colStats).font = { bold: true, color: { argb: 'FFFFFF' }, size: 12 };
+    tituloStats.getCell(colStats).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: '4472C4' } };
+    tituloStats.getCell(colStats).alignment = { vertical: 'middle', horizontal: 'center' };
+    tituloStats.getCell(colStats).border = bordeCompleto();
+
+    const stats = [
+        { label: 'Total Registros:', value: reportData.TotalRegistros, format: '0' },
+        { label: 'Unidades Salidas:', value: reportData.TotalUnidadesSalidas, format: '0' },
+    ];
+
+    stats.forEach((stat, i) => {
+        const row = worksheet.getRow(2 + i);
+        row.getCell(colStats).value = stat.label;
+        row.getCell(colStats).font = { bold: true };
+        row.getCell(colStats).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'E7E6E6' } };
+        row.getCell(colStats).border = bordeCompleto();
+
+        row.getCell(colStats + 1).value = Number(stat.value ?? 0);
+        row.getCell(colStats + 1).numFmt = stat.format;
+        row.getCell(colStats + 1).font = { bold: true };
+        row.getCell(colStats + 1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFC7CE' } };
+        row.getCell(colStats + 1).alignment = { horizontal: 'right' };
+        row.getCell(colStats + 1).border = bordeCompleto();
+    });
+
+    // Bordes + alineación de la tabla principal
+    const totalFilas = (reportData.data?.length ?? 0) + 1;
+    worksheet.eachRow((row, rowNumber) => {
+        if (rowNumber > totalFilas) return;
+        for (let col = 1; col <= numColumnas; col++) {
+            row.getCell(col).border = bordeCompleto();
+        }
+        if (rowNumber > 1) row.getCell(4).alignment = { horizontal: 'right' };
+    });
+
+    return await workbook.xlsx.writeBuffer();
+};

@@ -3,7 +3,8 @@ import {
     obtenerReporteProductosStock,
     obtenerReporteFacturasConDeuda,
     obtenerReporteVentas,
-    obtenerReporteCompras
+    obtenerReporteCompras,
+    obtenerReporteSalidasInventario
 } from "../services/reporte.service.js";
 
 export const obtenerReporteStockBajo = async (req: Request, res: Response) => {
@@ -112,6 +113,34 @@ export const obtenerReporteVentasPorPeriodo = async(req: Request, res: Response)
 
         res.status(500).json({
             mensaje: "Error al buscar ventas."
+        });
+
+    }
+}
+
+export const obtenerReporteSalidasInventarioPorPeriodo = async (req: Request, res: Response) => {
+    try {
+
+        const search = req.query.search?.toString() ?? "";
+        const page = Number(req.query.page) || 1;
+        const perPage = Number(req.query.perPage) || 10;
+        const fechaInicio = req.query.fechaInicio?.toString() ?? "";
+        const fechaFin = req.query.fechaFin?.toString() ?? "";
+
+        const resultado = await obtenerReporteSalidasInventario(
+            search,
+            fechaInicio,
+            fechaFin,
+            page,
+            perPage
+        );
+
+        res.json(resultado);
+
+    } catch (error) {
+
+        res.status(500).json({
+            mensaje: "Error al buscar salidas de inventario."
         });
 
     }

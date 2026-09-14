@@ -66,29 +66,53 @@ export const obtenerReporteProductosStock = async (
 
     // Datos del reporte
     const [rows]: any = await pool.query(
-        `
-        SELECT
-            p.id,
-            p.Nombre,
-            p.Id_marca,
-            m.Nombre_marca,
-            p.Id_categoria,
-            c.Nombre_categoria,
-            p.Precio_venta,
-            p.Stock,
-            p.Stock_min,
-            p.Fecha_vencimiento
-        FROM productos p
-        INNER JOIN marcas m ON p.Id_marca = m.id
-        INNER JOIN categorias c ON p.Id_categoria = c.id
-        ${where}
-        ORDER BY
-            p.Stock ASC,
-            p.Nombre ASC
-        LIMIT ? OFFSET ?
-        `,
-        [...params, perPage, offset]
-    );
+    `
+    SELECT
+        p.id,
+        p.Nombre,
+        p.Id_marca,
+        m.Nombre_marca,
+        p.Id_categoria,
+        c.Nombre_categoria,
+        p.Precio_venta,
+        p.Stock,
+        p.Stock_min,
+        p.Fecha_vencimiento,
+
+        -- Proveedor de la compra más reciente
+        (
+            SELECT pr.Nombre_Empresa
+            FROM detalle_compra dc
+            INNER JOIN compras co ON co.id = dc.Id_compra
+            INNER JOIN proveedores pr ON pr.id = co.Id_proveedor
+            WHERE dc.Id_producto = p.id
+            ORDER BY co.Fecha DESC, co.id DESC
+            LIMIT 1
+        ) AS Proveedor_reciente,
+
+        -- Proveedor que más cantidad ha suministrado históricamente
+        (
+            SELECT pr2.Nombre_Empresa
+            FROM detalle_compra dc2
+            INNER JOIN compras co2 ON co2.id = dc2.Id_compra
+            INNER JOIN proveedores pr2 ON pr2.id = co2.Id_proveedor
+            WHERE dc2.Id_producto = p.id
+            GROUP BY co2.Id_proveedor, pr2.Nombre_Empresa
+            ORDER BY SUM(dc2.Cantidad) DESC
+            LIMIT 1
+        ) AS Proveedor_principal
+
+    FROM productos p
+    INNER JOIN marcas m ON p.Id_marca = m.id
+    INNER JOIN categorias c ON p.Id_categoria = c.id
+    ${where}
+    ORDER BY
+        p.Stock ASC,
+        p.Nombre ASC
+    LIMIT ? OFFSET ?
+    `,
+    [...params, perPage, offset]
+);
 
     return {
         data: rows,
@@ -538,5 +562,97 @@ export const obtenerReporteCompras = async (
         last_page: Math.ceil(total / perPage),
         TotalRegistros: estadisticas[0].TotalRegistros,
         TotalCompras: estadisticas[0].TotalCompras
+    };
+};
+
+export const obtenerReporteSalidasInventario = async (
+    search: string = "",
+    fechaInicio: string = "",
+    fechaFin: string = "",
+    page: number = 1,
+    perPage: number = 10
+) => {
+
+    const offset = (page - 1) * perPage;
+
+    let where = "WHERE 1=1";
+    const params: any[] = [];
+
+    // Búsqueda por producto o motivo de salida
+    if (search.trim() !== "") {
+        where += `
+            AND (
+                p.Nombre LIKE ?
+                OR d.Motivo LIKE ?
+            )
+        `;
+
+        params.push(
+            `%${search}%`,
+            `%${search}%`
+        );
+    }
+
+    // Fecha inicial
+    if (fechaInicio !== "") {
+        where += " AND s.Fecha >= ?";
+        params.push(`${fechaInicio} 00:00:00`);
+    }
+
+    // Fecha final
+    if (fechaFin !== "") {
+        where += " AND s.Fecha < ?";
+        params.push(addOneDay(fechaFin));
+    }
+
+    // Estadísticas
+    const [estadisticas]: any = await pool.query(
+        `
+        SELECT
+            COUNT(*) AS TotalRegistros,
+            COALESCE(SUM(d.Cantidad),0) AS TotalUnidadesSalidas
+        FROM detalle_otras_salidas_inventario d
+        INNER JOIN otras_salidas_inventario s
+            ON d.Id_salida = s.id
+        INNER JOIN productos p
+            ON d.Id_producto = p.id
+        ${where}
+        `,
+        params
+    );
+
+    const total = estadisticas[0].TotalRegistros;
+
+    // Datos paginados
+    const [rows]: any = await pool.query(
+        `
+        SELECT
+            d.id,
+            d.Id_salida,
+            s.Fecha,
+            d.Id_producto,
+            p.Nombre AS Nombre_Producto,
+            d.Motivo,
+            d.Cantidad
+        FROM detalle_otras_salidas_inventario d
+        INNER JOIN otras_salidas_inventario s
+            ON d.Id_salida = s.id
+        INNER JOIN productos p
+            ON d.Id_producto = p.id
+        ${where}
+        ORDER BY s.Fecha DESC, d.id DESC
+        LIMIT ? OFFSET ?
+        `,
+        [...params, perPage, offset]
+    );
+
+    return {
+        data: rows,
+        current_page: page,
+        per_page: perPage,
+        total,
+        last_page: Math.ceil(total / perPage),
+        TotalRegistros: estadisticas[0].TotalRegistros,
+        TotalUnidadesSalidas: estadisticas[0].TotalUnidadesSalidas
     };
 };

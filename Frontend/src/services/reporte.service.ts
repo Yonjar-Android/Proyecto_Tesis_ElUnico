@@ -1,6 +1,7 @@
 import axiosInstance from "./axiosInstance";
 import type { RespuestaReporteVentas } from "../models/VentaReportes";
 import type { RespuestaReporteCompras } from "../models/CompraReporte";
+import type { RespuestaReporteSalidas } from "../models/SalidaInventario";
 
 const API = "http://localhost:3001/api/reportes";
 const token = localStorage.getItem("token");
@@ -99,6 +100,25 @@ export const obtenerReporteComprasPorPeriodo = async (
             headers: {
             Authorization: `Bearer ${token}`
         }
+        }
+    );
+
+    return data;
+};
+
+export const obtenerReporteSalidasPorPeriodo = async (
+    search: string = "",
+    fechaInicio: string = "",
+    fechaFin: string = "",
+    page: number = 1,
+    perPage: number = 10
+): Promise<RespuestaReporteSalidas> => {
+
+    const { data } = await axiosInstance.get<RespuestaReporteSalidas>(
+        `${API}/obtenerReporteSalidasInventario`,
+        {
+            params: { search, fechaInicio, fechaFin, page, perPage },
+            headers: { Authorization: `Bearer ${token}` }
         }
     );
 

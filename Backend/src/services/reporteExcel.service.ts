@@ -1,7 +1,7 @@
 import ExcelJS from "exceljs";
-import { obtenerReporteProductosStock, obtenerReporteFacturasConDeuda, obtenerReporteVentas, obtenerReporteCompras }
+import { obtenerReporteProductosStock, obtenerReporteFacturasConDeuda, obtenerReporteVentas, obtenerReporteCompras, obtenerReporteSalidasInventario }
  from "./reporte.service.js";
-import { generateExcelReport, ReportType } from "../utils/excelGenerator.js";
+import { generateExcelReport, ReportType, generateSalidasInventarioExcelReport } from "../utils/excelGenerator.js";
 
 // Servicios específicos para cada reporte
 export const generateProductosStockExcel = async (
@@ -68,4 +68,20 @@ export const generateReporteComprasPorPeriodoExcel = async(
     );
     return await generateExcelReport(reportData, 'compras_por_periodo'
     )
+}
+
+export const generateReporteSalidasPorPeriodoExcel = async(
+    search: string = "",
+    fechaInicio: string = "",
+    fechaFin: string = ""
+): Promise<ExcelJS.Buffer> => {
+    const reportData = await obtenerReporteSalidasInventario(
+        search,
+        fechaInicio,
+        fechaFin,
+        1,
+        1000000 // Un número grande para obtener todos
+    );
+    return await generateSalidasInventarioExcelReport(reportData);
+    
 }

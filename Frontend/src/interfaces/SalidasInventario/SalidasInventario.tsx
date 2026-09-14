@@ -20,17 +20,18 @@ const TIPOS_SALIDA = [
 ];
 
 interface PayloadSalida {
-    Tipo_Salida: string;
     Observacion: string;
     detalles: {
         Id_producto: number;
         Cantidad: number;
+        Motivo: string;
     }[];
 }
 
 interface ItemSalida {
     producto: ProductoListado;
     cantidad: number;
+    motivo: string;
 }
 
 type EstadoSalida = "Completada" | "Anulada";
@@ -129,13 +130,18 @@ function SalidasInventario() {
       return;
     }
 
+    if (!tipoSalida) {
+      setError("Selecciona un tipo de salida.");
+      return;
+    }
+
     const yaExiste = items.some((item) => item.producto.id === productoSeleccionado.id);
     if (yaExiste) {
       setError("Este producto ya fue agregado a la salida.");
       return;
     }
 
-    setItems((prev) => [...prev, { producto: productoSeleccionado, cantidad: Number(cantidad) }]);
+    setItems((prev) => [...prev, { producto: productoSeleccionado, cantidad: Number(cantidad), motivo: tipoSalida }]);
     setError("");
     limpiarCamposProducto();
   };
@@ -153,10 +159,6 @@ function SalidasInventario() {
   };
 
   const registrarSalida = async () => {
-    if (!tipoSalida) {
-      setError("Selecciona un tipo de salida.");
-      return;
-    }
 
     if (items.length === 0) {
       setError("Agrega al menos un producto para registrar la salida.");
@@ -167,11 +169,11 @@ function SalidasInventario() {
 
     try {
       const payload: PayloadSalida = {
-            Tipo_Salida: tipoSalida,
             Observacion: observacion,
             detalles: items.map((item) => ({
                 Id_producto: item.producto.id,
                 Cantidad: item.cantidad,
+                Motivo: item.motivo,
             })),
         };
 
@@ -281,6 +283,7 @@ function SalidasInventario() {
               <tr>
                 <th>Producto</th>
                 <th>Cantidad</th>
+                <th>Motivo</th>
                 <th className={styles.thAccion}>Acción</th>
               </tr>
             </thead>
@@ -294,6 +297,7 @@ function SalidasInventario() {
                     )}
                   </td>
                   <td>{item.cantidad}</td>
+                  <td>{item.motivo}</td>
                   <td className={styles.tdAccion}>
                     <button
                       className={styles.btnEliminar}

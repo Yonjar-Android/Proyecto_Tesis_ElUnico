@@ -19,14 +19,12 @@ export const postSalida = async (
         }
 
         const {
-            Tipo_Salida,
             Observacion,
             detalles
         } = req.body;
 
         const resultado = await crearSalida({
             Id_usuario: idUsuario,
-            Tipo_Salida,
             Observacion,
             detalles
         });

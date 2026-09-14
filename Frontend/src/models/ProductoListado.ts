@@ -13,4 +13,7 @@ export interface ProductoListado {
     Stock_min: number;
 
     Fecha_vencimiento: Date | null;
+
+    Proveedor_reciente: string | null;
+    Proveedor_principal: string | null;
 }

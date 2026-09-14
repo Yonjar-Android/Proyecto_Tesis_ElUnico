@@ -197,6 +197,9 @@ export default function Sidebar() {
                 <NavLink to="/reportes/stock-proximo-agotarse" className="sidebar-sublink">
                   Stock Próximo a Agotarse
                 </NavLink>
+                <NavLink to="/reportes/salidasInventario" className="sidebar-sublink">
+                  Salidas de Inventario
+                </NavLink>
                 <NavLink to="/reportes/ventas" className="sidebar-sublink">
                   Ventas por Período
                 </NavLink>
