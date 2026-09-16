@@ -565,6 +565,116 @@ export const obtenerReporteCompras = async (
     };
 };
 
+export const obtenerReporteVentasServicio = async (
+    search: string = "",
+    fechaInicio: string = "",
+    fechaFin: string = "",
+    page: number = 1,
+    perPage: number = 10
+) => {
+
+    const offset = (page - 1) * perPage;
+
+    let where = "WHERE d.Id_servicio IS NOT NULL";
+    const params: any[] = [];
+
+    if (search.trim() !== "") {
+        where += " AND s.Nombre_servicio LIKE ?";
+        params.push(`%${search}%`);
+    }
+
+    if (fechaInicio !== "") {
+        where += " AND v.Fecha >= ?";
+        params.push(`${fechaInicio} 00:00:00`);
+    }
+
+    if (fechaFin !== "") {
+        where += " AND v.Fecha < ?";
+        params.push(addOneDay(fechaFin));
+    }
+
+    const devolucionesSubquery = `
+        SELECT
+            dd.Id_detalle_venta AS Id_detalle_venta,
+            COALESCE(SUM(dd.Subtotal), 0) AS TotalDevuelto
+        FROM detalle_devolucion dd
+        INNER JOIN devoluciones dev ON dev.id = dd.Id_devolucion
+        WHERE dev.Estado <> 'Anulada'
+        GROUP BY dd.Id_detalle_venta
+    `;
+
+    // Monto neto facturado de esta línea (ya descontando devoluciones de ese detalle)
+    const subtotalNetoExpr = `d.Subtotal - COALESCE(devt.TotalDevuelto, 0)`;
+
+    // Descuento normalizado a córdobas, sea porcentaje o monto fijo
+    const descuentoMontoExpr = `
+        CASE
+            WHEN d.Tipo_descuento = 'Porcentaje'
+            THEN (d.Precio_Venta * d.Cantidad * d.Descuento / 100)
+            ELSE d.Descuento
+        END
+    `;
+
+    // Total de servicios distintos que cumplen el filtro (para la paginación)
+    const [totalServicios]: any = await pool.query(
+        `
+        SELECT COUNT(DISTINCT s.id) AS Total
+        FROM detalle_venta d
+        INNER JOIN ventas v ON d.Id_venta = v.id
+        INNER JOIN servicios s ON d.Id_servicio = s.id
+        LEFT JOIN (${devolucionesSubquery}) devt ON devt.Id_detalle_venta = d.id
+        ${where}
+        `,
+        params
+    );
+    const total = totalServicios[0].Total;
+
+    // Estadísticas generales (sobre todos los servicios que cumplen el filtro, sin paginar)
+    const [estadisticas]: any = await pool.query(
+        `
+        SELECT
+            COALESCE(SUM(${subtotalNetoExpr}), 0) AS TotalFacturadoServicios
+        FROM detalle_venta d
+        INNER JOIN ventas v ON d.Id_venta = v.id
+        INNER JOIN servicios s ON d.Id_servicio = s.id
+        LEFT JOIN (${devolucionesSubquery}) devt ON devt.Id_detalle_venta = d.id
+        ${where}
+        `,
+        params
+    );
+
+    // Datos agrupados por servicio, paginados
+    const [rows]: any = await pool.query(
+        `
+        SELECT
+            s.id AS Id_servicio,
+            s.Nombre_servicio,
+            SUM(d.Cantidad) AS CantidadTotal,
+            COALESCE(SUM(${descuentoMontoExpr}), 0) AS TotalDescuento,
+            COALESCE(SUM(${subtotalNetoExpr}), 0) AS TotalFacturado
+        FROM detalle_venta d
+        INNER JOIN ventas v ON d.Id_venta = v.id
+        INNER JOIN servicios s ON d.Id_servicio = s.id
+        LEFT JOIN (${devolucionesSubquery}) devt ON devt.Id_detalle_venta = d.id
+        ${where}
+        GROUP BY s.id, s.Nombre_servicio
+        ORDER BY TotalFacturado DESC
+        LIMIT ? OFFSET ?
+        `,
+        [...params, perPage, offset]
+    );
+
+    return {
+        data: rows,
+        current_page: page,
+        per_page: perPage,
+        total,
+        last_page: Math.ceil(total / perPage),
+        TotalRegistros: total,
+        TotalFacturadoServicios: estadisticas[0].TotalFacturadoServicios
+    };
+};
+
 export const obtenerReporteSalidasInventario = async (
     search: string = "",
     fechaInicio: string = "",

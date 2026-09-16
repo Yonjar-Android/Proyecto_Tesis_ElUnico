@@ -110,3 +110,21 @@ export const descargarReporteSalidasExcel = async (
     });
     return response.data;
 };
+
+
+export const descargarReporteVentasServicioExcel = async (
+    search: string = "",
+    fechaInicio: string = "",
+    fechaFin: string = "",
+): Promise<Blob> => {
+    const response = await axiosInstance.get(`${API}/excel/servicios-por-periodo`, {
+        params: { 
+            search, 
+            fechaInicio, 
+            fechaFin ,
+        },
+        headers: { Authorization: `Bearer ${token}` },
+        responseType: 'blob'
+    });
+    return response.data;
+};

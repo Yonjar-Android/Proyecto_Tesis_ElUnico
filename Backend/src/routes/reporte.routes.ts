@@ -4,7 +4,8 @@ import {
     obtenerReporteCuentasCobrar,
     obtenerReporteVentasPorPeriodo,
     obtenerReporteComprasPorPeriodo,
-    obtenerReporteSalidasInventarioPorPeriodo
+    obtenerReporteSalidasInventarioPorPeriodo,
+    obtenerReporteVentasServicioPorPeriodo
 } from "../controllers/reporte.controller.js";
 
 const router = Router();
@@ -12,6 +13,7 @@ const router = Router();
 router.get("/obtenerReporteStockBajo", obtenerReporteStockBajo);
 router.get("/obtenerReporteCuentasCobrar", obtenerReporteCuentasCobrar);
 router.get("/obtenerReporteVentas", obtenerReporteVentasPorPeriodo);
+router.get("/obtenerReporteVentasServicios", obtenerReporteVentasServicioPorPeriodo);
 router.get("/obtenerReporteCompras", obtenerReporteComprasPorPeriodo);
 router.get("/obtenerReporteSalidasInventario", obtenerReporteSalidasInventarioPorPeriodo);
 
