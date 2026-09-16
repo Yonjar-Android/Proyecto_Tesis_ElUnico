@@ -217,6 +217,9 @@ export default function Sidebar() {
                 <NavLink to="/reportes/ventas-servicios" className="sidebar-sublink">
                   Ventas de Servicios por Período
                 </NavLink>
+                <NavLink to="/reportes/ventas-productos" className="sidebar-sublink">
+                  Ventas de Productos por Período
+                </NavLink>
                 <NavLink to="/reportes/compras" className="sidebar-sublink">
                   Compras por Período
                 </NavLink>

@@ -675,6 +675,116 @@ export const obtenerReporteVentasServicio = async (
     };
 };
 
+export const obtenerReporteVentasProducto = async (
+    search: string = "",
+    fechaInicio: string = "",
+    fechaFin: string = "",
+    page: number = 1,
+    perPage: number = 10
+) => {
+
+    const offset = (page - 1) * perPage;
+
+    let where = "WHERE d.Id_producto IS NOT NULL";
+    const params: any[] = [];
+
+    if (search.trim() !== "") {
+        where += " AND p.Nombre LIKE ?";
+        params.push(`%${search}%`);
+    }
+
+    if (fechaInicio !== "") {
+        where += " AND v.Fecha >= ?";
+        params.push(`${fechaInicio} 00:00:00`);
+    }
+
+    if (fechaFin !== "") {
+        where += " AND v.Fecha < ?";
+        params.push(addOneDay(fechaFin));
+    }
+
+    const devolucionesSubquery = `
+        SELECT
+            dd.Id_detalle_venta AS Id_detalle_venta,
+            COALESCE(SUM(dd.Subtotal), 0) AS TotalDevuelto
+        FROM detalle_devolucion dd
+        INNER JOIN devoluciones dev ON dev.id = dd.Id_devolucion
+        WHERE dev.Estado <> 'Anulada'
+        GROUP BY dd.Id_detalle_venta
+    `;
+
+    // Monto neto facturado de esta línea (ya descontando devoluciones de ese detalle)
+    const subtotalNetoExpr = `d.Subtotal - COALESCE(devt.TotalDevuelto, 0)`;
+
+    // Descuento normalizado a córdobas, sea porcentaje o monto fijo
+    const descuentoMontoExpr = `
+        CASE
+            WHEN d.Tipo_descuento = 'Porcentaje'
+            THEN (d.Precio_Venta * d.Cantidad * d.Descuento / 100)
+            ELSE d.Descuento
+        END
+    `;
+
+    // Total de productos distintos que cumplen el filtro (para la paginación)
+    const [totalProductos]: any = await pool.query(
+        `
+        SELECT COUNT(DISTINCT p.id) AS Total
+        FROM detalle_venta d
+        INNER JOIN ventas v ON d.Id_venta = v.id
+        INNER JOIN productos p ON d.Id_producto = p.id
+        LEFT JOIN (${devolucionesSubquery}) devt ON devt.Id_detalle_venta = d.id
+        ${where}
+        `,
+        params
+    );
+    const total = totalProductos[0].Total;
+
+    // Estadísticas generales (sobre todos los productos que cumplen el filtro, sin paginar)
+    const [estadisticas]: any = await pool.query(
+        `
+        SELECT
+            COALESCE(SUM(${subtotalNetoExpr}), 0) AS TotalFacturadoProductos
+        FROM detalle_venta d
+        INNER JOIN ventas v ON d.Id_venta = v.id
+        INNER JOIN productos p ON d.Id_producto = p.id
+        LEFT JOIN (${devolucionesSubquery}) devt ON devt.Id_detalle_venta = d.id
+        ${where}
+        `,
+        params
+    );
+
+    // Datos agrupados por producto, paginados
+    const [rows]: any = await pool.query(
+        `
+        SELECT
+            p.id AS Id_producto,
+            p.Nombre AS Nombre_producto,
+            SUM(d.Cantidad) AS CantidadTotal,
+            COALESCE(SUM(${descuentoMontoExpr}), 0) AS TotalDescuento,
+            COALESCE(SUM(${subtotalNetoExpr}), 0) AS TotalFacturado
+        FROM detalle_venta d
+        INNER JOIN ventas v ON d.Id_venta = v.id
+        INNER JOIN productos p ON d.Id_producto = p.id
+        LEFT JOIN (${devolucionesSubquery}) devt ON devt.Id_detalle_venta = d.id
+        ${where}
+        GROUP BY p.id, p.Nombre
+        ORDER BY TotalFacturado DESC
+        LIMIT ? OFFSET ?
+        `,
+        [...params, perPage, offset]
+    );
+
+    return {
+        data: rows,
+        current_page: page,
+        per_page: perPage,
+        total,
+        last_page: Math.ceil(total / perPage),
+        TotalRegistros: total,
+        TotalFacturadoProductos: estadisticas[0].TotalFacturadoProductos
+    };
+};
+
 export const obtenerReporteSalidasInventario = async (
     search: string = "",
     fechaInicio: string = "",

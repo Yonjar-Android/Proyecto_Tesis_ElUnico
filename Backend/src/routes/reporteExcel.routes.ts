@@ -6,7 +6,8 @@ import {
     descargarReporteComprasPorPeriodo,
     descargarReporteVentasPorPeriodo,
     descargarReporteSalidasPorPeriodo,
-    descargarReporteVentasServicioPorPeriodo
+    descargarReporteVentasServicioPorPeriodo,
+    descargarReporteVentasProductoPorPeriodo
 } from '../controllers/reporteExcel.controller.js';
 
 const router = Router();
@@ -18,4 +19,5 @@ router.get('/excel/ventas-por-periodo', descargarReporteVentasPorPeriodo);
 router.get('/excel/compras-por-periodo', descargarReporteComprasPorPeriodo);
 router.get('/excel/salidas-por-periodo', descargarReporteSalidasPorPeriodo);
 router.get('/excel/servicios-por-periodo', descargarReporteVentasServicioPorPeriodo);
+router.get('/excel/productos-por-periodo', descargarReporteVentasProductoPorPeriodo);
 export default router;

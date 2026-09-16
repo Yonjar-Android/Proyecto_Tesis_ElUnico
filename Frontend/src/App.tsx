@@ -18,6 +18,7 @@ import ReporteCompras from "./interfaces/Reportes/ReporteCompras/ReporteCompras"
 import ReporteVentas from "./interfaces/Reportes/ReporteVentas/ReporteVentas";
 import ReporteSalidasInventario from "./interfaces/Reportes/ReporteSalidasInventario/ReporteSalidasInventario";
 import ReporteVentasServicio from "./interfaces/Reportes/ReporteVentasServicios/ReporteVentasServicios";
+import ReporteVentasProducto from "./interfaces/Reportes/ReporteVentasProductos/ReporteVentasServicios";
 import Mantenimiento from "./interfaces/Mantenimiento/Mantenimiento";
 import Usuario from "./interfaces/Usuario/Usuario";
 import Caja from "./interfaces/Caja/Caja";
@@ -92,7 +93,8 @@ function App() {
             <Route path="/reportes/stock-proximo-agotarse" element={<ReporteStockProximoAgotarse />} />
             <Route path="/reportes/salidasInventario" element={<ReporteSalidasInventario />} />
             <Route path="/reportes/ventas" element={<ReporteVentas />} />
-            <Route path="/reportes/ventas-servicios" element={<ReporteVentasServicio />} />
+            <Route path="/reportes/ventas-servicios" element={<ReporteVentasServicio />} /> 
+            <Route path="/reportes/ventas-productos" element={<ReporteVentasProducto />} /> 
             <Route path="/reportes/compras" element={<ReporteCompras />} />
           </Route>
         </Routes>
