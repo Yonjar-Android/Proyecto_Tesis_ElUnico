@@ -285,10 +285,17 @@ export const crearDevolucion = async (
             );
         }
 
-        // ==========================================
-        // VERIFICAR SI TODOS LOS PRODUCTOS DE LA VENTA
-        // YA FUERON DEVUELTOS EN SU TOTALIDAD
-        // ==========================================
+        const [servicioRows]: any = await connection.query(
+            `
+            SELECT COUNT(*) AS Total
+            FROM detalle_venta
+            WHERE Id_venta = ?
+              AND Id_servicio IS NOT NULL
+            `,
+            [data.Id_venta]
+        );
+
+        const tieneServicios = Number(servicioRows[0].Total) > 0;
 
         const [detalleVentaTotales]: any = await connection.query(
             `
@@ -307,6 +314,7 @@ export const crearDevolucion = async (
         );
 
         const todosDevueltos =
+            !tieneServicios &&
             detalleVentaTotales.length > 0 &&
             detalleVentaTotales.every(
                 (fila: any) =>

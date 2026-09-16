@@ -706,7 +706,8 @@ export const obtenerReporteVentasProducto = async (
     const devolucionesSubquery = `
         SELECT
             dd.Id_detalle_venta AS Id_detalle_venta,
-            COALESCE(SUM(dd.Subtotal), 0) AS TotalDevuelto
+            COALESCE(SUM(dd.Subtotal), 0) AS TotalDevuelto,
+            COALESCE(SUM(dd.Cantidad), 0) AS CantidadDevuelta
         FROM detalle_devolucion dd
         INNER JOIN devoluciones dev ON dev.id = dd.Id_devolucion
         WHERE dev.Estado <> 'Anulada'
@@ -716,12 +717,17 @@ export const obtenerReporteVentasProducto = async (
     // Monto neto facturado de esta línea (ya descontando devoluciones de ese detalle)
     const subtotalNetoExpr = `d.Subtotal - COALESCE(devt.TotalDevuelto, 0)`;
 
-    // Descuento normalizado a córdobas, sea porcentaje o monto fijo
+    // Cantidad neta de esta línea (ya descontando unidades devueltas)
+    const cantidadNetaExpr = `(d.Cantidad - COALESCE(devt.CantidadDevuelta, 0))`;
+
+    // Descuento normalizado a córdobas, sea porcentaje o monto fijo.
+    // En ambos casos d.Descuento es un valor POR UNIDAD, así que el total
+    // se obtiene multiplicando por la cantidad neta (ya descontando lo devuelto).
     const descuentoMontoExpr = `
         CASE
             WHEN d.Tipo_descuento = 'Porcentaje'
-            THEN (d.Precio_Venta * d.Cantidad * d.Descuento / 100)
-            ELSE d.Descuento
+            THEN (d.Precio_Venta * ${cantidadNetaExpr} * d.Descuento / 100)
+            ELSE (d.Descuento * ${cantidadNetaExpr})
         END
     `;
 
@@ -759,7 +765,7 @@ export const obtenerReporteVentasProducto = async (
         SELECT
             p.id AS Id_producto,
             p.Nombre AS Nombre_producto,
-            SUM(d.Cantidad) AS CantidadTotal,
+            SUM(${cantidadNetaExpr}) AS CantidadTotal,
             COALESCE(SUM(${descuentoMontoExpr}), 0) AS TotalDescuento,
             COALESCE(SUM(${subtotalNetoExpr}), 0) AS TotalFacturado
         FROM detalle_venta d
