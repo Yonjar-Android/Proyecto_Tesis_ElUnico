@@ -6,7 +6,8 @@ import {
     obtenerReporteCompras,
     obtenerReporteSalidasInventario,
     obtenerReporteVentasServicio,
-    obtenerReporteVentasProducto
+    obtenerReporteVentasProducto,
+    obtenerReporteInventario
 } from "../services/reporte.service.js";
 
 export const obtenerReporteStockBajo = async (req: Request, res: Response) => {
@@ -181,6 +182,24 @@ export const obtenerReporteSalidasInventarioPorPeriodo = async (req: Request, re
             mensaje: "Error al buscar salidas de inventario."
         });
 
+    }
+}
+
+export const obtenerReporteInventarioGeneral = async (req: Request, res: Response) => {
+    try {
+        const search = req.query.search?.toString() ?? "";
+        const Id_categoria = Number(req.query.Id_categoria) || null;
+        const Id_marca = Number(req.query.Id_marca) || null;
+        const page = Number(req.query.page) || 1;
+        const perPage = Number(req.query.perPage) || 10;
+
+        const resultado = await obtenerReporteInventario(
+            search, Id_categoria, Id_marca, page, perPage
+        );
+
+        res.json(resultado);
+    } catch (error) {
+        res.status(500).json({ mensaje: error });
     }
 }
 

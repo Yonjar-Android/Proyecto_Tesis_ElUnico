@@ -141,3 +141,18 @@ export const descargarReporteVentasProductoExcel = async (
      });
      return response.data;
  };
+
+ export const descargarReporteInventarioExcel = async (
+    search: string = "",
+    Id_categoria: number | null = null,
+    Id_marca: number | null = null
+): Promise<Blob> => {
+
+    const response = await axiosInstance.get(`${API}/excel/inventario`, {
+        params: { search, Id_categoria, Id_marca },
+        headers: { Authorization: `Bearer ${token}` },
+        responseType: "blob",
+    });
+
+    return response.data;
+};

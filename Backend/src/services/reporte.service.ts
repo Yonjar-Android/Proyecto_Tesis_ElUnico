@@ -882,3 +882,81 @@ export const obtenerReporteSalidasInventario = async (
         TotalUnidadesSalidas: estadisticas[0].TotalUnidadesSalidas
     };
 };
+
+export const obtenerReporteInventario = async (
+    search: string = "",
+    Id_categoria: number | null = null,
+    Id_marca: number | null = null,
+    page: number = 1,
+    perPage: number = 10
+) => {
+
+    const offset = (page - 1) * perPage;
+
+    let where = "WHERE 1=1";
+    const params: any[] = [];
+
+    if (search.trim() !== "") {
+        where += " AND p.Nombre LIKE ?";
+        params.push(`%${search}%`);
+    }
+
+    if (Id_categoria !== null && Id_categoria > 0) {
+        where += " AND p.Id_categoria = ?";
+        params.push(Id_categoria);
+    }
+
+    if (Id_marca !== null && Id_marca > 0) {
+        where += " AND p.Id_marca = ?";
+        params.push(Id_marca);
+    }
+
+    const [estadisticas]: any = await pool.query(
+        `
+        SELECT
+            COUNT(*) AS TotalRegistros,
+            COALESCE(SUM(p.Stock), 0) AS TotalStock,
+            SUM(CASE WHEN p.Stock < p.Stock_min THEN 1 ELSE 0 END) AS TotalStockCritico
+        FROM productos p
+        INNER JOIN marcas m ON p.Id_marca = m.id
+        INNER JOIN categorias c ON p.Id_categoria = c.id
+        ${where}
+        `,
+        params
+    );
+
+    const total = estadisticas[0].TotalRegistros;
+
+    const [rows]: any = await pool.query(
+        `
+        SELECT
+            p.id,
+            p.Nombre,
+            p.Id_marca,
+            m.Nombre_marca,
+            p.Id_categoria,
+            c.Nombre_categoria,
+            p.Precio_venta,
+            p.Stock,
+            p.Stock_min
+        FROM productos p
+        INNER JOIN marcas m ON p.Id_marca = m.id
+        INNER JOIN categorias c ON p.Id_categoria = c.id
+        ${where}
+        ORDER BY p.Nombre ASC
+        LIMIT ? OFFSET ?
+        `,
+        [...params, perPage, offset]
+    );
+
+    return {
+        data: rows,
+        current_page: page,
+        per_page: perPage,
+        total,
+        last_page: Math.ceil(total / perPage),
+        TotalRegistros: estadisticas[0].TotalRegistros,
+        TotalStock: estadisticas[0].TotalStock,
+        TotalStockCritico: estadisticas[0].TotalStockCritico
+    };
+};

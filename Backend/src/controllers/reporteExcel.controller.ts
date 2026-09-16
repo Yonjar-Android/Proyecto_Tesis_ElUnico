@@ -7,7 +7,8 @@ import {
     generateReporteComprasPorPeriodoExcel,
     generateReporteSalidasPorPeriodoExcel,
     generateReporteVentasServicioPorPeriodoExcel,
-    generateReporteVentasProductoPorPeriodoExcel
+    generateReporteVentasProductoPorPeriodoExcel,
+    generateReporteInventarioExcel
 } from '../services/reporteExcel.service.js';
 
 export const descargarReporteProductosStock = async (req: Request, res: Response) => {
@@ -257,6 +258,33 @@ export const descargarReporteVentasProductoPorPeriodo = async (req: Request, res
         res.status(500).json({
             success: false,
             message: 'Error al generar el reporte de ventas por producto',
+            error: error instanceof Error ? error.message : 'Error desconocido'
+        });
+    }
+};
+
+export const descargarReporteInventario = async (req: Request, res: Response) => {
+    try {
+        const { search = "", Id_categoria = null, Id_marca = null } = req.query;
+
+        const excelBuffer = await generateReporteInventarioExcel(
+            search as string,
+            Id_categoria ? Number(Id_categoria) : null,
+            Id_marca ? Number(Id_marca) : null
+        );
+
+        const fechaActual = new Date().toISOString().split('T')[0];
+        const filename = `reporte_inventario_${fechaActual}.xlsx`;
+
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', `attachment; filename=${filename}`);
+
+        res.send(excelBuffer);
+    } catch (error) {
+        console.error('Error generando Excel de inventario:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error al generar el reporte de inventario',
             error: error instanceof Error ? error.message : 'Error desconocido'
         });
     }

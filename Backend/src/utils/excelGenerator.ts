@@ -616,3 +616,91 @@ export const generateVentasProductoExcelReport = async (
 
     return await workbook.xlsx.writeBuffer();
 };
+
+export const generateInventarioExcelReport = async (
+    reportData: any
+): Promise<ExcelJS.Buffer> => {
+    const workbook = new ExcelJS.Workbook();
+    workbook.creator = 'Sistema de Reportes';
+    workbook.created = new Date();
+
+    const worksheet = workbook.addWorksheet('Reporte');
+    const numColumnas = 5;
+
+    worksheet.columns = [
+        { header: 'Producto', key: 'Nombre', width: 35 },
+        { header: 'Marca', key: 'Nombre_marca', width: 20 },
+        { header: 'Categoría', key: 'Nombre_categoria', width: 20 },
+        { header: 'Precio Venta', key: 'Precio_venta', width: 15, style: { numFmt: '#,##0.00' } },
+        { header: 'Stock', key: 'Stock', width: 12, style: { numFmt: '0' } },
+    ];
+
+    worksheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFF' }, size: 12 };
+    worksheet.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: '4F81BD' } };
+    worksheet.getRow(1).alignment = { vertical: 'middle', horizontal: 'center' };
+    worksheet.getRow(1).height = 25;
+
+    (reportData.data ?? []).forEach((row: any) => {
+        const nuevaFila = worksheet.addRow({
+            Nombre: row.Nombre,
+            Nombre_marca: row.Nombre_marca,
+            Nombre_categoria: row.Nombre_categoria,
+            Precio_venta: Number(row.Precio_venta),
+            Stock: Number(row.Stock),
+        });
+
+        // Resaltar en rojo el stock crítico, igual que la píldora de la interfaz
+        if (Number(row.Stock) < Number(row.Stock_min)) {
+            nuevaFila.getCell(5).font = { bold: true, color: { argb: 'DC2626' } };
+            nuevaFila.getCell(5).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FEF2F2' } };
+        }
+    });
+
+    // Estadísticas a la derecha
+    const colStats = numColumnas + 2;
+    worksheet.getColumn(colStats).width = 25;
+    worksheet.getColumn(colStats + 1).width = 20;
+
+    const tituloStats = worksheet.getRow(1);
+    tituloStats.getCell(colStats).value = 'ESTADÍSTICAS';
+    tituloStats.getCell(colStats).font = { bold: true, color: { argb: 'FFFFFF' }, size: 12 };
+    tituloStats.getCell(colStats).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: '4472C4' } };
+    tituloStats.getCell(colStats).alignment = { vertical: 'middle', horizontal: 'center' };
+    tituloStats.getCell(colStats).border = bordeCompleto();
+
+    const stats = [
+        { label: 'Total Productos:', value: reportData.TotalRegistros, format: '0' },
+        { label: 'Stock Total:', value: reportData.TotalStock, format: '0' },
+        { label: 'Stock Crítico:', value: reportData.TotalStockCritico, format: '0' },
+    ];
+
+    stats.forEach((stat, i) => {
+        const row = worksheet.getRow(2 + i);
+        row.getCell(colStats).value = stat.label;
+        row.getCell(colStats).font = { bold: true };
+        row.getCell(colStats).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'E7E6E6' } };
+        row.getCell(colStats).border = bordeCompleto();
+
+        row.getCell(colStats + 1).value = Number(stat.value ?? 0);
+        row.getCell(colStats + 1).numFmt = stat.format;
+        row.getCell(colStats + 1).font = { bold: true };
+        row.getCell(colStats + 1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFC7CE' } };
+        row.getCell(colStats + 1).alignment = { horizontal: 'right' };
+        row.getCell(colStats + 1).border = bordeCompleto();
+    });
+
+    // Bordes + alineación de la tabla principal
+    const totalFilas = (reportData.data?.length ?? 0) + 1;
+    worksheet.eachRow((row, rowNumber) => {
+        if (rowNumber > totalFilas) return;
+        for (let col = 1; col <= numColumnas; col++) {
+            row.getCell(col).border = bordeCompleto();
+        }
+        if (rowNumber > 1) {
+            row.getCell(4).alignment = { horizontal: 'right' };
+            row.getCell(5).alignment = { horizontal: 'right' };
+        }
+    });
+
+    return await workbook.xlsx.writeBuffer();
+};

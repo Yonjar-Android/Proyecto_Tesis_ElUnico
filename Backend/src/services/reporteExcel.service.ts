@@ -6,14 +6,16 @@ import {
     obtenerReporteCompras,
     obtenerReporteSalidasInventario, 
     obtenerReporteVentasServicio,
-    obtenerReporteVentasProducto
+    obtenerReporteVentasProducto,
+    obtenerReporteInventario
 }
  from "./reporte.service.js";
 import { generateExcelReport,
      ReportType,
      generateSalidasInventarioExcelReport,
       generateVentasServicioExcelReport,
-      generateVentasProductoExcelReport
+      generateVentasProductoExcelReport,
+      generateInventarioExcelReport
     } from "../utils/excelGenerator.js";
 
 // Servicios específicos para cada reporte
@@ -127,4 +129,19 @@ export const generateReporteVentasProductoPorPeriodoExcel = async (
         1000000
     );
     return await generateVentasProductoExcelReport(reportData);
+}
+
+export const generateReporteInventarioExcel = async (
+    search: string = "",
+    Id_categoria: number | null = null,
+    Id_marca: number | null = null
+): Promise<ExcelJS.Buffer> => {
+    const reportData = await obtenerReporteInventario(
+        search,
+        Id_categoria,
+        Id_marca,
+        1,
+        1000000
+    );
+    return await generateInventarioExcelReport(reportData);
 }
