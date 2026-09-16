@@ -1,0 +1,260 @@
+.historial-caja-container {
+  padding: 28px 32px;
+  max-width: 1300px;
+  margin: 0 auto;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+.historial-caja-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.historial-caja-titulo {
+  font-size: 26px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+}
+
+.historial-caja-subtitulo {
+  font-size: 14px;
+  color: #64748b;
+  margin-top: 4px;
+  margin-bottom: 0;
+}
+
+.historial-caja-acciones-top {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.btn-exportar-excel {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px;
+  background-color: #107c41;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.btn-exportar-excel:hover {
+  background-color: #0c6b37;
+  transform: translateY(-1px);
+}
+
+.btn-exportar-pdf {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px;
+  background-color: #dc2626;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.btn-exportar-pdf:hover {
+  background-color: #b91c1c;
+  transform: translateY(-1px);
+}
+
+.btn-recargar-historial {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  background-color: #f1f5f9;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-recargar-historial:hover {
+  background-color: #e2e8f0;
+  color: #1e293b;
+}
+
+/* Filtros y Buscador */
+.historial-caja-filtros {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.historial-caja-search-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 8px 14px;
+  min-width: 280px;
+  flex: 1;
+  max-width: 400px;
+}
+
+.historial-caja-search-box input {
+  border: none;
+  outline: none;
+  font-size: 14px;
+  width: 100%;
+  color: #1e293b;
+}
+
+.historial-caja-estado-select {
+  padding: 8px 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #ffffff;
+  font-size: 14px;
+  color: #334155;
+  outline: none;
+  cursor: pointer;
+}
+
+/* Tabla */
+.historial-tabla-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  overflow-x: auto;
+}
+
+.historial-tabla {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 13.5px;
+}
+
+.historial-tabla th {
+  background: #f8fafc;
+  color: #475569;
+  font-weight: 700;
+  padding: 13px 16px;
+  border-bottom: 1px solid #e2e8f0;
+  text-transform: uppercase;
+  font-size: 11.5px;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.historial-tabla td {
+  padding: 13px 16px;
+  border-bottom: 1px solid #f1f5f9;
+  color: #1e293b;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.historial-tabla tr:hover {
+  background-color: #f8fafc;
+}
+
+.historial-sesion-badge {
+  font-weight: 700;
+  color: #0047ab;
+  background: #eff6ff;
+  padding: 3px 8px;
+  border-radius: 6px;
+  display: inline-block;
+  font-size: 12.5px;
+}
+
+.historial-usuario {
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.historial-fecha-principal {
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.historial-fecha-secundaria {
+  font-size: 11.5px;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+.badge-estado {
+  display: inline-block;
+  padding: 3px 9px;
+  border-radius: 12px;
+  font-size: 11.5px;
+  font-weight: 700;
+}
+
+.badge-estado-abierta {
+  background-color: #dcfce7;
+  color: #166534;
+}
+
+.badge-estado-cerrada {
+  background-color: #f1f5f9;
+  color: #475569;
+}
+
+.monto-positivo {
+  color: #16a34a;
+  font-weight: 600;
+}
+
+.monto-negativo {
+  color: #dc2626;
+  font-weight: 600;
+}
+
+.monto-neutro {
+  color: #334155;
+  font-weight: 600;
+}
+
+.historial-tabla-vacia {
+  text-align: center;
+  padding: 40px !important;
+  color: #94a3b8;
+  font-size: 14px;
+}
+
+.historial-tabla-cargando {
+  text-align: center;
+  padding: 40px !important;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.historial-resumen-footer {
+  padding: 12px 16px;
+  background: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+  font-size: 13px;
+  color: #64748b;
+  display: flex;
+  justify-content: space-between;
+}

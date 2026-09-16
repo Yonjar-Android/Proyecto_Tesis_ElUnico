@@ -97,6 +97,14 @@
   opacity: 1;
 }
 
+.sidebar-sublink-disabled {
+  opacity: 0.45 !important;
+  cursor: not-allowed !important;
+}
+.sidebar-sublink-disabled:hover {
+  background: transparent !important;
+}
+
 .sidebar-footer {
   margin-top: auto;
   border-top: 1px solid rgba(255, 255, 255, 0.15);

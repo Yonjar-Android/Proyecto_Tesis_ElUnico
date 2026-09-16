@@ -84,3 +84,27 @@ export const actualizarEgreso = async (id: number, payload: EgresoCajaInput) => 
   const response = await axiosInstance.put(`${API}/egresos/${id}`, payload);
   return response.data;
 };
+
+export interface SesionHistorial {
+  id_sesion: number;
+  id_usuario: number;
+  usuario_nombre: string;
+  fecha_apertura: string;
+  fecha_cierre: string | null;
+  monto_apertura_cordobas: number;
+  monto_apertura_dolares: number;
+  tasa_cambio: number;
+  total_ingresos_sistema: number;
+  total_egresos_sistema: number;
+  total_neto_sistema: number;
+  total_efectivo_contado: number;
+  total_tarjeta_transferencia: number;
+  diferencia: number;
+  observaciones: string | null;
+  estado: "Abierta" | "Cerrada";
+}
+
+export const obtenerHistorialCajas = async (): Promise<{ success: boolean; historial: SesionHistorial[] }> => {
+  const response = await axiosInstance.get(`${API}/historial`);
+  return response.data;
+};
