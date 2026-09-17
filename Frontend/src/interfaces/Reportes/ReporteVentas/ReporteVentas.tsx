@@ -16,6 +16,7 @@ import {
     descargarReporteVentasExcel, 
     descargarArchivoExcel 
 } from "../../../services/reporteExcel.service.js";
+import { descargarReporteVentasPdf } from "../../../services/reportePdf.service.js";
 import { Joyride, type Step } from "react-joyride";
 
 export interface RespuestaReporteVentas extends PaginatedResponse<VentaReporte> {
@@ -71,6 +72,19 @@ function ReporteVentas() {
     content: "Con estos botones puedes navegar entre las páginas de ventas para buscar alguna que no aparezca en la lista actual.",
   },
 ];
+
+const handleDescargarPdf = async () => {
+    try {
+      const search = clienteSeleccionado
+      ? `${clienteSeleccionado.Nombre} ${clienteSeleccionado.Apellido}`
+      : "";
+
+        const blob = await descargarReporteVentasPdf(search, fechaInicio, fechaFin, tipoPago, estado);
+        descargarArchivoExcel(blob, `reporte_ventas_${fechaInicio}_a_${fechaFin}.pdf`);
+    } catch (error) {
+        console.error('Error al descargar PDF:', error);
+    }
+};
 
 const imprimirTicket = async (idVenta: number) => {
   try {
@@ -191,6 +205,16 @@ useEffect(() => {
             >
                 <IconoBarras />
                 {exportando ? 'Exportando...' : 'Exportar Excel'}
+            </button>
+
+             <button 
+                className={styles["reporte-btn-exportar"]}
+                onClick={handleDescargarPdf}
+                disabled={exportando}
+                data-tour="exportar-reporte"
+            >
+                <IconoBarras />
+                {exportando ? 'Exportando...' : 'Exportar Pdf'}
             </button>
             </div>
         </div>

@@ -15,6 +15,7 @@ import authRoutes from "./routes/auth.routes.js";
 import compraRoutes from "./routes/compra.routes.js";
 import reporteRoutes from "./routes/reporte.routes.js";
 import reporteExcelRoutes from "./routes/reporteExcel.routes.js";
+import reportePdfRoutes from "./routes/reportePdf.routes.js";
 import cajaRoutes from "./routes/caja.routes.js";
 import servicioRoutes from "./routes/service.routes.js"
 import cors from "cors";
@@ -58,6 +59,7 @@ app.use("/api/devoluciones", authMiddleware, devolucionesRoutes);
 app.use("/api/salidas_inventario", authMiddleware, salidasRoutes);
 app.use("/api/mantenimiento", authMiddleware, mantenimientoRoutes);
 app.use("/api/excel", authMiddleware, reporteExcelRoutes);
+app.use("/api/pdf", authMiddleware, reportePdfRoutes);
 
 app.listen(PORT, () => {
     console.log(`Servidor iniciado en http://localhost:${PORT}`);

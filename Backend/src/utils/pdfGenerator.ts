@@ -1,0 +1,145 @@
+// pdfGenerator.ts
+import PDFDocument from 'pdfkit';
+
+const NOMBRE_NEGOCIO = 'El Único';
+
+
+const agregarEncabezado = (doc: PDFKit.PDFDocument, nombreReporte: string) => {
+    doc.fontSize(18).font('Helvetica-Bold').fillColor('#000000')
+        .text(NOMBRE_NEGOCIO, { align: 'center' });
+
+    doc.fontSize(13).font('Helvetica')
+        .text(nombreReporte, { align: 'center' })
+        .moveDown(0.3);
+
+    doc.fontSize(8).fillColor('#666666')
+        .text(`Generado: ${new Date().toLocaleString('es-NI')}`, { align: 'center' })
+        .fillColor('#000000')
+        .moveDown(1);
+};
+
+interface Columna {
+    header: string;
+    key: string;
+    width: number;
+    align?: 'left' | 'right' | 'center';
+    format?: (value: any) => string;
+}
+
+const dibujarHeaderTabla = (doc: PDFKit.PDFDocument, columnas: Columna[], x: number, y: number): number => {
+    const alto = 20;
+    doc.rect(x, y, columnas.reduce((s, c) => s + c.width, 0), alto).fill('#4F81BD');
+    doc.fillColor('#FFFFFF').font('Helvetica-Bold').fontSize(9);
+    let posX = x;
+    columnas.forEach((col) => {
+        doc.text(col.header, posX + 2, y + 6, { width: col.width - 4, align: col.align ?? 'left' });
+        posX += col.width;
+    });
+    doc.fillColor('#000000').font('Helvetica');
+    return y + alto;
+};
+
+const dibujarFila = (doc: PDFKit.PDFDocument, columnas: Columna[], row: any, x: number, y: number, zebra: boolean): number => {
+    const alto = 18;
+    if (zebra) {
+        doc.rect(x, y, columnas.reduce((s, c) => s + c.width, 0), alto).fill('#F2F2F2');
+        doc.fillColor('#000000');
+    }
+    doc.fontSize(8).font('Helvetica');
+    let posX = x;
+    columnas.forEach((col) => {
+        const valor = col.format ? col.format(row[col.key]) : String(row[col.key] ?? '');
+        doc.text(valor, posX + 2, y + 5, { width: col.width - 4, align: col.align ?? 'left' });
+        posX += col.width;
+    });
+    return y + alto;
+};
+
+// --- Formato de números: 1,000.00 (coma miles, punto decimales) ---
+const formatoMoneda = (v: any) =>
+    `C$ ${Number(v ?? 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+const formatoEntero = (v: any) =>
+    Number(v ?? 0).toLocaleString('en-US');
+
+const formatoFecha = (v: any) => v ? new Date(v).toLocaleDateString('es-NI') : '';
+
+export const generateVentasPorPeriodoPdfReport = async (reportData: any): Promise<Buffer> => {
+    return new Promise((resolve, reject) => {
+        try {
+            const doc = new PDFDocument({ margin: 40, size: 'A4', layout: 'landscape' });
+            const chunks: Buffer[] = [];
+            doc.on('data', (c) => chunks.push(c));
+            doc.on('end', () => resolve(Buffer.concat(chunks)));
+            doc.on('error', reject);
+
+            const nombreReporte = 'Reporte de Ventas por Período';
+            doc.on('pageAdded', () => agregarEncabezado(doc, nombreReporte));
+            agregarEncabezado(doc, nombreReporte);
+
+            const anchoUtil = doc.page.width - doc.page.margins.left - doc.page.margins.right;
+
+// --- Estadísticas centradas ---
+const stats = [
+    { label: 'Total Registros', value: reportData.TotalRegistros, format: formatoEntero },
+    { label: 'Ventas Contado', value: reportData.VentasContado, format: formatoMoneda },
+    { label: 'Ventas Transferencia', value: reportData.VentasTransferencia, format: formatoMoneda },
+    { label: 'Total Abonado', value: reportData.TotalAbonado, format: formatoMoneda },
+    { label: 'Total Pendiente', value: reportData.TotalPendientePago, format: formatoMoneda },
+    { label: 'Total Ventas', value: reportData.TotalVentas, format: formatoMoneda },
+];
+
+const porFila = 3, anchoStat = 170, altoStat = 34, gapStat = 6;
+const anchoBloqueStats = porFila * anchoStat;
+const xInicioStats = doc.page.margins.left + (anchoUtil - anchoBloqueStats) / 2;
+
+let statX = xInicioStats, statY = doc.y;
+
+stats.forEach((stat, i) => {
+    if (i > 0 && i % porFila === 0) {
+        statX = xInicioStats;
+        statY += altoStat + gapStat;
+    }
+    doc.rect(statX, statY, anchoStat - gapStat, altoStat).fill('#E7E6E6');
+    doc.fillColor('#333333').fontSize(8).font('Helvetica-Bold')
+        .text(stat.label, statX + 6, statY + 5, { width: anchoStat - 16 });
+    doc.fillColor('#000000').fontSize(11).font('Helvetica-Bold')
+        .text(stat.format(stat.value), statX + 6, statY + 18, { width: anchoStat - 16 });
+    statX += anchoStat;
+});
+
+doc.y = statY + altoStat + 15;
+doc.x = doc.page.margins.left;
+
+// --- Tabla centrada ---
+const columnas: Columna[] = [
+    { header: 'ID', key: 'id', width: 40, align: 'right' },
+    { header: 'Fecha', key: 'Fecha', width: 65, format: formatoFecha },
+    { header: 'Cliente', key: 'Cliente', width: 150 },
+    { header: 'N° Cliente', key: 'NCliente', width: 75 },
+    { header: 'Tipo Pago', key: 'Tipo_Pago', width: 75 },
+    { header: 'Total Orig.', key: 'TotalOriginal', width: 75, align: 'right', format: formatoMoneda },
+    { header: 'Total Dev.', key: 'TotalDevuelto', width: 75, align: 'right', format: formatoMoneda },
+    { header: 'Total Neto', key: 'Total', width: 75, align: 'right', format: formatoMoneda },
+];
+
+const anchoTabla = columnas.reduce((s, c) => s + c.width, 0);
+const xInicio = doc.page.margins.left + (anchoUtil - anchoTabla) / 2;
+
+let y = dibujarHeaderTabla(doc, columnas, xInicio, doc.y);
+const limiteInferior = doc.page.height - doc.page.margins.bottom;
+
+(reportData.data ?? []).forEach((row: any, i: number) => {
+    if (y + 18 > limiteInferior) {
+        doc.addPage();
+        y = dibujarHeaderTabla(doc, columnas, xInicio, doc.y);
+    }
+    y = dibujarFila(doc, columnas, row, xInicio, y, i % 2 === 1);
+});
+
+            doc.end();
+        } catch (error) {
+            reject(error);
+        }
+    });
+};
