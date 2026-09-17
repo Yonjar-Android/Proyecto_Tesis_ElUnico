@@ -184,11 +184,11 @@ function ReporteCuentasPorCobrar() {
             </tbody>
           </table>
 
-          <div className={styles["reporte-footer"]} data-tour="paginacion-reporte">
+          <div className={styles["reporte-footer"]}>
             <span className={styles["reporte-count"]}>
               Mostrando {facturas.length} de {total} facturas
             </span>
-            <div className={styles["reporte-pagination"]}>
+            <div className={styles["reporte-pagination"]} data-tour="paginacion-reporte">
               <button
                 className={styles["reporte-page-btn"]}
                 onClick={() => setCurrentPage(1)}

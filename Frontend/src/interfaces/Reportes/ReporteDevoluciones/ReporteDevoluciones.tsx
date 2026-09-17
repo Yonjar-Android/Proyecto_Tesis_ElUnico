@@ -13,6 +13,8 @@ import type {
   RespuestaReporteDevoluciones,
   DevolucionReporte,
 } from "../../../models/RespuestaReporteDevoluciones";
+import { Joyride, type Step } from "react-joyride";
+import { HelpCircle } from 'lucide-react';
 
 function ReporteDevoluciones() {
   const [devoluciones, setDevoluciones] = useState<DevolucionReporte[]>([]);
@@ -29,6 +31,26 @@ function ReporteDevoluciones() {
   const [totalDevuelto, setTotalDevuelto] = useState(0);
 
   const [exportando, setExportando] = useState(false);
+
+  const [tourActivo, setTourActivo] = useState(false);
+  const pasosTour: Step[] = [
+  {
+    target: '[data-tour="exportar-reporte"]',
+    content: "Desde aquí puedes exportar el reporte a Excel.",
+  },
+  {
+    target: '[data-tour="filtrar-reporte"]',
+    content: "Aquí puedes buscar clientes por su nombre, número o también filtrar por fecha.",
+  },
+  {
+    target: '[data-tour="tabla-reporte"]',
+    content: "Aquí puedes ver la lista de devoluciones y el total devuelto.",
+  },
+  {
+    target: '[data-tour="paginacion-reporte"]',
+    content: "Con estos botones puedes navegar entre las páginas de devoluciones para buscar alguna que no aparezca en la lista actual.",
+  },
+];
 
   const validarFechas = (): boolean => {
     const hoy = obtenerFechaHoy();
@@ -112,14 +134,21 @@ function ReporteDevoluciones() {
             </p>
           </div>
 
+          <div style={{ display: "flex", gap: "8px" }}>
+          <button className="categoria-add-btn" onClick={() => setTourActivo(true)}>
+            <HelpCircle size={18} />
+          </button>
+
           <button
             className={styles["reporte-btn-exportar"]}
             onClick={exportar}
             disabled={exportando}
+            data-tour="exportar-reporte"
           >
             <IconoBarras />
             {exportando ? "Exportando..." : "Exportar Excel"}
           </button>
+        </div>
         </div>
 
         <div className={styles["reporte-stats-row"]}>
@@ -154,7 +183,7 @@ function ReporteDevoluciones() {
           </div>
         </div>
 
-        <div className={styles["reporte-filtro-row"]}>
+        <div className={styles["reporte-filtro-row"]} data-tour="filtrar-reporte">
           <div className={styles["reporte-fechas-grupo"]}>
             <div className={styles["reporte-fechas-fila"]}>
               <div className={styles["reporte-campo"]}>
@@ -204,7 +233,7 @@ function ReporteDevoluciones() {
         </div>
 
         <div className={styles["reporte-card-tabla"]}>
-          <table className={styles["reporte-tabla"]}>
+          <table className={styles["reporte-tabla"]} data-tour="tabla-reporte">
             <thead>
               <tr>
                 <th>Fecha</th>
@@ -237,7 +266,7 @@ function ReporteDevoluciones() {
             <span className={styles["reporte-pagina-info"]}>
               Página <strong>{currentPage}</strong> de <strong>{lastPage}</strong>
             </span>
-            <div className={styles["reporte-pagination"]}>
+            <div className={styles["reporte-pagination"]} data-tour="paginacion-reporte">
               <button
                 className={styles["reporte-page-btn"]}
                 onClick={() => setCurrentPage(1)}
@@ -273,6 +302,24 @@ function ReporteDevoluciones() {
           </div>
         </div>
       </div>
+
+            <Joyride
+  steps={pasosTour}
+  run={tourActivo}
+  continuous
+  locale={{
+    back: "Atrás",
+    close: "Cerrar",
+    last: "Finalizar",
+    next: "Siguiente",
+    skip: "Omitir",
+  }}
+  onEvent={(data) => {
+    if (data.type === "tour:end") {
+      setTourActivo(false);
+    }
+  }}
+/>
     </div>
   );
 }

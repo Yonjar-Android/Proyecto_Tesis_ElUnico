@@ -11,6 +11,8 @@ import type {
   RespuestaReporteSalidas,
 } from "../../../models/SalidaInventario";
 import { descargarReporteSalidasExcel, descargarArchivoExcel }  from "../../../services/reporteExcel.service"
+import { Joyride, type Step } from "react-joyride";
+import { HelpCircle } from 'lucide-react';
 
 function ReporteSalidasInventario() {
   const [salidas, setSalidas] = useState<SalidaInventarioReporteRow[]>([]);
@@ -26,6 +28,26 @@ function ReporteSalidasInventario() {
   const [totalUnidadesSalidas, setTotalUnidadesSalidas] = useState(0);
 
   const [exportando, setExportando] = useState(false);
+
+    const [tourActivo, setTourActivo] = useState(false);
+  const pasosTour: Step[] = [
+  {
+    target: '[data-tour="exportar-reporte"]',
+    content: "Desde aquí puedes exportar el reporte a Excel.",
+  },
+  {
+    target: '[data-tour="filtrar-reporte"]',
+    content: "Aquí puedes buscar productos por su nombre, motivo de salida o también filtrar por fecha.",
+  },
+  {
+    target: '[data-tour="tabla-reporte"]',
+    content: "Aquí puedes ver la lista de salidas, cantidad y motiva de salida del inventario.",
+  },
+  {
+    target: '[data-tour="paginacion-reporte"]',
+    content: "Con estos botones puedes navegar entre las páginas de salidas para buscar alguna que no aparezca en la lista actual.",
+  },
+];
 
   const validarFechas = (): boolean => {
     const hoy = obtenerFechaHoy();
@@ -111,14 +133,21 @@ function ReporteSalidasInventario() {
             </p>
           </div>
 
+          <div style={{ display: "flex", gap: "8px" }}>
+          <button className="categoria-add-btn" onClick={() => setTourActivo(true)}>
+            <HelpCircle size={18} />
+          </button>
+
           <button
             className={styles["reporte-btn-exportar"]}
             onClick={exportar}
             disabled={exportando}
+            data-tour="exportar-reporte"
           >
             <IconoBarras />
             {exportando ? "Exportando..." : "Exportar Excel"}
           </button>
+        </div>
         </div>
 
         <div className={styles["reporte-stats-row"]}>
@@ -143,7 +172,7 @@ function ReporteSalidasInventario() {
           </div>
         </div>
 
-        <div className={styles["reporte-filtro-row"]}>
+        <div className={styles["reporte-filtro-row"]} data-tour="filtrar-reporte">
           <div className={styles["reporte-fechas-grupo"]}>
             <div className={styles["reporte-fechas-fila"]}>
               <div className={styles["reporte-campo"]}>
@@ -193,7 +222,7 @@ function ReporteSalidasInventario() {
         </div>
 
         <div className={styles["reporte-card-tabla"]}>
-          <table className={styles["reporte-tabla"]}>
+          <table className={styles["reporte-tabla"]} data-tour="tabla-reporte">
             <thead>
               <tr>
                 <th>Fecha</th>
@@ -228,7 +257,7 @@ function ReporteSalidasInventario() {
             <span className={styles["reporte-pagina-info"]}>
               Página <strong>{currentPage}</strong> de <strong>{lastPage}</strong>
             </span>
-            <div className={styles["reporte-pagination"]}>
+            <div className={styles["reporte-pagination"]} data-tour="paginacion-reporte">
               <button
                 className={styles["reporte-page-btn"]}
                 onClick={() => setCurrentPage(1)}
@@ -264,6 +293,24 @@ function ReporteSalidasInventario() {
           </div>
         </div>
       </div>
+
+      <Joyride
+  steps={pasosTour}
+  run={tourActivo}
+  continuous
+  locale={{
+    back: "Atrás",
+    close: "Cerrar",
+    last: "Finalizar",
+    next: "Siguiente",
+    skip: "Omitir",
+  }}
+  onEvent={(data) => {
+    if (data.type === "tour:end") {
+      setTourActivo(false);
+    }
+  }}
+/>
     </div>
   );
 }

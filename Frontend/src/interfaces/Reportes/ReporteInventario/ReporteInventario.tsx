@@ -18,6 +18,8 @@ import ModalSeleccionarCategoria from "../../Productos/ModalesSeleccion/ModalSel
 import ModalSeleccionarMarca from "../../Productos/ModalesSeleccion/ModalSeleccionarMarca";
 import type { Categoria } from "../../../models/Categoria";
 import type { Marca } from "../../../models/Marca";
+import { Joyride, type Step } from "react-joyride";
+import { HelpCircle } from 'lucide-react';
 
 function ReporteInventario() {
   const [productos, setProductos] = useState<ProductoInventarioReporte[]>([]);
@@ -38,6 +40,26 @@ function ReporteInventario() {
   const [stockCritico, setStockCritico] = useState(0);
 
   const [exportando, setExportando] = useState(false);
+
+  const [tourActivo, setTourActivo] = useState(false);
+  const pasosTour: Step[] = [
+  {
+    target: '[data-tour="exportar-reporte"]',
+    content: "Desde aquí puedes exportar el reporte a Excel.",
+  },
+  {
+    target: '[data-tour="filtrar-reporte"]',
+    content: "Aquí puedes buscar productos por su nombre, marca y categoría.",
+  },
+  {
+    target: '[data-tour="tabla-reporte"]',
+    content: "Aquí puedes ver la lista de productos y su stock actual.",
+  },
+  {
+    target: '[data-tour="paginacion-reporte"]',
+    content: "Con estos botones puedes navegar entre las páginas de productos para buscar alguno que no aparezca en la lista actual.",
+  },
+];
 
   const buscar = async () => {
     try {
@@ -97,14 +119,21 @@ function ReporteInventario() {
             </p>
           </div>
 
+          <div style={{ display: "flex", gap: "8px" }}>
+          <button className="categoria-add-btn" onClick={() => setTourActivo(true)}>
+            <HelpCircle size={18} />
+          </button>
+
           <button
             className={styles["reporte-btn-exportar"]}
             onClick={exportar}
             disabled={exportando}
+            data-tour="exportar-reporte"
           >
             <IconoBarras />
             {exportando ? "Exportando..." : "Exportar Excel"}
           </button>
+        </div>
         </div>
 
         <div className={styles["reporte-stats-row"]}>
@@ -139,7 +168,7 @@ function ReporteInventario() {
           </div>
         </div>
 
-        <div className={styles["reporte-filtro-row"]}>
+        <div className={styles["reporte-filtro-row"]} data-tour="filtrar-reporte">
           <div className={styles["reporte-campo"]}>
             <label>🔎 Nombre</label>
             <input
@@ -212,7 +241,7 @@ function ReporteInventario() {
         </div>
 
         <div className={styles["reporte-card-tabla"]}>
-          <table className={styles["reporte-tabla"]}>
+          <table className={styles["reporte-tabla"]} data-tour="tabla-reporte">
             <thead>
               <tr>
                 <th>Producto</th>
@@ -253,7 +282,7 @@ function ReporteInventario() {
             <span className={styles["reporte-pagina-info"]}>
               Página <strong>{currentPage}</strong> de <strong>{lastPage}</strong>
             </span>
-            <div className={styles["reporte-pagination"]}>
+            <div className={styles["reporte-pagination"]} data-tour="paginacion-reporte">
               <button
                 className={styles["reporte-page-btn"]}
                 onClick={() => setCurrentPage(1)}
@@ -289,6 +318,24 @@ function ReporteInventario() {
           </div>
         </div>
       </div>
+
+            <Joyride
+  steps={pasosTour}
+  run={tourActivo}
+  continuous
+  locale={{
+    back: "Atrás",
+    close: "Cerrar",
+    last: "Finalizar",
+    next: "Siguiente",
+    skip: "Omitir",
+  }}
+  onEvent={(data) => {
+    if (data.type === "tour:end") {
+      setTourActivo(false);
+    }
+  }}
+/>
 
       <ModalSeleccionarMarca
         abierto={modalMarcaAbierto}
