@@ -20,6 +20,7 @@ import ReporteSalidasInventario from "./interfaces/Reportes/ReporteSalidasInvent
 import ReporteVentasServicio from "./interfaces/Reportes/ReporteVentasServicios/ReporteVentasServicios";
 import ReporteVentasProducto from "./interfaces/Reportes/ReporteVentasProductos/ReporteVentasServicios";
 import ReporteInventario from "./interfaces/Reportes/ReporteInventario/ReporteInventario";
+import ReporteDevoluciones from "./interfaces/Reportes/ReporteDevoluciones/ReporteDevoluciones";
 import Mantenimiento from "./interfaces/Mantenimiento/Mantenimiento";
 import Usuario from "./interfaces/Usuario/Usuario";
 import Caja from "./interfaces/Caja/Caja";
@@ -98,6 +99,7 @@ function App() {
             <Route path="/reportes/ventas-productos" element={<ReporteVentasProducto />} /> 
             <Route path="/reportes/compras" element={<ReporteCompras />} />
             <Route path="/reportes/inventario" element={<ReporteInventario />} />
+            <Route path="/reportes/devoluciones" element={<ReporteDevoluciones />} />
           </Route>
         </Routes>
       </CajaProvider>

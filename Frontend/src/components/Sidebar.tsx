@@ -226,6 +226,9 @@ export default function Sidebar() {
                 <NavLink to="/reportes/inventario" className="sidebar-sublink">
                   Inventario
                 </NavLink>
+                <NavLink to="/reportes/devoluciones" className="sidebar-sublink">
+                  Devoluciones
+                </NavLink>
               </div>
             )}
           </>

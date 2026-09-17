@@ -960,3 +960,95 @@ export const obtenerReporteInventario = async (
         TotalStockCritico: estadisticas[0].TotalStockCritico
     };
 };
+
+export const obtenerReporteDevoluciones = async (
+    search: string = "",
+    fechaInicio: string = "",
+    fechaFin: string = "",
+    page: number = 1,
+    perPage: number = 10
+) => {
+
+    const offset = (page - 1) * perPage;
+
+    let where = "WHERE dev.Estado = 'Completada'";
+    const params: any[] = [];
+
+    // Buscar por cliente o número de factura
+    if (search.trim() !== "") {
+        where += `
+            AND (
+                CONCAT(c.Nombre, ' ', c.Apellido) LIKE ?
+                OR c.NCliente LIKE ?
+                OR v.id = ?
+            )
+        `;
+        params.push(`%${search}%`, `%${search}%`, search);
+    }
+
+    // Fecha inicial
+    if (fechaInicio !== "") {
+        where += " AND dev.Fecha >= ?";
+        params.push(`${fechaInicio} 00:00:00`);
+    }
+
+    // Fecha final
+    if (fechaFin !== "") {
+        where += " AND dev.Fecha < ?";
+        params.push(addOneDay(fechaFin));
+    }
+
+    // Estadísticas
+    const [estadisticas]: any = await pool.query(
+        `
+        SELECT
+            COUNT(DISTINCT dev.id) AS TotalRegistros,
+            COALESCE(SUM(dd.Subtotal), 0) AS TotalDevuelto,
+            COALESCE(SUM(dd.Cantidad), 0) AS TotalProductosDevueltos
+        FROM devoluciones dev
+        INNER JOIN detalle_devolucion dd ON dd.Id_devolucion = dev.id
+        INNER JOIN ventas v ON dev.Id_venta = v.id
+        INNER JOIN clientes c ON v.Id_cliente = c.id
+        ${where}
+        `,
+        params
+    );
+
+    const total = estadisticas[0].TotalRegistros;
+
+    // Datos paginados, una fila por devolución
+    const [rows]: any = await pool.query(
+        `
+        SELECT
+            dev.id,
+            dev.Fecha,
+            dev.Motivo,
+            dev.Observacion,
+            v.id AS NFactura,
+            CONCAT(c.Nombre, ' ', c.Apellido) AS Cliente,
+            c.NCliente,
+            SUM(dd.Cantidad) AS CantidadProductos,
+            SUM(dd.Subtotal) AS TotalDevuelto
+        FROM devoluciones dev
+        INNER JOIN detalle_devolucion dd ON dd.Id_devolucion = dev.id
+        INNER JOIN ventas v ON dev.Id_venta = v.id
+        INNER JOIN clientes c ON v.Id_cliente = c.id
+        ${where}
+        GROUP BY dev.id, dev.Fecha, dev.Motivo, dev.Observacion, v.id, c.Nombre, c.Apellido, c.NCliente
+        ORDER BY dev.Fecha DESC, dev.id DESC
+        LIMIT ? OFFSET ?
+        `,
+        [...params, perPage, offset]
+    );
+
+    return {
+        data: rows,
+        current_page: page,
+        per_page: perPage,
+        total,
+        last_page: Math.ceil(total / perPage),
+        TotalRegistros: estadisticas[0].TotalRegistros,
+        TotalDevuelto: estadisticas[0].TotalDevuelto,
+        TotalProductosDevueltos: estadisticas[0].TotalProductosDevueltos
+    };
+};

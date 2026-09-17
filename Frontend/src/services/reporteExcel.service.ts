@@ -156,3 +156,18 @@ export const descargarReporteVentasProductoExcel = async (
 
     return response.data;
 };
+
+export const descargarReporteDevolucionesExcel = async (
+    search: string = "",
+    fechaInicio: string = "",
+    fechaFin: string = ""
+): Promise<Blob> => {
+
+    const response = await axiosInstance.get(`${API}/excel/devoluciones`, {
+        params: { search, fechaInicio, fechaFin },
+        headers: { Authorization: `Bearer ${token}` },
+        responseType: "blob",
+    });
+
+    return response.data;
+};

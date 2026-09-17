@@ -8,7 +8,8 @@ import {
     generateReporteSalidasPorPeriodoExcel,
     generateReporteVentasServicioPorPeriodoExcel,
     generateReporteVentasProductoPorPeriodoExcel,
-    generateReporteInventarioExcel
+    generateReporteInventarioExcel,
+    generateReporteDevolucionesExcel
 } from '../services/reporteExcel.service.js';
 
 export const descargarReporteProductosStock = async (req: Request, res: Response) => {
@@ -285,6 +286,33 @@ export const descargarReporteInventario = async (req: Request, res: Response) =>
         res.status(500).json({
             success: false,
             message: 'Error al generar el reporte de inventario',
+            error: error instanceof Error ? error.message : 'Error desconocido'
+        });
+    }
+};
+
+export const descargarReporteDevolucionesPorPeriodo = async (req: Request, res: Response) => {
+    try {
+        const { search = "", fechaInicio = "", fechaFin = "" } = req.query;
+
+        const excelBuffer = await generateReporteDevolucionesExcel(
+            search as string,
+            fechaInicio as string,
+            fechaFin as string
+        );
+
+        const fechaActual = new Date().toISOString().split('T')[0];
+        const filename = `reporte_devoluciones_${fechaInicio || 'inicio'}_a_${fechaFin || fechaActual}.xlsx`;
+
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', `attachment; filename=${filename}`);
+
+        res.send(excelBuffer);
+    } catch (error) {
+        console.error('Error generando Excel de devoluciones:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error al generar el reporte de devoluciones',
             error: error instanceof Error ? error.message : 'Error desconocido'
         });
     }

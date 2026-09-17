@@ -7,7 +7,8 @@ import {
     obtenerReporteSalidasInventario,
     obtenerReporteVentasServicio,
     obtenerReporteVentasProducto,
-    obtenerReporteInventario
+    obtenerReporteInventario,
+    obtenerReporteDevoluciones
 } from "../services/reporte.service.js";
 
 export const obtenerReporteStockBajo = async (req: Request, res: Response) => {
@@ -195,6 +196,24 @@ export const obtenerReporteInventarioGeneral = async (req: Request, res: Respons
 
         const resultado = await obtenerReporteInventario(
             search, Id_categoria, Id_marca, page, perPage
+        );
+
+        res.json(resultado);
+    } catch (error) {
+        res.status(500).json({ mensaje: error });
+    }
+}
+
+export const obtenerReporteDevolucionesPorPeriodo = async (req: Request, res: Response) => {
+    try {
+        const search = req.query.search?.toString() ?? "";
+        const fechaInicio = req.query.fechaInicio?.toString() ?? "";
+        const fechaFin = req.query.fechaFin?.toString() ?? "";
+        const page = Number(req.query.page) || 1;
+        const perPage = Number(req.query.perPage) || 10;
+
+        const resultado = await obtenerReporteDevoluciones(
+            search, fechaInicio, fechaFin, page, perPage
         );
 
         res.json(resultado);

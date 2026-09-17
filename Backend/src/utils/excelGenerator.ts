@@ -704,3 +704,87 @@ export const generateInventarioExcelReport = async (
 
     return await workbook.xlsx.writeBuffer();
 };
+
+export const generateDevolucionesExcelReport = async (
+    reportData: any
+): Promise<ExcelJS.Buffer> => {
+    const workbook = new ExcelJS.Workbook();
+    workbook.creator = 'Sistema de Reportes';
+    workbook.created = new Date();
+
+    const worksheet = workbook.addWorksheet('Reporte');
+    const numColumnas = 4;
+
+    worksheet.columns = [
+        { header: 'Fecha', key: 'Fecha', width: 15, style: { numFmt: 'DD/MM/YYYY' } },
+        { header: 'N° Factura', key: 'NFactura', width: 12, style: { numFmt: '0' } },
+        { header: 'Cliente', key: 'Cliente', width: 30 },
+        { header: 'Cantidad Productos', key: 'CantidadProductos', width: 18, style: { numFmt: '0' } },
+        { header: 'Total Devuelto', key: 'TotalDevuelto', width: 18, style: { numFmt: '#,##0.00' } },
+    ];
+
+    worksheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFF' }, size: 12 };
+    worksheet.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: '4F81BD' } };
+    worksheet.getRow(1).alignment = { vertical: 'middle', horizontal: 'center' };
+    worksheet.getRow(1).height = 25;
+
+    (reportData.data ?? []).forEach((row: any) => {
+        worksheet.addRow({
+            Fecha: row.Fecha ? new Date(row.Fecha) : null,
+            NFactura: Number(row.NFactura),
+            Cliente: row.Cliente,
+            CantidadProductos: Number(row.CantidadProductos),
+            TotalDevuelto: Number(row.TotalDevuelto),
+        });
+    });
+
+    // Estadísticas a la derecha
+    const colStats = numColumnas + 2;
+    worksheet.getColumn(colStats).width = 25;
+    worksheet.getColumn(colStats + 1).width = 20;
+
+    const tituloStats = worksheet.getRow(1);
+    tituloStats.getCell(colStats).value = 'ESTADÍSTICAS';
+    tituloStats.getCell(colStats).font = { bold: true, color: { argb: 'FFFFFF' }, size: 12 };
+    tituloStats.getCell(colStats).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: '4472C4' } };
+    tituloStats.getCell(colStats).alignment = { vertical: 'middle', horizontal: 'center' };
+    tituloStats.getCell(colStats).border = bordeCompleto();
+
+    const stats = [
+        { label: 'Total Devoluciones:', value: reportData.TotalRegistros, format: '0' },
+        { label: 'Productos Devueltos:', value: reportData.TotalProductosDevueltos, format: '0' },
+        { label: 'Total Devuelto:', value: reportData.TotalDevuelto, format: '#,##0.00' },
+    ];
+
+    stats.forEach((stat, i) => {
+        const row = worksheet.getRow(2 + i);
+        row.getCell(colStats).value = stat.label;
+        row.getCell(colStats).font = { bold: true };
+        row.getCell(colStats).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'E7E6E6' } };
+        row.getCell(colStats).border = bordeCompleto();
+
+        row.getCell(colStats + 1).value = Number(stat.value ?? 0);
+        row.getCell(colStats + 1).numFmt = stat.format;
+        row.getCell(colStats + 1).font = { bold: true };
+        row.getCell(colStats + 1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFC7CE' } };
+        row.getCell(colStats + 1).alignment = { horizontal: 'right' };
+        row.getCell(colStats + 1).border = bordeCompleto();
+    });
+
+    // Bordes + alineación de la tabla principal
+    const numColumnasReal = 5; // Fecha, N° Factura, Cliente, Cantidad, Total
+    const totalFilas = (reportData.data?.length ?? 0) + 1;
+    worksheet.eachRow((row, rowNumber) => {
+        if (rowNumber > totalFilas) return;
+        for (let col = 1; col <= numColumnasReal; col++) {
+            row.getCell(col).border = bordeCompleto();
+        }
+        if (rowNumber > 1) {
+            row.getCell(2).alignment = { horizontal: 'right' }; // N° Factura
+            row.getCell(4).alignment = { horizontal: 'right' }; // Cantidad
+            row.getCell(5).alignment = { horizontal: 'right' }; // Total
+        }
+    });
+
+    return await workbook.xlsx.writeBuffer();
+};
