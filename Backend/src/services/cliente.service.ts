@@ -23,7 +23,7 @@ export const buscarClientes = async (
     const deudaSubquery = `
         SELECT
             v.Id_cliente AS Id_cliente,
-            SUM(cf.total_deuda - COALESCE(ab.TotalAbonado, 0)) AS Deuda_Total
+            SUM(cf.total_deuda - COALESCE(ab.TotalAbonado, 0) - cf.monto_inicial) AS Deuda_Total
         FROM credito_factura cf
         INNER JOIN ventas v ON v.id = cf.id_venta
         LEFT JOIN (
@@ -240,4 +240,39 @@ export const actualizarCliente = async (
     );
 
     return result;
+};
+
+export const obtenerSiguienteNCliente = async (): Promise<number> => {
+  const [rows]: any = await pool.query(`
+    WITH RECURSIVE numeros AS (
+      SELECT 1 AS numero
+
+      UNION ALL
+
+      SELECT numero + 1
+      FROM numeros
+      WHERE numero <= (
+        SELECT COALESCE(MAX(NCliente), 0)
+        FROM clientes
+      )
+    )
+    SELECT MIN(numero) AS siguiente
+    FROM numeros
+    WHERE numero NOT IN (
+      SELECT NCliente
+      FROM clientes
+      WHERE NCliente IS NOT NULL
+    )
+  `);
+
+  if (rows[0].siguiente === null) {
+    const [maxRows]: any = await pool.query(`
+      SELECT COALESCE(MAX(NCliente), 0) + 1 AS siguiente
+      FROM clientes
+    `);
+
+    return Number(maxRows[0].siguiente);
+  }
+
+  return Number(rows[0].siguiente);
 };

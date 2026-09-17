@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { buscarClientes, crearCliente, actualizarCliente } from "../services/cliente.service.js";
+import { buscarClientes, crearCliente, actualizarCliente, obtenerSiguienteNCliente } from "../services/cliente.service.js";
 
 export const buscarCliente = async (req: Request, res: Response) => {
     try{
@@ -75,4 +75,18 @@ export const putCliente = async (req: Request, res: Response) => {
             mensaje: error.message
         });
     }
+};
+
+export const getSiguienteNCliente = async (req: Request, res: Response) => {
+  try {
+    const siguienteNCliente = await obtenerSiguienteNCliente();
+
+    res.status(200).json({
+      siguienteNCliente
+    });
+  } catch (error: any) {
+    res.status(400).json({
+      mensaje: error.message
+    });
+  }
 };

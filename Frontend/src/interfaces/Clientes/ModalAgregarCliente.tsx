@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "./ModalCliente.css";
 import {
   IconoPersonaMas,
@@ -8,6 +8,7 @@ import {
   IconoUbicacion,
 } from "./IconosCliente";
 import { validarCedula } from "./ValidarCedula";
+import { obtenerSiguienteNCliente } from "../../services/cliente.service";
 
 interface Props {
   abierto: boolean;
@@ -58,8 +59,25 @@ function ModalAgregarCliente({ abierto, onClose, onGuardar }: Props) {
   const [saldo_deuda, setSaldo_Deuda] = useState("0");
   const [direccion, setDireccion] = useState("");
   const [cedula, setCedula] = useState("");
+  const [nclienteSugerido, setNclienteSugerido] = useState<number | null>(null);
 
   const [error, setError] = useState("");
+
+useEffect(() => {
+  if (!abierto) return;
+
+  const cargarNumeroSugerido = async () => {
+    try {
+      const numero = await obtenerSiguienteNCliente();
+      setNclienteSugerido(numero.siguienteNCliente);
+    } catch (error) {
+      console.error("Error al obtener número de cliente sugerido:", error);
+    }
+  };
+
+  cargarNumeroSugerido();
+}, [abierto]);
+
 
   if (!abierto) return null;
 
@@ -211,7 +229,11 @@ if (Number(ncliente) <= 0) {
                 onChange={(e) => setNcliente(e.target.value)}
               />
             </div>
-          </div>
+            {nclienteSugerido !== null && (
+  <small>
+    Número sugerido: <strong>{nclienteSugerido}</strong>
+  </small>
+)}   </div>
 
           <div className="separador-opcional">Información opcional</div>
 

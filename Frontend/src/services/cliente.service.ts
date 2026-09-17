@@ -52,3 +52,13 @@ export const buscarClientes = async(
 
     return response.data;
 }
+
+export const obtenerSiguienteNCliente = async() => {
+    const response = await axiosInstance.get(`${API}/obtenerSiguienteNCliente`,{
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
+
+    return response.data;
+}
