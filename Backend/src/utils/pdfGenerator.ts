@@ -79,63 +79,205 @@ export const generateVentasPorPeriodoPdfReport = async (reportData: any): Promis
 
             const anchoUtil = doc.page.width - doc.page.margins.left - doc.page.margins.right;
 
-// --- Estadísticas centradas ---
-const stats = [
-    { label: 'Total Registros', value: reportData.TotalRegistros, format: formatoEntero },
-    { label: 'Ventas Contado', value: reportData.VentasContado, format: formatoMoneda },
-    { label: 'Ventas Transferencia', value: reportData.VentasTransferencia, format: formatoMoneda },
-    { label: 'Total Abonado', value: reportData.TotalAbonado, format: formatoMoneda },
-    { label: 'Total Pendiente', value: reportData.TotalPendientePago, format: formatoMoneda },
-    { label: 'Total Ventas', value: reportData.TotalVentas, format: formatoMoneda },
-];
+            // --- Estadísticas centradas ---
+            const stats = [
+                { label: 'Total Registros', value: reportData.TotalRegistros, format: formatoEntero },
+                { label: 'Ventas Contado', value: reportData.VentasContado, format: formatoMoneda },
+                { label: 'Ventas Transferencia', value: reportData.VentasTransferencia, format: formatoMoneda },
+                { label: 'Total Abonado', value: reportData.TotalAbonado, format: formatoMoneda },
+                { label: 'Total Pendiente', value: reportData.TotalPendientePago, format: formatoMoneda },
+                { label: 'Total Ventas', value: reportData.TotalVentas, format: formatoMoneda },
+            ];
 
-const porFila = 3, anchoStat = 170, altoStat = 34, gapStat = 6;
-const anchoBloqueStats = porFila * anchoStat;
-const xInicioStats = doc.page.margins.left + (anchoUtil - anchoBloqueStats) / 2;
+            const porFila = 3, anchoStat = 170, altoStat = 34, gapStat = 6;
+            const anchoBloqueStats = porFila * anchoStat;
+            const xInicioStats = doc.page.margins.left + (anchoUtil - anchoBloqueStats) / 2;
 
-let statX = xInicioStats, statY = doc.y;
+            let statX = xInicioStats, statY = doc.y;
 
-stats.forEach((stat, i) => {
-    if (i > 0 && i % porFila === 0) {
-        statX = xInicioStats;
-        statY += altoStat + gapStat;
-    }
-    doc.rect(statX, statY, anchoStat - gapStat, altoStat).fill('#E7E6E6');
-    doc.fillColor('#333333').fontSize(8).font('Helvetica-Bold')
-        .text(stat.label, statX + 6, statY + 5, { width: anchoStat - 16 });
-    doc.fillColor('#000000').fontSize(11).font('Helvetica-Bold')
-        .text(stat.format(stat.value), statX + 6, statY + 18, { width: anchoStat - 16 });
-    statX += anchoStat;
-});
+            stats.forEach((stat, i) => {
+                if (i > 0 && i % porFila === 0) {
+                    statX = xInicioStats;
+                    statY += altoStat + gapStat;
+                }
+                doc.rect(statX, statY, anchoStat - gapStat, altoStat).fill('#E7E6E6');
+                doc.fillColor('#333333').fontSize(8).font('Helvetica-Bold')
+                    .text(stat.label, statX + 6, statY + 5, { width: anchoStat - 16 });
+                doc.fillColor('#000000').fontSize(11).font('Helvetica-Bold')
+                    .text(stat.format(stat.value), statX + 6, statY + 18, { width: anchoStat - 16 });
+                statX += anchoStat;
+            });
 
-doc.y = statY + altoStat + 15;
-doc.x = doc.page.margins.left;
+            doc.y = statY + altoStat + 15;
+            doc.x = doc.page.margins.left;
 
-// --- Tabla centrada ---
-const columnas: Columna[] = [
-    { header: 'ID', key: 'id', width: 40, align: 'right' },
-    { header: 'Fecha', key: 'Fecha', width: 65, format: formatoFecha },
-    { header: 'Cliente', key: 'Cliente', width: 150 },
-    { header: 'N° Cliente', key: 'NCliente', width: 75 },
-    { header: 'Tipo Pago', key: 'Tipo_Pago', width: 75 },
-    { header: 'Total Orig.', key: 'TotalOriginal', width: 75, align: 'right', format: formatoMoneda },
-    { header: 'Total Dev.', key: 'TotalDevuelto', width: 75, align: 'right', format: formatoMoneda },
-    { header: 'Total Neto', key: 'Total', width: 75, align: 'right', format: formatoMoneda },
-];
+            // --- Tabla centrada (igual a la interfaz) ---
+            const columnas: Columna[] = [
+                { header: 'N° Factura', key: 'id', width: 70, align: 'left' },
+                { header: 'Fecha', key: 'Fecha', width: 80, format: formatoFecha },
+                { header: 'Cliente', key: 'Cliente', width: 200 },
+                { header: 'Estado', key: 'Estado', width: 100 },
+                { header: 'Tipo de Pago', key: 'Tipo_Pago', width: 100 },
+                { header: 'Monto', key: 'Total', width: 90, align: 'right', format: formatoMoneda },
+            ];
 
-const anchoTabla = columnas.reduce((s, c) => s + c.width, 0);
-const xInicio = doc.page.margins.left + (anchoUtil - anchoTabla) / 2;
+            const anchoTabla = columnas.reduce((s, c) => s + c.width, 0);
+            const xInicio = doc.page.margins.left + (anchoUtil - anchoTabla) / 2;
 
-let y = dibujarHeaderTabla(doc, columnas, xInicio, doc.y);
-const limiteInferior = doc.page.height - doc.page.margins.bottom;
+            let y = dibujarHeaderTabla(doc, columnas, xInicio, doc.y);
+            const limiteInferior = doc.page.height - doc.page.margins.bottom;
 
-(reportData.data ?? []).forEach((row: any, i: number) => {
-    if (y + 18 > limiteInferior) {
-        doc.addPage();
-        y = dibujarHeaderTabla(doc, columnas, xInicio, doc.y);
-    }
-    y = dibujarFila(doc, columnas, row, xInicio, y, i % 2 === 1);
-});
+            (reportData.data ?? []).forEach((row: any, i: number) => {
+                if (y + 18 > limiteInferior) {
+                    doc.addPage();
+                    y = dibujarHeaderTabla(doc, columnas, xInicio, doc.y);
+                }
+                y = dibujarFila(doc, columnas, row, xInicio, y, i % 2 === 1);
+            });
+
+            doc.end();
+        } catch (error) {
+            reject(error);
+        }
+    });
+};
+
+export const generateVentasProductoPdfReport = async (reportData: any): Promise<Buffer> => {
+    return new Promise((resolve, reject) => {
+        try {
+            const doc = new PDFDocument({ margin: 40, size: 'A4', layout: 'landscape' });
+            const chunks: Buffer[] = [];
+            doc.on('data', (c) => chunks.push(c));
+            doc.on('end', () => resolve(Buffer.concat(chunks)));
+            doc.on('error', reject);
+
+            const nombreReporte = 'Reporte de Ventas por Producto';
+            doc.on('pageAdded', () => agregarEncabezado(doc, nombreReporte));
+            agregarEncabezado(doc, nombreReporte);
+
+            const anchoUtil = doc.page.width - doc.page.margins.left - doc.page.margins.right;
+
+            // --- Estadísticas centradas ---
+            const stats = [
+                { label: 'Productos Distintos', value: reportData.TotalRegistros, format: formatoEntero },
+                { label: 'Total Facturado', value: reportData.TotalFacturadoProductos, format: formatoMoneda },
+            ];
+
+            const porFila = 2, anchoStat = 200, altoStat = 34, gapStat = 6;
+            const anchoBloqueStats = porFila * anchoStat;
+            const xInicioStats = doc.page.margins.left + (anchoUtil - anchoBloqueStats) / 2;
+
+            let statX = xInicioStats, statY = doc.y;
+
+            stats.forEach((stat, i) => {
+                if (i > 0 && i % porFila === 0) {
+                    statX = xInicioStats;
+                    statY += altoStat + gapStat;
+                }
+                doc.rect(statX, statY, anchoStat - gapStat, altoStat).fill('#E7E6E6');
+                doc.fillColor('#333333').fontSize(8).font('Helvetica-Bold')
+                    .text(stat.label, statX + 6, statY + 5, { width: anchoStat - 16 });
+                doc.fillColor('#000000').fontSize(11).font('Helvetica-Bold')
+                    .text(stat.format(stat.value), statX + 6, statY + 18, { width: anchoStat - 16 });
+                statX += anchoStat;
+            });
+
+            doc.y = statY + altoStat + 15;
+            doc.x = doc.page.margins.left;
+
+            // --- Tabla centrada ---
+            const columnas: Columna[] = [
+                { header: 'Producto', key: 'Nombre_producto', width: 250 },
+                { header: 'Cantidad', key: 'CantidadTotal', width: 100, align: 'right', format: formatoEntero },
+                { header: 'Descuento', key: 'TotalDescuento', width: 130, align: 'right', format: formatoMoneda },
+                { header: 'Total Facturado', key: 'TotalFacturado', width: 130, align: 'right', format: formatoMoneda },
+            ];
+
+            const anchoTabla = columnas.reduce((s, c) => s + c.width, 0);
+            const xInicio = doc.page.margins.left + (anchoUtil - anchoTabla) / 2;
+
+            let y = dibujarHeaderTabla(doc, columnas, xInicio, doc.y);
+            const limiteInferior = doc.page.height - doc.page.margins.bottom;
+
+            (reportData.data ?? []).forEach((row: any, i: number) => {
+                if (y + 18 > limiteInferior) {
+                    doc.addPage();
+                    y = dibujarHeaderTabla(doc, columnas, xInicio, doc.y);
+                }
+                y = dibujarFila(doc, columnas, row, xInicio, y, i % 2 === 1);
+            });
+
+            doc.end();
+        } catch (error) {
+            reject(error);
+        }
+    });
+};
+
+export const generateVentasServicioPdfReport = async (reportData: any): Promise<Buffer> => {
+    return new Promise((resolve, reject) => {
+        try {
+            const doc = new PDFDocument({ margin: 40, size: 'A4', layout: 'landscape' });
+            const chunks: Buffer[] = [];
+            doc.on('data', (c) => chunks.push(c));
+            doc.on('end', () => resolve(Buffer.concat(chunks)));
+            doc.on('error', reject);
+
+            const nombreReporte = 'Reporte de Ventas por Servicio';
+            doc.on('pageAdded', () => agregarEncabezado(doc, nombreReporte));
+            agregarEncabezado(doc, nombreReporte);
+
+            const anchoUtil = doc.page.width - doc.page.margins.left - doc.page.margins.right;
+
+            // --- Estadísticas centradas ---
+            const stats = [
+                { label: 'Servicios Distintos', value: reportData.TotalRegistros, format: formatoEntero },
+                { label: 'Total Facturado', value: reportData.TotalFacturadoServicios, format: formatoMoneda },
+            ];
+
+            const porFila = 2, anchoStat = 200, altoStat = 34, gapStat = 6;
+            const anchoBloqueStats = porFila * anchoStat;
+            const xInicioStats = doc.page.margins.left + (anchoUtil - anchoBloqueStats) / 2;
+
+            let statX = xInicioStats, statY = doc.y;
+
+            stats.forEach((stat, i) => {
+                if (i > 0 && i % porFila === 0) {
+                    statX = xInicioStats;
+                    statY += altoStat + gapStat;
+                }
+                doc.rect(statX, statY, anchoStat - gapStat, altoStat).fill('#E7E6E6');
+                doc.fillColor('#333333').fontSize(8).font('Helvetica-Bold')
+                    .text(stat.label, statX + 6, statY + 5, { width: anchoStat - 16 });
+                doc.fillColor('#000000').fontSize(11).font('Helvetica-Bold')
+                    .text(stat.format(stat.value), statX + 6, statY + 18, { width: anchoStat - 16 });
+                statX += anchoStat;
+            });
+
+            doc.y = statY + altoStat + 15;
+            doc.x = doc.page.margins.left;
+
+            // --- Tabla centrada ---
+            const columnas: Columna[] = [
+                { header: 'Servicio', key: 'Nombre_servicio', width: 250 },
+                { header: 'Cantidad', key: 'CantidadTotal', width: 100, align: 'right', format: formatoEntero },
+                { header: 'Descuento', key: 'TotalDescuento', width: 130, align: 'right', format: formatoMoneda },
+                { header: 'Total Facturado', key: 'TotalFacturado', width: 130, align: 'right', format: formatoMoneda },
+            ];
+
+            const anchoTabla = columnas.reduce((s, c) => s + c.width, 0);
+            const xInicio = doc.page.margins.left + (anchoUtil - anchoTabla) / 2;
+
+            let y = dibujarHeaderTabla(doc, columnas, xInicio, doc.y);
+            const limiteInferior = doc.page.height - doc.page.margins.bottom;
+
+            (reportData.data ?? []).forEach((row: any, i: number) => {
+                if (y + 18 > limiteInferior) {
+                    doc.addPage();
+                    y = dibujarHeaderTabla(doc, columnas, xInicio, doc.y);
+                }
+                y = dibujarFila(doc, columnas, row, xInicio, y, i % 2 === 1);
+            });
 
             doc.end();
         } catch (error) {

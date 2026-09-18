@@ -7,6 +7,7 @@ import {
     obtenerReporteVentasServiciosPorPeriodo,
  } from "../../../services/reporte.service";
 import { descargarReporteVentasServicioExcel, descargarArchivoExcel } from "../../../services/reporteExcel.service";
+import { descargarReporteVentasServicioPdf } from "../../../services/reportePdf.service";
 import type { RespuestaReporteVentasServicios, DetalleVentaServicio } from "../../../models/RespuestaReporteVentasServicios";
 import { Joyride, type Step } from "react-joyride";
 import { HelpCircle } from 'lucide-react';
@@ -125,6 +126,15 @@ function ReporteVentasServicio() {
     }
   };
 
+  const handleDescargarPdfServicio = async () => {
+    try {
+        const blob = await descargarReporteVentasServicioPdf(servicioBuscado, fechaInicio, fechaFin);
+        descargarArchivoExcel(blob, `reporte_ventas_servicio_${fechaInicio}_a_${fechaFin}.pdf`);
+    } catch (error) {
+        console.error('Error al descargar PDF:', error);
+    }
+};
+
   return (
     <div className={styles["reporte-page"]}>
       <div className={styles["reporte-contenido"]}>
@@ -150,6 +160,16 @@ function ReporteVentasServicio() {
             <IconoBarras />
             {exportando ? "Exportando..." : "Exportar Excel"}
           </button>
+
+          <button 
+                className={styles["reporte-btn-exportarPdf"]}
+                onClick={handleDescargarPdfServicio}
+                disabled={exportando}
+                data-tour="exportar-reporte"
+            >
+                <IconoBarras />
+                {exportando ? 'Exportando...' : 'Exportar Pdf'}
+            </button>
         </div>
         </div>
 

@@ -208,7 +208,7 @@ useEffect(() => {
             </button>
 
              <button 
-                className={styles["reporte-btn-exportar"]}
+                className={styles["reporte-btn-exportarPdf"]}
                 onClick={handleDescargarPdf}
                 disabled={exportando}
                 data-tour="exportar-reporte"

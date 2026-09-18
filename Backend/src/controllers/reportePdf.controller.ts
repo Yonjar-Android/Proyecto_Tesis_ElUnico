@@ -1,5 +1,9 @@
 import { Request, Response } from 'express';
-import { generateReporteVentasPorPeriodoPdf } from "../services/reportePdf.service.js";
+import { 
+    generateReporteVentasPorPeriodoPdf,
+    generateReporteVentasProductoPdf,
+    generateReporteVentasServicioPdf
+ } from "../services/reportePdf.service.js";
 
 export const descargarReporteVentasPorPeriodoPdf = async (req: Request, res: Response) => {
     try {
@@ -21,6 +25,54 @@ export const descargarReporteVentasPorPeriodoPdf = async (req: Request, res: Res
         res.status(500).json({
             success: false,
             message: 'Error al generar el reporte de ventas en PDF',
+            error: error instanceof Error ? error.message : 'Error desconocido'
+        });
+    }
+};
+
+export const descargarReporteVentasProductoPdf = async (req: Request, res: Response) => {
+    try {
+        const { search = "", fechaInicio = "", fechaFin = "" } = req.query;
+
+        const pdfBuffer = await generateReporteVentasProductoPdf(
+            search as string, fechaInicio as string, fechaFin as string
+        );
+
+        const fechaActual = new Date().toISOString().split('T')[0];
+        const filename = `reporte_ventas_producto_${fechaInicio || 'inicio'}_a_${fechaFin || fechaActual}.pdf`;
+
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename=${filename}`);
+        res.send(pdfBuffer);
+    } catch (error) {
+        console.error('Error generando PDF de ventas por producto:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error al generar el reporte de ventas por producto',
+            error: error instanceof Error ? error.message : 'Error desconocido'
+        });
+    }
+};
+
+export const descargarReporteVentasServicioPdf = async (req: Request, res: Response) => {
+    try {
+        const { search = "", fechaInicio = "", fechaFin = "" } = req.query;
+
+        const pdfBuffer = await generateReporteVentasServicioPdf(
+            search as string, fechaInicio as string, fechaFin as string
+        );
+
+        const fechaActual = new Date().toISOString().split('T')[0];
+        const filename = `reporte_ventas_servicio_${fechaInicio || 'inicio'}_a_${fechaFin || fechaActual}.pdf`;
+
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename=${filename}`);
+        res.send(pdfBuffer);
+    } catch (error) {
+        console.error('Error generando PDF de ventas por servicio:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error al generar el reporte de ventas por servicio',
             error: error instanceof Error ? error.message : 'Error desconocido'
         });
     }
