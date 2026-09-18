@@ -8,6 +8,7 @@ import {
     descargarReporteStockBajoExcel, 
     descargarArchivoExcel 
 } from "../../../services/reporteExcel.service.js";
+import { descargarReporteProductosStockPdf } from "../../../services/reportePdf.service.js";
 import { Joyride, type Step } from "react-joyride";
 import { HelpCircle } from 'lucide-react';
 
@@ -116,6 +117,15 @@ function ReporteStockBajo() {
         }
     };
 
+    const handleDescargarPdfProductosStock = async () => {
+    try {
+        const blob = await descargarReporteProductosStockPdf(searchTerm);
+        descargarArchivoExcel(blob, `reporte_productos_stock_${new Date().toISOString().split('T')[0]}.pdf`);
+    } catch (error) {
+        console.error('Error al descargar PDF:', error);
+    }
+};
+
   function renderStock(producto: ProductoListado) {
     if (producto.Stock === 0) {
       return <span className={styles["reporte-pill-critico"]}>0 (CRÍTICO)</span>;
@@ -164,6 +174,16 @@ function ReporteStockBajo() {
             >
                 <IconoBarras />
                 {exportando ? 'Exportando...' : 'Exportar Excel'}
+            </button>
+
+            <button 
+                className={styles["reporte-btn-exportarPdf"]}
+                onClick={handleDescargarPdfProductosStock}
+                disabled={exportando}
+                data-tour="exportar-reporte"
+            >
+                <IconoBarras />
+                {exportando ? 'Exportando...' : 'Exportar Pdf'}
             </button>
             </div>
         </div>

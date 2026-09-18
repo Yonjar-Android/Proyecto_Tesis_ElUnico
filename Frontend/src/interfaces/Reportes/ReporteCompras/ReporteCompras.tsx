@@ -14,6 +14,7 @@ import {
     descargarReporteComprasExcel, 
     descargarArchivoExcel 
 } from "../../../services/reporteExcel.service.js";
+import { descargarReporteComprasPorPeriodoPdf } from "../../../services/reportePdf.service.js";
 import { Joyride, type Step } from "react-joyride";
 
 function ReporteCompras() {
@@ -140,6 +141,15 @@ const buscar = async () => {
           }
       };
 
+const handleDescargarPdfCompras = async () => {
+    try {
+        const blob = await descargarReporteComprasPorPeriodoPdf("", fechaInicio, fechaFin,  proveedorSeleccionado?.id ?? 0);
+        descargarArchivoExcel(blob, `reporte_compras_${fechaInicio}_a_${fechaFin}.pdf`);
+    } catch (error) {
+        console.error('Error al descargar PDF:', error);
+    }
+};
+
   return (
     <div className={styles["reporte-page"]}>
       <div className={styles["reporte-contenido"]}>
@@ -159,6 +169,16 @@ const buscar = async () => {
             <IconoBarras />
             Exportar Excel
           </button>
+
+          <button 
+                className={styles["reporte-btn-exportarPdf"]}
+                onClick={handleDescargarPdfCompras}
+                disabled={exportando}
+                data-tour="exportar-reporte"
+            >
+                <IconoBarras />
+                {exportando ? 'Exportando...' : 'Exportar Pdf'}
+            </button>
           </div>
         </div>
 

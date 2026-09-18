@@ -5,7 +5,9 @@ import {
     obtenerReporteInventario,
     obtenerReporteSalidasInventario,
     obtenerReporteDevoluciones,
-    obtenerReporteFacturasConDeuda
+    obtenerReporteFacturasConDeuda,
+    obtenerReporteProductosStock,
+    obtenerReporteCompras
  } from "./reporte.service.js";
 import { 
     generateVentasPorPeriodoPdfReport,
@@ -14,7 +16,9 @@ import {
     generateInventarioPdfReport,
     generateSalidasInventarioPdfReport,
     generateDevolucionesPdfReport,
-    generateClientesDeudaPdfReport
+    generateClientesDeudaPdfReport,
+    generateProductosStockPdfReport,
+    generateComprasPorPeriodoPdfReport
  } from "../utils/pdfGenerator.js";
 
 export const generateReporteVentasPorPeriodoPdf = async (
@@ -94,4 +98,29 @@ export const generateReporteClientesDeudaPdf = async (
 ): Promise<Buffer> => {
     const reportData = await obtenerReporteFacturasConDeuda(search, 1, 1000000);
     return await generateClientesDeudaPdfReport(reportData);
+};
+
+export const generateReporteProductosStockPdf = async (
+    search: string = "",
+    porcentaje: number = 30
+): Promise<Buffer> => {
+    const reportData = await obtenerReporteProductosStock(search, porcentaje, 1, 1000000);
+    return await generateProductosStockPdfReport(reportData, porcentaje);
+};
+
+export const generateReporteComprasPorPeriodoPdf = async (
+    search: string = "",
+    fechaInicio: string = "",
+    fechaFin: string = "",
+    Id_proveedor: number | null = null
+): Promise<Buffer> => {
+    const reportData = await obtenerReporteCompras(
+        search,
+        fechaInicio,
+        fechaFin,
+        Id_proveedor,
+        1,
+        1000000
+    );
+    return await generateComprasPorPeriodoPdfReport(reportData);
 };

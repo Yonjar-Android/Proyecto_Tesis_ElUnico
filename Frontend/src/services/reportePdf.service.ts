@@ -93,3 +93,29 @@ export const descargarReporteClientesDeudaPdf = async (
     });
     return response.data;
 };
+
+export const descargarReporteProductosStockPdf = async (
+    search: string = "",
+    porcentaje: number = 30
+): Promise<Blob> => {
+    const response = await axiosInstance.get(`${API}/productos-stock`, {
+        params: { search, porcentaje },
+        headers: { Authorization: `Bearer ${token}` },
+        responseType: 'blob'
+    });
+    return response.data;
+};
+
+export const descargarReporteComprasPorPeriodoPdf = async (
+    search: string = "",
+    fechaInicio: string = "",
+    fechaFin: string = "",
+    Id_proveedor: number | null = null
+): Promise<Blob> => {
+    const response = await axiosInstance.get(`${API}/compras-por-periodo`, {
+        params: { search, fechaInicio, fechaFin, Id_proveedor },
+        headers: { Authorization: `Bearer ${token}` },
+        responseType: 'blob'
+    });
+    return response.data;
+};

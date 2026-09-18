@@ -6,7 +6,9 @@ import {
     generateReporteInventarioPdf,
     generateReporteSalidasInventarioPdf,
     generateReporteDevolucionesPdf,
-    generateReporteClientesDeudaPdf
+    generateReporteClientesDeudaPdf,
+    generateReporteProductosStockPdf,
+    generateReporteComprasPorPeriodoPdf
  } from "../services/reportePdf.service.js";
 
 export const descargarReporteVentasPorPeriodoPdf = async (req: Request, res: Response) => {
@@ -177,6 +179,59 @@ export const descargarReporteClientesDeudaPdf = async (req: Request, res: Respon
         res.status(500).json({
             success: false,
             message: 'Error al generar el reporte de cuentas por cobrar',
+            error: error instanceof Error ? error.message : 'Error desconocido'
+        });
+    }
+};
+
+export const descargarReporteProductosStockPdf = async (req: Request, res: Response) => {
+    try {
+        const { search = "", porcentaje = 30 } = req.query;
+
+        const pdfBuffer = await generateReporteProductosStockPdf(search as string, Number(porcentaje));
+
+        const filename = `reporte_productos_stock_${new Date().toISOString().split('T')[0]}.pdf`;
+
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename=${filename}`);
+        res.send(pdfBuffer);
+    } catch (error) {
+        console.error('Error generando PDF de productos stock:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error al generar el reporte de productos',
+            error: error instanceof Error ? error.message : 'Error desconocido'
+        });
+    }
+};
+
+export const descargarReporteComprasPorPeriodoPdf = async (req: Request, res: Response) => {
+    try {
+        const {
+            search = "",
+            fechaInicio = "",
+            fechaFin = "",
+            Id_proveedor = null,
+        } = req.query;
+
+        const pdfBuffer = await generateReporteComprasPorPeriodoPdf(
+            search as string,
+            fechaInicio as string,
+            fechaFin as string,
+            Id_proveedor ? Number(Id_proveedor) : null
+        );
+
+        const fechaActual = new Date().toISOString().split('T')[0];
+        const filename = `reporte_compras_${fechaInicio || 'inicio'}_a_${fechaFin || fechaActual}.pdf`;
+
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename=${filename}`);
+        res.send(pdfBuffer);
+    } catch (error) {
+        console.error('Error generando PDF de compras:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error al generar el reporte de compras',
             error: error instanceof Error ? error.message : 'Error desconocido'
         });
     }
