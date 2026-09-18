@@ -9,6 +9,7 @@ import {
     descargarReporteCuentasCobrarExcel, 
     descargarArchivoExcel
 } from "../../../services/reporteExcel.service.js";
+import { descargarReporteClientesDeudaPdf } from "../../../services/reportePdf.service.js";
 import { Joyride, type Step } from "react-joyride";
 import { HelpCircle } from 'lucide-react';
 
@@ -101,6 +102,15 @@ function ReporteCuentasPorCobrar() {
         }
     };
 
+    const handleDescargarPdfClientesDeuda = async () => {
+    try {
+        const blob = await descargarReporteClientesDeudaPdf(searchTerm);
+        descargarArchivoExcel(blob, `reporte_cuentas_por_cobrar_${new Date().toISOString().split('T')[0]}.pdf`);
+    } catch (error) {
+        console.error('Error al descargar PDF:', error);
+    }
+};
+
   return (
     <div className={styles["reporte-page"]}>
       <div className={styles["reporte-contenido"]}>
@@ -125,6 +135,16 @@ function ReporteCuentasPorCobrar() {
             >
                 <IconoBarras />
                 {exportando ? 'Exportando...' : 'Exportar Excel'}
+            </button>
+
+            <button 
+                className={styles["reporte-btn-exportarPdf"]}
+                onClick={handleDescargarPdfClientesDeuda}
+                disabled={exportando}
+                data-tour="exportar-reporte"
+            >
+                <IconoBarras />
+                {exportando ? 'Exportando...' : 'Exportar Pdf'}
             </button>
             </div>
         </div>

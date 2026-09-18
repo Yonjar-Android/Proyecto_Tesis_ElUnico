@@ -69,3 +69,27 @@ export const descargarReporteSalidasInventarioPdf = async (
     });
     return response.data;
 };
+
+export const descargarReporteDevolucionesPdf = async (
+    search: string = "",
+    fechaInicio: string = "",
+    fechaFin: string = ""
+): Promise<Blob> => {
+    const response = await axiosInstance.get(`${API}/devoluciones`, {
+        params: { search, fechaInicio, fechaFin },
+        headers: { Authorization: `Bearer ${token}` },
+        responseType: 'blob'
+    });
+    return response.data;
+};
+
+export const descargarReporteClientesDeudaPdf = async (
+    search: string = ""
+): Promise<Blob> => {
+    const response = await axiosInstance.get(`${API}/clientes-deuda`, {
+        params: { search },
+        headers: { Authorization: `Bearer ${token}` },
+        responseType: 'blob'
+    });
+    return response.data;
+};

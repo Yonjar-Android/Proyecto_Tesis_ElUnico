@@ -4,7 +4,9 @@ import {
     generateReporteVentasProductoPdf,
     generateReporteVentasServicioPdf,
     generateReporteInventarioPdf,
-    generateReporteSalidasInventarioPdf
+    generateReporteSalidasInventarioPdf,
+    generateReporteDevolucionesPdf,
+    generateReporteClientesDeudaPdf
  } from "../services/reportePdf.service.js";
 
 export const descargarReporteVentasPorPeriodoPdf = async (req: Request, res: Response) => {
@@ -129,6 +131,52 @@ export const descargarReporteSalidasInventarioPdf = async (req: Request, res: Re
         res.status(500).json({
             success: false,
             message: 'Error al generar el reporte de salidas de inventario',
+            error: error instanceof Error ? error.message : 'Error desconocido'
+        });
+    }
+};
+
+export const descargarReporteDevolucionesPdf = async (req: Request, res: Response) => {
+    try {
+        const { search = "", fechaInicio = "", fechaFin = "" } = req.query;
+
+        const pdfBuffer = await generateReporteDevolucionesPdf(
+            search as string, fechaInicio as string, fechaFin as string
+        );
+
+        const fechaActual = new Date().toISOString().split('T')[0];
+        const filename = `reporte_devoluciones_${fechaInicio || 'inicio'}_a_${fechaFin || fechaActual}.pdf`;
+
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename=${filename}`);
+        res.send(pdfBuffer);
+    } catch (error) {
+        console.error('Error generando PDF de devoluciones:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error al generar el reporte de devoluciones',
+            error: error instanceof Error ? error.message : 'Error desconocido'
+        });
+    }
+};
+
+export const descargarReporteClientesDeudaPdf = async (req: Request, res: Response) => {
+    try {
+        const { search = "" } = req.query;
+
+        const pdfBuffer = await generateReporteClientesDeudaPdf(search as string);
+
+        const fechaActual = new Date().toISOString().split('T')[0];
+        const filename = `reporte_cuentas_por_cobrar_${fechaActual}.pdf`;
+
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename=${filename}`);
+        res.send(pdfBuffer);
+    } catch (error) {
+        console.error('Error generando PDF de cuentas por cobrar:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error al generar el reporte de cuentas por cobrar',
             error: error instanceof Error ? error.message : 'Error desconocido'
         });
     }

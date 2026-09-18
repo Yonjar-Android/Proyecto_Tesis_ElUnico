@@ -3,14 +3,18 @@ import {
     obtenerReporteVentasProducto,
     obtenerReporteVentasServicio,
     obtenerReporteInventario,
-    obtenerReporteSalidasInventario
+    obtenerReporteSalidasInventario,
+    obtenerReporteDevoluciones,
+    obtenerReporteFacturasConDeuda
  } from "./reporte.service.js";
 import { 
     generateVentasPorPeriodoPdfReport,
     generateVentasProductoPdfReport,
     generateVentasServicioPdfReport,
     generateInventarioPdfReport,
-    generateSalidasInventarioPdfReport
+    generateSalidasInventarioPdfReport,
+    generateDevolucionesPdfReport,
+    generateClientesDeudaPdfReport
  } from "../utils/pdfGenerator.js";
 
 export const generateReporteVentasPorPeriodoPdf = async (
@@ -72,4 +76,22 @@ export const generateReporteSalidasInventarioPdf = async (
         search, fechaInicio, fechaFin, 1, 1000000
     );
     return await generateSalidasInventarioPdfReport(reportData);
+};
+
+export const generateReporteDevolucionesPdf = async (
+    search: string = "",
+    fechaInicio: string = "",
+    fechaFin: string = ""
+): Promise<Buffer> => {
+    const reportData = await obtenerReporteDevoluciones(
+        search, fechaInicio, fechaFin, 1, 1000000
+    );
+    return await generateDevolucionesPdfReport(reportData);
+};
+
+export const generateReporteClientesDeudaPdf = async (
+    search: string = ""
+): Promise<Buffer> => {
+    const reportData = await obtenerReporteFacturasConDeuda(search, 1, 1000000);
+    return await generateClientesDeudaPdfReport(reportData);
 };

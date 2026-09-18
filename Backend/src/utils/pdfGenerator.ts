@@ -448,3 +448,152 @@ export const generateSalidasInventarioPdfReport = async (reportData: any): Promi
         }
     });
 };
+
+export const generateDevolucionesPdfReport = async (reportData: any): Promise<Buffer> => {
+    return new Promise((resolve, reject) => {
+        try {
+            const doc = new PDFDocument({ margin: 40, size: 'A4', layout: 'landscape' });
+            const chunks: Buffer[] = [];
+            doc.on('data', (c) => chunks.push(c));
+            doc.on('end', () => resolve(Buffer.concat(chunks)));
+            doc.on('error', reject);
+
+            const nombreReporte = 'Reporte de Devoluciones';
+            doc.on('pageAdded', () => agregarEncabezado(doc, nombreReporte));
+            agregarEncabezado(doc, nombreReporte);
+
+            const anchoUtil = doc.page.width - doc.page.margins.left - doc.page.margins.right;
+
+            // --- Estadísticas centradas ---
+            const stats = [
+                { label: 'Total Devoluciones', value: reportData.TotalRegistros, format: formatoEntero },
+                { label: 'Productos Devueltos', value: reportData.TotalProductosDevueltos, format: formatoEntero },
+                { label: 'Total Devuelto', value: reportData.TotalDevuelto, format: formatoMoneda },
+            ];
+
+            const porFila = 3, anchoStat = 170, altoStat = 34, gapStat = 6;
+            const anchoBloqueStats = porFila * anchoStat;
+            const xInicioStats = doc.page.margins.left + (anchoUtil - anchoBloqueStats) / 2;
+
+            let statX = xInicioStats, statY = doc.y;
+
+            stats.forEach((stat, i) => {
+                if (i > 0 && i % porFila === 0) {
+                    statX = xInicioStats;
+                    statY += altoStat + gapStat;
+                }
+                doc.rect(statX, statY, anchoStat - gapStat, altoStat).fill('#E7E6E6');
+                doc.fillColor('#333333').fontSize(8).font('Helvetica-Bold')
+                    .text(stat.label, statX + 6, statY + 5, { width: anchoStat - 16 });
+                doc.fillColor('#000000').fontSize(11).font('Helvetica-Bold')
+                    .text(stat.format(stat.value), statX + 6, statY + 18, { width: anchoStat - 16 });
+                statX += anchoStat;
+            });
+
+            doc.y = statY + altoStat + 15;
+            doc.x = doc.page.margins.left;
+
+            // --- Tabla centrada ---
+            const columnas: Columna[] = [
+                { header: 'Fecha', key: 'Fecha', width: 90, format: formatoFecha },
+                { header: 'N° Factura', key: 'NFactura', width: 90, align: 'right', format: formatoEntero },
+                { header: 'Cliente', key: 'Cliente', width: 220 },
+                { header: 'Cant. Productos', key: 'CantidadProductos', width: 110, align: 'right', format: formatoEntero },
+                { header: 'Total Devuelto', key: 'TotalDevuelto', width: 130, align: 'right', format: formatoMoneda },
+            ];
+
+            const anchoTabla = columnas.reduce((s, c) => s + c.width, 0);
+            const xInicio = doc.page.margins.left + (anchoUtil - anchoTabla) / 2;
+
+            let y = dibujarHeaderTabla(doc, columnas, xInicio, doc.y);
+            const limiteInferior = doc.page.height - doc.page.margins.bottom;
+
+            (reportData.data ?? []).forEach((row: any, i: number) => {
+                if (y + 18 > limiteInferior) {
+                    doc.addPage();
+                    y = dibujarHeaderTabla(doc, columnas, xInicio, doc.y);
+                }
+                y = dibujarFila(doc, columnas, row, xInicio, y, i % 2 === 1);
+            });
+
+            doc.end();
+        } catch (error) {
+            reject(error);
+        }
+    });
+};
+
+export const generateClientesDeudaPdfReport = async (reportData: any): Promise<Buffer> => {
+    return new Promise((resolve, reject) => {
+        try {
+            const doc = new PDFDocument({ margin: 40, size: 'A4', layout: 'landscape' });
+            const chunks: Buffer[] = [];
+            doc.on('data', (c) => chunks.push(c));
+            doc.on('end', () => resolve(Buffer.concat(chunks)));
+            doc.on('error', reject);
+
+            const nombreReporte = 'Reporte de Cuentas por Cobrar';
+            doc.on('pageAdded', () => agregarEncabezado(doc, nombreReporte));
+            agregarEncabezado(doc, nombreReporte);
+
+            const anchoUtil = doc.page.width - doc.page.margins.left - doc.page.margins.right;
+
+            // --- Estadísticas centradas ---
+            const stats = [
+                { label: 'Total Facturas', value: reportData.TotalFacturasConDeuda, format: formatoEntero },
+                { label: 'Saldo Pendiente', value: reportData.TotalSaldoPendiente, format: formatoMoneda },
+            ];
+
+            const porFila = 2, anchoStat = 200, altoStat = 34, gapStat = 6;
+            const anchoBloqueStats = porFila * anchoStat;
+            const xInicioStats = doc.page.margins.left + (anchoUtil - anchoBloqueStats) / 2;
+
+            let statX = xInicioStats, statY = doc.y;
+
+            stats.forEach((stat, i) => {
+                if (i > 0 && i % porFila === 0) {
+                    statX = xInicioStats;
+                    statY += altoStat + gapStat;
+                }
+                doc.rect(statX, statY, anchoStat - gapStat, altoStat).fill('#E7E6E6');
+                doc.fillColor('#333333').fontSize(8).font('Helvetica-Bold')
+                    .text(stat.label, statX + 6, statY + 5, { width: anchoStat - 16 });
+                doc.fillColor('#000000').fontSize(11).font('Helvetica-Bold')
+                    .text(stat.format(stat.value), statX + 6, statY + 18, { width: anchoStat - 16 });
+                statX += anchoStat;
+            });
+
+            doc.y = statY + altoStat + 15;
+            doc.x = doc.page.margins.left;
+
+            // --- Tabla centrada ---
+            const columnas: Columna[] = [
+                { header: 'N° Factura', key: 'IdVenta', width: 80, align: 'right', format: formatoEntero },
+                { header: 'N° Cliente', key: 'NCliente', width: 90 },
+                { header: 'Nombre', key: 'Nombre', width: 140 },
+                { header: 'Apellido', key: 'Apellido', width: 140 },
+                { header: 'Teléfono', key: 'Telefono', width: 90 },
+                { header: 'Crédito Pendiente', key: 'Saldo_Deuda', width: 110, align: 'right', format: formatoMoneda },
+                { header: 'Próx. Fecha Pago', key: 'ProximaFechaPago', width: 100, format: formatoFecha },
+            ];
+
+            const anchoTabla = columnas.reduce((s, c) => s + c.width, 0);
+            const xInicio = doc.page.margins.left + (anchoUtil - anchoTabla) / 2;
+
+            let y = dibujarHeaderTabla(doc, columnas, xInicio, doc.y);
+            const limiteInferior = doc.page.height - doc.page.margins.bottom;
+
+            (reportData.data ?? []).forEach((row: any, i: number) => {
+                if (y + 18 > limiteInferior) {
+                    doc.addPage();
+                    y = dibujarHeaderTabla(doc, columnas, xInicio, doc.y);
+                }
+                y = dibujarFila(doc, columnas, row, xInicio, y, i % 2 === 1);
+            });
+
+            doc.end();
+        } catch (error) {
+            reject(error);
+        }
+    });
+};

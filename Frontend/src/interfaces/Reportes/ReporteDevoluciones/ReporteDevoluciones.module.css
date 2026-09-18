@@ -56,6 +56,25 @@
   cursor: not-allowed;
 }
 
+.reporte-btn-exportarPdf {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #fff;
+  border: 1px solid #DC2626;
+  color: #DC2626;
+  border-radius: 8px;
+  padding: 0.55rem 1.1rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.reporte-btn-exportarPdf:hover {
+  background-color: #FEF2F2;
+}
+
 /* Tarjetas de estadísticas */
 .reporte-stats-row {
   display: flex;

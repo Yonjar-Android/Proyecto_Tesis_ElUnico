@@ -4,7 +4,9 @@ import {
     descargarReporteVentasProductoPdf,
     descargarReporteVentasServicioPdf,
     descargarReporteInventarioPdf,
-    descargarReporteSalidasInventarioPdf
+    descargarReporteSalidasInventarioPdf,
+    descargarReporteDevolucionesPdf,
+    descargarReporteClientesDeudaPdf
  } from '../controllers/reportePdf.controller.js';
 
 const router = Router();
@@ -14,4 +16,6 @@ router.get('/productos-por-periodo', descargarReporteVentasProductoPdf);
 router.get('/servicios-por-periodo', descargarReporteVentasServicioPdf);
 router.get('/inventario', descargarReporteInventarioPdf);
 router.get('/salidas-inventario', descargarReporteSalidasInventarioPdf);
+router.get('/devoluciones', descargarReporteDevolucionesPdf);
+router.get('/clientes-deuda', descargarReporteClientesDeudaPdf);
 export default router;

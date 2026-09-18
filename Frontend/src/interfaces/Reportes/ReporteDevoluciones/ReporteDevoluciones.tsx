@@ -13,6 +13,7 @@ import type {
   RespuestaReporteDevoluciones,
   DevolucionReporte,
 } from "../../../models/RespuestaReporteDevoluciones";
+import { descargarReporteDevolucionesPdf } from "../../../services/reportePdf.service";
 import { Joyride, type Step } from "react-joyride";
 import { HelpCircle } from 'lucide-react';
 
@@ -123,6 +124,15 @@ function ReporteDevoluciones() {
     }
   };
 
+  const handleDescargarPdfDevoluciones = async () => {
+    try {
+        const blob = await descargarReporteDevolucionesPdf(search, fechaInicio, fechaFin);
+        descargarArchivoExcel(blob, `reporte_devoluciones_${fechaInicio}_a_${fechaFin}.pdf`);
+    } catch (error) {
+        console.error('Error al descargar PDF:', error);
+    }
+};
+
   return (
     <div className={styles["reporte-page"]}>
       <div className={styles["reporte-contenido"]}>
@@ -148,6 +158,16 @@ function ReporteDevoluciones() {
             <IconoBarras />
             {exportando ? "Exportando..." : "Exportar Excel"}
           </button>
+
+          <button 
+                className={styles["reporte-btn-exportarPdf"]}
+                onClick={handleDescargarPdfDevoluciones}
+                disabled={exportando}
+                data-tour="exportar-reporte"
+            >
+                <IconoBarras />
+                {exportando ? 'Exportando...' : 'Exportar Pdf'}
+            </button>
         </div>
         </div>
 
