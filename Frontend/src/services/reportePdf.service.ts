@@ -43,3 +43,29 @@ export const descargarReporteVentasServicioPdf = async (
     });
     return response.data;
 };
+
+export const descargarReporteInventarioPdf = async (
+    search: string = "",
+    Id_categoria: number | null = null,
+    Id_marca: number | null = null
+): Promise<Blob> => {
+    const response = await axiosInstance.get(`${API}/inventario`, {
+        params: { search, Id_categoria, Id_marca },
+        headers: { Authorization: `Bearer ${token}` },
+        responseType: 'blob'
+    });
+    return response.data;
+};
+
+export const descargarReporteSalidasInventarioPdf = async (
+    search: string = "",
+    fechaInicio: string = "",
+    fechaFin: string = ""
+): Promise<Blob> => {
+    const response = await axiosInstance.get(`${API}/salidas-inventario`, {
+        params: { search, fechaInicio, fechaFin },
+        headers: { Authorization: `Bearer ${token}` },
+        responseType: 'blob'
+    });
+    return response.data;
+};

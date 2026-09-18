@@ -39,7 +39,15 @@ const dibujarHeaderTabla = (doc: PDFKit.PDFDocument, columnas: Columna[], x: num
     return y + alto;
 };
 
-const dibujarFila = (doc: PDFKit.PDFDocument, columnas: Columna[], row: any, x: number, y: number, zebra: boolean): number => {
+const dibujarFila = (
+    doc: any,
+    columnas: Columna[],
+    row: any,
+    x: number,
+    y: number,
+    zebra: boolean,
+    critico: boolean = false
+): number => {
     const alto = 18;
     if (zebra) {
         doc.rect(x, y, columnas.reduce((s, c) => s + c.width, 0), alto).fill('#F2F2F2');
@@ -49,6 +57,14 @@ const dibujarFila = (doc: PDFKit.PDFDocument, columnas: Columna[], row: any, x: 
     let posX = x;
     columnas.forEach((col) => {
         const valor = col.format ? col.format(row[col.key]) : String(row[col.key] ?? '');
+
+        if (critico && col.key === 'Stock') {
+            doc.rect(posX, y, col.width, alto).fill('#FEF2F2');
+            doc.fillColor('#DC2626').font('Helvetica-Bold');
+        } else {
+            doc.fillColor('#000000').font('Helvetica');
+        }
+
         doc.text(valor, posX + 2, y + 5, { width: col.width - 4, align: col.align ?? 'left' });
         posX += col.width;
     });
@@ -263,6 +279,153 @@ export const generateVentasServicioPdfReport = async (reportData: any): Promise<
                 { header: 'Cantidad', key: 'CantidadTotal', width: 100, align: 'right', format: formatoEntero },
                 { header: 'Descuento', key: 'TotalDescuento', width: 130, align: 'right', format: formatoMoneda },
                 { header: 'Total Facturado', key: 'TotalFacturado', width: 130, align: 'right', format: formatoMoneda },
+            ];
+
+            const anchoTabla = columnas.reduce((s, c) => s + c.width, 0);
+            const xInicio = doc.page.margins.left + (anchoUtil - anchoTabla) / 2;
+
+            let y = dibujarHeaderTabla(doc, columnas, xInicio, doc.y);
+            const limiteInferior = doc.page.height - doc.page.margins.bottom;
+
+            (reportData.data ?? []).forEach((row: any, i: number) => {
+                if (y + 18 > limiteInferior) {
+                    doc.addPage();
+                    y = dibujarHeaderTabla(doc, columnas, xInicio, doc.y);
+                }
+                y = dibujarFila(doc, columnas, row, xInicio, y, i % 2 === 1);
+            });
+
+            doc.end();
+        } catch (error) {
+            reject(error);
+        }
+    });
+};
+
+export const generateInventarioPdfReport = async (reportData: any): Promise<Buffer> => {
+    return new Promise((resolve, reject) => {
+        try {
+            const doc = new PDFDocument({ margin: 40, size: 'A4', layout: 'landscape' });
+            const chunks: Buffer[] = [];
+            doc.on('data', (c) => chunks.push(c));
+            doc.on('end', () => resolve(Buffer.concat(chunks)));
+            doc.on('error', reject);
+
+            const nombreReporte = 'Reporte de Inventario';
+            doc.on('pageAdded', () => agregarEncabezado(doc, nombreReporte));
+            agregarEncabezado(doc, nombreReporte);
+
+            const anchoUtil = doc.page.width - doc.page.margins.left - doc.page.margins.right;
+
+            // --- Estadísticas centradas ---
+            const stats = [
+                { label: 'Total Productos', value: reportData.TotalRegistros, format: formatoEntero },
+                { label: 'Stock Total', value: reportData.TotalStock, format: formatoEntero },
+                { label: 'Stock Crítico', value: reportData.TotalStockCritico, format: formatoEntero },
+            ];
+
+            const porFila = 3, anchoStat = 170, altoStat = 34, gapStat = 6;
+            const anchoBloqueStats = porFila * anchoStat;
+            const xInicioStats = doc.page.margins.left + (anchoUtil - anchoBloqueStats) / 2;
+
+            let statX = xInicioStats, statY = doc.y;
+
+            stats.forEach((stat, i) => {
+                if (i > 0 && i % porFila === 0) {
+                    statX = xInicioStats;
+                    statY += altoStat + gapStat;
+                }
+                doc.rect(statX, statY, anchoStat - gapStat, altoStat).fill('#E7E6E6');
+                doc.fillColor('#333333').fontSize(8).font('Helvetica-Bold')
+                    .text(stat.label, statX + 6, statY + 5, { width: anchoStat - 16 });
+                doc.fillColor('#000000').fontSize(11).font('Helvetica-Bold')
+                    .text(stat.format(stat.value), statX + 6, statY + 18, { width: anchoStat - 16 });
+                statX += anchoStat;
+            });
+
+            doc.y = statY + altoStat + 15;
+            doc.x = doc.page.margins.left;
+
+            // --- Tabla centrada ---
+            const columnas: Columna[] = [
+                { header: 'Producto', key: 'Nombre', width: 220 },
+                { header: 'Marca', key: 'Nombre_marca', width: 120 },
+                { header: 'Categoría', key: 'Nombre_categoria', width: 120 },
+                { header: 'Precio Venta', key: 'Precio_venta', width: 100, align: 'right', format: formatoMoneda },
+                { header: 'Stock', key: 'Stock', width: 80, align: 'right', format: formatoEntero },
+            ];
+
+            const anchoTabla = columnas.reduce((s, c) => s + c.width, 0);
+            const xInicio = doc.page.margins.left + (anchoUtil - anchoTabla) / 2;
+
+            let y = dibujarHeaderTabla(doc, columnas, xInicio, doc.y);
+            const limiteInferior = doc.page.height - doc.page.margins.bottom;
+
+            (reportData.data ?? []).forEach((row: any, i: number) => {
+                if (y + 18 > limiteInferior) {
+                    doc.addPage();
+                    y = dibujarHeaderTabla(doc, columnas, xInicio, doc.y);
+                }
+                const esCritico = Number(row.Stock) < Number(row.Stock_min);
+                y = dibujarFila(doc, columnas, row, xInicio, y, i % 2 === 1, esCritico);
+            });
+
+            doc.end();
+        } catch (error) {
+            reject(error);
+        }
+    });
+};
+
+export const generateSalidasInventarioPdfReport = async (reportData: any): Promise<Buffer> => {
+    return new Promise((resolve, reject) => {
+        try {
+            const doc = new PDFDocument({ margin: 40, size: 'A4', layout: 'landscape' });
+            const chunks: Buffer[] = [];
+            doc.on('data', (c) => chunks.push(c));
+            doc.on('end', () => resolve(Buffer.concat(chunks)));
+            doc.on('error', reject);
+
+            const nombreReporte = 'Reporte de Otras Salidas de Inventario';
+            doc.on('pageAdded', () => agregarEncabezado(doc, nombreReporte));
+            agregarEncabezado(doc, nombreReporte);
+
+            const anchoUtil = doc.page.width - doc.page.margins.left - doc.page.margins.right;
+
+            // --- Estadísticas centradas ---
+            const stats = [
+                { label: 'Total Registros', value: reportData.TotalRegistros, format: formatoEntero },
+                { label: 'Unidades Salidas', value: reportData.TotalUnidadesSalidas, format: formatoEntero },
+            ];
+
+            const porFila = 2, anchoStat = 200, altoStat = 34, gapStat = 6;
+            const anchoBloqueStats = porFila * anchoStat;
+            const xInicioStats = doc.page.margins.left + (anchoUtil - anchoBloqueStats) / 2;
+
+            let statX = xInicioStats, statY = doc.y;
+
+            stats.forEach((stat, i) => {
+                if (i > 0 && i % porFila === 0) {
+                    statX = xInicioStats;
+                    statY += altoStat + gapStat;
+                }
+                doc.rect(statX, statY, anchoStat - gapStat, altoStat).fill('#E7E6E6');
+                doc.fillColor('#333333').fontSize(8).font('Helvetica-Bold')
+                    .text(stat.label, statX + 6, statY + 5, { width: anchoStat - 16 });
+                doc.fillColor('#000000').fontSize(11).font('Helvetica-Bold')
+                    .text(stat.format(stat.value), statX + 6, statY + 18, { width: anchoStat - 16 });
+                statX += anchoStat;
+            });
+
+            doc.y = statY + altoStat + 15;
+            doc.x = doc.page.margins.left;
+
+            // --- Tabla centrada ---
+            const columnas: Columna[] = [
+                { header: 'Fecha', key: 'Fecha', width: 100, format: formatoFecha },
+                { header: 'Producto', key: 'Nombre_Producto', width: 250 },
+                { header: 'Motivo', key: 'Motivo', width: 200 },
+                { header: 'Cantidad', key: 'Cantidad', width: 100, align: 'right', format: formatoEntero },
             ];
 
             const anchoTabla = columnas.reduce((s, c) => s + c.width, 0);

@@ -14,6 +14,7 @@ import type {
   RespuestaReporteInventario,
   ProductoInventarioReporte,
 } from "../../../models/RespuestaReporteInventario";
+import { descargarReporteInventarioPdf } from "../../../services/reportePdf.service";
 import ModalSeleccionarCategoria from "../../Productos/ModalesSeleccion/ModalSeleccionarCategoria";
 import ModalSeleccionarMarca from "../../Productos/ModalesSeleccion/ModalSeleccionarMarca";
 import type { Categoria } from "../../../models/Categoria";
@@ -108,6 +109,19 @@ function ReporteInventario() {
     }
   };
 
+const handleDescargarPdfInventario = async () => {
+    try {
+        const blob = await descargarReporteInventarioPdf(
+          busquedaNombre,
+        categoriaSeleccionada?.id ?? null,
+        marcaSeleccionada?.id ?? null
+        );
+        descargarArchivoExcel(blob, `reporte_inventario_${new Date().toISOString().split('T')[0]}.pdf`);
+    } catch (error) {
+        console.error('Error al descargar PDF:', error);
+    }
+};
+
   return (
     <div className={styles["reporte-page"]}>
       <div className={styles["reporte-contenido"]}>
@@ -133,6 +147,16 @@ function ReporteInventario() {
             <IconoBarras />
             {exportando ? "Exportando..." : "Exportar Excel"}
           </button>
+
+          <button 
+                className={styles["reporte-btn-exportarPdf"]}
+                onClick={handleDescargarPdfInventario}
+                disabled={exportando}
+                data-tour="exportar-reporte"
+            >
+                <IconoBarras />
+                {exportando ? 'Exportando...' : 'Exportar Pdf'}
+            </button>
         </div>
         </div>
 

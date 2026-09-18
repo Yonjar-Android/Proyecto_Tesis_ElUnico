@@ -10,6 +10,7 @@ import type {
   SalidaInventarioReporteRow,
   RespuestaReporteSalidas,
 } from "../../../models/SalidaInventario";
+import { descargarReporteSalidasInventarioPdf } from "../../../services/reportePdf.service";
 import { descargarReporteSalidasExcel, descargarArchivoExcel }  from "../../../services/reporteExcel.service"
 import { Joyride, type Step } from "react-joyride";
 import { HelpCircle } from 'lucide-react';
@@ -122,6 +123,15 @@ function ReporteSalidasInventario() {
     }
   };
 
+  const handleDescargarPdfSalidasInventario = async () => {
+    try {
+        const blob = await descargarReporteSalidasInventarioPdf(motivo, fechaInicio, fechaFin);
+        descargarArchivoExcel(blob, `reporte_salidas_inventario_${fechaInicio}_a_${fechaFin}.pdf`);
+    } catch (error) {
+        console.error('Error al descargar PDF:', error);
+    }
+};
+
   return (
     <div className={styles["reporte-page"]}>
       <div className={styles["reporte-contenido"]}>
@@ -147,6 +157,16 @@ function ReporteSalidasInventario() {
             <IconoBarras />
             {exportando ? "Exportando..." : "Exportar Excel"}
           </button>
+
+          <button 
+                className={styles["reporte-btn-exportarPdf"]}
+                onClick={handleDescargarPdfSalidasInventario}
+                disabled={exportando}
+                data-tour="exportar-reporte"
+            >
+                <IconoBarras />
+                {exportando ? 'Exportando...' : 'Exportar Pdf'}
+            </button>
         </div>
         </div>
 
