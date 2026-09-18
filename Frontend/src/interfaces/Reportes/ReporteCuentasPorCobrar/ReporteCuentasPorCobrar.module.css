@@ -70,6 +70,10 @@
   background-color: #FEF2F2;
 }
 
+.botones-exportar {
+  display: flex;
+  gap: 8px;
+}
 
 /* Tarjetas de estadísticas */
 .reporte-stats-row {

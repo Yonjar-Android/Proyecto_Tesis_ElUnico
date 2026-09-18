@@ -40,7 +40,7 @@ function ReporteCompras() {
  const pasosTour: Step[] = [
   {
     target: '[data-tour="exportar-reporte"]',
-    content: "Desde aquí puedes exportar el reporte de compras a Excel.",
+    content: "Desde aquí puedes exportar el reporte de compras en excel o pdf.",
   },
   {
     target: '[data-tour="filtrar-reporte"]',
@@ -164,8 +164,11 @@ const handleDescargarPdfCompras = async () => {
             <HelpCircle size={18} />
           </button>
 
+          <div className={styles["botones-exportar"]}
+          data-tour="exportar-reporte">
+
           <button className={styles["reporte-btn-exportar"]} onClick={exportar}
-            data-tour="exportar-reporte">
+            >
             <IconoBarras />
             Exportar Excel
           </button>
@@ -174,11 +177,11 @@ const handleDescargarPdfCompras = async () => {
                 className={styles["reporte-btn-exportarPdf"]}
                 onClick={handleDescargarPdfCompras}
                 disabled={exportando}
-                data-tour="exportar-reporte"
             >
                 <IconoBarras />
                 {exportando ? 'Exportando...' : 'Exportar Pdf'}
             </button>
+            </div>
           </div>
         </div>
 

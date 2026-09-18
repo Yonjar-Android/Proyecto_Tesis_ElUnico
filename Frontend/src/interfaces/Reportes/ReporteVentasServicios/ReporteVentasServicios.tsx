@@ -31,7 +31,7 @@ function ReporteVentasServicio() {
  const pasosTour: Step[] = [
   {
     target: '[data-tour="exportar-reporte"]',
-    content: "Desde aquí puedes exportar el reporte a Excel.",
+    content: "Desde aquí puedes exportar el reporte en excel o pdf.",
   },
   {
     target: '[data-tour="filtrar-reporte"]',
@@ -161,6 +161,9 @@ function ReporteVentasServicio() {
             {exportando ? "Exportando..." : "Exportar Excel"}
           </button>
 
+          <div className={styles["botones-exportar"]}
+          data-tour="exportar-reporte">
+
           <button 
                 className={styles["reporte-btn-exportarPdf"]}
                 onClick={handleDescargarPdfServicio}
@@ -170,6 +173,7 @@ function ReporteVentasServicio() {
                 <IconoBarras />
                 {exportando ? 'Exportando...' : 'Exportar Pdf'}
             </button>
+            </div>
         </div>
         </div>
 

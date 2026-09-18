@@ -36,7 +36,7 @@ function ReporteCuentasPorCobrar() {
  const pasosTour: Step[] = [
   {
     target: '[data-tour="exportar-reporte"]',
-    content: "Desde aquí puedes exportar el reporte de cuentas por cobrar a Excel.",
+    content: "Desde aquí puedes exportar el reporte de cuentas por cobrar en excel o pdf.",
   },
   {
     target: '[data-tour="filtrar-reporte"]',
@@ -127,12 +127,13 @@ function ReporteCuentasPorCobrar() {
             <HelpCircle size={18} />
           </button>
 
+          <div className={styles["botones-exportar"]}
+          data-tour="exportar-reporte">
+
           <button 
                 className={styles["reporte-btn-exportar"]}
                 onClick={exportar}
-                disabled={exportando}
-                data-tour="exportar-reporte"
-            >
+                disabled={exportando}>
                 <IconoBarras />
                 {exportando ? 'Exportando...' : 'Exportar Excel'}
             </button>
@@ -140,12 +141,11 @@ function ReporteCuentasPorCobrar() {
             <button 
                 className={styles["reporte-btn-exportarPdf"]}
                 onClick={handleDescargarPdfClientesDeuda}
-                disabled={exportando}
-                data-tour="exportar-reporte"
-            >
+                disabled={exportando}>
                 <IconoBarras />
                 {exportando ? 'Exportando...' : 'Exportar Pdf'}
             </button>
+            </div>
             </div>
         </div>
 

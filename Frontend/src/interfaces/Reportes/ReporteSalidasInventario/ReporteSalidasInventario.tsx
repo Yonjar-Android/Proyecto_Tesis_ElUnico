@@ -34,7 +34,7 @@ function ReporteSalidasInventario() {
   const pasosTour: Step[] = [
   {
     target: '[data-tour="exportar-reporte"]',
-    content: "Desde aquí puedes exportar el reporte a Excel.",
+    content: "Desde aquí puedes exportar el reporte en excel o pdf.",
   },
   {
     target: '[data-tour="filtrar-reporte"]',
@@ -148,6 +148,9 @@ function ReporteSalidasInventario() {
             <HelpCircle size={18} />
           </button>
 
+          <div className={styles["botones-exportar"]}
+          data-tour="exportar-reporte">
+
           <button
             className={styles["reporte-btn-exportar"]}
             onClick={exportar}
@@ -167,6 +170,7 @@ function ReporteSalidasInventario() {
                 <IconoBarras />
                 {exportando ? 'Exportando...' : 'Exportar Pdf'}
             </button>
+            </div>
         </div>
         </div>
 

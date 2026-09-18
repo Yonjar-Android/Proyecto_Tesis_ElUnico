@@ -53,7 +53,7 @@ function ReporteStockBajo() {
  const pasosTour: Step[] = [
   {
     target: '[data-tour="exportar-reporte"]',
-    content: "Desde aquí puedes exportar el reporte de stock bajo a Excel.",
+    content: "Desde aquí puedes exportar el reporte de stock bajo en excel o pdf.",
   },
   {
     target: '[data-tour="filtrar-reporte"]',
@@ -166,11 +166,13 @@ function ReporteStockBajo() {
             <HelpCircle size={18} />
           </button>
 
+          <div className={styles["botones-exportar"]}
+          data-tour="exportar-reporte">
+
           <button 
                 className={styles["reporte-btn-exportar"]}
                 onClick={exportar}
                 disabled={exportando}
-                data-tour="exportar-reporte"
             >
                 <IconoBarras />
                 {exportando ? 'Exportando...' : 'Exportar Excel'}
@@ -180,11 +182,12 @@ function ReporteStockBajo() {
                 className={styles["reporte-btn-exportarPdf"]}
                 onClick={handleDescargarPdfProductosStock}
                 disabled={exportando}
-                data-tour="exportar-reporte"
             >
                 <IconoBarras />
                 {exportando ? 'Exportando...' : 'Exportar Pdf'}
             </button>
+            
+            </div>
             </div>
         </div>
 
