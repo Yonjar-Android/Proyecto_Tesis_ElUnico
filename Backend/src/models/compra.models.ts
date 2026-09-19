@@ -24,6 +24,7 @@ export interface ArticuloCompra {
 
 export interface DetalleCompraDTO {
     idCompra: number;
+    idProveedor: number;
     fecha: string;
     nFactura: string;
     total: number;

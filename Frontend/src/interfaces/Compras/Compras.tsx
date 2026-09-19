@@ -1,42 +1,30 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./Compras.css";
 import type { Proveedor } from "../../models/Proveedor";
-import type { ProductoListado } from "../../models/ProductoListado";
 import { crearCompra } from "../../services/compra.service";
-import ModalSeleccionarProducto from "../Facturacion/ModalSeleccionarProducto";
 import ModalSeleccionarProveedor from "./ModalSeleccionarProveedor";
-import { SquarePen, Trash2, HelpCircle } from "lucide-react";
-import { formatearMoneda } from "../FuncionAuxiliar"
+import ItemsCompraForm, { type ItemCompra } from "./ItemsCompraForm";
+import { History, HelpCircle } from "lucide-react";
+import { formatearMoneda } from "../FuncionAuxiliar";
 import Notificacion, { type TipoNotificacion } from "../../components/Notification/Notification";
 import { Joyride, type Step } from "react-joyride";
-
-interface ItemCompra {
-  producto: ProductoListado,
-  cantidad: number;
-  precio_compra: number;
-  precio_venta: number;
-}
 
 function formatearFechaInput(fecha: Date) {
   const dia = String(fecha.getDate()).padStart(2, "0");
   const mes = String(fecha.getMonth() + 1).padStart(2, "0");
   const anio = fecha.getFullYear();
-
   return `${anio}-${mes}-${dia}`;
 }
 
 function Compras() {
-  const [productoSeleccionado, setProductoSeleccionado] = useState<ProductoListado | null>(null);
-  const [cantidad, setCantidad] = useState("1");
-  const [precio, setPrecio] = useState("0.00");
-  const [precioVenta, setPrecioVenta] = useState("0.00");
+  const navigate = useNavigate();
+
   const [fecha, setFecha] = useState(formatearFechaInput(new Date()));
   const [NFactura, setNFactura] = useState("");
   const [proveedorSeleccionado, setProveedorSeleccionado] = useState<Proveedor | null>(null);
 
   const [items, setItems] = useState<ItemCompra[]>([]);
-  const [indiceEditando, setIndiceEditando] = useState<number | null>(null);
-  const [modalProductoAbierto, setModalProductoAbierto] = useState(false);
   const [modalProveedorAbierto, setModalProveedorAbierto] = useState(false);
 
   const [error, setError] = useState("");
@@ -44,412 +32,183 @@ function Compras() {
 
   const [tourActivo, setTourActivo] = useState(false);
 
- const pasosTour: Step[] = [
-  {
-    target: '[data-tour="compras-producto"]',
-    content: "Aquí se abre una ventana para seleccionar el producto que desea agregar a la venta.",
-  },
-  {
-    target: '[data-tour="compras-agregar"]',
-    content: "Acá se agrega el producto seleccionado a la factura.",
-  },
-  {
-    target: '[data-tour="compras-proveedor"]',
-    content: "Aquí se abre una ventana para seleccionar el proveedor al que desea realizar la compra.",
-  },
-  {
-    target: '[data-tour="compras-tabla"]',
-    content: "En esta tabla puede visualizar la información de la compra que desea registrar.",
-  },
-  {
-    target: '[data-tour="botones-compras"]',
-    content: "Con estos botones puedes eliminar o editar el producto de la factura.",
-  },
-  {
-    target: '[data-tour="compras-cancelar"]',
-    content: "Desde aquí cancela la compra en curso.",
-  },
-  {
-    target: '[data-tour="compras-registrar"]',
-    content: "Aquí puedes registrar la compra una vez ingresado todos los datos.",
-  },
-];
-
-  
-  const limpiarCamposProducto = () => {
-    setProductoSeleccionado(null);
-    setCantidad("1");
-    setPrecio("0.00");
-    setPrecioVenta("0.00");
-  };
-
-  const cancelarEdicion = () => {
-    setIndiceEditando(null);
-    limpiarCamposProducto();
-    setError("");
-  };
-
-  // Precarga el formulario con los datos de la fila y activa el modo edición.
-  const editarItem = (index: number) => {
-    const item = items[index];
-    setProductoSeleccionado(item.producto);
-    setCantidad(String(item.cantidad));
-    setPrecio(item.precio_compra.toFixed(2));
-    setIndiceEditando(index);
-    setError("");
-  };
-
-  const guardarProducto = () => {
-
-    if (!productoSeleccionado) {
-      setError("Selecciona un producto.");
-      return;
-    }
-
-    if (isNaN(Number(cantidad)) || Number(cantidad) <= 0) {
-      setError("Ingresa una cantidad válida.");
-      return;
-    }
-
-    if (isNaN(Number(precio)) || Number(precio) <= 0) {
-      setError("Ingresa un precio de compra válido.");
-      return;
-    }
-
-    if (isNaN(Number(precioVenta)) || Number(precioVenta) <= 0) {
-      setError("Ingresa un precio de venta válido.");
-      return;
-    }
-
-    if(Number(precioVenta) < Number(precio)){
-      setError("El precio de venta no puede ser menor que el precio de compra.");
-      return;
-    }
-
-    // Al chequear duplicados, ignora la propia fila que se está editando.
-    const yaExiste = items.some(
-      (item, i) => item.producto.id === productoSeleccionado.id && i !== indiceEditando
-    );
-
-    if (yaExiste) {
-      setError("Este producto ya fue agregado a la factura.");
-      return;
-    }
-
-    const itemGuardado: ItemCompra = {
-      producto: productoSeleccionado,
-      cantidad: Number(cantidad),
-      precio_compra: Number(precio),
-      precio_venta: Number(precioVenta)
-    }
-
-    if (indiceEditando !== null) {
-      setItems((prev) =>
-        prev.map((item, i) => (i === indiceEditando ? itemGuardado : item))
-      );
-    } else {
-      setItems((prev) => [...prev, itemGuardado]);
-    }
-
-    setError("");
-    setIndiceEditando(null);
-    limpiarCamposProducto();
-  };
-
-  const eliminarItem = (index: number) => {
-    setItems((prev) => prev.filter((_, i) => i !== index));
-  };
+  const pasosTour: Step[] = [
+    {
+      target: '[data-tour="historial-proveedor"]',
+      content: "Con este botón puedes navegar a la pantalla del historial de compras.",
+    },
+    {
+      target: '[data-tour="compras-proveedor"]',
+      content: "Aquí se abre una ventana para seleccionar el proveedor al que desea realizar la compra.",
+    },
+    {
+      target: '[data-tour="compras-producto"]',
+      content: "Aquí se abre una ventana para seleccionar el producto que desea agregar a la venta.",
+    },
+    {
+      target: '[data-tour="compras-agregar"]',
+      content: "Acá se agrega el producto seleccionado a la factura.",
+    },
+    {
+      target: '[data-tour="compras-tabla"]',
+      content: "En esta tabla puede visualizar la información de la compra que desea registrar.",
+    },
+    {
+      target: '[data-tour="botones-compras"]',
+      content: "Con estos botones puedes eliminar o editar el producto de la factura.",
+    },
+    {
+      target: '[data-tour="compras-cancelar"]',
+      content: "Desde aquí cancela la compra en curso.",
+    },
+    {
+      target: '[data-tour="compras-registrar"]',
+      content: "Aquí puedes registrar la compra una vez ingresado todos los datos.",
+    },
+  ];
 
   const total = items.reduce((suma, item) => suma + item.cantidad * item.precio_compra, 0);
 
   const cancelar = () => {
     setItems([]);
-    limpiarCamposProducto();
     setError("");
   };
- 
+
   const confirmarCompra = async () => {
-    
     if (items.length === 0) {
       setError("Agrega al menos un producto para realizar la compra.");
       return;
     }
 
-    if(!proveedorSeleccionado) {
+    if (!proveedorSeleccionado) {
       setError("Selecciona un proveedor.");
       return;
     }
 
-    
-
     try {
-
-      const total = items.reduce((suma, item) => suma + item.cantidad * item.precio_compra, 0);
+      const totalActual = items.reduce((suma, item) => suma + item.cantidad * item.precio_compra, 0);
 
       await crearCompra(
         Number(proveedorSeleccionado?.id),
         NFactura,
-        total,
+        totalActual,
         items.map((item) => ({
           Id_producto: item.producto.id,
           Cantidad: item.cantidad,
           Precio: item.precio_compra,
           Subtotal: item.cantidad * item.precio_compra,
-          Precio_venta: item.precio_venta
-        })),
+          Precio_venta: item.precio_venta,
+        }))
       );
- 
+
       setItems([]);
       setError("");
-      setProductoSeleccionado(null);
       setProveedorSeleccionado(null);
       setNFactura("");
 
       setNotif({ mensaje: "Compra realizada correctamente", tipo: "exito" });
-
-      return true;
     } catch (error: any) {
       setNotif({ mensaje: "Ocurrió un error al realizar la compra", tipo: "error" });
       setError(error.response.data.mensaje);
-      return false;
     }
   };
 
   return (
     <div className="factura-page">
       {notif && (
-              <Notificacion
-                mensaje={notif.mensaje}
-                tipo={notif.tipo}
-                onCerrar={() => setNotif(null)}
-              />
-            )}
-        <div className="factura-contenido">
-      <div className="factura-header">
-        <div className="header-help">
+        <Notificacion mensaje={notif.mensaje} tipo={notif.tipo} onCerrar={() => setNotif(null)} />
+      )}
+      <div className="factura-contenido">
+        <div className="factura-header">
+          <div className="header-help">
             <h1>Gestión de Compras</h1>
-            <button className="categoria-add-btn" onClick={() => setTourActivo(true)}>
-            <HelpCircle size={18} />
-          </button>
-          </div>
-      </div>
-
-      <div className="factura-card">
-        <div className="compra-fila-formulario">
-          <div className="compra-campo compra-campo-producto" data-tour="compras-producto">
-            <label>
-              Producto <span style={{ color: "#e5484d" }}>*</span>
-            </label>
             <button
               type="button"
-              className="compra-selector-btn"
-              onClick={() => setModalProductoAbierto(true)}
+              className="categoria-add-btn"
+              onClick={() => navigate("/compras/historial")}
+              title="Ver historial de compras"
+              data-tour="historial-proveedor"
             >
-              <span
-                className={
-                  productoSeleccionado ? "" : "compra-selector-placeholder"
-                }
-              >
-                {productoSeleccionado
-                  ? productoSeleccionado.Nombre
-                  : "Seleccione un producto"}
-              </span>
+              <History size={18} />
+              Historial
+            </button>
+            <button className="categoria-add-btn" onClick={() => setTourActivo(true)}>
+              <HelpCircle size={18} />
             </button>
           </div>
+        </div>
 
-          <div className="compra-campo compra-campo-cantidad">
-            <label>
-              Cantidad <span style={{ color: "#e5484d" }}>*</span>
-            </label>
-            <input
-              type="number"
-              min="1"
-              value={cantidad}
-              onChange={(e) => setCantidad(e.target.value)}
-            />
-          </div>
-
-          <div className="compra-campo compra-campo-precio">
-            <label>
-              Precio de Compra <span style={{ color: "#e5484d" }}>*</span>
-            </label>
-            <div className="compra-precio-input">
-              <span>C$</span>
-              <input
-                type="number"
-                step="1"
-                min="0"
-                value={precio}
-                onChange={(e) => setPrecio(e.target.value)}
-              />
-            </div>
-          </div>
-          <button className="factura-btn-agregar" onClick={guardarProducto} data-tour="compras-agregar">
-              {indiceEditando !== null ? "Actualizar" : "Agregar"}
-            </button>
-
-            {indiceEditando !== null && (
+        <div className="factura-card">
+          <div className="compra-fila-formulario">
+            <div className="compra-campo compra-campo-producto" data-tour="compras-proveedor">
+              <label>
+                Proveedor <span style={{ color: "#e5484d" }}>*</span>
+              </label>
               <button
                 type="button"
-                className="factura-btn-cancelar-edicion"
-                onClick={cancelarEdicion}
+                className="compra-selector-btn"
+                onClick={() => setModalProveedorAbierto(true)}
               >
-                Cancelar edición
+                <span className={proveedorSeleccionado ? "" : "compra-selector-placeholder"}>
+                  {proveedorSeleccionado ? proveedorSeleccionado.Nombre_Empresa : "Seleccione un proveedor"}
+                </span>
               </button>
-            )}
-        </div>
+            </div>
 
-        <div className="compra-fila-formulario">
-          <div className="compra-campo compra-campo-producto" data-tour="compras-proveedor">
-            <label>
-              Proveedor <span style={{ color: "#e5484d" }}>*</span>
-            </label>
-            <button
-              type="button"
-              className="compra-selector-btn"
-              onClick={() => setModalProveedorAbierto(true)}
-            >
-              <span
-                className={
-                  proveedorSeleccionado ? "" : "compra-selector-placeholder"
-                }
-              >
-                {proveedorSeleccionado
-                  ? proveedorSeleccionado.Nombre_Empresa
-                  : "Seleccione un proveedor"}
-              </span>
-            </button>
-          </div>
-
-          <div className="compra-campo compra-campo-fecha">
-            <label>
-              Fecha <span style={{ color: "#e5484d" }}>*</span>
-            </label>
-            <input
-              type="date"
-              value={fecha}
-               max={formatearFechaInput(new Date())}
-              onChange={(e) => setFecha(e.target.value)}
-            />
-          </div>
-
-          <div className="compra-campo compra-campo-factura">
-            <label>
-              N° Factura <span style={{ color: "#e5484d" }}>*</span>
-            </label>
-            <input
-              type="text"
-              placeholder="Ej: FAC-102"
-              value={NFactura}
-              onChange={(e) => setNFactura(e.target.value)}
-            />
-          </div>
-
-          <div className="compra-campo compra-campo-precio-venta">
-            <label>
-              Precio de Venta <span style={{ color: "#e5484d" }}>*</span>
-            </label>
-            <div className="compra-precio-input">
-              <span>C$</span>
+            <div className="compra-campo compra-campo-fecha">
+              <label>
+                Fecha <span style={{ color: "#e5484d" }}>*</span>
+              </label>
               <input
-                type="number"
-                step="1"
-                min="0"
-                value={precioVenta}
-                onChange={(e) => setPrecioVenta(e.target.value)}
+                type="date"
+                value={fecha}
+                max={formatearFechaInput(new Date())}
+                onChange={(e) => setFecha(e.target.value)}
+              />
+            </div>
+
+            <div className="compra-campo compra-campo-factura">
+              <label>
+                N° Factura <span style={{ color: "#e5484d" }}>*</span>
+              </label>
+              <input
+                type="text"
+                placeholder="Ej: FAC-102"
+                value={NFactura}
+                onChange={(e) => setNFactura(e.target.value)}
               />
             </div>
           </div>
         </div>
-      </div>
 
+        <div className="factura-card">
+          <ItemsCompraForm items={items} setItems={setItems} onError={setError} />
+        </div>
 
-      <div className="factura-card factura-card-tabla" data-tour="compras-tabla">
-        <table className="factura-tabla">
-          <thead>
-            <tr>
-              <th>Producto</th>
-              <th>Cantidad</th>
-              <th>Precio</th>
-              <th>Subtotal</th>
-              <th className="factura-th-accion">Acción</th>
-            </tr>
-          </thead>
-          <tbody>
-            {items.map((item, index) => (
-              <tr key={index}
-              className={indiceEditando === index ? "factura-tr-editando" : ""}
-              >
-                <td>
-                  {item.producto.Nombre}
-                  {item.producto.Nombre_marca && (
-                    <span className="factura-nombre-marca">{item.producto.Nombre_marca}</span>
-                  )}
-                </td>
-                <td>{item.cantidad}</td>
-                <td>C${formatearMoneda(item.precio_compra)}</td>
-                <td className="factura-td-subtotal">
-                  C${(formatearMoneda(item.cantidad * item.precio_compra))}
-                </td>
-                <td className="factura-td-accion" data-tour="botones-compras">
-                  <button
-                      className="factura-btn-editar"
-                      onClick={() => editarItem(index)}
-                      aria-label="Editar producto"
-                      title="Editar"
-                    >
-                      <SquarePen size={24} />
-                    </button>
+        {error && <span className="error-text">{error}</span>}
 
-                    <button
-                      className="factura-btn-eliminar"
-                      onClick={() => eliminarItem(index)}
-                      aria-label="Eliminar producto"
-                      title="Eliminar"
-                    >
-                      <Trash2 size={24} />
-                    </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-
-        {items.length === 0 && (
-          <div className="factura-vacio">Aún no has agregado productos a la venta.</div>
-        )}
-      </div>
-
-      {error && <span className="error-text">{error}</span>}
-
-      <div className="factura-footer">
-        <button className="factura-btn-cancelar" onClick={cancelar} data-tour="compras-cancelar">
-          Cancelar
-        </button>
-
-        <div className="factura-total-venta">
-          <div className="factura-total-texto">
-            <span className="factura-total-label">Total</span>
-            <span className="factura-total-monto">C${formatearMoneda(total)}</span>
-          </div>
-
-          <button className="factura-btn-vender" onClick={confirmarCompra} disabled={items.length == 0} data-tour="compras-registrar">
-            Realizar Compra
+        <div className="factura-footer">
+          <button className="factura-btn-cancelar" onClick={cancelar} data-tour="compras-cancelar">
+            Cancelar
           </button>
+
+          <div className="factura-total-venta">
+            <div className="factura-total-texto">
+              <span className="factura-total-label">Total</span>
+              <span className="factura-total-monto">C${formatearMoneda(total)}</span>
+            </div>
+
+            <button
+              className="factura-btn-vender"
+              onClick={confirmarCompra}
+              disabled={items.length === 0}
+              data-tour="compras-registrar"
+            >
+              Realizar Compra
+            </button>
+          </div>
         </div>
       </div>
-      </div>
-
-      <ModalSeleccionarProducto
-        abierto={modalProductoAbierto}
-        onClose={() => setModalProductoAbierto(false)}
-        onSeleccionar={(producto: any) => {
-          setProductoSeleccionado(producto);
-          setPrecioVenta(producto.Precio_venta);
-          setModalProductoAbierto(false);
-          
-        }}
-      />
 
       <ModalSeleccionarProveedor
         abierto={modalProveedorAbierto}
@@ -460,23 +219,23 @@ function Compras() {
         }}
       />
 
-                  <Joyride
-  steps={pasosTour}
-  run={tourActivo}
-  continuous
-  locale={{
-    back: "Atrás",
-    close: "Cerrar",
-    last: "Finalizar",
-    next: "Siguiente",
-    skip: "Omitir",
-  }}
-  onEvent={(data) => {
-    if (data.type === "tour:end") {
-      setTourActivo(false);
-    }
-  }}
-/>
+      <Joyride
+        steps={pasosTour}
+        run={tourActivo}
+        continuous
+        locale={{
+          back: "Atrás",
+          close: "Cerrar",
+          last: "Finalizar",
+          next: "Siguiente",
+          skip: "Omitir",
+        }}
+        onEvent={(data) => {
+          if (data.type === "tour:end") {
+            setTourActivo(false);
+          }
+        }}
+      />
     </div>
   );
 }

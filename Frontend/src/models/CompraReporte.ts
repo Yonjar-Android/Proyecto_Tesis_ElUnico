@@ -16,14 +16,18 @@ export interface RespuestaReporteCompras extends PaginatedResponse<CompraReporte
 }
 
 export interface ArticuloCompra {
+    idDetalle: number;
+    idProducto: number;
     nombre: string;
     cantidad: number;
     precio: number;
     subtotal: number;
+    precioVentaActual: number;
 }
 
 export interface DetalleCompraDTO {
     idCompra: number;
+    idProveedor: number;
     fecha: string;
     nFactura: string;
     total: number;

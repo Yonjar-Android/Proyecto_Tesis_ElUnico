@@ -39,3 +39,37 @@ export const obtenerDetalleCompra = async (idCompra: number): Promise<DetalleCom
     });
     return response.data;
 };
+
+export const actualizarCompra = async (
+    idCompra: number,
+    Id_proveedor: number,
+    NFactura: string,
+    Total: number,
+    Detalles: DetalleCompra[]
+) => {
+
+    const response = await axiosInstance.put(`${API}/${idCompra}`, {
+        Id_proveedor,
+        NFactura,
+        Total,
+        Detalles
+    }, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
+
+    return response.data;
+};
+
+export const listarCompras = async (page: number, limit: number) => {
+
+    const response = await axiosInstance.get(API, {
+        params: { page, limit },
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
+
+    return response.data;
+};

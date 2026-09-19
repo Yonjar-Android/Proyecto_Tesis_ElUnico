@@ -60,7 +60,7 @@
 }
 
 .compra-campo label {
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   text-align: left;
   font-weight: 700;
   letter-spacing: 0.04em;
@@ -98,7 +98,7 @@
 }
 
 .compra-campo-precio {
-  flex: 1;
+  flex: 2;
 }
 
 /* Columnas de la fila 2: Proveedor | Fecha | N° Factura | Precio de Venta */
@@ -111,7 +111,7 @@
 }
 
 .compra-campo-precio-venta {
-  flex: 1;
+  flex: 2;
 }
 
 .compra-selector-btn {

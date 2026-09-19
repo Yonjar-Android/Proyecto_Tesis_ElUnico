@@ -11,6 +11,8 @@ import EditarProducto from "./interfaces/Productos/EditarProducto";
 import CrearProducto from "./interfaces/Productos/CrearProducto";
 import Facturacion from "./interfaces/Facturacion/Facturacion";
 import Compras from "./interfaces/Compras/Compras";
+import HistorialCompras from "./interfaces/Compras/HistorialCompras";
+import EditarCompra from "./interfaces/Compras/EditarCompra";
 import LoginElUnico from "./interfaces/IniciodeSesion/LoginElUnico";
 import ReporteCuentasPorCobrar from "./interfaces/Reportes/ReporteCuentasPorCobrar/ReporteCuentasPorCobrar";
 import ReporteStockProximoAgotarse from "./interfaces/Reportes/ReporteStockPromiAgotarse/ReporteStockBajo";
@@ -51,6 +53,8 @@ function App() {
             <Route path="/salidasInventario" element={<SalidasInventario />} />
             <Route path="/devoluciones" element={<Devoluciones />} />
             <Route path="/compras" element={<Compras />} />
+            <Route path="/compras/historial" element={<HistorialCompras />} />
+            <Route path="/compras/:id/editar" element={<EditarCompra />} />
             <Route path="/inventario/crear" element={<CrearProducto />} />
             <Route path="/inventario/editar/:id" element={<EditarProducto />} />
             <Route path="/mantenimiento" element={<Mantenimiento />} />
