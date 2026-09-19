@@ -153,11 +153,22 @@ export const registrarAbono = async (
             [nuevoEstadoFactura, idCreditoFactura]
         );
 
+        const [creditoFacturaRows]: any = await connection.query(
+            `SELECT id_venta FROM credito_factura WHERE id = ?`,
+            [idCreditoFactura]
+        );
+
+        if (creditoFacturaRows.length === 0) {
+            throw new Error("No se encontró la venta asociada a este crédito.");
+        }
+
+        const idVenta = creditoFacturaRows[0].id_venta;
+
         const nuevoEstadoFactura2 = pendientesRestantes[0].total === 0 ? "Pagada" : "Pendiente";
 
         await connection.query(
             `UPDATE ventas SET Estado = ? WHERE id = ?`,
-            [nuevoEstadoFactura2, idCreditoFactura]
+            [nuevoEstadoFactura2, idVenta]
         );
 
         await connection.commit();

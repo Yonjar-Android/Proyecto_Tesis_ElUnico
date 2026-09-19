@@ -122,7 +122,7 @@ function Facturacion() {
   const [tipoPago, setTipoPago] = useState("Contado");
   const [numReferencia, setNumReferencia] = useState<string | null>("");
   const [clienteSeleccionado, setClienteSeleccionado] = useState<Cliente>({
-    id: 10,
+    id: 21,
     Nombre: "Cliente",
     Apellido: "General",
     Telefono: "",
@@ -182,7 +182,7 @@ function Facturacion() {
     setTipoPago("Contado");
     setNumReferencia("");
     setClienteSeleccionado({
-    id: 10,
+    id: 21,
     Nombre: "Cliente",
     Apellido: "General",
     Telefono: "",
