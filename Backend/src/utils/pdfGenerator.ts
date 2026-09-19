@@ -209,8 +209,8 @@ export const generateVentasProductoPdfReport = async (reportData: any): Promise<
             // --- Tabla centrada ---
             const columnas: Columna[] = [
                 { header: 'Producto', key: 'Nombre_producto', width: 250 },
-                { header: 'Cantidad', key: 'CantidadTotal', width: 100, align: 'right', format: formatoEntero },
-                { header: 'Descuento', key: 'TotalDescuento', width: 130, align: 'right', format: formatoMoneda },
+                { header: 'Cantidad', key: 'CantidadTotal', width: 100, align: 'left', format: formatoEntero },
+                { header: 'Descuento', key: 'TotalDescuento', width: 130, align: 'left', format: formatoMoneda },
                 { header: 'Total Facturado', key: 'TotalFacturado', width: 130, align: 'right', format: formatoMoneda },
             ];
 
@@ -281,8 +281,8 @@ export const generateVentasServicioPdfReport = async (reportData: any): Promise<
             // --- Tabla centrada ---
             const columnas: Columna[] = [
                 { header: 'Servicio', key: 'Nombre_servicio', width: 250 },
-                { header: 'Cantidad', key: 'CantidadTotal', width: 100, align: 'right', format: formatoEntero },
-                { header: 'Descuento', key: 'TotalDescuento', width: 130, align: 'right', format: formatoMoneda },
+                { header: 'Cantidad', key: 'CantidadTotal', width: 100, align: 'left', format: formatoEntero },
+                { header: 'Descuento', key: 'TotalDescuento', width: 130, align: 'left', format: formatoMoneda },
                 { header: 'Total Facturado', key: 'TotalFacturado', width: 130, align: 'right', format: formatoMoneda },
             ];
 
@@ -354,9 +354,9 @@ export const generateInventarioPdfReport = async (reportData: any): Promise<Buff
             // --- Tabla centrada ---
             const columnas: Columna[] = [
                 { header: 'Producto', key: 'Nombre', width: 220 },
-                { header: 'Marca', key: 'Nombre_marca', width: 120 },
-                { header: 'Categoría', key: 'Nombre_categoria', width: 120 },
-                { header: 'Precio Venta', key: 'Precio_venta', width: 100, align: 'right', format: formatoMoneda },
+                { header: 'Marca', key: 'Nombre_marca', width: 120, align: 'left' },
+                { header: 'Categoría', key: 'Nombre_categoria', width: 120, align: 'left' },
+                { header: 'Precio Venta', key: 'Precio_venta', width: 100, align: 'left', format: formatoMoneda },
                 { header: 'Stock', key: 'Stock', width: 80, align: 'right', format: formatoEntero },
             ];
 
@@ -501,9 +501,9 @@ export const generateDevolucionesPdfReport = async (reportData: any): Promise<Bu
             // --- Tabla centrada ---
             const columnas: Columna[] = [
                 { header: 'Fecha', key: 'Fecha', width: 90, format: formatoFecha },
-                { header: 'N° Factura', key: 'NFactura', width: 90, align: 'right', format: formatoEntero },
-                { header: 'Cliente', key: 'Cliente', width: 220 },
-                { header: 'Cant. Productos', key: 'CantidadProductos', width: 110, align: 'right', format: formatoEntero },
+                { header: 'N° Factura', key: 'NFactura', width: 90, align: 'left', format: formatoEntero },
+                { header: 'Cliente', key: 'Cliente', width: 220, align: 'left' },
+                { header: 'Cant. Productos', key: 'CantidadProductos', width: 110, align: 'left', format: formatoEntero },
                 { header: 'Total Devuelto', key: 'TotalDevuelto', width: 130, align: 'right', format: formatoMoneda },
             ];
 
@@ -573,13 +573,13 @@ export const generateClientesDeudaPdfReport = async (reportData: any): Promise<B
 
             // --- Tabla centrada ---
             const columnas: Columna[] = [
-                { header: 'N° Factura', key: 'IdVenta', width: 80, align: 'right', format: formatoEntero },
+                { header: 'N° Factura', key: 'IdVenta', width: 80, align: 'left', format: formatoEntero },
                 { header: 'N° Cliente', key: 'NCliente', width: 90 },
                 { header: 'Nombre', key: 'Nombre', width: 140 },
                 { header: 'Apellido', key: 'Apellido', width: 140 },
                 { header: 'Teléfono', key: 'Telefono', width: 90 },
-                { header: 'Crédito Pendiente', key: 'Saldo_Deuda', width: 110, align: 'right', format: formatoMoneda },
-                { header: 'Próx. Fecha Pago', key: 'ProximaFechaPago', width: 100, format: formatoFecha },
+                { header: 'Crédito Pendiente', key: 'Saldo_Deuda', width: 110, align: 'left', format: formatoMoneda },
+                { header: 'Próx. Fecha Pago', key: 'ProximaFechaPago', width: 100, align: 'right', format: formatoFecha },
             ];
 
             const anchoTabla = columnas.reduce((s, c) => s + c.width, 0);
@@ -669,11 +669,11 @@ export const generateProductosStockPdfReport = async (
             // --- Tabla centrada ---
             const columnas: Columna[] = [
                 { header: 'Producto', key: 'Nombre', width: 210 },
-                { header: 'Código', key: 'id', width: 70, align: 'right', format: formatoEntero },
+                { header: 'Código', key: 'id', width: 70, align: 'left', format: formatoEntero },
                 { header: 'Categoría', key: 'Nombre_categoria', width: 130 },
-                { header: 'Precio', key: 'Precio_venta', width: 100, align: 'right', format: formatoMoneda },
-                { header: 'Stock Mín.', key: 'Stock_min', width: 80, align: 'right', format: formatoEntero },
-                { header: 'Stock Actual', key: 'Stock', width: 90, align: 'right', format: formatoEntero },
+                { header: 'Precio', key: 'Precio_venta', width: 100, align: 'left', format: formatoMoneda },
+                { header: 'Stock Mín.', key: 'Stock_min', width: 80, align: 'left', format: formatoEntero },
+                { header: 'Stock Actual', key: 'Stock', width: 90, align: 'center', format: formatoEntero },
             ];
 
             const anchoTabla = columnas.reduce((s, c) => s + c.width, 0);
