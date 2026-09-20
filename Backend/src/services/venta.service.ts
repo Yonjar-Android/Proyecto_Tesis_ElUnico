@@ -325,6 +325,15 @@ export const buscarFacturaParaDevolucion = async (
 
     const venta = ventaRows[0];
 
+    const [creditoRows]: any = await pool.query(
+        `SELECT id FROM credito_factura WHERE id_venta = ? LIMIT 1`,
+        [idVenta]
+    );
+ 
+    if (creditoRows.length > 0) {
+        throw new Error("No se pueden registrar devoluciones sobre facturas al crédito.");
+    }
+
     const [detalleRows]: any = await pool.query(
         `
         SELECT
