@@ -102,7 +102,7 @@ export const generateVentasPorPeriodoPdfReport = async (reportData: any): Promis
 
             // --- Estadísticas centradas ---
             const stats = [
-                { label: 'Total Registros', value: reportData.TotalRegistros, format: formatoEntero },
+                { label: 'Registros Totales', value: reportData.TotalRegistros, format: formatoEntero },
                 { label: 'Ventas Contado', value: reportData.VentasContado, format: formatoMoneda },
                 { label: 'Ventas Transferencia', value: reportData.VentasTransferencia, format: formatoMoneda },
                 { label: 'Total Abonado', value: reportData.TotalAbonado, format: formatoMoneda },
@@ -316,7 +316,7 @@ export const generateInventarioPdfReport = async (reportData: any): Promise<Buff
             doc.on('end', () => resolve(Buffer.concat(chunks)));
             doc.on('error', reject);
 
-            const nombreReporte = 'Reporte de Inventario';
+            const nombreReporte = 'Reporte de Inventario General';
             doc.on('pageAdded', () => agregarEncabezado(doc, nombreReporte));
             agregarEncabezado(doc, nombreReporte);
 
@@ -399,7 +399,7 @@ export const generateSalidasInventarioPdfReport = async (reportData: any): Promi
 
             // --- Estadísticas centradas ---
             const stats = [
-                { label: 'Total Registros', value: reportData.TotalRegistros, format: formatoEntero },
+                { label: 'Registros Totales', value: reportData.TotalRegistros, format: formatoEntero },
                 { label: 'Unidades Salidas', value: reportData.TotalUnidadesSalidas, format: formatoEntero },
             ];
 

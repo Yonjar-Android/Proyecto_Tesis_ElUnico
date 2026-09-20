@@ -151,6 +151,9 @@ function ReporteVentasServicio() {
             <HelpCircle size={18} />
           </button>
 
+          <div className={styles["botones-exportar"]}
+          data-tour="exportar-reporte">
+
           <button
             className={styles["reporte-btn-exportar"]}
             onClick={exportar}
@@ -161,8 +164,7 @@ function ReporteVentasServicio() {
             {exportando ? "Exportando..." : "Exportar Excel"}
           </button>
 
-          <div className={styles["botones-exportar"]}
-          data-tour="exportar-reporte">
+          
 
           <button 
                 className={styles["reporte-btn-exportarPdf"]}
@@ -180,7 +182,7 @@ function ReporteVentasServicio() {
         <div className={styles["reporte-stats-row"]}>
           <div className={styles["reporte-stat-card"]}>
             <div className={styles["reporte-stat-header"]}>
-              <span className={styles["reporte-stat-label"]}>Registros totales</span>
+              <span className={styles["reporte-stat-label"]}>Servicios Distintos</span>
               <span className={styles["reporte-stat-icono"]}>
                 <IconoCuboOutline />
               </span>

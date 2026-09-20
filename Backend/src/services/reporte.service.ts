@@ -172,7 +172,8 @@ export const obtenerReporteFacturasConDeuda = async (
             AND prim.numero_cuota = cu.numero_cuota
     `;
 
-    // Estadísticas generales (sobre TODAS las facturas con saldo pendiente, sin aplicar la búsqueda)
+    // Estadísticas generales: ahora hace JOIN con clientes y aplica el mismo
+    // whereBusqueda que el resto del reporte, para que varíen según el filtro.
     const [estadisticas]: any = await pool.query(
         `
         SELECT
@@ -183,13 +184,17 @@ export const obtenerReporteFacturasConDeuda = async (
                 cf.id,
                 cf.total_deuda - COALESCE(ab.total_abonado, 0) AS SaldoFactura
             FROM ventas v
+            INNER JOIN clientes cli ON cli.id = v.Id_cliente
             INNER JOIN credito_factura cf ON cf.id_venta = v.id
                 AND cf.estado IN ('pendiente', 'pagada_parcial')
             LEFT JOIN (${abonosSubquery}) ab
                 ON ab.id_credito_factura = cf.id
+            WHERE 1 = 1
+            ${whereBusqueda}
         ) sub
         WHERE SaldoFactura > 0
-        `
+        `,
+        params
     );
 
     // Total de registros del reporte (aplicando búsqueda)

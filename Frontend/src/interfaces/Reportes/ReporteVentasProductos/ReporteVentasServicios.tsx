@@ -258,7 +258,7 @@ function ReporteVentasProducto() {
               {detalles.map((d) => (
                 <tr key={d.Id_producto}>
                   <td className={styles["reporte-td-nombre"]}>{d.Nombre_producto}</td>
-                  <td className={styles["reporte-td-centro"]}>{d.CantidadTotal}</td>
+                  <td className={styles["reporte-td-centro"]}>{Number(d.CantidadTotal) % 1 === 0 ? Number(d.CantidadTotal) : Number(d.CantidadTotal)}</td>   
                   <td className={styles["reporte-th-derecha"]}>C$ {formatearMoneda(d.TotalDescuento)}</td>
                   <td className={styles["reporte-td-derecha"]}>C$ {formatearMoneda(d.TotalFacturado)}</td>
                 </tr>

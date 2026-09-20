@@ -188,7 +188,7 @@ const handleDescargarPdfCompras = async () => {
         <div className={styles["reporte-stats-row"]}>
           <div className={styles["reporte-stat-card"]}>
             <div className={styles["reporte-stat-header"]}>
-              <span className={styles["reporte-stat-label"]}>Registros totales</span>
+              <span className={styles["reporte-stat-label"]}>Proveedores distintos</span>
               <span className={styles["reporte-stat-icono"]}>
                 <IconoCuboOutline />
               </span>

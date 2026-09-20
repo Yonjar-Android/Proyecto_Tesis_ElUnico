@@ -192,7 +192,8 @@ function ReporteSalidasInventario() {
                 <IconoCuboOutline />
               </span>
             </div>
-            <span className={styles["reporte-stat-valor"]}>{totalUnidadesSalidas}</span>
+            <span className={styles["reporte-stat-valor"]}>{Number(totalUnidadesSalidas) % 1 === 0 ? Number(totalUnidadesSalidas) : Number(totalUnidadesSalidas)}</span>
+            
           </div>
         </div>
 
@@ -263,7 +264,7 @@ function ReporteSalidasInventario() {
                   <td className={styles["reporte-td-centro"]}>
                     <span className={styles["reporte-badge-motivo"]}>{salida.Motivo}</span>
                   </td>
-                  <td className={styles["reporte-td-derecha"]}>{salida.Cantidad}</td>
+                  <td className={styles["reporte-td-derecha"]}>{Number(salida.Cantidad) % 1 === 0 ? Number(salida.Cantidad) : Number(salida.Cantidad)}</td>
                 </tr>
               ))}
             </tbody>

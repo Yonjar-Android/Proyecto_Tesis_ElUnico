@@ -193,7 +193,8 @@ function ReporteDevoluciones() {
                 <IconoCuboOutline />
               </span>
             </div>
-            <span className={styles["reporte-stat-valor"]}>{productosDevueltos}</span>
+            <span className={styles["reporte-stat-valor"]}>{Number(productosDevueltos) % 1 === 0 ? Number(productosDevueltos) : Number(productosDevueltos)}</span>
+            
           </div>
 
           <div className={`${styles["reporte-stat-card"]} ${styles["reporte-stat-card--oscura"]}`}>
@@ -273,7 +274,7 @@ function ReporteDevoluciones() {
                   <td>{formatearFecha(d.Fecha)}</td>
                   <td className={styles["reporte-td-centro"]}>{d.NFactura}</td>
                   <td className={styles["reporte-td-nombre"]}>{d.Cliente}</td>
-                  <td className={styles["reporte-td-centro"]}>{d.CantidadProductos}</td>
+                  <td className={styles["reporte-td-centro"]}>{Number(d.CantidadProductos) % 1 === 0 ? Number(d.CantidadProductos) : Number(d.CantidadProductos)}</td>
                   <td className={styles["reporte-td-derecha"]}>C$ {formatearMoneda(d.TotalDevuelto)}</td>
                 </tr>
               ))}
