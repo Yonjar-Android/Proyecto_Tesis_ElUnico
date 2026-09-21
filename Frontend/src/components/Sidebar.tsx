@@ -229,6 +229,12 @@ export default function Sidebar() {
                 <NavLink to="/reportes/devoluciones" className="sidebar-sublink">
                   Devoluciones
                 </NavLink>
+                <NavLink to="/reportes/arqueo-caja-periodo" className="sidebar-sublink">
+                  Arqueo de Caja por Período
+                </NavLink>
+                <NavLink to="/reportes/arqueo-caja-cajero" className="sidebar-sublink">
+                  Arqueo de Caja por Cajero
+                </NavLink>
               </div>
             )}
           </>

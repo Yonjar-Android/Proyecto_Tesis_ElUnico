@@ -7,7 +7,9 @@ import {
     obtenerReporteDevoluciones,
     obtenerReporteFacturasConDeuda,
     obtenerReporteProductosStock,
-    obtenerReporteCompras
+    obtenerReporteCompras,
+    obtenerReporteArqueoPeriodo,
+    obtenerReporteArqueoCajero
  } from "./reporte.service.js";
 import { 
     generateVentasPorPeriodoPdfReport,
@@ -18,7 +20,9 @@ import {
     generateDevolucionesPdfReport,
     generateClientesDeudaPdfReport,
     generateProductosStockPdfReport,
-    generateComprasPorPeriodoPdfReport
+    generateComprasPorPeriodoPdfReport,
+    generateArqueoPeriodoPdfReport,
+    generateArqueoCajeroPdfReport
  } from "../utils/pdfGenerator.js";
 
 export const generateReporteVentasPorPeriodoPdf = async (
@@ -123,4 +127,41 @@ export const generateReporteComprasPorPeriodoPdf = async (
         1000000
     );
     return await generateComprasPorPeriodoPdfReport(reportData);
+};
+
+export const generateReporteArqueoPeriodoPdf = async (
+    search: string = "",
+    fechaInicio: string = "",
+    fechaFin: string = "",
+    estado: string = ""
+): Promise<Buffer> => {
+    const reportData = await obtenerReporteArqueoPeriodo(
+        search,
+        fechaInicio,
+        fechaFin,
+        estado,
+        1,
+        1000000
+    );
+    return await generateArqueoPeriodoPdfReport(reportData);
+};
+
+export const generateReporteArqueoCajeroPdf = async (
+    search: string = "",
+    fechaInicio: string = "",
+    fechaFin: string = "",
+    idUsuario: number | null = null,
+    estado: string = "",
+    nombreCajero?: string
+): Promise<Buffer> => {
+    const reportData = await obtenerReporteArqueoCajero(
+        search,
+        fechaInicio,
+        fechaFin,
+        idUsuario,
+        estado,
+        1,
+        1000000
+    );
+    return await generateArqueoCajeroPdfReport(reportData, nombreCajero);
 };

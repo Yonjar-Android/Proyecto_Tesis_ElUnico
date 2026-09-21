@@ -8,7 +8,10 @@ import {
     obtenerReporteVentasServicioPorPeriodo,
     obtenerReporteVentasProductoPorPeriodo,
     obtenerReporteInventarioGeneral,
-    obtenerReporteDevolucionesPorPeriodo
+    obtenerReporteDevolucionesPorPeriodo,
+    obtenerReporteArqueoPeriodo,
+    obtenerReporteArqueoCajero,
+    obtenerDetalleArqueo
 } from "../controllers/reporte.controller.js";
 
 const router = Router();
@@ -22,6 +25,8 @@ router.get("/obtenerReporteSalidasInventario", obtenerReporteSalidasInventarioPo
 router.get("/obtenerReporteVentasProductos", obtenerReporteVentasProductoPorPeriodo);
 router.get("/obtenerReporteInventario", obtenerReporteInventarioGeneral);
 router.get("/obtenerReporteDevoluciones", obtenerReporteDevolucionesPorPeriodo);
-
+router.get("/obtenerReporteArqueoPeriodo", obtenerReporteArqueoPeriodo);
+router.get("/obtenerReporteArqueoCajero", obtenerReporteArqueoCajero);
+router.get("/obtenerDetalleArqueo/:idSesion", obtenerDetalleArqueo);
 
 export default router;

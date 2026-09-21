@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { Database, Upload, CheckCircle2, XCircle } from "lucide-react";
+import { Database, Upload, CheckCircle2, XCircle, HelpCircle } from "lucide-react";
+import { Joyride, type Step } from "react-joyride";
 import {
   listarRespaldos,
   crearRespaldo,
@@ -37,6 +38,26 @@ export default function Mantenimiento() {
   const [mensajeExito, setMensajeExito] = useState("");
 
   const inputArchivoRef = useRef<HTMLInputElement>(null);
+
+  const [tourActivo, setTourActivo] = useState(false);
+  const pasosTour: Step[] = [
+    {
+      target: '[data-tour="crear-respaldo"]',
+      content: "Crea una copia de seguridad inmediata de la base de datos y la registra en el historial.",
+    },
+    {
+      target: '[data-tour="restaurar-archivo"]',
+      content: "Permite seleccionar un archivo .sql de tu equipo para restaurar la base de datos a ese estado.",
+    },
+    {
+      target: '[data-tour="historial-respaldos"]',
+      content: "Lista con todos los respaldos generados previamente, indicando fecha, tamaño y estado.",
+    },
+    {
+      target: '[data-tour="acciones-respaldo"]',
+      content: "Descarga el archivo SQL a tu equipo o restaura la base de datos al estado seleccionado.",
+    },
+  ];
 
   useEffect(() => {
     cargarHistorial();
@@ -142,7 +163,23 @@ export default function Mantenimiento() {
 
   return (
     <div className="mantenimiento-container">
-      <h1 className="mantenimiento-titulo">Mantenimiento</h1>
+      <div style={{ position: "relative", marginBottom: "20px" }}>
+        <h1 className="mantenimiento-titulo" style={{ margin: 0 }}>Mantenimiento</h1>
+        <button
+          type="button"
+          className="mantenimiento-help-btn"
+          onClick={() => setTourActivo(true)}
+          title="Guía de ayuda"
+          style={{
+            position: "absolute",
+            right: "20px",
+            top: "50%",
+            transform: "translateY(-50%)",
+          }}
+        >
+          <HelpCircle size={18} />
+        </button>
+      </div>
 
       <div className="mantenimiento-card mantenimiento-acciones-card">
         <h2 className="mantenimiento-subtitulo">Respaldos de base de datos</h2>
@@ -150,6 +187,7 @@ export default function Mantenimiento() {
         <div className="mantenimiento-botones">
           <button
             className="btn-respaldo btn-crear"
+            data-tour="crear-respaldo"
             onClick={handleCrearRespaldo}
             disabled={creandoRespaldo || restaurando}
           >
@@ -159,6 +197,7 @@ export default function Mantenimiento() {
 
           <button
             className="btn-respaldo btn-restaurar"
+            data-tour="restaurar-archivo"
             onClick={handleAbrirSelectorArchivo}
             disabled={creandoRespaldo || restaurando}
           >
@@ -201,7 +240,7 @@ export default function Mantenimiento() {
           <span className="historial-total">Total: {respaldos.length} registros</span>
         </div>
 
-        <div className="mantenimiento-tabla-wrap">
+        <div className="mantenimiento-tabla-wrap" data-tour="historial-respaldos">
           <table className="mantenimiento-tabla">
             <thead>
               <tr>
@@ -244,7 +283,7 @@ export default function Mantenimiento() {
                         {respaldo.estado}
                       </span>
                     </td>
-                    <td className="col-acciones">
+                    <td className="col-acciones" data-tour="acciones-respaldo">
                       {respaldo.estado === "Exitoso" ? (
                         <>
                           <button
@@ -280,6 +319,24 @@ export default function Mantenimiento() {
           </table>
         </div>
       </div>
+
+      <Joyride
+        steps={pasosTour}
+        run={tourActivo}
+        continuous
+        locale={{
+          back: "Atrás",
+          close: "Cerrar",
+          last: "Finalizar",
+          next: "Siguiente",
+          skip: "Omitir",
+        }}
+        onEvent={(data) => {
+          if (data.type === "tour:end") {
+            setTourActivo(false);
+          }
+        }}
+      />
     </div>
   );
 }

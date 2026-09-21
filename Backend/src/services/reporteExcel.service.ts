@@ -8,7 +8,9 @@ import {
     obtenerReporteVentasServicio,
     obtenerReporteVentasProducto,
     obtenerReporteInventario,
-    obtenerReporteDevoluciones
+    obtenerReporteDevoluciones,
+    obtenerReporteArqueoPeriodo,
+    obtenerReporteArqueoCajero
 }
  from "./reporte.service.js";
 import { generateExcelReport,
@@ -17,7 +19,9 @@ import { generateExcelReport,
       generateVentasServicioExcelReport,
       generateVentasProductoExcelReport,
       generateInventarioExcelReport,
-      generateDevolucionesExcelReport
+      generateDevolucionesExcelReport,
+      generateArqueoPeriodoExcelReport,
+      generateArqueoCajeroExcelReport
     } from "../utils/excelGenerator.js";
 
 // Servicios específicos para cada reporte
@@ -161,4 +165,41 @@ export const generateReporteDevolucionesExcel = async (
         1000000
     );
     return await generateDevolucionesExcelReport(reportData);
-}
+};
+
+export const generateReporteArqueoPeriodoExcel = async (
+    search: string = "",
+    fechaInicio: string = "",
+    fechaFin: string = "",
+    estado: string = ""
+): Promise<ExcelJS.Buffer> => {
+    const reportData = await obtenerReporteArqueoPeriodo(
+        search,
+        fechaInicio,
+        fechaFin,
+        estado,
+        1,
+        1000000
+    );
+    return await generateArqueoPeriodoExcelReport(reportData);
+};
+
+export const generateReporteArqueoCajeroExcel = async (
+    search: string = "",
+    fechaInicio: string = "",
+    fechaFin: string = "",
+    idUsuario: number | null = null,
+    estado: string = "",
+    nombreCajero?: string
+): Promise<ExcelJS.Buffer> => {
+    const reportData = await obtenerReporteArqueoCajero(
+        search,
+        fechaInicio,
+        fechaFin,
+        idUsuario,
+        estado,
+        1,
+        1000000
+    );
+    return await generateArqueoCajeroExcelReport(reportData, nombreCajero);
+};

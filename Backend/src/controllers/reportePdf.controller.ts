@@ -8,7 +8,9 @@ import {
     generateReporteDevolucionesPdf,
     generateReporteClientesDeudaPdf,
     generateReporteProductosStockPdf,
-    generateReporteComprasPorPeriodoPdf
+    generateReporteComprasPorPeriodoPdf,
+    generateReporteArqueoPeriodoPdf,
+    generateReporteArqueoCajeroPdf
  } from "../services/reportePdf.service.js";
 
 export const descargarReporteVentasPorPeriodoPdf = async (req: Request, res: Response) => {
@@ -232,6 +234,63 @@ export const descargarReporteComprasPorPeriodoPdf = async (req: Request, res: Re
         res.status(500).json({
             success: false,
             message: 'Error al generar el reporte de compras',
+            error: error instanceof Error ? error.message : 'Error desconocido'
+        });
+    }
+};
+
+export const descargarReporteArqueoPeriodoPdf = async (req: Request, res: Response) => {
+    try {
+        const { search = "", fechaInicio = "", fechaFin = "", estado = "" } = req.query;
+
+        const pdfBuffer = await generateReporteArqueoPeriodoPdf(
+            search as string,
+            fechaInicio as string,
+            fechaFin as string,
+            estado as string
+        );
+
+        const fechaActual = new Date().toISOString().split('T')[0];
+        const filename = `reporte_arqueo_periodo_${fechaInicio || 'inicio'}_a_${fechaFin || fechaActual}.pdf`;
+
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename=${filename}`);
+        res.send(pdfBuffer);
+    } catch (error) {
+        console.error('Error generando PDF de arqueo por periodo:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error al generar el reporte de arqueo por período en PDF',
+            error: error instanceof Error ? error.message : 'Error desconocido'
+        });
+    }
+};
+
+export const descargarReporteArqueoCajeroPdf = async (req: Request, res: Response) => {
+    try {
+        const { search = "", fechaInicio = "", fechaFin = "", idUsuario = "", estado = "", nombreCajero = "" } = req.query;
+
+        const pdfBuffer = await generateReporteArqueoCajeroPdf(
+            search as string,
+            fechaInicio as string,
+            fechaFin as string,
+            idUsuario ? Number(idUsuario) : null,
+            estado as string,
+            nombreCajero as string
+        );
+
+        const fechaActual = new Date().toISOString().split('T')[0];
+        const sufijoCajero = nombreCajero ? `_${String(nombreCajero).replace(/\s+/g, '_')}` : '';
+        const filename = `reporte_arqueo_cajero${sufijoCajero}_${fechaInicio || 'inicio'}_a_${fechaFin || fechaActual}.pdf`;
+
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename=${filename}`);
+        res.send(pdfBuffer);
+    } catch (error) {
+        console.error('Error generando PDF de arqueo por cajero:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error al generar el reporte de arqueo por cajero en PDF',
             error: error instanceof Error ? error.message : 'Error desconocido'
         });
     }

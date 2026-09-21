@@ -1,21 +1,88 @@
 // pdfGenerator.ts
 import PDFDocument from 'pdfkit';
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
 
-const NOMBRE_NEGOCIO = 'El Único';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
+// --- Gestión y Caching del Logotipo Corporativo ---
+let cachedLogoBuffer: Buffer | null = null;
+const obtenerLogo = (): Buffer | null => {
+    if (cachedLogoBuffer) return cachedLogoBuffer;
+    const posiblesRutas = [
+        path.join(__dirname, '../assets/LogoAzulNaranja.png'),
+        path.join(__dirname, '../assets/logo.png'),
+        path.join(__dirname, '../../Frontend/src/assets/LogoAzulNaranja.png'),
+        path.join(process.cwd(), 'src/assets/LogoAzulNaranja.png'),
+        path.join(process.cwd(), 'src/assets/logo.png'),
+        path.join(process.cwd(), 'dist/assets/LogoAzulNaranja.png'),
+        path.join(process.cwd(), '../Frontend/src/assets/LogoAzulNaranja.png'),
+    ];
+    for (const p of posiblesRutas) {
+        try {
+            if (fs.existsSync(p)) {
+                cachedLogoBuffer = fs.readFileSync(p);
+                return cachedLogoBuffer;
+            }
+        } catch (_) {}
+    }
+    return null;
+};
 
+// --- Encabezado Corporativo Oficial ---
 const agregarEncabezado = (doc: PDFKit.PDFDocument, nombreReporte: string) => {
-    doc.fontSize(18).font('Helvetica-Bold').fillColor('#000000')
-        .text(NOMBRE_NEGOCIO, { align: 'center' });
+    const logo = obtenerLogo();
+    const startX = doc.page.margins.left; // 40
+    const startY = 25;
+    const usableWidth = doc.page.width - doc.page.margins.left - doc.page.margins.right;
 
-    doc.fontSize(13).font('Helvetica')
-        .text(nombreReporte, { align: 'center' })
-        .moveDown(0.3);
+    let textX = startX;
+    if (logo) {
+        try {
+            doc.image(logo, startX, startY, { width: 46, height: 46 });
+            textX = startX + 54;
+        } catch (_) {
+            textX = startX;
+        }
+    }
 
-    doc.fontSize(8).fillColor('#666666')
-        .text(`Generado: ${new Date().toLocaleString('es-NI')}`, { align: 'center' })
-        .fillColor('#000000')
-        .moveDown(1);
+    // Nombre de la Empresa
+    doc.fontSize(14).font('Helvetica-Bold').fillColor('#0F172A')
+        .text('REPUESTOS EL ÚNICO', textX, startY + 2, { lineBreak: false });
+
+    // Subtítulo institucional
+    doc.fontSize(8).font('Helvetica').fillColor('#64748B')
+        .text('Sistema de Control y Gestión de Negocio', textX, startY + 17, { lineBreak: false });
+
+    // Título dinámico del reporte
+    doc.fontSize(11).font('Helvetica-Bold').fillColor('#1E40AF')
+        .text(nombreReporte, textX, startY + 29, { lineBreak: false });
+
+    // Bloque de emisión a la derecha
+    const metaWidth = 220;
+    const metaX = doc.page.width - doc.page.margins.right - metaWidth;
+    doc.fontSize(7.5).font('Helvetica-Bold').fillColor('#475569')
+        .text('FECHA DE EMISIÓN', metaX, startY + 3, { width: metaWidth, align: 'right' });
+
+    doc.fontSize(8.5).font('Helvetica').fillColor('#0F172A')
+        .text(new Date().toLocaleString('es-NI'), metaX, startY + 15, { width: metaWidth, align: 'right' });
+
+    doc.fontSize(7.5).font('Helvetica').fillColor('#94A3B8')
+        .text('Documento Oficial Interno', metaX, startY + 27, { width: metaWidth, align: 'right' });
+
+    // Línea divisoria decorativa
+    const dividerY = startY + 50;
+    doc.strokeColor('#E2E8F0').lineWidth(1)
+        .moveTo(startX, dividerY).lineTo(startX + usableWidth, dividerY).stroke();
+
+    // Franja de acento azul marino/cobalto
+    doc.rect(startX, dividerY - 1, 90, 2).fill('#1E40AF');
+
+    // Restaurar cursor para el contenido subsiguiente
+    doc.y = dividerY + 14;
+    doc.x = startX;
 };
 
 interface Columna {
@@ -26,19 +93,22 @@ interface Columna {
     format?: (value: any) => string;
 }
 
+// --- Encabezado de Tablas con Paleta Corporativa ---
 const dibujarHeaderTabla = (doc: PDFKit.PDFDocument, columnas: Columna[], x: number, y: number): number => {
     const alto = 20;
-    doc.rect(x, y, columnas.reduce((s, c) => s + c.width, 0), alto).fill('#4F81BD');
-    doc.fillColor('#FFFFFF').font('Helvetica-Bold').fontSize(9);
+    const anchoTotal = columnas.reduce((s, c) => s + c.width, 0);
+    doc.rect(x, y, anchoTotal, alto).fill('#0F172A');
+    doc.fillColor('#FFFFFF').font('Helvetica-Bold').fontSize(8.5);
     let posX = x;
     columnas.forEach((col) => {
-        doc.text(col.header, posX + 2, y + 6, { width: col.width - 4, align: col.align ?? 'left' });
+        doc.text(col.header, posX + 4, y + 5.5, { width: col.width - 8, align: col.align ?? 'left' });
         posX += col.width;
     });
-    doc.fillColor('#000000').font('Helvetica');
+    doc.fillColor('#0F172A').font('Helvetica');
     return y + alto;
 };
 
+// --- Filas de Datos con Cebrado y Bordes Sutiles ---
 const dibujarFila = (
     doc: any,
     columnas: Columna[],
@@ -50,10 +120,17 @@ const dibujarFila = (
     celdasColor?: Record<string, { bg: string; text: string }>
 ): number => {
     const alto = 18;
+    const anchoTotal = columnas.reduce((s, c) => s + c.width, 0);
+
+    // Fondo cebrado alternado
     if (zebra) {
-        doc.rect(x, y, columnas.reduce((s, c) => s + c.width, 0), alto).fill('#F2F2F2');
-        doc.fillColor('#000000');
+        doc.rect(x, y, anchoTotal, alto).fill('#F8FAFC');
     }
+
+    // Línea divisoria inferior
+    doc.strokeColor('#E2E8F0').lineWidth(0.5)
+        .moveTo(x, y + alto).lineTo(x + anchoTotal, y + alto).stroke();
+
     doc.fontSize(8).font('Helvetica');
     let posX = x;
     columnas.forEach((col) => {
@@ -61,19 +138,59 @@ const dibujarFila = (
         const colorCelda = celdasColor?.[col.key];
 
         if (critico && col.key === 'Stock') {
-            doc.rect(posX, y, col.width, alto).fill('#FEF2F2');
+            doc.rect(posX + 2, y + 1.5, col.width - 4, alto - 3).fill('#FEF2F2');
             doc.fillColor('#DC2626').font('Helvetica-Bold');
         } else if (colorCelda) {
-            doc.rect(posX + 4, y + 2, col.width - 8, alto - 4).fill(colorCelda.bg);
+            doc.rect(posX + 3, y + 1.5, col.width - 6, alto - 3).fill(colorCelda.bg);
             doc.fillColor(colorCelda.text).font('Helvetica-Bold');
         } else {
-            doc.fillColor('#000000').font('Helvetica');
+            doc.fillColor('#1E293B').font('Helvetica');
         }
 
-        doc.text(valor, posX + 2, y + 5, { width: col.width - 4, align: col.align ?? 'left' });
+        doc.text(valor, posX + 4, y + 5, { width: col.width - 8, align: col.align ?? 'left' });
         posX += col.width;
     });
     return y + alto;
+};
+
+// --- Tarjetas de Métricas Estadísticas (KPIs) Estilo Dashboard ---
+const dibujarCajaStat = (
+    doc: any,
+    statX: number,
+    statY: number,
+    ancho: number,
+    alto: number,
+    label: string,
+    valor: string,
+    variant?: 'normal' | 'danger' | 'success' | 'warning'
+) => {
+    // Fondo de tarjeta y borde suave
+    doc.roundedRect(statX, statY, ancho, alto, 3).fillAndStroke('#F8FAFC', '#E2E8F0');
+
+    // Acento lateral izquierdo
+    let accentColor = '#1E40AF';
+    let valColor = '#0F172A';
+    const lUpper = label.toUpperCase();
+    if (variant === 'danger' || lUpper.includes('RIESGO') || lUpper.includes('FALTANTE') || lUpper.includes('DEUDA')) {
+        accentColor = '#DC2626';
+        valColor = '#DC2626';
+    } else if (variant === 'success' || lUpper.includes('VENTAS') || lUpper.includes('SOBRANTE') || lUpper.includes('GANANCIA') || lUpper.includes('FACTURADO')) {
+        accentColor = '#16A34A';
+        valColor = '#16A34A';
+    } else if (variant === 'warning' || lUpper.includes('PENDIENTE') || lUpper.includes('SALIDAS')) {
+        accentColor = '#D97706';
+        valColor = '#D97706';
+    }
+
+    doc.roundedRect(statX, statY, 3.5, alto, 1.5).fill(accentColor);
+
+    // Etiqueta superior
+    doc.fillColor('#64748B').fontSize(7).font('Helvetica-Bold')
+        .text(lUpper, statX + 8, statY + 5, { width: ancho - 14, lineBreak: false });
+
+    // Valor numérico formateado
+    doc.fillColor(valColor).fontSize(10.5).font('Helvetica-Bold')
+        .text(valor, statX + 8, statY + 17, { width: ancho - 14, lineBreak: false });
 };
 
 // --- Formato de números: 1,000.00 (coma miles, punto decimales) ---
@@ -121,11 +238,7 @@ export const generateVentasPorPeriodoPdfReport = async (reportData: any): Promis
                     statX = xInicioStats;
                     statY += altoStat + gapStat;
                 }
-                doc.rect(statX, statY, anchoStat - gapStat, altoStat).fill('#E7E6E6');
-                doc.fillColor('#333333').fontSize(8).font('Helvetica-Bold')
-                    .text(stat.label, statX + 6, statY + 5, { width: anchoStat - 16 });
-                doc.fillColor('#000000').fontSize(11).font('Helvetica-Bold')
-                    .text(stat.format(stat.value), statX + 6, statY + 18, { width: anchoStat - 16 });
+                dibujarCajaStat(doc, statX, statY, anchoStat - gapStat, altoStat, stat.label, stat.format(stat.value));
                 statX += anchoStat;
             });
 
@@ -195,11 +308,7 @@ export const generateVentasProductoPdfReport = async (reportData: any): Promise<
                     statX = xInicioStats;
                     statY += altoStat + gapStat;
                 }
-                doc.rect(statX, statY, anchoStat - gapStat, altoStat).fill('#E7E6E6');
-                doc.fillColor('#333333').fontSize(8).font('Helvetica-Bold')
-                    .text(stat.label, statX + 6, statY + 5, { width: anchoStat - 16 });
-                doc.fillColor('#000000').fontSize(11).font('Helvetica-Bold')
-                    .text(stat.format(stat.value), statX + 6, statY + 18, { width: anchoStat - 16 });
+                dibujarCajaStat(doc, statX, statY, anchoStat - gapStat, altoStat, stat.label, stat.format(stat.value));
                 statX += anchoStat;
             });
 
@@ -267,11 +376,7 @@ export const generateVentasServicioPdfReport = async (reportData: any): Promise<
                     statX = xInicioStats;
                     statY += altoStat + gapStat;
                 }
-                doc.rect(statX, statY, anchoStat - gapStat, altoStat).fill('#E7E6E6');
-                doc.fillColor('#333333').fontSize(8).font('Helvetica-Bold')
-                    .text(stat.label, statX + 6, statY + 5, { width: anchoStat - 16 });
-                doc.fillColor('#000000').fontSize(11).font('Helvetica-Bold')
-                    .text(stat.format(stat.value), statX + 6, statY + 18, { width: anchoStat - 16 });
+                dibujarCajaStat(doc, statX, statY, anchoStat - gapStat, altoStat, stat.label, stat.format(stat.value));
                 statX += anchoStat;
             });
 
@@ -340,11 +445,7 @@ export const generateInventarioPdfReport = async (reportData: any): Promise<Buff
                     statX = xInicioStats;
                     statY += altoStat + gapStat;
                 }
-                doc.rect(statX, statY, anchoStat - gapStat, altoStat).fill('#E7E6E6');
-                doc.fillColor('#333333').fontSize(8).font('Helvetica-Bold')
-                    .text(stat.label, statX + 6, statY + 5, { width: anchoStat - 16 });
-                doc.fillColor('#000000').fontSize(11).font('Helvetica-Bold')
-                    .text(stat.format(stat.value), statX + 6, statY + 18, { width: anchoStat - 16 });
+                dibujarCajaStat(doc, statX, statY, anchoStat - gapStat, altoStat, stat.label, stat.format(stat.value));
                 statX += anchoStat;
             });
 
@@ -414,11 +515,7 @@ export const generateSalidasInventarioPdfReport = async (reportData: any): Promi
                     statX = xInicioStats;
                     statY += altoStat + gapStat;
                 }
-                doc.rect(statX, statY, anchoStat - gapStat, altoStat).fill('#E7E6E6');
-                doc.fillColor('#333333').fontSize(8).font('Helvetica-Bold')
-                    .text(stat.label, statX + 6, statY + 5, { width: anchoStat - 16 });
-                doc.fillColor('#000000').fontSize(11).font('Helvetica-Bold')
-                    .text(stat.format(stat.value), statX + 6, statY + 18, { width: anchoStat - 16 });
+                dibujarCajaStat(doc, statX, statY, anchoStat - gapStat, altoStat, stat.label, stat.format(stat.value));
                 statX += anchoStat;
             });
 
@@ -487,11 +584,7 @@ export const generateDevolucionesPdfReport = async (reportData: any): Promise<Bu
                     statX = xInicioStats;
                     statY += altoStat + gapStat;
                 }
-                doc.rect(statX, statY, anchoStat - gapStat, altoStat).fill('#E7E6E6');
-                doc.fillColor('#333333').fontSize(8).font('Helvetica-Bold')
-                    .text(stat.label, statX + 6, statY + 5, { width: anchoStat - 16 });
-                doc.fillColor('#000000').fontSize(11).font('Helvetica-Bold')
-                    .text(stat.format(stat.value), statX + 6, statY + 18, { width: anchoStat - 16 });
+                dibujarCajaStat(doc, statX, statY, anchoStat - gapStat, altoStat, stat.label, stat.format(stat.value));
                 statX += anchoStat;
             });
 
@@ -560,11 +653,7 @@ export const generateClientesDeudaPdfReport = async (reportData: any): Promise<B
                     statX = xInicioStats;
                     statY += altoStat + gapStat;
                 }
-                doc.rect(statX, statY, anchoStat - gapStat, altoStat).fill('#E7E6E6');
-                doc.fillColor('#333333').fontSize(8).font('Helvetica-Bold')
-                    .text(stat.label, statX + 6, statY + 5, { width: anchoStat - 16 });
-                doc.fillColor('#000000').fontSize(11).font('Helvetica-Bold')
-                    .text(stat.format(stat.value), statX + 6, statY + 18, { width: anchoStat - 16 });
+                dibujarCajaStat(doc, statX, statY, anchoStat - gapStat, altoStat, stat.label, stat.format(stat.value));
                 statX += anchoStat;
             });
 
@@ -655,11 +744,7 @@ export const generateProductosStockPdfReport = async (
                     statX = xInicioStats;
                     statY += altoStat + gapStat;
                 }
-                doc.rect(statX, statY, anchoStat - gapStat, altoStat).fill('#E7E6E6');
-                doc.fillColor('#333333').fontSize(8).font('Helvetica-Bold')
-                    .text(stat.label, statX + 6, statY + 5, { width: anchoStat - 16 });
-                doc.fillColor('#000000').fontSize(11).font('Helvetica-Bold')
-                    .text(stat.format(stat.value), statX + 6, statY + 18, { width: anchoStat - 16 });
+                dibujarCajaStat(doc, statX, statY, anchoStat - gapStat, altoStat, stat.label, stat.format(stat.value));
                 statX += anchoStat;
             });
 
@@ -731,11 +816,7 @@ export const generateComprasPorPeriodoPdfReport = async (reportData: any): Promi
                     statX = xInicioStats;
                     statY += altoStat + gapStat;
                 }
-                doc.rect(statX, statY, anchoStat - gapStat, altoStat).fill('#E7E6E6');
-                doc.fillColor('#333333').fontSize(8).font('Helvetica-Bold')
-                    .text(stat.label, statX + 6, statY + 5, { width: anchoStat - 16 });
-                doc.fillColor('#000000').fontSize(11).font('Helvetica-Bold')
-                    .text(stat.format(stat.value), statX + 6, statY + 18, { width: anchoStat - 16 });
+                dibujarCajaStat(doc, statX, statY, anchoStat - gapStat, altoStat, stat.label, stat.format(stat.value));
                 statX += anchoStat;
             });
 
@@ -762,6 +843,195 @@ export const generateComprasPorPeriodoPdfReport = async (reportData: any): Promi
                     y = dibujarHeaderTabla(doc, columnas, xInicio, doc.y);
                 }
                 y = dibujarFila(doc, columnas, row, xInicio, y, i % 2 === 1);
+            });
+
+            doc.end();
+        } catch (error) {
+            reject(error);
+        }
+    });
+};
+
+const formatoFechaHora = (v: any) => {
+    if (!v) return '---';
+    try {
+        const d = new Date(v);
+        if (isNaN(d.getTime())) return String(v);
+        const fecha = d.toLocaleDateString('es-NI', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        const hora = d.toLocaleTimeString('es-NI', { hour: '2-digit', minute: '2-digit' });
+        return `${fecha} ${hora}`;
+    } catch {
+        return String(v);
+    }
+};
+
+export const generateArqueoPeriodoPdfReport = async (reportData: any): Promise<Buffer> => {
+    return new Promise((resolve, reject) => {
+        try {
+            const doc = new PDFDocument({ margin: 40, size: 'A4', layout: 'landscape' });
+            const chunks: Buffer[] = [];
+            doc.on('data', (c) => chunks.push(c));
+            doc.on('end', () => resolve(Buffer.concat(chunks)));
+            doc.on('error', reject);
+
+            const nombreReporte = 'Reporte de Arqueo de Caja por Período';
+            doc.on('pageAdded', () => agregarEncabezado(doc, nombreReporte));
+            agregarEncabezado(doc, nombreReporte);
+
+            const anchoUtil = doc.page.width - doc.page.margins.left - doc.page.margins.right;
+
+            // --- Estadísticas centradas ---
+            const stats = [
+                { label: 'Total Sesiones', value: reportData.TotalRegistros, format: formatoEntero },
+                { label: 'Total Apertura', value: reportData.TotalAperturaCordobas, format: formatoMoneda },
+                { label: 'Ingresos Sistema', value: reportData.TotalIngresos, format: formatoMoneda },
+                { label: 'Egresos Sistema', value: reportData.TotalEgresos, format: formatoMoneda },
+                { label: 'Efectivo Contado', value: reportData.TotalEfectivoContado, format: formatoMoneda },
+                { label: 'Diferencia Neta', value: reportData.TotalDiferencia, format: formatoMoneda },
+            ];
+
+            const porFila = 3, anchoStat = 170, altoStat = 34, gapStat = 6;
+            const anchoBloqueStats = porFila * anchoStat;
+            const xInicioStats = doc.page.margins.left + (anchoUtil - anchoBloqueStats) / 2;
+
+            let statX = xInicioStats, statY = doc.y;
+
+            stats.forEach((stat, i) => {
+                if (i > 0 && i % porFila === 0) {
+                    statX = xInicioStats;
+                    statY += altoStat + gapStat;
+                }
+                dibujarCajaStat(doc, statX, statY, anchoStat - gapStat, altoStat, stat.label, stat.format(stat.value));
+                statX += anchoStat;
+            });
+
+            doc.y = statY + altoStat + 15;
+            doc.x = doc.page.margins.left;
+
+            // --- Tabla centrada ---
+            const columnas: Columna[] = [
+                { header: 'N°', key: 'id_sesion', width: 45, align: 'center', format: (v) => `#${v}` },
+                { header: 'Cajero', key: 'usuario_nombre', width: 100 },
+                { header: 'Apertura', key: 'fecha_apertura', width: 95, format: formatoFechaHora },
+                { header: 'Cierre', key: 'fecha_cierre', width: 95, format: formatoFechaHora },
+                { header: 'Monto Apert.', key: 'total_apertura_cordobas', width: 75, align: 'right', format: formatoMoneda },
+                { header: 'Ingresos', key: 'total_ingresos_sistema', width: 75, align: 'right', format: formatoMoneda },
+                { header: 'Egresos', key: 'total_egresos_sistema', width: 75, align: 'right', format: formatoMoneda },
+                { header: 'Contado', key: 'total_efectivo_contado', width: 75, align: 'right', format: formatoMoneda },
+                { header: 'Diferencia', key: 'diferencia', width: 70, align: 'right', format: formatoMoneda },
+                { header: 'Estado', key: 'estado', width: 55, align: 'center' },
+            ];
+
+            const anchoTabla = columnas.reduce((s, c) => s + c.width, 0);
+            const xInicio = doc.page.margins.left + (anchoUtil - anchoTabla) / 2;
+
+            let y = dibujarHeaderTabla(doc, columnas, xInicio, doc.y);
+            const limiteInferior = doc.page.height - doc.page.margins.bottom;
+
+            (reportData.data ?? []).forEach((row: any, i: number) => {
+                if (y + 18 > limiteInferior) {
+                    doc.addPage();
+                    y = dibujarHeaderTabla(doc, columnas, xInicio, doc.y);
+                }
+
+                const diff = Number(row.diferencia ?? 0);
+                const celdasColor: Record<string, { bg: string; text: string }> = {};
+                if (diff < 0) {
+                    celdasColor['diferencia'] = { bg: '#FEF2F2', text: '#DC2626' };
+                } else if (diff > 0) {
+                    celdasColor['diferencia'] = { bg: '#DCFCE7', text: '#16A34A' };
+                }
+
+                y = dibujarFila(doc, columnas, row, xInicio, y, i % 2 === 1, false, celdasColor);
+            });
+
+            doc.end();
+        } catch (error) {
+            reject(error);
+        }
+    });
+};
+
+export const generateArqueoCajeroPdfReport = async (reportData: any, nombreCajero?: string): Promise<Buffer> => {
+    return new Promise((resolve, reject) => {
+        try {
+            const doc = new PDFDocument({ margin: 40, size: 'A4', layout: 'landscape' });
+            const chunks: Buffer[] = [];
+            doc.on('data', (c) => chunks.push(c));
+            doc.on('end', () => resolve(Buffer.concat(chunks)));
+            doc.on('error', reject);
+
+            const nombreReporte = nombreCajero 
+                ? `Reporte de Arqueo de Caja - Cajero: ${nombreCajero}`
+                : 'Reporte de Arqueo de Caja por Cajero';
+            doc.on('pageAdded', () => agregarEncabezado(doc, nombreReporte));
+            agregarEncabezado(doc, nombreReporte);
+
+            const anchoUtil = doc.page.width - doc.page.margins.left - doc.page.margins.right;
+
+            // --- Estadísticas centradas ---
+            const stats = [
+                { label: 'Total Sesiones', value: reportData.TotalRegistros, format: formatoEntero },
+                { label: 'Total Apertura', value: reportData.TotalAperturaCordobas, format: formatoMoneda },
+                { label: 'Ingresos Sistema', value: reportData.TotalIngresos, format: formatoMoneda },
+                { label: 'Egresos Sistema', value: reportData.TotalEgresos, format: formatoMoneda },
+                { label: 'Efectivo Contado', value: reportData.TotalEfectivoContado, format: formatoMoneda },
+                { label: 'Diferencia Neta', value: reportData.TotalDiferencia, format: formatoMoneda },
+            ];
+
+            const porFila = 3, anchoStat = 170, altoStat = 34, gapStat = 6;
+            const anchoBloqueStats = porFila * anchoStat;
+            const xInicioStats = doc.page.margins.left + (anchoUtil - anchoBloqueStats) / 2;
+
+            let statX = xInicioStats, statY = doc.y;
+
+            stats.forEach((stat, i) => {
+                if (i > 0 && i % porFila === 0) {
+                    statX = xInicioStats;
+                    statY += altoStat + gapStat;
+                }
+                dibujarCajaStat(doc, statX, statY, anchoStat - gapStat, altoStat, stat.label, stat.format(stat.value));
+                statX += anchoStat;
+            });
+
+            doc.y = statY + altoStat + 15;
+            doc.x = doc.page.margins.left;
+
+            // --- Tabla centrada ---
+            const columnas: Columna[] = [
+                { header: 'N°', key: 'id_sesion', width: 45, align: 'center', format: (v) => `#${v}` },
+                { header: 'Cajero', key: 'usuario_nombre', width: 100 },
+                { header: 'Apertura', key: 'fecha_apertura', width: 95, format: formatoFechaHora },
+                { header: 'Cierre', key: 'fecha_cierre', width: 95, format: formatoFechaHora },
+                { header: 'Monto Apert.', key: 'total_apertura_cordobas', width: 75, align: 'right', format: formatoMoneda },
+                { header: 'Ingresos', key: 'total_ingresos_sistema', width: 75, align: 'right', format: formatoMoneda },
+                { header: 'Egresos', key: 'total_egresos_sistema', width: 75, align: 'right', format: formatoMoneda },
+                { header: 'Contado', key: 'total_efectivo_contado', width: 75, align: 'right', format: formatoMoneda },
+                { header: 'Diferencia', key: 'diferencia', width: 70, align: 'right', format: formatoMoneda },
+                { header: 'Estado', key: 'estado', width: 55, align: 'center' },
+            ];
+
+            const anchoTabla = columnas.reduce((s, c) => s + c.width, 0);
+            const xInicio = doc.page.margins.left + (anchoUtil - anchoTabla) / 2;
+
+            let y = dibujarHeaderTabla(doc, columnas, xInicio, doc.y);
+            const limiteInferior = doc.page.height - doc.page.margins.bottom;
+
+            (reportData.data ?? []).forEach((row: any, i: number) => {
+                if (y + 18 > limiteInferior) {
+                    doc.addPage();
+                    y = dibujarHeaderTabla(doc, columnas, xInicio, doc.y);
+                }
+
+                const diff = Number(row.diferencia ?? 0);
+                const celdasColor: Record<string, { bg: string; text: string }> = {};
+                if (diff < 0) {
+                    celdasColor['diferencia'] = { bg: '#FEF2F2', text: '#DC2626' };
+                } else if (diff > 0) {
+                    celdasColor['diferencia'] = { bg: '#DCFCE7', text: '#16A34A' };
+                }
+
+                y = dibujarFila(doc, columnas, row, xInicio, y, i % 2 === 1, false, celdasColor);
             });
 
             doc.end();

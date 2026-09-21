@@ -12,6 +12,8 @@ import ModalSeleccionarMarca from "./ModalesSeleccion/ModalSeleccionarMarca";
 import type { Marca } from "../../models/Marca";
 import type { Categoria } from "../../models/Categoria";
 import Notificacion, { type TipoNotificacion } from "../../components/Notification/Notification";
+import { HelpCircle } from "lucide-react";
+import { Joyride, type Step } from "react-joyride";
 
 function EditarProducto() {
   const { id } = useParams();
@@ -20,7 +22,6 @@ function EditarProducto() {
 
   const [producto, setProducto] = useState<ProductoListado | null>(null);
   const [nombreProducto, setNombreProducto] = useState("");
-  const [codigo, setCodigo] = useState("");
   const [categoria, setCategoria] = useState<Categoria | null>(null);
   const [marca, setMarca] = useState<Marca | null>(null);
   const [precio, setPrecio] = useState("0.00");
@@ -37,6 +38,30 @@ function EditarProducto() {
 
   const [error, setError] = useState("");
   const [notif, setNotif] = useState<{ mensaje: string; tipo: TipoNotificacion } | null>(null);
+
+  const [tourActivo, setTourActivo] = useState(false);
+  const pasosTour: Step[] = [
+    {
+      target: '[data-tour="editar-nombre"]',
+      content: "Modifica el nombre comercial o técnico del repuesto o producto.",
+    },
+    {
+      target: '[data-tour="editar-clasificacion"]',
+      content: "Actualiza la categoría y marca asociadas a este producto.",
+    },
+    {
+      target: '[data-tour="editar-precio"]',
+      content: "Ajusta el precio unitario de venta al público en Córdobas (C$).",
+    },
+    {
+      target: '[data-tour="editar-existencias"]',
+      content: "Ajusta las existencias físicas actuales y el nivel mínimo de stock para alertas.",
+    },
+    {
+      target: '[data-tour="editar-guardar"]',
+      content: "Haz clic aquí para guardar los cambios realizados sobre el producto.",
+    },
+  ];
 
   // Busca el producto cada vez que cambia el id en la URL.
   /*useEffect(() => {
@@ -184,9 +209,19 @@ useEffect(() => {
               <h2>Editar producto</h2>
             </div>
 
-            <button className="inventario-volver" onClick={onVolver}>
-              ← Volver al listado
-            </button>
+            <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+              <button
+                type="button"
+                className="inventario-volver"
+                onClick={() => setTourActivo(true)}
+                title="Guía de ayuda"
+              >
+                <HelpCircle size={16} /> Ayuda
+              </button>
+              <button className="inventario-volver" onClick={onVolver}>
+                ← Volver al listado
+              </button>
+            </div>
           </div>
 
           <div className="inventario-grid">
@@ -196,7 +231,7 @@ useEffect(() => {
                 <p>Información fundamental del componente para el catálogo central.</p>
               </div>
 
-              <div className="producto-campo">
+              <div className="producto-campo" data-tour="editar-nombre">
                 <label>Nombre del producto <span style={{ color: "#e5484d" }}> *</span></label> 
                 <input
                   type="text"
@@ -205,7 +240,7 @@ useEffect(() => {
                 />
               </div>
 
-              <div className="producto-campo-fila">
+              <div className="producto-campo-fila" data-tour="editar-clasificacion">
                 <div className="producto-campo">
                   <label>
                     Categoría <span style={{ color: "#e5484d" }}>*</span>
@@ -237,7 +272,7 @@ useEffect(() => {
                 </div>
               </div>
 
-              <div className="producto-campo">
+              <div className="producto-campo" data-tour="editar-precio">
                 <label>
                   Precio de venta (NIO) <span style={{ color: "#e5484d" }}>*</span>
                 </label>
@@ -265,7 +300,7 @@ useEffect(() => {
 
               <div className="producto-divisor">Control de existencias</div>
 
-              <div className="producto-campo-fila">
+              <div className="producto-campo-fila" data-tour="editar-existencias">
                 <div className="producto-campo">
                   <label>Stock actual</label>
                   <div className="producto-stepper">
@@ -301,7 +336,7 @@ useEffect(() => {
               {error && <span className="error-text">{error}</span>}
 
               <div className="producto-botones">
-                <button className="producto-btn-guardar" onClick={actualizar}>
+                <button className="producto-btn-guardar" onClick={actualizar} data-tour="editar-guardar">
                   Actualizar
                 </button>
                 <button className="producto-btn-cancelar" onClick={onVolver}>
@@ -354,6 +389,23 @@ useEffect(() => {
         }}
       />
 
+      <Joyride
+        steps={pasosTour}
+        run={tourActivo}
+        continuous
+        locale={{
+          back: "Atrás",
+          close: "Cerrar",
+          last: "Finalizar",
+          next: "Siguiente",
+          skip: "Omitir",
+        }}
+        onEvent={(data) => {
+          if (data.type === "tour:end") {
+            setTourActivo(false);
+          }
+        }}
+      />
     </div>
   );
 }

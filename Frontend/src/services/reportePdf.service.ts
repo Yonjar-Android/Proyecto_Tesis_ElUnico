@@ -119,3 +119,33 @@ export const descargarReporteComprasPorPeriodoPdf = async (
     });
     return response.data;
 };
+
+export const descargarReporteArqueoPeriodoPdf = async (
+    search: string = "",
+    fechaInicio: string = "",
+    fechaFin: string = "",
+    estado: string = ""
+): Promise<Blob> => {
+    const response = await axiosInstance.get(`${API}/arqueo-caja-periodo`, {
+        params: { search, fechaInicio, fechaFin, estado },
+        headers: { Authorization: `Bearer ${token}` },
+        responseType: 'blob'
+    });
+    return response.data;
+};
+
+export const descargarReporteArqueoCajeroPdf = async (
+    search: string = "",
+    fechaInicio: string = "",
+    fechaFin: string = "",
+    idUsuario: number | null = null,
+    estado: string = "",
+    nombreCajero: string = ""
+): Promise<Blob> => {
+    const response = await axiosInstance.get(`${API}/arqueo-caja-cajero`, {
+        params: { search, fechaInicio, fechaFin, idUsuario, estado, nombreCajero },
+        headers: { Authorization: `Bearer ${token}` },
+        responseType: 'blob'
+    });
+    return response.data;
+};

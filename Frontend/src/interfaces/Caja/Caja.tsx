@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus, Pencil, AlertTriangle } from "lucide-react";
+import { Plus, Pencil, AlertTriangle, HelpCircle } from "lucide-react";
+import { Joyride, type Step } from "react-joyride";
 import EgresoModal from "./EgresoModal";
 import { obtenerSesionActiva } from "../../services/caja.service";
 import "./Caja.css";
@@ -37,6 +38,30 @@ export default function Caja() {
 
   const [modalEgresoAbierto, setModalEgresoAbierto] = useState(false);
   const [egresoEditando, setEgresoEditando] = useState<Egreso | null>(null);
+
+  const [tourActivo, setTourActivo] = useState(false);
+  const pasosTour: Step[] = [
+    {
+      target: '[data-tour="estado-caja"]',
+      content: "Muestra el estado actual de la caja (Abierta/Cerrada) y la tasa de cambio oficial del dólar.",
+    },
+    {
+      target: '[data-tour="resumen-caja"]',
+      content: "Resumen en tiempo real del turno: monto inicial de apertura en C$ y USD, ingresos por ventas en efectivo, transferencias, egresos y el neto acumulado.",
+    },
+    {
+      target: '[data-tour="registrar-egreso"]',
+      content: "Permite registrar salidas de dinero o gastos menores de caja especificando concepto y monto.",
+    },
+    {
+      target: '[data-tour="movimientos-caja"]',
+      content: "Historial de todos los egresos registrados durante el turno con opción para editar si hubo error.",
+    },
+    {
+      target: '[data-tour="cerrar-caja-btn"]',
+      content: "Acceso directo para proceder con el conteo final y cierre de la sesión de caja.",
+    },
+  ];
 
   useEffect(() => {
     cargarEstadoCaja();
@@ -112,7 +137,15 @@ export default function Caja() {
             Motorepuestos El Único · {new Date().toLocaleDateString("es-NI", { day: "2-digit", month: "long", year: "numeric" })}
           </p>
         </div>
-        <div className="caja-header-derecha">
+        <div className="caja-header-derecha" data-tour="estado-caja">
+          <button
+            type="button"
+            className="caja-help-btn"
+            onClick={() => setTourActivo(true)}
+            title="Guía de ayuda"
+          >
+            <HelpCircle size={18} />
+          </button>
           <span className="caja-tasa-pill">1 USD · C${tasaCambio.toFixed(2)}</span>
           <span className={`caja-estado-pill ${sesionActiva ? "estado-abierta" : "estado-cerrada"}`}>
             {sesionActiva ? "Caja abierta" : "Caja cerrada"}
@@ -145,7 +178,7 @@ export default function Caja() {
           </div>
 
           {/* GRID DE RESUMEN FINANCIERO: 6 TARJETAS (2 filas de 3) */}
-          <div className="caja-resumen-grid">
+          <div className="caja-resumen-grid" data-tour="resumen-caja">
             {/* 1. Apertura Córdobas */}
             <div className="caja-resumen-card">
               <span>Apertura Córdobas</span>
@@ -193,12 +226,12 @@ export default function Caja() {
             </div>
           </div>
 
-          <button className="btn-registrar-egreso" onClick={() => setModalEgresoAbierto(true)}>
+          <button className="btn-registrar-egreso" data-tour="registrar-egreso" onClick={() => setModalEgresoAbierto(true)}>
             <Plus size={18} />
             Registrar nuevo egreso
           </button>
 
-          <div className="caja-movimientos">
+          <div className="caja-movimientos" data-tour="movimientos-caja">
             <div className="caja-movimientos-header">
               <h3>Movimientos registrados</h3>
               <span>{egresos.length} egresos</span>
@@ -236,7 +269,7 @@ export default function Caja() {
           </div>
 
           <div className="caja-footer-acciones" style={{ justifyContent: "flex-end" }}>
-            <button className="btn-cerrar-caja" onClick={() => navigate("/caja/cierre")}>
+            <button className="btn-cerrar-caja" data-tour="cerrar-caja-btn" onClick={() => navigate("/caja/cierre")}>
               Cerrar caja
             </button>
           </div>
@@ -261,6 +294,24 @@ export default function Caja() {
           }}
         />
       )}
+
+      <Joyride
+        steps={pasosTour}
+        run={tourActivo}
+        continuous
+        locale={{
+          back: "Atrás",
+          close: "Cerrar",
+          last: "Finalizar",
+          next: "Siguiente",
+          skip: "Omitir",
+        }}
+        onEvent={(data) => {
+          if (data.type === "tour:end") {
+            setTourActivo(false);
+          }
+        }}
+      />
     </div>
   );
 }

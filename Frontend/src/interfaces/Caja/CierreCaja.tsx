@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Lock, FileDown, CheckCircle } from "lucide-react";
+import { Lock, FileDown, CheckCircle, HelpCircle } from "lucide-react";
+import { Joyride, type Step } from "react-joyride";
 import ConteoBilletes from "./ConteoBilletes";
 import type { DesgloseItem } from "./ConteoBilletes";
 import { cerrarCaja, obtenerResumenCierre, obtenerSesionActiva } from "../../services/caja.service";
@@ -21,6 +22,30 @@ export default function CierreCaja() {
   const [sesionActiva, setSesionActiva] = useState<{ id_sesion: number; [key: string]: any } | null>(null);
   const [dataCaja, setDataCaja] = useState<any>(null);
   const [modalCierreExitoso, setModalCierreExitoso] = useState(false);
+
+  const [tourActivo, setTourActivo] = useState(false);
+  const pasosTour: Step[] = [
+    {
+      target: '[data-tour="cierre-resumen-sistema"]',
+      content: "Muestra el consolidado del sistema: monto inicial de apertura, ingresos por ventas, egresos y el efectivo esperado que debe haber en caja.",
+    },
+    {
+      target: '[data-tour="cierre-conteo"]',
+      content: "Ingresa el conteo físico de los billetes y monedas que realmente tienes en caja al terminar el turno.",
+    },
+    {
+      target: '[data-tour="cierre-transferencias"]',
+      content: "Ingresa o valida el total cobrado a través de transferencias electrónicas o tarjeta.",
+    },
+    {
+      target: '[data-tour="cierre-diferencia"]',
+      content: "Calcula en tiempo real la diferencia del arqueo, alertando si existe faltante o sobrante de efectivo.",
+    },
+    {
+      target: '[data-tour="cierre-confirmar"]',
+      content: "Confirma el cierre formal de la caja, finalizando la sesión y permitiendo exportar el comprobante.",
+    },
+  ];
 
   // Totales del sistema (calculados en base a las ventas/egresos del día)
   const [totalSistema, setTotalSistema] = useState({
@@ -240,15 +265,25 @@ export default function CierreCaja() {
 
   return (
     <div className="apertura-container">
-      <h1 className="apertura-titulo">
-        <Lock size={22} />
-        Cierre de Caja
-      </h1>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+        <h1 className="apertura-titulo" style={{ margin: 0 }}>
+          <Lock size={22} />
+          Cierre de Caja
+        </h1>
+        <button
+          type="button"
+          className="apertura-help-btn"
+          onClick={() => setTourActivo(true)}
+          title="Guía de ayuda"
+        >
+          <HelpCircle size={18} />
+        </button>
+      </div>
       <p className="apertura-subtitulo">
         Cuenta el efectivo final y compara contra lo esperado por el sistema.
       </p>
 
-      <div className="cierre-resumen-sistema">
+      <div className="cierre-resumen-sistema" data-tour="cierre-resumen-sistema">
         <div>
           <span>Apertura</span>
           <strong>C${formatearMoneda(totalSistema.montoApertura)}</strong>
@@ -268,15 +303,17 @@ export default function CierreCaja() {
       </div>
 
       <div className="apertura-card">
-        <ConteoBilletes
-          tasaCambio={tasaCambio}
-          onTotalChange={(total, items) => {
-            setTotalContado(total);
-            setDesglose(items);
-          }}
-        />
+        <div data-tour="cierre-conteo">
+          <ConteoBilletes
+            tasaCambio={tasaCambio}
+            onTotalChange={(total, items) => {
+              setTotalContado(total);
+              setDesglose(items);
+            }}
+          />
+        </div>
 
-        <div className="apertura-campo">
+        <div className="apertura-campo" data-tour="cierre-transferencias">
           <label>Tarjeta / Transferencia (C$)</label>
           <input
             type="number"
@@ -287,7 +324,7 @@ export default function CierreCaja() {
           />
         </div>
 
-        <div className={`cierre-diferencia ${diferencia < 0 ? "diferencia-negativa" : diferencia > 0 ? "diferencia-positiva" : ""}`}>
+        <div className={`cierre-diferencia ${diferencia < 0 ? "diferencia-negativa" : diferencia > 0 ? "diferencia-positiva" : ""}`} data-tour="cierre-diferencia">
           <span>Diferencia</span>
           <strong>
             {diferencia > 0 ? "+" : ""}C${diferencia.toLocaleString(undefined, { minimumFractionDigits: 2 })}
@@ -310,7 +347,7 @@ export default function CierreCaja() {
           <button className="btn-apertura-cancelar" onClick={() => navigate("/caja")}>
             Cancelar
           </button>
-          <button className="btn-apertura-confirmar btn-cierre-confirmar" onClick={handleCerrarCaja} disabled={guardando}>
+          <button className="btn-apertura-confirmar btn-cierre-confirmar" data-tour="cierre-confirmar" onClick={handleCerrarCaja} disabled={guardando}>
             {guardando ? "Cerrando caja..." : "Confirmar cierre"}
           </button>
         </div>
@@ -363,6 +400,24 @@ export default function CierreCaja() {
           </div>
         </div>
       )}
+
+      <Joyride
+        steps={pasosTour}
+        run={tourActivo}
+        continuous
+        locale={{
+          back: "Atrás",
+          close: "Cerrar",
+          last: "Finalizar",
+          next: "Siguiente",
+          skip: "Omitir",
+        }}
+        onEvent={(data) => {
+          if (data.type === "tour:end") {
+            setTourActivo(false);
+          }
+        }}
+      />
     </div>
   );
 }

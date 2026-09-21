@@ -1057,3 +1057,270 @@ export const obtenerReporteDevoluciones = async (
         TotalProductosDevueltos: estadisticas[0].TotalProductosDevueltos
     };
 };
+
+export const obtenerReporteArqueoPeriodo = async (
+    search: string = "",
+    fechaInicio: string = "",
+    fechaFin: string = "",
+    estado: string = "",
+    page: number = 1,
+    perPage: number = 10
+) => {
+    const offset = (page - 1) * perPage;
+    let where = "WHERE 1=1";
+    const params: any[] = [];
+
+    if (search.trim() !== "") {
+        where += ` AND (
+            u.Nombre_Usuario LIKE ? 
+            OR sc.id_sesion LIKE ? 
+            OR sc.observaciones LIKE ?
+        )`;
+        params.push(`%${search}%`, `%${search}%`, `%${search}%`);
+    }
+
+    if (fechaInicio !== "") {
+        where += " AND sc.fecha_apertura >= ?";
+        params.push(`${fechaInicio} 00:00:00`);
+    }
+
+    if (fechaFin !== "") {
+        where += " AND sc.fecha_apertura < ?";
+        params.push(addOneDay(fechaFin));
+    }
+
+    if (estado !== "" && estado.toUpperCase() !== "TODOS") {
+        where += " AND sc.estado = ?";
+        params.push(estado);
+    }
+
+    // Estadísticas generales (KPIs)
+    const [estadisticas]: any = await pool.query(
+        `SELECT
+            COUNT(*) AS TotalRegistros,
+            COALESCE(SUM(sc.monto_apertura_cordobas + (sc.monto_apertura_dolares * sc.tasa_cambio)), 0) AS TotalAperturaCordobas,
+            COALESCE(SUM(sc.total_ingresos_sistema), 0) AS TotalIngresos,
+            COALESCE(SUM(sc.total_egresos_sistema), 0) AS TotalEgresos,
+            COALESCE(SUM(sc.total_efectivo_contado), 0) AS TotalEfectivoContado,
+            COALESCE(SUM(sc.total_tarjeta_transferencia), 0) AS TotalTransferencias,
+            COALESCE(SUM(sc.diferencia), 0) AS TotalDiferencia,
+            COALESCE(SUM(CASE WHEN sc.diferencia > 0 THEN sc.diferencia ELSE 0 END), 0) AS TotalSobrantes,
+            COALESCE(SUM(CASE WHEN sc.diferencia < 0 THEN sc.diferencia ELSE 0 END), 0) AS TotalFaltantes
+        FROM sesiones_caja sc
+        LEFT JOIN usuarios u ON sc.id_usuario = u.id
+        ${where}`,
+        params
+    );
+
+    // Conteo total
+    const [countRows]: any = await pool.query(
+        `SELECT COUNT(*) AS total
+        FROM sesiones_caja sc
+        LEFT JOIN usuarios u ON sc.id_usuario = u.id
+        ${where}`,
+        params
+    );
+
+    const total = countRows[0]?.total || 0;
+
+    // Datos paginados
+    const [rows]: any = await pool.query(
+        `SELECT
+            sc.id_sesion,
+            sc.id_usuario,
+            COALESCE(u.Nombre_Usuario, 'Desconocido') AS usuario_nombre,
+            sc.fecha_apertura,
+            sc.fecha_cierre,
+            sc.monto_apertura_cordobas,
+            sc.monto_apertura_dolares,
+            sc.tasa_cambio,
+            (sc.monto_apertura_cordobas + (sc.monto_apertura_dolares * sc.tasa_cambio)) AS total_apertura_cordobas,
+            sc.total_ingresos_sistema,
+            sc.total_egresos_sistema,
+            sc.total_neto_sistema,
+            sc.total_efectivo_contado,
+            sc.total_tarjeta_transferencia,
+            sc.diferencia,
+            sc.observaciones,
+            sc.estado
+        FROM sesiones_caja sc
+        LEFT JOIN usuarios u ON sc.id_usuario = u.id
+        ${where}
+        ORDER BY sc.id_sesion DESC
+        LIMIT ? OFFSET ?`,
+        [...params, perPage, offset]
+    );
+
+    const stats = estadisticas[0] || {};
+
+    return {
+        data: rows,
+        current_page: page,
+        per_page: perPage,
+        total,
+        last_page: Math.ceil(total / perPage) || 1,
+        TotalRegistros: Number(stats.TotalRegistros) || 0,
+        TotalAperturaCordobas: Number(stats.TotalAperturaCordobas) || 0,
+        TotalIngresos: Number(stats.TotalIngresos) || 0,
+        TotalEgresos: Number(stats.TotalEgresos) || 0,
+        TotalEfectivoContado: Number(stats.TotalEfectivoContado) || 0,
+        TotalTransferencias: Number(stats.TotalTransferencias) || 0,
+        TotalDiferencia: Number(stats.TotalDiferencia) || 0,
+        TotalSobrantes: Number(stats.TotalSobrantes) || 0,
+        TotalFaltantes: Number(stats.TotalFaltantes) || 0
+    };
+};
+
+export const obtenerReporteArqueoCajero = async (
+    search: string = "",
+    fechaInicio: string = "",
+    fechaFin: string = "",
+    idUsuario: number | null = null,
+    estado: string = "",
+    page: number = 1,
+    perPage: number = 10
+) => {
+    const offset = (page - 1) * perPage;
+    let where = "WHERE 1=1";
+    const params: any[] = [];
+
+    if (idUsuario && idUsuario > 0) {
+        where += " AND sc.id_usuario = ?";
+        params.push(idUsuario);
+    }
+
+    if (search.trim() !== "") {
+        where += ` AND (
+            u.Nombre_Usuario LIKE ? 
+            OR sc.id_sesion LIKE ? 
+            OR sc.observaciones LIKE ?
+        )`;
+        params.push(`%${search}%`, `%${search}%`, `%${search}%`);
+    }
+
+    if (fechaInicio !== "") {
+        where += " AND sc.fecha_apertura >= ?";
+        params.push(`${fechaInicio} 00:00:00`);
+    }
+
+    if (fechaFin !== "") {
+        where += " AND sc.fecha_apertura < ?";
+        params.push(addOneDay(fechaFin));
+    }
+
+    if (estado !== "" && estado.toUpperCase() !== "TODOS") {
+        where += " AND sc.estado = ?";
+        params.push(estado);
+    }
+
+    // Estadísticas generales (KPIs)
+    const [estadisticas]: any = await pool.query(
+        `SELECT
+            COUNT(*) AS TotalRegistros,
+            COALESCE(SUM(sc.monto_apertura_cordobas + (sc.monto_apertura_dolares * sc.tasa_cambio)), 0) AS TotalAperturaCordobas,
+            COALESCE(SUM(sc.total_ingresos_sistema), 0) AS TotalIngresos,
+            COALESCE(SUM(sc.total_egresos_sistema), 0) AS TotalEgresos,
+            COALESCE(SUM(sc.total_efectivo_contado), 0) AS TotalEfectivoContado,
+            COALESCE(SUM(sc.total_tarjeta_transferencia), 0) AS TotalTransferencias,
+            COALESCE(SUM(sc.diferencia), 0) AS TotalDiferencia,
+            COALESCE(SUM(CASE WHEN sc.diferencia > 0 THEN sc.diferencia ELSE 0 END), 0) AS TotalSobrantes,
+            COALESCE(SUM(CASE WHEN sc.diferencia < 0 THEN sc.diferencia ELSE 0 END), 0) AS TotalFaltantes
+        FROM sesiones_caja sc
+        LEFT JOIN usuarios u ON sc.id_usuario = u.id
+        ${where}`,
+        params
+    );
+
+    // Conteo total
+    const [countRows]: any = await pool.query(
+        `SELECT COUNT(*) AS total
+        FROM sesiones_caja sc
+        LEFT JOIN usuarios u ON sc.id_usuario = u.id
+        ${where}`,
+        params
+    );
+
+    const total = countRows[0]?.total || 0;
+
+    // Datos paginados
+    const [rows]: any = await pool.query(
+        `SELECT
+            sc.id_sesion,
+            sc.id_usuario,
+            COALESCE(u.Nombre_Usuario, 'Desconocido') AS usuario_nombre,
+            sc.fecha_apertura,
+            sc.fecha_cierre,
+            sc.monto_apertura_cordobas,
+            sc.monto_apertura_dolares,
+            sc.tasa_cambio,
+            (sc.monto_apertura_cordobas + (sc.monto_apertura_dolares * sc.tasa_cambio)) AS total_apertura_cordobas,
+            sc.total_ingresos_sistema,
+            sc.total_egresos_sistema,
+            sc.total_neto_sistema,
+            sc.total_efectivo_contado,
+            sc.total_tarjeta_transferencia,
+            sc.diferencia,
+            sc.observaciones,
+            sc.estado
+        FROM sesiones_caja sc
+        LEFT JOIN usuarios u ON sc.id_usuario = u.id
+        ${where}
+        ORDER BY sc.id_sesion DESC
+        LIMIT ? OFFSET ?`,
+        [...params, perPage, offset]
+    );
+
+    const stats = estadisticas[0] || {};
+
+    return {
+        data: rows,
+        current_page: page,
+        per_page: perPage,
+        total,
+        last_page: Math.ceil(total / perPage) || 1,
+        TotalRegistros: Number(stats.TotalRegistros) || 0,
+        TotalAperturaCordobas: Number(stats.TotalAperturaCordobas) || 0,
+        TotalIngresos: Number(stats.TotalIngresos) || 0,
+        TotalEgresos: Number(stats.TotalEgresos) || 0,
+        TotalEfectivoContado: Number(stats.TotalEfectivoContado) || 0,
+        TotalTransferencias: Number(stats.TotalTransferencias) || 0,
+        TotalDiferencia: Number(stats.TotalDiferencia) || 0,
+        TotalSobrantes: Number(stats.TotalSobrantes) || 0,
+        TotalFaltantes: Number(stats.TotalFaltantes) || 0
+    };
+};
+
+export const obtenerDetalleArqueo = async (idSesion: number) => {
+    const [sesionRows]: any = await pool.query(
+        `SELECT 
+            sc.*,
+            COALESCE(u.Nombre_Usuario, 'Desconocido') AS usuario_nombre,
+            (sc.monto_apertura_cordobas + (sc.monto_apertura_dolares * sc.tasa_cambio)) AS total_apertura_cordobas
+        FROM sesiones_caja sc
+        LEFT JOIN usuarios u ON sc.id_usuario = u.id
+        WHERE sc.id_sesion = ?`,
+        [idSesion]
+    );
+
+    if (!sesionRows || sesionRows.length === 0) {
+        throw new Error("No se encontró la sesión de caja solicitada.");
+    }
+
+    const sesion = sesionRows[0];
+
+    const [egresos]: any = await pool.query(
+        `SELECT * FROM egresos_caja WHERE id_sesion = ? ORDER BY id_egreso DESC`,
+        [idSesion]
+    );
+
+    const [billetes]: any = await pool.query(
+        `SELECT * FROM arqueo_desglose_billetes WHERE id_sesion = ? ORDER BY moneda ASC, denominacion DESC`,
+        [idSesion]
+    );
+
+    return {
+        sesion,
+        egresos: egresos || [],
+        desgloseBilletes: billetes || []
+    };
+};

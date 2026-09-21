@@ -6,6 +6,7 @@ import type { RespuestaReporteVentasServicios } from "../models/RespuestaReporte
 import type { RespuestaReporteVentasProductos } from "../models/DetalleVentaProducto";
 import type { RespuestaReporteInventario } from "../models/RespuestaReporteInventario";
 import type { RespuestaReporteDevoluciones } from "../models/RespuestaReporteDevoluciones";
+import type { RespuestaReporteArqueo, DetalleArqueoDTO } from "../models/ArqueoCajaReporte";
 
 const API = "http://localhost:3001/api/reportes";
 const token = localStorage.getItem("token");
@@ -210,5 +211,54 @@ export const obtenerReporteDevolucionesPorPeriodo = async (
         }
     );
 
+    return data;
+};
+
+export const obtenerReporteArqueoPorPeriodo = async (
+    search: string = "",
+    fechaInicio: string = "",
+    fechaFin: string = "",
+    estado: string = "",
+    page: number = 1,
+    perPage: number = 10
+): Promise<RespuestaReporteArqueo> => {
+    const { data } = await axiosInstance.get<RespuestaReporteArqueo>(
+        `${API}/obtenerReporteArqueoPeriodo`,
+        {
+            params: { search, fechaInicio, fechaFin, estado, page, perPage },
+            headers: { Authorization: `Bearer ${token}` }
+        }
+    );
+    return data;
+};
+
+export const obtenerReporteArqueoPorCajero = async (
+    search: string = "",
+    fechaInicio: string = "",
+    fechaFin: string = "",
+    idUsuario: number | null = null,
+    estado: string = "",
+    page: number = 1,
+    perPage: number = 10
+): Promise<RespuestaReporteArqueo> => {
+    const { data } = await axiosInstance.get<RespuestaReporteArqueo>(
+        `${API}/obtenerReporteArqueoCajero`,
+        {
+            params: { search, fechaInicio, fechaFin, idUsuario, estado, page, perPage },
+            headers: { Authorization: `Bearer ${token}` }
+        }
+    );
+    return data;
+};
+
+export const obtenerDetalleArqueo = async (
+    idSesion: number
+): Promise<DetalleArqueoDTO> => {
+    const { data } = await axiosInstance.get<DetalleArqueoDTO>(
+        `${API}/obtenerDetalleArqueo/${idSesion}`,
+        {
+            headers: { Authorization: `Bearer ${token}` }
+        }
+    );
     return data;
 };

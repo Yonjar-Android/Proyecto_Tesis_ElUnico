@@ -400,3 +400,22 @@
     justify-content: center;
   }
 }
+
+.usuario-help-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #0047ab;
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 14px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 71, 171, 0.25);
+  transition: all 0.2s ease;
+}
+
+.usuario-help-btn:hover {
+  background-color: #003682;
+  transform: translateY(-1px);
+}

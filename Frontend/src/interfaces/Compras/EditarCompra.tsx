@@ -6,7 +6,8 @@ import { obtenerDetalleCompra, actualizarCompra } from "../../services/compra.se
 import type { DetalleCompraDTO } from "../../models/CompraReporte";
 import ModalSeleccionarProveedor from "./ModalSeleccionarProveedor";
 import ItemsCompraForm, { type ItemCompra } from "./ItemsCompraForm";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, HelpCircle } from "lucide-react";
+import { Joyride, type Step } from "react-joyride";
 import { formatearMoneda } from "../FuncionAuxiliar";
 import Notificacion, { type TipoNotificacion } from "../../components/Notification/Notification";
 
@@ -23,6 +24,26 @@ function EditarCompra() {
   const [error, setError] = useState("");
   const [notif, setNotif] = useState<{ mensaje: string; tipo: TipoNotificacion } | null>(null);
   const [guardando, setGuardando] = useState(false);
+
+  const [tourActivo, setTourActivo] = useState(false);
+  const pasosTour: Step[] = [
+    {
+      target: '[data-tour="editar-proveedor"]',
+      content: "Permite cambiar o reasignar el proveedor que emitió la factura de compra.",
+    },
+    {
+      target: '[data-tour="editar-factura"]',
+      content: "Número de serie o consecutivo de la factura física del proveedor.",
+    },
+    {
+      target: '[data-tour="editar-articulos"]',
+      content: "Artículos que componen la compra: ajusta productos, cantidades y precios de compra unitarios.",
+    },
+    {
+      target: '[data-tour="editar-guardar"]',
+      content: "Guarda las correcciones en el registro de compra y recalcula el inventario y costos.",
+    },
+  ];
 
   useEffect(() => {
     if (!id) return;
@@ -141,12 +162,20 @@ function EditarCompra() {
               <ArrowLeft size={18} />
             </button>
             <h1>Editar Compra</h1>
+            <button
+              type="button"
+              className="categoria-add-btn"
+              onClick={() => setTourActivo(true)}
+              title="Guía de ayuda"
+            >
+              <HelpCircle size={18} />
+            </button>
           </div>
         </div>
 
         <div className="factura-card">
           <div className="compra-fila-formulario">
-            <div className="compra-campo compra-campo-producto">
+            <div className="compra-campo compra-campo-producto" data-tour="editar-proveedor">
               <label>
                 Proveedor <span style={{ color: "#e5484d" }}>*</span>
               </label>
@@ -161,7 +190,7 @@ function EditarCompra() {
               </button>
             </div>
 
-            <div className="compra-campo compra-campo-factura">
+            <div className="compra-campo compra-campo-factura" data-tour="editar-factura">
               <label>
                 N° Factura <span style={{ color: "#e5484d" }}>*</span>
               </label>
@@ -175,7 +204,7 @@ function EditarCompra() {
           </div>
         </div>
 
-        <div className="factura-card">
+        <div className="factura-card" data-tour="editar-articulos">
           <ItemsCompraForm items={items} setItems={setItems} onError={setError} />
         </div>
 
@@ -198,6 +227,7 @@ function EditarCompra() {
 
             <button
               className="factura-btn-vender"
+              data-tour="editar-guardar"
               onClick={guardarCambios}
               disabled={items.length === 0 || guardando}
             >
@@ -213,6 +243,24 @@ function EditarCompra() {
         onSeleccionar={(proveedor) => {
           setProveedorSeleccionado(proveedor);
           setModalProveedorAbierto(false);
+        }}
+      />
+
+      <Joyride
+        steps={pasosTour}
+        run={tourActivo}
+        continuous
+        locale={{
+          back: "Atrás",
+          close: "Cerrar",
+          last: "Finalizar",
+          next: "Siguiente",
+          skip: "Omitir",
+        }}
+        onEvent={(data) => {
+          if (data.type === "tour:end") {
+            setTourActivo(false);
+          }
         }}
       />
     </div>

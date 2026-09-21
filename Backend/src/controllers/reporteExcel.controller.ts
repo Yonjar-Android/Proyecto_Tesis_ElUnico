@@ -9,7 +9,9 @@ import {
     generateReporteVentasServicioPorPeriodoExcel,
     generateReporteVentasProductoPorPeriodoExcel,
     generateReporteInventarioExcel,
-    generateReporteDevolucionesExcel
+    generateReporteDevolucionesExcel,
+    generateReporteArqueoPeriodoExcel,
+    generateReporteArqueoCajeroExcel
 } from '../services/reporteExcel.service.js';
 
 export const descargarReporteProductosStock = async (req: Request, res: Response) => {
@@ -313,6 +315,75 @@ export const descargarReporteDevolucionesPorPeriodo = async (req: Request, res: 
         res.status(500).json({
             success: false,
             message: 'Error al generar el reporte de devoluciones',
+            error: error instanceof Error ? error.message : 'Error desconocido'
+        });
+    }
+};
+
+export const descargarReporteArqueoPeriodoExcel = async (req: Request, res: Response) => {
+    try {
+        const {
+            search = "",
+            fechaInicio = "",
+            fechaFin = "",
+            estado = ""
+        } = req.query;
+
+        const excelBuffer = await generateReporteArqueoPeriodoExcel(
+            search as string,
+            fechaInicio as string,
+            fechaFin as string,
+            estado as string
+        );
+
+        const fechaActual = new Date().toISOString().split('T')[0];
+        const filename = `reporte_arqueo_periodo_${fechaInicio || 'inicio'}_a_${fechaFin || fechaActual}.xlsx`;
+
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', `attachment; filename=${filename}`);
+        res.send(excelBuffer);
+    } catch (error) {
+        console.error('Error generando Excel de arqueo por periodo:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error al generar el reporte de arqueo por período',
+            error: error instanceof Error ? error.message : 'Error desconocido'
+        });
+    }
+};
+
+export const descargarReporteArqueoCajeroExcel = async (req: Request, res: Response) => {
+    try {
+        const {
+            search = "",
+            fechaInicio = "",
+            fechaFin = "",
+            idUsuario = "",
+            estado = "",
+            nombreCajero = ""
+        } = req.query;
+
+        const excelBuffer = await generateReporteArqueoCajeroExcel(
+            search as string,
+            fechaInicio as string,
+            fechaFin as string,
+            idUsuario ? Number(idUsuario) : null,
+            estado as string,
+            nombreCajero as string
+        );
+
+        const fechaActual = new Date().toISOString().split('T')[0];
+        const sufijoCajero = nombreCajero ? `_${String(nombreCajero).replace(/\s+/g, '_')}` : '';
+        const filename = `reporte_arqueo_cajero${sufijoCajero}_${fechaInicio || 'inicio'}_a_${fechaFin || fechaActual}.xlsx`;
+
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', `attachment; filename=${filename}`);
+        res.send(excelBuffer);
+    } catch (error) {
+        console.error('Error generando Excel de arqueo por cajero:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error al generar el reporte de arqueo por cajero',
             error: error instanceof Error ? error.message : 'Error desconocido'
         });
     }

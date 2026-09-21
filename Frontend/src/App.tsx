@@ -23,6 +23,8 @@ import ReporteVentasServicio from "./interfaces/Reportes/ReporteVentasServicios/
 import ReporteVentasProducto from "./interfaces/Reportes/ReporteVentasProductos/ReporteVentasServicios";
 import ReporteInventario from "./interfaces/Reportes/ReporteInventario/ReporteInventario";
 import ReporteDevoluciones from "./interfaces/Reportes/ReporteDevoluciones/ReporteDevoluciones";
+import ReporteArqueoPeriodo from "./interfaces/Reportes/ReporteCaja/ReporteArqueoPeriodo";
+import ReporteArqueoCajero from "./interfaces/Reportes/ReporteCaja/ReporteArqueoCajero";
 import Mantenimiento from "./interfaces/Mantenimiento/Mantenimiento";
 import Usuario from "./interfaces/Usuario/Usuario";
 import Caja from "./interfaces/Caja/Caja";
@@ -104,6 +106,8 @@ function App() {
             <Route path="/reportes/compras" element={<ReporteCompras />} />
             <Route path="/reportes/inventario" element={<ReporteInventario />} />
             <Route path="/reportes/devoluciones" element={<ReporteDevoluciones />} />
+            <Route path="/reportes/arqueo-caja-periodo" element={<ReporteArqueoPeriodo />} />
+            <Route path="/reportes/arqueo-caja-cajero" element={<ReporteArqueoCajero />} />
           </Route>
         </Routes>
       </CajaProvider>

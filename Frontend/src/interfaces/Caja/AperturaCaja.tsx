@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Wallet } from "lucide-react";
+import { Wallet, HelpCircle } from "lucide-react";
+import { Joyride, type Step } from "react-joyride";
 import ConteoBilletes from "./ConteoBilletes";
 import type { DesgloseItem } from "./ConteoBilletes";
 import { abrirCaja } from "../../services/caja.service";
@@ -22,7 +23,27 @@ export default function AperturaCaja() {
   const [observaciones, setObservaciones] = useState("");
   const [guardando, setGuardando] = useState(false);
   const [error, setError] = useState("");
- 
+
+  const [tourActivo, setTourActivo] = useState(false);
+  const pasosTour: Step[] = [
+    {
+      target: '[data-tour="apertura-tasa"]',
+      content: "Establece la tasa de cambio oficial de Córdobas por Dólar (USD) para las operaciones de la jornada.",
+    },
+    {
+      target: '[data-tour="apertura-conteo"]',
+      content: "Ingresa el desglose físico de billetes y monedas en Córdobas y Dólares con los que inicia el fondo de caja.",
+    },
+    {
+      target: '[data-tour="apertura-observaciones"]',
+      content: "Permite registrar notas u observaciones iniciales del turno si existieran irregularidades.",
+    },
+    {
+      target: '[data-tour="apertura-confirmar"]',
+      content: "Confirma la apertura formal de la caja para habilitar facturación y cobros en el sistema.",
+    },
+  ];
+
   async function handleAbrirCaja() {
     setError("");
     if (totalContado <= 0) {
@@ -72,10 +93,20 @@ export default function AperturaCaja() {
  
   return (
     <div className="apertura-container">
-      <h1 className="apertura-titulo">
-        <Wallet size={22} />
-        Apertura de Caja
-      </h1>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+        <h1 className="apertura-titulo" style={{ margin: 0 }}>
+          <Wallet size={22} />
+          Apertura de Caja
+        </h1>
+        <button
+          type="button"
+          className="apertura-help-btn"
+          onClick={() => setTourActivo(true)}
+          title="Guía de ayuda"
+        >
+          <HelpCircle size={18} />
+        </button>
+      </div>
       <p className="apertura-subtitulo">
         Cuenta el efectivo con el que se inicia el día antes de comenzar a operar.
       </p>
@@ -85,7 +116,7 @@ export default function AperturaCaja() {
       )}
  
       <div className="apertura-card">
-        <div className="apertura-campo apertura-tasa">
+        <div className="apertura-campo apertura-tasa" data-tour="apertura-tasa">
           <label>Tasa de cambio del día (1 USD =)</label>
           <div className="apertura-tasa-input">
             <span>C$</span>
@@ -98,17 +129,19 @@ export default function AperturaCaja() {
           </div>
         </div>
  
-        <ConteoBilletes
-          tasaCambio={tasaCambio}
-          onTotalChange={(total, items, cordobas, dolares) => {
-            setTotalContado(total);
-            setDesglose(items);
-            setMontoCordobas(cordobas || 0); // <-- Guarda los córdobas contados
-            setMontoDolares(dolares || 0);   // <-- Guarda los dólares contados
-          }}
-        />
+        <div data-tour="apertura-conteo">
+          <ConteoBilletes
+            tasaCambio={tasaCambio}
+            onTotalChange={(total, items, cordobas, dolares) => {
+              setTotalContado(total);
+              setDesglose(items);
+              setMontoCordobas(cordobas || 0); // <-- Guarda los córdobas contados
+              setMontoDolares(dolares || 0);   // <-- Guarda los dólares contados
+            }}
+          />
+        </div>
  
-        <div className="apertura-campo">
+        <div className="apertura-campo" data-tour="apertura-observaciones">
           <label>Observaciones de apertura</label>
           <textarea
             placeholder="Ej: Todo en orden, sin novedades..."
@@ -124,11 +157,29 @@ export default function AperturaCaja() {
           <button className="btn-apertura-cancelar" onClick={() => navigate("/caja")}>
             Cancelar
           </button>
-          <button className="btn-apertura-confirmar" onClick={handleAbrirCaja} disabled={guardando}>
+          <button className="btn-apertura-confirmar" data-tour="apertura-confirmar" onClick={handleAbrirCaja} disabled={guardando}>
             {guardando ? "Abriendo caja..." : "Confirmar apertura"}
           </button>
         </div>
       </div>
+
+      <Joyride
+        steps={pasosTour}
+        run={tourActivo}
+        continuous
+        locale={{
+          back: "Atrás",
+          close: "Cerrar",
+          last: "Finalizar",
+          next: "Siguiente",
+          skip: "Omitir",
+        }}
+        onEvent={(data) => {
+          if (data.type === "tour:end") {
+            setTourActivo(false);
+          }
+        }}
+      />
     </div>
   );
 }

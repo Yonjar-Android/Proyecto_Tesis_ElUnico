@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { SquarePen, ArrowLeft } from "lucide-react";
+import { SquarePen, ArrowLeft, HelpCircle } from "lucide-react";
+import { Joyride, type Step } from "react-joyride";
 import { formatearMoneda } from "../FuncionAuxiliar";
 import { listarCompras } from "../../services/compra.service";
 import styles from "./HistorialCompras.module.css";
@@ -28,6 +29,26 @@ function HistorialCompras() {
   const [pagina, setPagina] = useState(1);
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState("");
+
+  const [tourActivo, setTourActivo] = useState(false);
+  const pasosTour: Step[] = [
+    {
+      target: '[data-tour="volver-compras"]',
+      content: "Regresa a la pantalla principal de registro de compras a proveedores.",
+    },
+    {
+      target: '[data-tour="tabla-historial-compras"]',
+      content: "Listado de compras registradas con fecha, número de factura física, proveedor y monto total.",
+    },
+    {
+      target: '[data-tour="editar-compra-btn"]',
+      content: "Permite abrir la compra para corregir cantidades, costos o agregar nuevos productos.",
+    },
+    {
+      target: '[data-tour="paginacion-compras"]',
+      content: "Botones para navegar entre las páginas del historial de compras.",
+    },
+  ];
 
   useEffect(() => {
     cargarCompras(pagina);
@@ -58,17 +79,26 @@ function HistorialCompras() {
             <button
               type="button"
               className="categoria-add-btn"
+              data-tour="volver-compras"
               onClick={() => navigate("/compras")}
               title="Volver a Compras"
             >
               <ArrowLeft size={18} />
             </button>
             <h1>Historial de Compras</h1>
+            <button
+              type="button"
+              className="categoria-add-btn"
+              onClick={() => setTourActivo(true)}
+              title="Guía de ayuda"
+            >
+              <HelpCircle size={18} />
+            </button>
           </div>
         </div>
 
         <div className="factura-card factura-card-tabla">
-          <table className="factura-tabla">
+          <table className="factura-tabla" data-tour="tabla-historial-compras">
             <thead>
               <tr>
                 <th>Fecha</th>
@@ -88,6 +118,7 @@ function HistorialCompras() {
                   <td className="factura-td-accion">
                     <button
                       className="factura-btn-editar"
+                      data-tour="editar-compra-btn"
                       onClick={() => navigate(`/compras/${compra.idCompra}/editar`)}
                       aria-label="Editar compra"
                       title="Editar"
@@ -153,6 +184,24 @@ function HistorialCompras() {
 
         {error && <span className="error-text">{error}</span>}
       </div>
+
+      <Joyride
+        steps={pasosTour}
+        run={tourActivo}
+        continuous
+        locale={{
+          back: "Atrás",
+          close: "Cerrar",
+          last: "Finalizar",
+          next: "Siguiente",
+          skip: "Omitir",
+        }}
+        onEvent={(data) => {
+          if (data.type === "tour:end") {
+            setTourActivo(false);
+          }
+        }}
+      />
     </div>
   );
 }

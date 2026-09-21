@@ -26,6 +26,25 @@
   margin: 0 0 24px;
 }
 
+.apertura-help-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #0047ab;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 71, 171, 0.25);
+  transition: all 0.2s ease;
+}
+
+.apertura-help-btn:hover {
+  background-color: #003682;
+  transform: translateY(-1px);
+}
+
 .apertura-card {
   background: #ffffff;
   border: 1px solid #e2e8f0;

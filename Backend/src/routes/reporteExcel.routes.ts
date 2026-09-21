@@ -9,7 +9,9 @@ import {
     descargarReporteVentasServicioPorPeriodo,
     descargarReporteVentasProductoPorPeriodo,
     descargarReporteInventario,
-    descargarReporteDevolucionesPorPeriodo
+    descargarReporteDevolucionesPorPeriodo,
+    descargarReporteArqueoPeriodoExcel,
+    descargarReporteArqueoCajeroExcel
 } from '../controllers/reporteExcel.controller.js';
 
 const router = Router();
@@ -24,4 +26,6 @@ router.get('/excel/servicios-por-periodo', descargarReporteVentasServicioPorPeri
 router.get('/excel/productos-por-periodo', descargarReporteVentasProductoPorPeriodo);
 router.get('/excel/inventario', descargarReporteInventario);
 router.get('/excel/devoluciones', descargarReporteDevolucionesPorPeriodo);
+router.get('/excel/arqueo-caja-periodo', descargarReporteArqueoPeriodoExcel);
+router.get('/excel/arqueo-caja-cajero', descargarReporteArqueoCajeroExcel);
 export default router;

@@ -11,6 +11,8 @@ import ModalSeleccionarMarca from "./ModalesSeleccion/ModalSeleccionarMarca";
 import type { Marca } from "../../models/Marca";
 import type { Categoria } from "../../models/Categoria";
 import Notificacion, { type TipoNotificacion } from "../../components/Notification/Notification";
+import { HelpCircle } from "lucide-react";
+import { Joyride, type Step } from "react-joyride";
 
 function CrearProducto() {
   const navigate = useNavigate();
@@ -31,6 +33,30 @@ function CrearProducto() {
 
   const [error, setError] = useState("");
   const [notif, setNotif] = useState<{ mensaje: string; tipo: TipoNotificacion } | null>(null);
+
+  const [tourActivo, setTourActivo] = useState(false);
+  const pasosTour: Step[] = [
+    {
+      target: '[data-tour="producto-nombre"]',
+      content: "Ingresa el nombre comercial o técnico del repuesto o producto.",
+    },
+    {
+      target: '[data-tour="producto-clasificacion"]',
+      content: "Selecciona la categoría y la marca a la que pertenece el producto.",
+    },
+    {
+      target: '[data-tour="producto-precio"]',
+      content: "Define el precio unitario de venta al público en Córdobas (C$).",
+    },
+    {
+      target: '[data-tour="producto-existencias"]',
+      content: "Ingresa las unidades iniciales en stock y el umbral mínimo para alertas de reabastecimiento.",
+    },
+    {
+      target: '[data-tour="producto-guardar"]',
+      content: "Haz clic aquí para registrar el nuevo producto en el catálogo del sistema.",
+    },
+  ];
 
   useEffect(() => {
     obtenerTotalProductosCategorias()
@@ -127,14 +153,24 @@ const getFechaMinima = () => {
               <p className="inventario-subtitulo">Registro de entrada para el inventario.</p>
             </div>
 
-            <button className="inventario-volver" onClick={onVolver}>
-              ← Volver al listado
-            </button>
+            <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+              <button
+                type="button"
+                className="inventario-volver"
+                onClick={() => setTourActivo(true)}
+                title="Guía de ayuda"
+              >
+                <HelpCircle size={16} /> Ayuda
+              </button>
+              <button className="inventario-volver" onClick={onVolver}>
+                ← Volver al listado
+              </button>
+            </div>
           </div>
 
           <div className="inventario-grid">
             <div className="producto-form-card">
-              <div className="producto-campo">
+              <div className="producto-campo" data-tour="producto-nombre">
                 <label>
                   Nombre del producto <span style={{ color: "#e5484d" }}>*</span>
                 </label>
@@ -146,7 +182,7 @@ const getFechaMinima = () => {
                 />
               </div>
 
-              <div className="producto-campo-fila">
+              <div className="producto-campo-fila" data-tour="producto-clasificacion">
                 <div className="producto-campo">
                   <label>
                     Categoría <span style={{ color: "#e5484d" }}>*</span>
@@ -178,7 +214,7 @@ const getFechaMinima = () => {
                 </div>
               </div>
 
-              <div className="producto-campo">
+              <div className="producto-campo" data-tour="producto-precio">
                 <label>
                   Precio de venta (NIO) <span style={{ color: "#e5484d" }}>*</span>
                 </label>
@@ -206,7 +242,7 @@ const getFechaMinima = () => {
 
               <div className="producto-divisor">Control de existencias</div>
 
-              <div className="producto-campo-fila">
+              <div className="producto-campo-fila" data-tour="producto-existencias">
                 <div className="producto-campo">
                   <label>
                     Stock inicial <span style={{ color: "#e5484d" }}>*</span>
@@ -233,7 +269,7 @@ const getFechaMinima = () => {
               {error && <span className="error-text">{error}</span>}
 
               <div className="producto-botones">
-                <button className="producto-btn-guardar" onClick={guardar} >
+                <button className="producto-btn-guardar" data-tour="producto-guardar" onClick={guardar} >
                   💾 Guardar producto
                 </button>
                 <button className="producto-btn-cancelar" onClick={onVolver}>
@@ -303,6 +339,24 @@ const getFechaMinima = () => {
         onSeleccionar={(m) => {
           setMarca(m);
           setModalMarcaAbierto(false);
+        }}
+      />
+
+      <Joyride
+        steps={pasosTour}
+        run={tourActivo}
+        continuous
+        locale={{
+          back: "Atrás",
+          close: "Cerrar",
+          last: "Finalizar",
+          next: "Siguiente",
+          skip: "Omitir",
+        }}
+        onEvent={(data) => {
+          if (data.type === "tour:end") {
+            setTourActivo(false);
+          }
         }}
       />
     </div>

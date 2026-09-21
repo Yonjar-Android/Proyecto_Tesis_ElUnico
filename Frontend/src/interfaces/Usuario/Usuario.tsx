@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { UserPlus, Pencil, Trash2, X, Eye, EyeOff, Search } from "lucide-react";
+import { UserPlus, Pencil, Trash2, X, Eye, EyeOff, Search, HelpCircle } from "lucide-react";
+import { Joyride, type Step } from "react-joyride";
 import "./Usuario.css";
 import {
   obtenerUsuarios as fetchUsuarios,
@@ -46,6 +47,26 @@ export default function Usuario() {
   const [errorForm, setErrorForm] = useState("");
 
   const [usuarioAEliminar, setUsuarioAEliminar] = useState<UsuarioRegistro | null>(null);
+
+  const [tourActivo, setTourActivo] = useState(false);
+  const pasosTour: Step[] = [
+    {
+      target: '[data-tour="agregar-usuario"]',
+      content: "Desde aquí puedes registrar un nuevo usuario y asignarle su rol en el sistema.",
+    },
+    {
+      target: '[data-tour="buscar-usuario"]',
+      content: "Filtra usuarios en tiempo real por nombre de usuario o correo electrónico.",
+    },
+    {
+      target: '[data-tour="tabla-usuarios"]',
+      content: "Visualiza la lista completa de usuarios con sus credenciales y permisos.",
+    },
+    {
+      target: '[data-tour="acciones-usuario"]',
+      content: "Permite editar los datos y rol del usuario, o eliminar su acceso al sistema.",
+    },
+  ];
 
   useEffect(() => {
     const guardado = localStorage.getItem("usuario");
@@ -167,15 +188,25 @@ export default function Usuario() {
           )}
         </div>
 
-        <button className="btn-agregar-usuario" onClick={abrirModalCrear}>
-          <UserPlus size={18} />
-          Agregar usuario
-        </button>
+        <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+          <button
+            type="button"
+            className="usuario-help-btn"
+            onClick={() => setTourActivo(true)}
+            title="Guía de ayuda"
+          >
+            <HelpCircle size={18} />
+          </button>
+          <button className="btn-agregar-usuario" data-tour="agregar-usuario" onClick={abrirModalCrear}>
+            <UserPlus size={18} />
+            Agregar usuario
+          </button>
+        </div>
       </div>
 
       <div className="usuario-card">
         <div className="usuario-filtros">
-          <div className="usuario-busqueda">
+          <div className="usuario-busqueda" data-tour="buscar-usuario">
             <Search size={17} color="#6b7280" />
             <input
               type="text"
@@ -190,7 +221,7 @@ export default function Usuario() {
         </div>
 
         {/* Vista de tabla (escritorio) */}
-        <div className="usuario-tabla-wrap">
+        <div className="usuario-tabla-wrap" data-tour="tabla-usuarios">
           <table className="usuario-tabla">
             <thead>
               <tr>
@@ -226,7 +257,7 @@ export default function Usuario() {
                     </td>
                     <td>{usuario.Correo}</td>
                     <td>{usuario.Nombre_rol}</td>
-                    <td className="col-acciones">
+                    <td className="col-acciones" data-tour="acciones-usuario">
                       <button
                         className="btn-icono"
                         onClick={() => abrirModalEditar(usuario)}
@@ -388,6 +419,24 @@ export default function Usuario() {
           </div>
         </div>
       )}
+
+      <Joyride
+        steps={pasosTour}
+        run={tourActivo}
+        continuous
+        locale={{
+          back: "Atrás",
+          close: "Cerrar",
+          last: "Finalizar",
+          next: "Siguiente",
+          skip: "Omitir",
+        }}
+        onEvent={(data) => {
+          if (data.type === "tour:end") {
+            setTourActivo(false);
+          }
+        }}
+      />
     </div>
   );
 }

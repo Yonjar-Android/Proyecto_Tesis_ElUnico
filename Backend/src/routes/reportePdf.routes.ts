@@ -8,7 +8,9 @@ import {
     descargarReporteDevolucionesPdf,
     descargarReporteClientesDeudaPdf,
     descargarReporteProductosStockPdf,
-    descargarReporteComprasPorPeriodoPdf
+    descargarReporteComprasPorPeriodoPdf,
+    descargarReporteArqueoPeriodoPdf,
+    descargarReporteArqueoCajeroPdf
  } from '../controllers/reportePdf.controller.js';
 
 const router = Router();
@@ -22,4 +24,6 @@ router.get('/devoluciones', descargarReporteDevolucionesPdf);
 router.get('/clientes-deuda', descargarReporteClientesDeudaPdf);
 router.get('/productos-stock', descargarReporteProductosStockPdf);
 router.get('/compras-por-periodo', descargarReporteComprasPorPeriodoPdf);
+router.get('/arqueo-caja-periodo', descargarReporteArqueoPeriodoPdf);
+router.get('/arqueo-caja-cajero', descargarReporteArqueoCajeroPdf);
 export default router;

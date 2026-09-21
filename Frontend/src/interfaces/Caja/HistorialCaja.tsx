@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
-import { History, FileSpreadsheet, FileText, Search, RefreshCw, AlertCircle } from "lucide-react";
+import { History, FileSpreadsheet, FileText, Search, RefreshCw, AlertCircle, HelpCircle } from "lucide-react";
+import { Joyride, type Step } from "react-joyride";
 import { obtenerHistorialCajas, type SesionHistorial } from "../../services/caja.service";
 import { formatearMoneda } from "../FuncionAuxiliar";
 import "./HistorialCaja.css";
@@ -10,6 +11,22 @@ export default function HistorialCaja() {
   const [error, setError] = useState("");
   const [busqueda, setBusqueda] = useState("");
   const [filtroEstado, setFiltroEstado] = useState<"todos" | "Abierta" | "Cerrada">("todos");
+
+  const [tourActivo, setTourActivo] = useState(false);
+  const pasosTour: Step[] = [
+    {
+      target: '[data-tour="exportar-cajas"]',
+      content: "Permite exportar a Excel o generar un documento PDF formal de las sesiones de caja listadas.",
+    },
+    {
+      target: '[data-tour="filtros-caja"]',
+      content: "Busca por número de sesión, cajero u observaciones, o filtra por estado (Abierta / Cerrada).",
+    },
+    {
+      target: '[data-tour="tabla-historial-cajas"]',
+      content: "Tabla histórica con fechas de apertura y cierre, cajero responsable, fondos y diferencias calculadas.",
+    },
+  ];
 
   useEffect(() => {
     cargarHistorial();
@@ -243,23 +260,33 @@ export default function HistorialCaja() {
 
         <div className="historial-caja-acciones-top">
           <button
-            className="btn-exportar-excel"
-            onClick={exportarExcel}
-            disabled={sesionesFiltradas.length === 0}
-            title="Exportar a Excel (.xls)"
+            type="button"
+            className="btn-help-historial"
+            onClick={() => setTourActivo(true)}
+            title="Guía de ayuda"
           >
-            <FileSpreadsheet size={16} />
-            Exportar Excel
+            <HelpCircle size={16} />
           </button>
-          <button
-            className="btn-exportar-pdf"
-            onClick={exportarPDF}
-            disabled={sesionesFiltradas.length === 0}
-            title="Exportar o imprimir en PDF"
-          >
-            <FileText size={16} />
-            Exportar PDF
-          </button>
+          <div data-tour="exportar-cajas" style={{ display: "flex", gap: "8px" }}>
+            <button
+              className="btn-exportar-excel"
+              onClick={exportarExcel}
+              disabled={sesionesFiltradas.length === 0}
+              title="Exportar a Excel (.xls)"
+            >
+              <FileSpreadsheet size={16} />
+              Exportar Excel
+            </button>
+            <button
+              className="btn-exportar-pdf"
+              onClick={exportarPDF}
+              disabled={sesionesFiltradas.length === 0}
+              title="Exportar o imprimir en PDF"
+            >
+              <FileText size={16} />
+              Exportar PDF
+            </button>
+          </div>
           <button
             className="btn-recargar-historial"
             onClick={cargarHistorial}
@@ -277,7 +304,7 @@ export default function HistorialCaja() {
         </div>
       )}
 
-      <div className="historial-caja-filtros">
+      <div className="historial-caja-filtros" data-tour="filtros-caja">
         <div className="historial-caja-search-box">
           <Search size={16} color="#64748b" />
           <input
@@ -299,7 +326,7 @@ export default function HistorialCaja() {
         </select>
       </div>
 
-      <div className="historial-tabla-card">
+      <div className="historial-tabla-card" data-tour="tabla-historial-cajas">
         <table className="historial-tabla">
           <thead>
             <tr>
@@ -402,6 +429,24 @@ export default function HistorialCaja() {
           <span>Motorepuestos El Único</span>
         </div>
       </div>
+
+      <Joyride
+        steps={pasosTour}
+        run={tourActivo}
+        continuous
+        locale={{
+          back: "Atrás",
+          close: "Cerrar",
+          last: "Finalizar",
+          next: "Siguiente",
+          skip: "Omitir",
+        }}
+        onEvent={(data) => {
+          if (data.type === "tour:end") {
+            setTourActivo(false);
+          }
+        }}
+      />
     </div>
   );
 }

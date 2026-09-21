@@ -171,3 +171,33 @@ export const descargarReporteDevolucionesExcel = async (
 
     return response.data;
 };
+
+export const descargarReporteArqueoPeriodoExcel = async (
+    search: string = "",
+    fechaInicio: string = "",
+    fechaFin: string = "",
+    estado: string = ""
+): Promise<Blob> => {
+    const response = await axiosInstance.get(`${API}/excel/arqueo-caja-periodo`, {
+        params: { search, fechaInicio, fechaFin, estado },
+        headers: { Authorization: `Bearer ${token}` },
+        responseType: "blob",
+    });
+    return response.data;
+};
+
+export const descargarReporteArqueoCajeroExcel = async (
+    search: string = "",
+    fechaInicio: string = "",
+    fechaFin: string = "",
+    idUsuario: number | null = null,
+    estado: string = "",
+    nombreCajero: string = ""
+): Promise<Blob> => {
+    const response = await axiosInstance.get(`${API}/excel/arqueo-caja-cajero`, {
+        params: { search, fechaInicio, fechaFin, idUsuario, estado, nombreCajero },
+        headers: { Authorization: `Bearer ${token}` },
+        responseType: "blob",
+    });
+    return response.data;
+};
