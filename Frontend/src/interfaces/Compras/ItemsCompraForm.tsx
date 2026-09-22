@@ -245,9 +245,10 @@ function ItemsCompraForm({ items, setItems, onError }: ItemsCompraFormProps) {
       <ModalSeleccionarProducto
         abierto={modalProductoAbierto}
         onClose={() => setModalProductoAbierto(false)}
-        onSeleccionar={(producto: any) => {
+        onSeleccionar={(producto: any, cant) => {
           setProductoSeleccionado(producto);
           setPrecioVenta(producto.Precio_venta);
+          setCantidad(cant.toString());
           setModalProductoAbierto(false);
         }}
       />

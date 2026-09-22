@@ -152,6 +152,7 @@ function Facturacion() {
 
   const [error, setError] = useState("");
   const [cajaAbierta, setCajaAbierta] = useState<boolean | null>(null);
+  const [procesandoVenta, setProcesandoVenta] = useState(false);
 
   useEffect(() => {
     const verificarCaja = async () => {
@@ -339,7 +340,7 @@ const totalGeneral = subtotalGeneral - descuentoGeneral;
     cancelarEdicion();
   };
 
-  const realizarVenta = () => {
+  const realizarVenta = async () => {
     if (!cajaAbierta) {
       setError("No se puede realizar la venta: la caja está cerrada. Abra una sesión de caja primero.");
       return;
@@ -351,11 +352,30 @@ const totalGeneral = subtotalGeneral - descuentoGeneral;
     }
 
     if (tipoPago === "Transferencia" && !numReferencia?.trim()) {
-  setError("Ingresa el número de referencia de la transferencia.");
-  return;
-}
+      setError("Ingresa el número de referencia de la transferencia.");
+      return;
+    }
 
     setError("");
+
+    if (tipoPago === "Transferencia" || tipoPago === "Credito") {
+      const dineroRecibido = tipoPago === "Transferencia" ? totalGeneral : 0;
+
+      const detalle: DetalleConfirmacionVenta = {
+        tipoMonedaRecibida: "cordobas",
+        montoRecibidoCordobas: dineroRecibido,
+        montoRecibidoDolares: 0,
+        cambioCordobas: 0,
+        tasaCambio: 0,
+        dineroRecibido,
+      };
+
+      setProcesandoVenta(true);
+      await confirmarVenta(detalle, setError);
+      setProcesandoVenta(false);
+      return;
+    }
+
     setModalConfirmarAbierto(true);
   };
 
@@ -594,6 +614,7 @@ const manejarSeleccionCliente = async (cliente: Cliente) => {
                   type="number"
                   step="1"
                   min="0"
+                  readOnly
                   value={precio}
                   onChange={(e) => setPrecio(e.target.value)}
                 />
@@ -834,11 +855,11 @@ const manejarSeleccionCliente = async (cliente: Cliente) => {
             <button
               className="factura-btn-vender"
               onClick={realizarVenta}
-              disabled={!cajaAbierta}
+              disabled={!cajaAbierta || procesandoVenta}
               title={!cajaAbierta ? "La caja está cerrada" : undefined}
               data-tour="realizar-venta"
             >
-              Realizar Venta
+              {procesandoVenta ? "Procesando..." : "Realizar Venta"}
             </button>
           </div>
         </div>
