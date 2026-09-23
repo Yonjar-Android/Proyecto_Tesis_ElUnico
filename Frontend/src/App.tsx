@@ -49,11 +49,16 @@ function App() {
             <Route path="/marcas" element={<Marca />} />
             <Route path="/categorias" element={<Categoria />} />
             <Route path="/clientes" element={<Cliente />} />
-            <Route path="/credito" element={<Credito />} />
+            <Route path="/credito" element={
+               <RutaProtegidaCaja>
+              <Credito /></RutaProtegidaCaja>} />
             <Route path="/proveedores" element={<Proveedor />} />
             <Route path="/inventario" element={<Inventario />} />
             <Route path="/salidasInventario" element={<SalidasInventario />} />
-            <Route path="/devoluciones" element={<Devoluciones />} />
+            <Route path="/devoluciones" element={
+              <RutaProtegidaCaja>
+              <Devoluciones/>
+              </RutaProtegidaCaja>} />
             <Route path="/compras" element={<Compras />} />
             <Route path="/compras/historial" element={<HistorialCompras />} />
             <Route path="/compras/:id/editar" element={<EditarCompra />} />

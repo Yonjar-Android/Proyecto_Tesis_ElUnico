@@ -13,7 +13,9 @@ export interface DatosRecibo {
   hora: string;
   tipoPago: string;
   clienteNombre: string;
-  clienteCedula?: string; // si el cliente no tiene cédula registrada, no se muestra la fila
+  clienteCedula?: string; 
+  recibidoEfectivo?: number; 
+  cambio?: number;         
   articulos: ArticuloRecibo[];
   devoluciones: DevolucionDTO[];
 }

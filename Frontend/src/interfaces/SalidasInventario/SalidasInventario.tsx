@@ -394,8 +394,9 @@ function SalidasInventario() {
       <ModalSeleccionarProducto
         abierto={modalProductoAbierto}
         onClose={() => setModalProductoAbierto(false)}
-        onSeleccionar={(producto) => {
+        onSeleccionar={(producto, cant) => {
           setProductoSeleccionado(producto);
+          setCantidad(cant.toString());
           setModalProductoAbierto(false);
         }}
       />

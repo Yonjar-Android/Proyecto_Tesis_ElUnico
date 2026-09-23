@@ -77,6 +77,8 @@ function ModalAbonarCredito({ abierto, factura, onClose, onConfirmado }: Props) 
   const [error, setError] = useState("");
   const [guardando, setGuardando] = useState(false);
 
+  const esTransferencia = tipoPago === "Transferencia";
+
   const buscarCuotasPendientes = async () => {
     try {
       const response: CuotaInfo[] = await obtenerCuotasPendientes(factura.id);
@@ -107,14 +109,17 @@ function ModalAbonarCredito({ abierto, factura, onClose, onConfirmado }: Props) 
   const numDolaresRecibido = Number(montoRecibidoDolares) || 0;
   const numMontoAAbonar = Number(montoAAbonar) || 0;
 
-  const recibidoEnCordobas =
-    tipoMonedaRecibida === "cordobas"
-      ? numCordobasRecibido
-      : tipoMonedaRecibida === "dolares"
-      ? numDolaresRecibido * TASA_CAMBIO
-      : numCordobasRecibido + numDolaresRecibido * TASA_CAMBIO;
+  // En Transferencia no hay entrega física de dinero ni cambio que calcular:
+  // lo recibido es, por definición, exactamente lo que se está abonando.
+  const recibidoEnCordobas = esTransferencia
+    ? numMontoAAbonar
+    : tipoMonedaRecibida === "cordobas"
+    ? numCordobasRecibido
+    : tipoMonedaRecibida === "dolares"
+    ? numDolaresRecibido * TASA_CAMBIO
+    : numCordobasRecibido + numDolaresRecibido * TASA_CAMBIO;
 
-  const cambioCordobas = Math.max(0, recibidoEnCordobas - numMontoAAbonar);
+  const cambioCordobas = esTransferencia ? 0 : Math.max(0, recibidoEnCordobas - numMontoAAbonar);
 
   const { distribucion, excedente } = calcularDistribucion(numMontoAAbonar, cuotasPendientes);
 
@@ -131,19 +136,21 @@ function ModalAbonarCredito({ abierto, factura, onClose, onConfirmado }: Props) 
   }
 
   const confirmar = async () => {
-    if (recibidoEnCordobas <= 0) {
-      setError("Ingresa el monto recibido.");
-      return;
-    }
-
     if (numMontoAAbonar <= 0) {
       setError("Ingresa cuánto deseas abonar.");
       return;
     }
 
-    if (numMontoAAbonar > recibidoEnCordobas) {
-      setError("El monto a abonar no puede ser mayor al monto recibido.");
-      return;
+    if (!esTransferencia) {
+      if (recibidoEnCordobas <= 0) {
+        setError("Ingresa el monto recibido.");
+        return;
+      }
+
+      if (numMontoAAbonar > recibidoEnCordobas) {
+        setError("El monto a abonar no puede ser mayor al monto recibido.");
+        return;
+      }
     }
 
     if (tipoPago === "Transferencia" && !numReferencia.trim()) {
@@ -153,8 +160,9 @@ function ModalAbonarCredito({ abierto, factura, onClose, onConfirmado }: Props) 
 
     // La tabla 'abono' no guarda moneda recibida/cambio como columnas propias,
     // así que se deja registrado en observaciones para trazabilidad.
+    // En Transferencia no aplica (no hay moneda física ni cambio).
     const observaciones =
-      tipoMonedaRecibida === "cordobas"
+      esTransferencia || tipoMonedaRecibida === "cordobas"
         ? undefined
         : `Recibido en ${tipoMonedaRecibida === "dolares" ? "dólares" : "mixto"}: ` +
           `C$${formatearMoneda(numCordobasRecibido)} + $${formatearMoneda(numDolaresRecibido)} ` +
@@ -204,6 +212,11 @@ function ModalAbonarCredito({ abierto, factura, onClose, onConfirmado }: Props) 
                 const nuevo = e.target.value as TipoPago;
                 setTipoPago(nuevo);
                 if (nuevo !== "Transferencia") setNumReferencia("");
+                // Al cambiar de tipo de pago se limpian los campos de moneda
+                // recibida, para no arrastrar un monto que ya no aplica.
+                setTipoMonedaRecibida("cordobas");
+                setMontoRecibidoCordobas("");
+                setMontoRecibidoDolares("");
               }}
             >
               <option value="Contado">Contado</option>
@@ -223,39 +236,43 @@ function ModalAbonarCredito({ abierto, factura, onClose, onConfirmado }: Props) 
             </div>
           )}
 
-          <div className="campo">
-            <label>Moneda recibida <span style={{ color: "#e5484d" }}>*</span></label>
-            <div className="moneda-selector">
-              <button type="button" className={`moneda-btn ${tipoMonedaRecibida === "cordobas" ? "activo" : ""}`} onClick={() => resetearCamposRecibido("cordobas")}>Córdobas</button>
-              <button type="button" className={`moneda-btn ${tipoMonedaRecibida === "dolares" ? "activo" : ""}`} onClick={() => resetearCamposRecibido("dolares")}>Dólares</button>
-              <button type="button" className={`moneda-btn ${tipoMonedaRecibida === "mixto" ? "activo" : ""}`} onClick={() => resetearCamposRecibido("mixto")}>Mixto</button>
-            </div>
-          </div>
-
-          {tipoMonedaRecibida !== "dolares" && (
-            <div className="campo">
-              <label>Monto recibido (córdobas)</label>
-              <div className="confirmar-monto-input">
-                <span>C$</span>
-                <input type="number" step="1" min="0" placeholder="0.00" value={montoRecibidoCordobas} onChange={(e) => setMontoRecibidoCordobas(e.target.value)} />
+          {!esTransferencia && (
+            <>
+              <div className="campo">
+                <label>Moneda recibida <span style={{ color: "#e5484d" }}>*</span></label>
+                <div className="moneda-selector">
+                  <button type="button" className={`moneda-btn ${tipoMonedaRecibida === "cordobas" ? "activo" : ""}`} onClick={() => resetearCamposRecibido("cordobas")}>Córdobas</button>
+                  <button type="button" className={`moneda-btn ${tipoMonedaRecibida === "dolares" ? "activo" : ""}`} onClick={() => resetearCamposRecibido("dolares")}>Dólares</button>
+                  <button type="button" className={`moneda-btn ${tipoMonedaRecibida === "mixto" ? "activo" : ""}`} onClick={() => resetearCamposRecibido("mixto")}>Mixto</button>
+                </div>
               </div>
-            </div>
-          )}
 
-          {tipoMonedaRecibida !== "cordobas" && (
-            <div className="campo">
-              <label>Monto recibido (dólares)</label>
-              <div className="confirmar-monto-input">
-                <span>$</span>
-                <input type="number" step="1" min="0" placeholder="0.00" value={montoRecibidoDolares} onChange={(e) => setMontoRecibidoDolares(e.target.value)} />
-              </div>
-            </div>
-          )}
+              {tipoMonedaRecibida !== "dolares" && (
+                <div className="campo">
+                  <label>Monto recibido (córdobas)</label>
+                  <div className="confirmar-monto-input">
+                    <span>C$</span>
+                    <input type="number" step="1" min="0" placeholder="0.00" value={montoRecibidoCordobas} onChange={(e) => setMontoRecibidoCordobas(e.target.value)} />
+                  </div>
+                </div>
+              )}
 
-          {tipoMonedaRecibida !== "cordobas" && (
-            <p className="abono-nota-tasa">
-              Equivalente recibido: C${formatearMoneda(recibidoEnCordobas)} (tasa C${formatearMoneda(TASA_CAMBIO)} por $1)
-            </p>
+              {tipoMonedaRecibida !== "cordobas" && (
+                <div className="campo">
+                  <label>Monto recibido (dólares)</label>
+                  <div className="confirmar-monto-input">
+                    <span>$</span>
+                    <input type="number" step="1" min="0" placeholder="0.00" value={montoRecibidoDolares} onChange={(e) => setMontoRecibidoDolares(e.target.value)} />
+                  </div>
+                </div>
+              )}
+
+              {tipoMonedaRecibida !== "cordobas" && (
+                <p className="abono-nota-tasa">
+                  Equivalente recibido: C${formatearMoneda(recibidoEnCordobas)} (tasa C${formatearMoneda(TASA_CAMBIO)} por $1)
+                </p>
+              )}
+            </>
           )}
 
           <div className="campo">
@@ -266,7 +283,7 @@ function ModalAbonarCredito({ abierto, factura, onClose, onConfirmado }: Props) 
             </div>
           </div>
 
-          {cambioCordobas > 0 && (
+          {!esTransferencia && cambioCordobas > 0 && (
             <div className="confirmar-cambio-card">
               <span className="confirmar-cambio-icono">💵</span>
               <span className="confirmar-cambio-label">Cambio</span>
