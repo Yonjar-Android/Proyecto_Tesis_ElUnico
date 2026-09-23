@@ -45,13 +45,14 @@ export const postAperturaCaja = async (req: Request, res: Response) => {
 
 export const postEgresoCaja = async (req: Request, res: Response) => {
   try {
-    const { idSesion, tipoEgreso, metodoPago, concepto, montoCordobas, observaciones } = req.body;
+    const { idSesion, tipoEgreso, metodoPago, concepto, montoCordobas, montoDolares, observaciones } = req.body;
     const idEgreso = await registrarEgresoCaja(
       Number(idSesion),
       tipoEgreso,
       metodoPago,
       concepto,
-      Number(montoCordobas),
+      Number(montoCordobas) || 0,
+      Number(montoDolares) || 0,
       observaciones || ""
     );
     res.status(201).json({ success: true, idEgreso });
@@ -98,13 +99,14 @@ export const getResumenCierreCaja = async (req: Request, res: Response) => {
 export const putEgresoCaja = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { tipoEgreso, metodoPago, concepto, montoCordobas, observaciones } = req.body;
+    const { tipoEgreso, metodoPago, concepto, montoCordobas, montoDolares, observaciones } = req.body;
     await actualizarEgresoCaja(
       Number(id),
       tipoEgreso,
       metodoPago,
       concepto,
-      Number(montoCordobas),
+      Number(montoCordobas) || 0,
+      Number(montoDolares) || 0,
       observaciones || ""
     );
     res.status(200).json({ success: true });

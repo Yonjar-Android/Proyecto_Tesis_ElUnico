@@ -9,6 +9,7 @@ export const crearVenta = async (
     Tipo_Pago: string,
     Total: number,
     RecibidoCordobas:number,
+    RecibidoDolares: number,
     Num_referencia: string,
     Detalles: DetalleVenta[],
     DatosCredito?: {  // ← NUEVO: Parámetro opcional
@@ -24,6 +25,7 @@ export const crearVenta = async (
         Tipo_Pago,
         Total,
         RecibidoCordobas,
+        RecibidoDolares,
         Num_referencia,
         Detalles,
         DatosCredito

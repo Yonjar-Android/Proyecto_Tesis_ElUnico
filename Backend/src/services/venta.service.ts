@@ -73,6 +73,7 @@ export const crearVenta = async (
     tipoPago: string,
     total: number,
     recibidoCordobas: number,
+    recibidoDolares: number,
     numReferencia: string,
     detalles: DetalleVentaInput[],
     datosCredito?: {
@@ -134,12 +135,21 @@ export const crearVenta = async (
             }
         }
 
+        // Para ventas al crédito y transferencias bancarias, NO ingresa efectivo físico a la caja
+        let cordobasCaja = Number(recibidoCordobas) || 0;
+        let dolaresCaja = Number(recibidoDolares) || 0;
+
+        if (tipoPago === "Credito" || tipoPago === "Transferencia") {
+            cordobasCaja = 0;
+            dolaresCaja = 0;
+        }
+
         // Crear venta
         const [venta]: any = await connection.query(
             `
             INSERT INTO ventas
-            (Id_cliente, Id_usuario, Fecha, Tipo_Pago, Num_referencia, Estado, Total)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            (Id_cliente, Id_usuario, Fecha, Tipo_Pago, Num_referencia, Estado, Total, RecibidoCordobas, RecibidoDolares)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             `,
             [
                 idCliente,
@@ -148,7 +158,9 @@ export const crearVenta = async (
                 tipoPago,
                 numReferencia,
                 estado,
-                total
+                total,
+                cordobasCaja,
+                dolaresCaja
             ]
         );
 

@@ -6,7 +6,7 @@ import ModalEditarCliente from "./ModalEditarCliente";
 import ModalAgregarCliente from "./ModalAgregarCliente"
 import ModalAbonarCliente from "./ModalAbonarCliente";
 import { crearDetalleAbono } from "../../services/detalle_abono.service";
-import { SquarePen, CreditCard, HelpCircle } from "lucide-react";
+import { SquarePen, HelpCircle } from "lucide-react";
 import { formatearMoneda, formatearTelefono } from "../FuncionAuxiliar"
 import Notificacion, { type TipoNotificacion } from "../../components/Notification/Notification";
 import { Joyride, type Step } from "react-joyride";

@@ -1040,3 +1040,118 @@ export const generateArqueoCajeroPdfReport = async (reportData: any, nombreCajer
         }
     });
 };
+export const generateCierreCajaPdfReport = async (detalle: any): Promise<Buffer> => {
+    return new Promise((resolve, reject) => {
+        try {
+            const doc = new PDFDocument({ margin: 40, size: 'A4' }); // portrait, es un recibo, no una tabla larga
+            const chunks: Buffer[] = [];
+            doc.on('data', (c) => chunks.push(c));
+            doc.on('end', () => resolve(Buffer.concat(chunks)));
+            doc.on('error', reject);
+
+            const sesion = detalle.sesion;
+            const nombreReporte = `Cierre de Caja #${sesion.id_sesion}`;
+            doc.on('pageAdded', () => agregarEncabezado(doc, nombreReporte));
+            agregarEncabezado(doc, nombreReporte);
+
+            const anchoUtil = doc.page.width - doc.page.margins.left - doc.page.margins.right;
+
+            doc.fontSize(9).font('Helvetica-Bold').fillColor('#475569').text(
+                `Cajero: ${sesion.usuario_nombre || 'N/D'}   |   Apertura: ${formatoFechaHora(sesion.fecha_apertura)}   |   Cierre: ${formatoFechaHora(sesion.fecha_cierre)}   |   Tasa: C$${Number(detalle.tasaCambio).toFixed(2)}`,
+                doc.page.margins.left, doc.y, { width: anchoUtil }
+            );
+            doc.moveDown(1.2);
+
+            const formatoUSD = (v: any) => `$ ${Number(v ?? 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD`;
+
+            // --- 8 KPIs, 4 por fila ---
+            const stats = [
+                { label: 'Apertura Córdobas', value: detalle.montoAperturaCordobas, format: formatoMoneda },
+                { label: 'Apertura Dólares', value: detalle.montoAperturaDolares, format: formatoUSD },
+                { label: 'Ingresos Córdobas', value: detalle.ingresosCordobas, format: formatoMoneda, variant: 'success' as const },
+                { label: 'Ingresos Dólares', value: detalle.ingresosDolares, format: formatoUSD, variant: 'success' as const },
+                { label: 'Transferencias', value: detalle.transferencias, format: formatoMoneda },
+                { label: 'Egresos', value: detalle.totalEgresosCordobas, format: formatoMoneda, variant: 'danger' as const },
+                { label: 'Efectivo Esperado', value: detalle.efectivoEsperado, format: formatoMoneda },
+                { label: 'Efectivo Contado', value: detalle.totalEfectivoContado, format: formatoMoneda },
+            ];
+
+            const porFila = 4, anchoStat = 130, altoStat = 40, gapStat = 6;
+            const anchoBloqueStats = porFila * anchoStat;
+            const xInicioStats = doc.page.margins.left + (anchoUtil - anchoBloqueStats) / 2;
+
+            let statX = xInicioStats, statY = doc.y;
+            stats.forEach((stat, i) => {
+                if (i > 0 && i % porFila === 0) {
+                    statX = xInicioStats;
+                    statY += altoStat + gapStat;
+                }
+                dibujarCajaStat(doc, statX, statY, anchoStat - gapStat, altoStat, stat.label, stat.format(stat.value), stat.variant);
+                statX += anchoStat;
+            });
+
+            doc.y = statY + altoStat + 16;
+            doc.x = doc.page.margins.left;
+
+            // --- Diferencia destacada, centrada ---
+            const diff = Number(detalle.diferencia) || 0;
+            const anchoDiff = 220;
+            const xDiff = doc.page.margins.left + (anchoUtil - anchoDiff) / 2;
+            dibujarCajaStat(
+                doc, xDiff, doc.y, anchoDiff, 40, 'Diferencia al Cierre',
+                `${diff > 0 ? '+' : ''}C$ ${Number(diff).toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
+                diff < 0 ? 'danger' : diff > 0 ? 'success' : 'normal'
+            );
+            doc.y += 40 + 20;
+            doc.x = doc.page.margins.left;
+
+            // --- Detalle de egresos ---
+            doc.fontSize(10).font('Helvetica-Bold').fillColor('#0F172A')
+                .text(`Detalle de Egresos (${(detalle.egresos ?? []).length})`, doc.page.margins.left, doc.y);
+            doc.moveDown(0.5);
+
+            const columnas: Columna[] = [
+                { header: '#', key: '_idx', width: 30, align: 'center' },
+                { header: 'Concepto', key: 'concepto', width: 190 },
+                { header: 'Tipo', key: 'tipo_egreso', width: 100 },
+                { header: 'Método', key: 'metodo_pago', width: 90 },
+                { header: 'Monto', key: 'monto_cordobas', width: 105, align: 'right', format: formatoMoneda },
+            ];
+
+            const anchoTabla = columnas.reduce((s, c) => s + c.width, 0);
+            const xInicio = doc.page.margins.left + (anchoUtil - anchoTabla) / 2;
+
+            let y = dibujarHeaderTabla(doc, columnas, xInicio, doc.y);
+            const limiteInferior = doc.page.height - doc.page.margins.bottom;
+
+            const egresosData = (detalle.egresos ?? []).map((e: any, i: number) => ({ ...e, _idx: i + 1 }));
+
+            if (egresosData.length === 0) {
+                doc.fontSize(8.5).font('Helvetica').fillColor('#94A3B8')
+                    .text('No hubo egresos registrados en esta sesión.', xInicio + 4, y + 5);
+                y += 20;
+            } else {
+                egresosData.forEach((row: any, i: number) => {
+                    if (y + 18 > limiteInferior) {
+                        doc.addPage();
+                        y = dibujarHeaderTabla(doc, columnas, xInicio, doc.y);
+                    }
+                    y = dibujarFila(doc, columnas, row, xInicio, y, i % 2 === 1);
+                });
+            }
+
+            // --- Observaciones ---
+            if (sesion.observaciones && String(sesion.observaciones).trim()) {
+                doc.moveDown(1.5);
+                doc.fontSize(9).font('Helvetica-Bold').fillColor('#0F172A')
+                    .text('Observaciones:', doc.page.margins.left, doc.y);
+                doc.fontSize(8.5).font('Helvetica').fillColor('#475569')
+                    .text(String(sesion.observaciones), doc.page.margins.left, doc.y + 12, { width: anchoUtil });
+            }
+
+            doc.end();
+        } catch (error) {
+            reject(error);
+        }
+    });
+};

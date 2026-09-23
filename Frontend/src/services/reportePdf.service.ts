@@ -149,3 +149,10 @@ export const descargarReporteArqueoCajeroPdf = async (
     });
     return response.data;
 };
+export const descargarReporteCierreCajaPdf = async (idSesion: number): Promise<Blob> => {
+    const response = await axiosInstance.get(`${API}/cierre-caja/${idSesion}`, {
+        headers: { Authorization: `Bearer ${token}` },
+        responseType: 'blob'
+    });
+    return response.data;
+};

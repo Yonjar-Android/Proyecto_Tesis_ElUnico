@@ -11,7 +11,7 @@ import "./AperturaCierre.css";
 export default function AperturaCaja() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { cajaAbierta, refrescarCaja } = useCajaAbierta();
+  const { cajaAbierta, refrescarCaja, marcarCajaAbierta } = useCajaAbierta();
  
   const mensajeCaja = (location.state as { mensajeCaja?: string } | null)?.mensajeCaja;
  
@@ -54,9 +54,13 @@ export default function AperturaCaja() {
     setGuardando(true);
     try {
       // AQUÍ ESTABA EL ERROR: Ahora pasamos los 4 argumentos en orden
-      await abrirCaja(montoCordobas, montoDolares, tasaCambio, observaciones);
-      await refrescarCaja();
-      navigate("/caja");
+      const respuesta = await abrirCaja(montoCordobas, montoDolares, tasaCambio, observaciones);
+      if (respuesta?.success === false) {
+        throw new Error(respuesta.message || "No se pudo abrir la caja.");
+      }
+      marcarCajaAbierta();
+      navigate("/caja", { replace: true });
+      void refrescarCaja();
     } catch (err: any) {
       setError(err?.response?.data?.message || err?.message || "No se pudo abrir la caja. Intenta de nuevo.");
     } finally {

@@ -26,6 +26,7 @@ interface Egreso {
   concepto: string;
   metodo_pago: string;
   monto_cordobas: number;
+  monto_dolares?: number;
   fecha_registro: string;
 }
 
@@ -34,6 +35,7 @@ export default function Caja() {
   const [sesionActiva, setSesionActiva] = useState<SesionCaja | null>(null);
   const [egresos, setEgresos] = useState<Egreso[]>([]);
   const [ingresosDia, setIngresosDia] = useState(0);
+  const [ingresosDolares, setIngresosDolares] = useState(0);
   const [transferencias, setTransferencias] = useState(0);
 
   const [modalEgresoAbierto, setModalEgresoAbierto] = useState(false);
@@ -69,14 +71,15 @@ export default function Caja() {
 
   async function cargarEstadoCaja() {
     try {
-      const data = await obtenerSesionActiva();
+       const data = await obtenerSesionActiva();
       setSesionActiva(data.sesion);
       setEgresos(data.egresos || []);
 
       // Ingresos en efectivo del día
       setIngresosDia(
-        Number(data.ingresosDia ?? data.sesion?.total_ingresos_sistema ?? 0)
+        Number(data.ingresosDia ?? 0)
       );
+      setIngresosDolares(Number(data.ingresosDolares ?? 0));
 
       // Ingresos por transferencias (banco / electrónico)
       setTransferencias(
@@ -93,6 +96,7 @@ export default function Caja() {
       setSesionActiva(null);
       setEgresos([]);
       setIngresosDia(0);
+      setIngresosDolares(0);
       setTransferencias(0);
     }
   }
@@ -112,14 +116,25 @@ export default function Caja() {
   // Equivalente en córdobas de los dólares de apertura
   const aperturaDolaresEnCordobas = aperturaDolares * tasaCambio;
 
-  // Total de egresos registrados
-  const totalEgresos = egresos.reduce((acc, e) => acc + Number(e.monto_cordobas || 0), 0);
+  // Egresos en efectivo (desglosados por divisa física)
+  const totalEgresosCordobas = egresos
+    .filter((e) => e.metodo_pago === "Efectivo")
+    .reduce((acc, e) => acc + Number(e.monto_cordobas || 0), 0);
+  const totalEgresosDolares = egresos
+    .filter((e) => e.metodo_pago === "Efectivo")
+    .reduce((acc, e) => acc + Number(e.monto_dolares || 0), 0);
+  const totalEgresosNoCaja = egresos
+    .filter((e) => e.metodo_pago !== "Efectivo")
+    .reduce((acc, e) => acc + Number(e.monto_cordobas || 0), 0);
 
-  // Total apertura consolidada
-  const aperturaTotal = aperturaCordobas + aperturaDolaresEnCordobas;
 
-  // NETO DEL DÍA: Monto de apertura + Ingresos - Egresos
-  const netoDia = aperturaTotal + ingresosDia + transferencias - totalEgresos;
+  // SALDOS DISPONIBLES EN CAJA FÍSICA (SEPARADOS):
+  const disponibleCordobas = aperturaCordobas + ingresosDia - totalEgresosCordobas;
+  const disponibleDolares = aperturaDolares + ingresosDolares - totalEgresosDolares;
+
+  // NETO TOTAL CONSOLIDADO EN CAJA FÍSICA (Transferencias excluidas):
+  const netoDiaCordobas = disponibleCordobas + (disponibleDolares * tasaCambio);
+  const netoDiaDolares = netoDiaCordobas / tasaCambio;
 
   function handleEgresoActualizado(egresoActualizado: Egreso) {
     setEgresos((prev) =>
@@ -177,7 +192,7 @@ export default function Caja() {
             </button>
           </div>
 
-          {/* GRID DE RESUMEN FINANCIERO: 6 TARJETAS (2 filas de 3) */}
+          {/* GRID DE RESUMEN FINANCIERO: 6 TARJETAS (2 filas de 3) + TARJETA DE NETO */}
           <div className="caja-resumen-grid" data-tour="resumen-caja">
             {/* 1. Apertura Córdobas */}
             <div className="caja-resumen-card">
@@ -197,31 +212,49 @@ export default function Caja() {
 
             {/* 3. Ingresos del día */}
             <div className="caja-resumen-card">
-              <span>Ingresos del día</span>
+              <span>Ingresos del día en córdobas</span>
               <strong className="valor-verde">C${formatearMoneda(ingresosDia)}</strong>
-              <small style={{ color: "#16a34a", fontSize: 12 }}>Ventas en efectivo</small>
+              <small style={{ color: "#16a34a", fontSize: 12 }}>Ventas en efectivo C$ y abonos</small>
             </div>
 
-            {/* 4. Transferencias */}
+            {/* 4. Ingresos en dólares */}
+            <div className="caja-resumen-card">
+              <span>Ingresos del día en dólares</span>
+              <strong style={{ color: "#16a34a" }}>${formatearMoneda(ingresosDolares)} USD</strong>
+              <small style={{ color: "#64748b", fontSize: 12 }}>
+                Equiv. C${formatearMoneda(ingresosDolares * tasaCambio)} · Ventas en efectivo USD
+              </small>
+            </div>
+
+            {/* 5. Transferencias (BANCO - NO SUMADO A CAJA FÍSICA) */}
             <div className="caja-resumen-card">
               <span>Transferencias</span>
               <strong style={{ color: "#0047ab" }}>C${formatearMoneda(transferencias)}</strong>
-              <small style={{ color: "#64748b", fontSize: 12 }}>Banco / Electrónico</small>
+              <small style={{ color: "#64748b", fontSize: 12 }}>Banco / Electrónico · Excluido de caja física</small>
             </div>
 
-            {/* 5. Egresos del día */}
+            {/* 6. Egresos del día */}
             <div className="caja-resumen-card">
               <span>Egresos del día</span>
-              <strong className="valor-rojo">- C${formatearMoneda(totalEgresos)}</strong>
-              <small style={{ color: "#dc2626", fontSize: 12 }}>{egresos.length} salidas</small>
+              <strong className="valor-rojo">- C${formatearMoneda(totalEgresosCordobas)}</strong>
+              <small style={{ color: "#dc2626", fontSize: 12 }}>
+                {totalEgresosDolares > 0 && `- $${formatearMoneda(totalEgresosDolares)} USD · `}
+                {egresos.length} salidas registradas
+                {totalEgresosNoCaja > 0 && ` · C$${formatearMoneda(totalEgresosNoCaja)} no efectivo`}
+              </small>
             </div>
 
-            {/* 6. Neto del día (ÚNICA TARJETA DE TOTAL CONSOLIDADO) */}
+            {/* 7. Neto del día (MOSTRAR CORRECTAMENTE CÓRDOBAS Y DÓLARES) */}
             <div className="caja-resumen-card caja-resumen-neto">
-              <span>Neto del día</span>
-              <strong>C${formatearMoneda(netoDia)}</strong>
-              <small style={{ color: "rgba(255,255,255,0.85)", fontSize: 11.5 }}>
-                Apertura + Ingresos - Egresos
+              <span>Neto disponible en caja</span>
+              <div style={{ display: "flex", gap: "16px", alignItems: "baseline", marginTop: 4, flexWrap: "wrap" }}>
+                <strong>C${formatearMoneda(disponibleCordobas)}</strong>
+                <span style={{ fontSize: 18, fontWeight: 700, color: "rgba(255,255,255,0.95)" }}>
+                  + ${formatearMoneda(disponibleDolares)} USD
+                </span>
+              </div>
+              <small style={{ color: "rgba(255,255,255,0.88)", fontSize: 11.5, marginTop: 4 }}>
+                Consolidado: C${formatearMoneda(netoDiaCordobas)} (Equiv. ${formatearMoneda(netoDiaDolares)} USD) · Transferencias excluidas
               </small>
             </div>
           </div>
@@ -250,7 +283,10 @@ export default function Caja() {
                       </p>
                     </div>
                     <div className="movimiento-derecha">
-                      <span className="movimiento-monto">- C${formatearMoneda(egreso.monto_cordobas)}</span>
+                      <span className="movimiento-monto">
+                        - C${formatearMoneda(egreso.monto_cordobas)}
+                        {Number(egreso.monto_dolares || 0) > 0 && <> · ${formatearMoneda(Number(egreso.monto_dolares))} USD</>}
+                      </span>
                       <button
                         className="movimiento-eliminar"
                         onClick={() => setEgresoEditando(egreso)}
@@ -261,8 +297,11 @@ export default function Caja() {
                   </div>
                 ))}
                 <div className="caja-total-egresos">
-                  <span>Total egresos</span>
-                  <strong>- C${formatearMoneda(totalEgresos)}</strong>
+                  <span>Total egresos en efectivo</span>
+                  <strong>
+                    - C${formatearMoneda(totalEgresosCordobas)}
+                    {totalEgresosDolares > 0 && <> · ${formatearMoneda(totalEgresosDolares)} USD</>}
+                  </strong>
                 </div>
               </>
             )}
@@ -280,6 +319,9 @@ export default function Caja() {
         <EgresoModal
           idSesion={sesionActiva.id_sesion}
           egresoAEditar={egresoEditando}
+          disponibleCordobas={disponibleCordobas}
+          disponibleDolares={disponibleDolares}
+          tasaCambio={tasaCambio}
           onClose={() => {
             setModalEgresoAbierto(false);
             setEgresoEditando(null);

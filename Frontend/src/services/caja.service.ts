@@ -9,6 +9,7 @@ export type EgresoCajaInput = {
   metodoPago: string;
   concepto: string;
   montoCordobas: number;   // antes: monto
+  montoDolares: number;
   observaciones: string;
 };
 
@@ -41,6 +42,7 @@ export interface SesionCajaActiva {
     tasa_cambio: number;
     total_ingresos_sistema?: number;
     total_tarjeta_transferencia?: number;
+    monto_dolares?: number;
     estado: string;
   } | null;
 }

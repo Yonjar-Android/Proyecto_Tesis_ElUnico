@@ -33,7 +33,6 @@ export default function Sidebar() {
   const navigate = useNavigate();
   const [cajaAbierto, setCajaAbierto] = useState(false);
 
-  const [cajaSesionAbierta, setCajaSesionAbierta] = useState(false);
   const [mostrarModalCaja, setMostrarModalCaja] = useState(false);
 
   const { cajaAbierta: cajaSesionActiva } = useCajaAbierta();

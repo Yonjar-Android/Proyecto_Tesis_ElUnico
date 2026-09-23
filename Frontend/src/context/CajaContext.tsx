@@ -4,15 +4,21 @@ import { obtenerSesionActiva } from "../services/caja.service";
 interface CajaContextType {
   cajaAbierta: boolean | null; // null = aún verificando
   refrescarCaja: () => Promise<void>;
+  marcarCajaAbierta: () => void;
 }
 
 const CajaContext = createContext<CajaContextType>({
   cajaAbierta: null,
   refrescarCaja: async () => {},
+  marcarCajaAbierta: () => {},
 });
 
 export function CajaProvider({ children }: { children: ReactNode }) {
   const [cajaAbierta, setCajaAbierta] = useState<boolean | null>(null);
+
+  const marcarCajaAbierta = useCallback(() => {
+    setCajaAbierta(true);
+  }, []);
 
   const refrescarCaja = useCallback(async () => {
     try {
@@ -28,7 +34,7 @@ export function CajaProvider({ children }: { children: ReactNode }) {
   }, [refrescarCaja]);
 
   return (
-    <CajaContext.Provider value={{ cajaAbierta, refrescarCaja }}>
+    <CajaContext.Provider value={{ cajaAbierta, refrescarCaja, marcarCajaAbierta }}>
       {children}
     </CajaContext.Provider>
   );

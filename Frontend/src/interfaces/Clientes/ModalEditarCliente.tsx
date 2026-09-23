@@ -4,7 +4,6 @@ import {
   IconoPersonaMas,
   IconoNumeral,
   IconoTelefono,
-  IconoTarjeta,
   IconoUbicacion,
 } from "./IconosCliente";
 import Cliente from "./Cliente";

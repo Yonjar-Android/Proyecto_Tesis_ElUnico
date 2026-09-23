@@ -5,7 +5,6 @@ import {
   IconoTelefono,
   IconoUbicacion,
 } from "../Clientes/IconosCliente";
-import { formatearTelefono } from "../FuncionAuxiliar";
 
 interface Props {
   abierto: boolean;

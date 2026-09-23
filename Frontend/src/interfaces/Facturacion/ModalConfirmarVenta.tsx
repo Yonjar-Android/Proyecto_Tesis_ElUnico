@@ -86,12 +86,12 @@ function ModalConfirmarVenta({
 
   const confirmar = async () => {
 
-    if (tipoMonedaRecibida === "cordobas" && numCordobasRecibido <= 0 && tipoPago != "Credito") {
+    if (tipoMonedaRecibida === "cordobas" && numCordobasRecibido <= 0) {
       setError("Ingresa el monto recibido en córdobas.");
       return;
     }
 
-    if (tipoMonedaRecibida === "dolares" && numDolaresRecibido <= 0 && tipoPago != "Credito") {
+    if (tipoMonedaRecibida === "dolares" && numDolaresRecibido <= 0) {
       setError("Ingresa el monto recibido en dólares.");
       return;
     }
@@ -100,23 +100,33 @@ function ModalConfirmarVenta({
       tipoMonedaRecibida === "mixto" &&
       numCordobasRecibido <= 0 &&
       numDolaresRecibido <= 0
-      && tipoPago != "Credito"
     ) {
       setError("Ingresa al menos un monto recibido (córdobas o dólares).");
       return;
     }
 
-    if (recibidoEnCordobas < totalVenta && tipoPago != "Credito") {
+    if (recibidoEnCordobas < totalVenta) {
       setError("El monto recibido no puede ser menor al total a pagar.");
       return;
     }
 
+    // Cálculo exacto de ingresos netos por moneda
+    const cordobasNetos = tipoMonedaRecibida === "cordobas"
+      ? totalVenta
+      : tipoMonedaRecibida === "dolares"
+      ? 0
+      : Math.max(0, numCordobasRecibido - cambioCordobas);
+
+    const dolaresNetos = tipoMonedaRecibida === "dolares"
+      ? (cambioCordobas === 0 ? numDolaresRecibido : Number((totalVenta / TASA_CAMBIO).toFixed(2)))
+      : tipoMonedaRecibida === "cordobas"
+      ? 0
+      : numDolaresRecibido;
+
     const detalle: DetalleConfirmacionVenta = {
       tipoMonedaRecibida,
-      montoRecibidoCordobas:
-        tipoMonedaRecibida === "dolares" ? 0 : numCordobasRecibido,
-      montoRecibidoDolares:
-        tipoMonedaRecibida === "cordobas" ? 0 : numDolaresRecibido,
+      montoRecibidoCordobas: Number(cordobasNetos.toFixed(2)),
+      montoRecibidoDolares: Number(dolaresNetos.toFixed(2)),
       cambioCordobas: Number(formatearMoneda(Number(cambioCordobas))),
       tasaCambio: TASA_CAMBIO,
       dineroRecibido: recibidoEnCordobas

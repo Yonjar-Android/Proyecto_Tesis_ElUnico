@@ -64,6 +64,7 @@ function construirFilasReporte() {
       Id_producto: producto.id,
       Nombre_Producto: producto.Nombre,
       Tipo_Salida: salida.Tipo_Salida,
+      Motivo: salida.Tipo_Salida,
       Cantidad: detalle.Cantidad,
       Estado: salida.Estado,
       Observacion: salida.Observacion,
@@ -122,8 +123,8 @@ export async function obtenerReporteSalidasPorPeriodo(
  * Pendiente de implementación en backend.
  */
 export async function descargarReporteSalidasExcel(
-  fechaInicio: string,
-  fechaFin: string
+  _fechaInicio: string,
+  _fechaFin: string
 ): Promise<Blob> {
   // ------------------------- Llamada real (backend pendiente) -------------------------
   // const response = await api.get("/reportes/salidas-inventario/exportar", {

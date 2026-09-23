@@ -121,7 +121,6 @@ export default function ReporteArqueoCajero() {
       setArqueos(response.data || []);
       setLastPage(response.last_page || 1);
       setRegistrosTotales(response.TotalRegistros || 0);
-      setTotalApertura(response.TotalAperturaCordobas || 0);
       setTotalIngresos(response.TotalIngresos || 0);
       setTotalEgresos(response.TotalEgresos || 0);
       setTotalContado(response.TotalEfectivoContado || 0);

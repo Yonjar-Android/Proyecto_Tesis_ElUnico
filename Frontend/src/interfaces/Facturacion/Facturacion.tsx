@@ -132,7 +132,6 @@ function Facturacion() {
     NCedula: ""
   });
   
-  const [montoInicial, setMontoInicial] = useState<number>(1);
   const [numeroCuotas, setNumeroCuotas] = useState<number>(1);
   const [fechaInicio, setFechaInicio] = useState<string>("");
   const [frecuencia, setFrecuencia] = useState<'diario' | 'semanal' | 'quincenal' | 'mensual'>('quincenal');
@@ -351,15 +350,53 @@ const totalGeneral = subtotalGeneral - descuentoGeneral;
     }
 
     if (tipoPago === "Transferencia" && !numReferencia?.trim()) {
-  setError("Ingresa el número de referencia de la transferencia.");
-  return;
-}
+      setError("Ingresa el número de referencia de la transferencia.");
+      return;
+    }
+
+    if (tipoPago === "Credito") {
+      if (!fechaInicio) {
+        setError("Ingresa la fecha de inicio del crédito.");
+        return;
+      }
+      if (!numeroCuotas || numeroCuotas <= 0) {
+        setError("Ingresa un número de cuotas válido para el crédito.");
+        return;
+      }
+      setError("");
+      void confirmarVenta(
+        {
+          tipoMonedaRecibida: "cordobas",
+          montoRecibidoCordobas: 0,
+          montoRecibidoDolares: 0,
+          cambioCordobas: 0,
+          tasaCambio: 36.6,
+          dineroRecibido: 0,
+        },
+        setError
+      );
+      return;
+    }
 
     setError("");
+    if (tipoPago === "Transferencia") {
+      void confirmarVenta(
+        {
+          tipoMonedaRecibida: "cordobas",
+          montoRecibidoCordobas: 0,
+          montoRecibidoDolares: 0,
+          cambioCordobas: 0,
+          tasaCambio: 36.6,
+          dineroRecibido: 0,
+        },
+        setError
+      );
+      return;
+    }
     setModalConfirmarAbierto(true);
   };
 
-const confirmarVenta = async (
+  const confirmarVenta = async (
     _detalle: DetalleConfirmacionVenta,
     setErrorModal: (mensaje: string) => void
   ): Promise<boolean> => {
@@ -368,12 +405,11 @@ const confirmarVenta = async (
       let datosCredito = undefined;
       
       if (tipoPago === "Credito") {
-        
         datosCredito = {
           fecha_inicio: fechaInicio,
           numero_cuotas: numeroCuotas,    
           frecuencia: frecuencia,
-          monto_inicial: _detalle.dineroRecibido,  
+          monto_inicial: 0,  
         };
       }
 
@@ -381,7 +417,8 @@ const confirmarVenta = async (
         Number(clienteSeleccionado?.id),
         tipoPago,
         totalGeneral,
-        _detalle.dineroRecibido,
+        _detalle.montoRecibidoCordobas,
+        _detalle.montoRecibidoDolares,
         numReferencia ?? "",
         items.map((item) =>
           item.tipo === "producto"

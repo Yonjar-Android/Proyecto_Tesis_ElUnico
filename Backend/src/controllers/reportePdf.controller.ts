@@ -10,7 +10,8 @@ import {
     generateReporteProductosStockPdf,
     generateReporteComprasPorPeriodoPdf,
     generateReporteArqueoPeriodoPdf,
-    generateReporteArqueoCajeroPdf
+    generateReporteArqueoCajeroPdf,
+    generateReporteCierreCajaPdf
  } from "../services/reportePdf.service.js";
 
 export const descargarReporteVentasPorPeriodoPdf = async (req: Request, res: Response) => {
@@ -291,6 +292,27 @@ export const descargarReporteArqueoCajeroPdf = async (req: Request, res: Respons
         res.status(500).json({
             success: false,
             message: 'Error al generar el reporte de arqueo por cajero en PDF',
+            error: error instanceof Error ? error.message : 'Error desconocido'
+        });
+    }
+};
+
+export const descargarReporteCierreCajaPdf = async (req: Request, res: Response) => {
+    try {
+        const { idSesion } = req.params;
+        const pdfBuffer = await generateReporteCierreCajaPdf(Number(idSesion));
+
+        const fechaActual = new Date().toISOString().split('T')[0];
+        const filename = `cierre_caja_sesion_${idSesion}_${fechaActual}.pdf`;
+
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename=${filename}`);
+        res.send(pdfBuffer);
+    } catch (error) {
+        console.error('Error generando PDF de cierre de caja:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error al generar el PDF de cierre de caja',
             error: error instanceof Error ? error.message : 'Error desconocido'
         });
     }

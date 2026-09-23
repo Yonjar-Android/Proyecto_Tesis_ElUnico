@@ -11,6 +11,7 @@ import {
     obtenerReporteArqueoPeriodo,
     obtenerReporteArqueoCajero
  } from "./reporte.service.js";
+import { obtenerDetalleCierrePorSesion } from "./caja.service.js";
 import { 
     generateVentasPorPeriodoPdfReport,
     generateVentasProductoPdfReport,
@@ -22,7 +23,8 @@ import {
     generateProductosStockPdfReport,
     generateComprasPorPeriodoPdfReport,
     generateArqueoPeriodoPdfReport,
-    generateArqueoCajeroPdfReport
+    generateArqueoCajeroPdfReport,
+    generateCierreCajaPdfReport
  } from "../utils/pdfGenerator.js";
 
 export const generateReporteVentasPorPeriodoPdf = async (
@@ -164,4 +166,8 @@ export const generateReporteArqueoCajeroPdf = async (
         1000000
     );
     return await generateArqueoCajeroPdfReport(reportData, nombreCajero);
+};
+export const generateReporteCierreCajaPdf = async (idSesion: number): Promise<Buffer> => {
+    const detalle = await obtenerDetalleCierrePorSesion(idSesion);
+    return await generateCierreCajaPdfReport(detalle);
 };

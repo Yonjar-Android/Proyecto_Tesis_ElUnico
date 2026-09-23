@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Lock, FileDown, CheckCircle, HelpCircle } from "lucide-react";
+import { Lock, FileDown, FileText, CheckCircle, HelpCircle } from "lucide-react";
 import { Joyride, type Step } from "react-joyride";
 import ConteoBilletes from "./ConteoBilletes";
 import type { DesgloseItem } from "./ConteoBilletes";
 import { cerrarCaja, obtenerResumenCierre, obtenerSesionActiva } from "../../services/caja.service";
+import { descargarReporteCierreCajaPdf } from "../../services/reportePdf.service";
+import { descargarArchivoExcel } from "../../services/reporteExcel.service";
 import { useCajaAbierta } from "../../context/CajaContext";
 import "./AperturaCierre.css";
 import { formatearMoneda } from "../FuncionAuxiliar";
@@ -23,11 +25,16 @@ export default function CierreCaja() {
   const [dataCaja, setDataCaja] = useState<any>(null);
   const [modalCierreExitoso, setModalCierreExitoso] = useState(false);
 
+  // Respuesta cruda de obtenerResumenCierre(), guardada tal cual para poder
+  // leer distintos nombres de campo sin romper nada si el backend cambia.
+  const [resumenRaw, setResumenRaw] = useState<any>(null);
+
   const [tourActivo, setTourActivo] = useState(false);
   const pasosTour: Step[] = [
     {
       target: '[data-tour="cierre-resumen-sistema"]',
-      content: "Muestra el consolidado del sistema: monto inicial de apertura, ingresos por ventas, egresos y el efectivo esperado que debe haber en caja.",
+      content:
+        "Muestra el consolidado del sistema: apertura, ingresos y efectivo esperado, separados en córdobas y dólares.",
     },
     {
       target: '[data-tour="cierre-conteo"]',
@@ -43,11 +50,13 @@ export default function CierreCaja() {
     },
     {
       target: '[data-tour="cierre-confirmar"]',
-      content: "Confirma el cierre formal de la caja, finalizando la sesión y permitiendo exportar el comprobante.",
+      content: "Confirma el cierre formal de la caja, finalizando la sesión y permitiendo exportar el comprobante en Excel o PDF.",
     },
   ];
 
-  // Totales del sistema (calculados en base a las ventas/egresos del día)
+  // Totales del sistema (calculados en base a las ventas/egresos del día).
+  // Se mantiene esta forma "combinada" porque es la que se usa para calcular
+  // la diferencia del arqueo (totalContado ya viene en córdobas equivalentes).
   const [totalSistema, setTotalSistema] = useState({
     montoApertura: 0,
     ingresos: 0,
@@ -64,6 +73,7 @@ export default function CierreCaja() {
   async function cargarResumenSistema() {
     try {
       const data = await obtenerResumenCierre();
+      setResumenRaw(data.resumen);
       setTotalSistema({
         montoApertura: data.resumen.montoApertura,
         ingresos: data.resumen.ingresosDia,
@@ -72,6 +82,7 @@ export default function CierreCaja() {
         efectivoEsperado: data.resumen.efectivoEsperado,
       });
     } catch (err) {
+      setResumenRaw(null);
       setTotalSistema({
         montoApertura: 0,
         ingresos: 0,
@@ -97,7 +108,38 @@ export default function CierreCaja() {
     }
   }
 
-  const diferencia = totalContado + Number(totalTarjeta || 0) - totalSistema.efectivoEsperado;
+  const diferencia = totalContado - totalSistema.efectivoEsperado;
+
+  // Desglose detallado por moneda, solo para mostrar en pantalla y exportar
+  // (Excel / PDF). NO se usa para calcular "diferencia" arriba, así no se
+  // toca la lógica de cierre que ya funcionaba.
+  //
+  // NOTA IMPORTANTE: estoy leyendo estos valores con varios nombres posibles
+  // (ej. resumenRaw?.ingresosCordobas ?? resumenRaw?.ingresosDia) porque no
+  // tengo visibilidad del shape exacto que devuelve tu endpoint
+  // obtenerResumenCierre() en el backend. Ajusta los nombres de campo de la
+  // izquierda (los que vienen de resumenRaw) para que coincidan exactamente
+  // con lo que tu API ya retorna para la pantalla de "Arqueo de Caja"
+  // (imagen que muestra Apertura Córdobas, Apertura Dólares, Ingresos del
+  // día en Córdobas/Dólares, Transferencias, etc).
+  const sesionInfo = dataCaja?.sesion || sesionActiva;
+  const transferenciasDetalle =
+    Number(totalTarjeta) ||
+    Number(resumenRaw?.totalTransferencias) ||
+    Number(resumenRaw?.totalTarjetaTransferencia) ||
+    Number(sesionInfo?.total_tarjeta_transferencia) ||
+    0;
+
+  const detalleCierre = {
+    aperturaCordobas: Number(sesionInfo?.monto_apertura_cordobas) || 0,
+    aperturaDolares: Number(sesionInfo?.monto_apertura_dolares) || 0,
+    ingresosCordobas: Number(resumenRaw?.ingresosCordobas ?? resumenRaw?.ingresosDia) || 0,
+    ingresosDolares: Number(resumenRaw?.ingresosDolares ?? dataCaja?.ingresosDolares) || 0,
+    transferencias: transferenciasDetalle,
+    egresos: totalSistema.egresos,
+    efectivoEsperadoCordobas: Number(resumenRaw?.efectivoEsperadoCordobas ?? resumenRaw?.efectivoEsperado) || 0,
+    efectivoEsperadoDolares: Number(resumenRaw?.efectivoEsperadoDolares) || 0,
+  };
 
   async function handleCerrarCaja() {
     setError("");
@@ -187,11 +229,15 @@ export default function CierreCaja() {
             <td colspan="2" class="td-val">$ ${formatearMoneda(aperturaDolares)} USD (Equiv: C$ ${formatearMoneda(aperturaDolaresEnCordobas)})</td>
           </tr>
           <tr>
-            <td colspan="2" class="td-lbl">Ingresos en Efectivo (Ventas)</td>
-            <td colspan="2" class="td-val" style="color: #16a34a; font-weight: bold;">C$ ${formatearMoneda(totalSistema.ingresos)}</td>
+            <td colspan="2" class="td-lbl">Ingresos en Córdobas</td>
+            <td colspan="2" class="td-val" style="color: #16a34a; font-weight: bold;">C$ ${formatearMoneda(detalleCierre.ingresosCordobas)}</td>
           </tr>
           <tr>
-            <td colspan="2" class="td-lbl">Ingresos por Transferencias</td>
+            <td colspan="2" class="td-lbl">Ingresos en Dólares</td>
+            <td colspan="2" class="td-val" style="color: #16a34a; font-weight: bold;">$ ${formatearMoneda(detalleCierre.ingresosDolares)} USD</td>
+          </tr>
+          <tr>
+            <td colspan="2" class="td-lbl">Transferencias (excluidas de caja física)</td>
             <td colspan="2" class="td-val" style="color: #0047ab; font-weight: bold;">C$ ${formatearMoneda(transferenciasMonto)}</td>
           </tr>
           <tr>
@@ -199,8 +245,12 @@ export default function CierreCaja() {
             <td colspan="2" class="td-val" style="color: #dc2626; font-weight: bold;">- C$ ${formatearMoneda(totalEgresos)}</td>
           </tr>
           <tr>
-            <td colspan="2" class="td-lbl">Total Esperado por Sistema</td>
-            <td colspan="2" class="td-val" style="font-weight: bold;">C$ ${formatearMoneda(totalSistema.efectivoEsperado)}</td>
+            <td colspan="2" class="td-lbl">Efectivo Esperado en Córdobas</td>
+            <td colspan="2" class="td-val" style="font-weight: bold;">C$ ${formatearMoneda(detalleCierre.efectivoEsperadoCordobas)}</td>
+          </tr>
+          <tr>
+            <td colspan="2" class="td-lbl">Efectivo Esperado en Dólares</td>
+            <td colspan="2" class="td-val" style="font-weight: bold;">$ ${formatearMoneda(detalleCierre.efectivoEsperadoDolares)} USD</td>
           </tr>
           <tr>
             <td colspan="2" class="td-lbl">Efectivo Físico Contado</td>
@@ -263,6 +313,28 @@ export default function CierreCaja() {
     URL.revokeObjectURL(url);
   }
 
+  // Exporta el cierre a PDF pidiéndolo al backend (pdfkit), no se genera en el navegador.
+  // El backend recalcula todo con la sesión ya cerrada (por id_sesion), por eso no depende
+  // de "detalleCierre" ni de "totalSistema" aquí.
+  const [exportandoPdf, setExportandoPdf] = useState(false);
+
+  async function exportarCierrePDF() {
+    const sesion = dataCaja?.sesion || sesionActiva;
+    if (!sesion) return;
+
+    setExportandoPdf(true);
+    try {
+      const blob = await descargarReporteCierreCajaPdf(sesion.id_sesion);
+      const fechaHoy = new Date().toISOString().split("T")[0];
+      descargarArchivoExcel(blob, `Cierre_Caja_Sesion_${sesion.id_sesion}_${fechaHoy}.pdf`);
+    } catch (err) {
+      console.error("Error al exportar PDF de cierre:", err);
+      alert("No se pudo generar el PDF del cierre de caja.");
+    } finally {
+      setExportandoPdf(false);
+    }
+  }
+
   return (
     <div className="apertura-container">
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
@@ -283,24 +355,47 @@ export default function CierreCaja() {
         Cuenta el efectivo final y compara contra lo esperado por el sistema.
       </p>
 
+      {/* Resumen detallado por moneda, similar al Arqueo de Caja.
+          Usa la clase "cierre-resumen-sistema" existente; si tienes 4 columnas
+          fijas en el CSS puede que necesites cambiar el grid a más columnas
+          o a "repeat(auto-fit, minmax(160px, 1fr))" para que quepan los 8 items. */}
       <div className="cierre-resumen-sistema" data-tour="cierre-resumen-sistema">
         <div>
-          <span>Apertura</span>
-          <strong>C${formatearMoneda(totalSistema.montoApertura)}</strong>
+          <span>Apertura Córdobas</span>
+          <strong>C${formatearMoneda(detalleCierre.aperturaCordobas)}</strong>
         </div>
         <div>
-          <span>+ Ingresos</span>
-          <strong className="valor-verde-cierre">C${formatearMoneda(totalSistema.ingresos)}</strong>
+          <span>Apertura Dólares</span>
+          <strong>${formatearMoneda(detalleCierre.aperturaDolares)} USD</strong>
+        </div>
+        <div>
+          <span>+ Ingresos Córdobas</span>
+          <strong className="valor-verde-cierre">C${formatearMoneda(detalleCierre.ingresosCordobas)}</strong>
+        </div>
+        <div>
+          <span>+ Ingresos Dólares</span>
+          <strong className="valor-verde-cierre">${formatearMoneda(detalleCierre.ingresosDolares)} USD</strong>
+        </div>
+        <div>
+          <span>Transferencias</span>
+          <strong>C${formatearMoneda(detalleCierre.transferencias)}</strong>
         </div>
         <div>
           <span>- Egresos</span>
-          <strong className="valor-rojo-cierre">C${formatearMoneda(totalSistema.egresos)}</strong>
+          <strong className="valor-rojo-cierre">C${formatearMoneda(detalleCierre.egresos)}</strong>
         </div>
         <div className="cierre-esperado">
-          <span>Efectivo esperado</span>
-          <strong>C${formatearMoneda(totalSistema.efectivoEsperado)}</strong>
+          <span>Efectivo esperado Córdobas</span>
+          <strong>C${formatearMoneda(detalleCierre.efectivoEsperadoCordobas)}</strong>
+        </div>
+        <div className="cierre-esperado">
+          <span>Efectivo esperado Dólares</span>
+          <strong>${formatearMoneda(detalleCierre.efectivoEsperadoDolares)} USD</strong>
         </div>
       </div>
+      <p style={{ fontSize: "12px", color: "#64748b", marginTop: "-8px", marginBottom: "16px" }}>
+        Las transferencias no se incluyen en el efectivo esperado, ya que no forman parte del arqueo físico.
+      </p>
 
       <div className="apertura-card">
         <div data-tour="cierre-conteo">
@@ -366,16 +461,40 @@ export default function CierreCaja() {
 
             <div className="modal-cierre-resumen-grid">
               <div className="modal-cierre-resumen-item">
-                <span>Efectivo Contado</span>
-                <strong>C${formatearMoneda(totalContado)}</strong>
+                <span>Apertura Córdobas</span>
+                <strong>C${formatearMoneda(detalleCierre.aperturaCordobas)}</strong>
+              </div>
+              <div className="modal-cierre-resumen-item">
+                <span>Apertura Dólares</span>
+                <strong>${formatearMoneda(detalleCierre.aperturaDolares)} USD</strong>
+              </div>
+              <div className="modal-cierre-resumen-item">
+                <span>Ingresos Córdobas</span>
+                <strong>C${formatearMoneda(detalleCierre.ingresosCordobas)}</strong>
+              </div>
+              <div className="modal-cierre-resumen-item">
+                <span>Ingresos Dólares</span>
+                <strong>${formatearMoneda(detalleCierre.ingresosDolares)} USD</strong>
               </div>
               <div className="modal-cierre-resumen-item">
                 <span>Transferencias</span>
-                <strong>C${formatearMoneda(Number(totalTarjeta || 0))}</strong>
+                <strong>C${formatearMoneda(detalleCierre.transferencias)}</strong>
               </div>
               <div className="modal-cierre-resumen-item">
-                <span>Total Esperado</span>
-                <strong>C${formatearMoneda(totalSistema.efectivoEsperado)}</strong>
+                <span>Egresos</span>
+                <strong>C${formatearMoneda(detalleCierre.egresos)}</strong>
+              </div>
+              <div className="modal-cierre-resumen-item">
+                <span>Esperado Córdobas</span>
+                <strong>C${formatearMoneda(detalleCierre.efectivoEsperadoCordobas)}</strong>
+              </div>
+              <div className="modal-cierre-resumen-item">
+                <span>Esperado Dólares</span>
+                <strong>${formatearMoneda(detalleCierre.efectivoEsperadoDolares)} USD</strong>
+              </div>
+              <div className="modal-cierre-resumen-item">
+                <span>Efectivo Contado</span>
+                <strong>C${formatearMoneda(totalContado)}</strong>
               </div>
               <div className="modal-cierre-resumen-item">
                 <span>Diferencia</span>
@@ -388,7 +507,11 @@ export default function CierreCaja() {
             <div className="modal-cierre-acciones">
               <button className="btn-modal-exportar" onClick={exportarCierreExcel}>
                 <FileDown size={18} />
-                Descargar Cierre en Excel
+                Exportar Excel
+              </button>
+              <button className="btn-modal-exportar" onClick={exportarCierrePDF} disabled={exportandoPdf}>
+                <FileText size={18} />
+                {exportandoPdf ? "Generando PDF..." : "Exportar PDF"}
               </button>
               <button
                 className="btn-modal-salir"

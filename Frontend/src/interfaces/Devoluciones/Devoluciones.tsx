@@ -4,7 +4,7 @@ import { crearDevolucion} from "../../services/devoluciones.service";
 import type {CrearDevolucionData} from "../../services/devoluciones.service"
 import { buscarFacturaParaDevolucion} from "../../services/venta.service";
 import Notificacion, { type TipoNotificacion } from "../../components/Notification/Notification";
-import { formatearMoneda, obtenerFechaHoy } from "../FuncionAuxiliar";
+import { formatearMoneda } from "../FuncionAuxiliar";
 import { Joyride, type Step } from "react-joyride";
 import { HelpCircle } from "lucide-react";
 
