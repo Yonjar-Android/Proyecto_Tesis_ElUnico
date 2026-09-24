@@ -1,32 +1,80 @@
+/* ============================================
+   LAYOUT PRINCIPAL (necesario para que sticky funcione)
+   ============================================ */
+.layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.content {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ============================================
+   SIDEBAR
+   ============================================ */
 .sidebar {
   display: flex;
   flex-direction: column;
   width: 240px;
-  min-height: 100vh;
+  flex-shrink: 0;
   background: #0047ab;
-  padding: 24px 0;
+  padding: 12px 0 0;          /* menos espacio arriba */
   box-sizing: border-box;
   font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+
+  /* Fijo a la pantalla */
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: visible;          /* deja salir el dropdown del usuario */
 }
 
+/* ---------- Logo ---------- */
 .sidebar-logo {
   display: flex;
   justify-content: center;
-  padding: 0 20px 28px;
+  align-items: center;
+  flex-shrink: 0;
+  height: 90px;               /* altura fija: ajusta a tu gusto (70-110px) */
+  padding: 0 20px;
+  margin-bottom: 4px;         /* poca separación con las opciones */
 }
 
 .sidebar-logo img {
   width: 100%;
-  max-width: 220px;
+  max-width: 250px;           /* tamaño grande del logo */
   height: auto;
+  margin: -28px 0;
 }
-
+/* ---------- Navegación (aquí vive el scroll) ---------- */
 .sidebar-nav {
   display: flex;
   flex-direction: column;
   flex: 1;
+  min-height: 0;              /* clave para que el scroll funcione en flex */
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
+/* Scrollbar discreta */
+.sidebar-nav::-webkit-scrollbar {
+  width: 6px;
+}
+.sidebar-nav::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+}
+.sidebar-nav::-webkit-scrollbar-track {
+  background: transparent;
+}
+.sidebar-nav {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+}
+
+/* ---------- Links ---------- */
 .sidebar-link {
   display: flex;
   align-items: center;
@@ -67,10 +115,11 @@
   transform: rotate(180deg);
 }
 
+/* ---------- Submenú ---------- */
 .sidebar-submenu {
   display: flex;
   flex-direction: column;
-  background: rgba(0, 0, 0, 0.18); /* O un azul más oscuro como #003682 */
+  background: rgba(0, 0, 0, 0.18);
   padding: 4px 0;
 }
 
@@ -90,6 +139,7 @@
   background: rgba(255, 255, 255, 0.1);
   opacity: 1;
 }
+
 .sidebar-sublink.active {
   background: #ff8c00;
   color: #ffffff;
@@ -98,23 +148,18 @@
 }
 
 .sidebar-sublink-disabled {
-  opacity: 0.45 !important;
-  cursor: not-allowed !important;
-}
-.sidebar-sublink-disabled:hover {
-  background: transparent !important;
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
 }
 
-.sidebar-footer {
-  margin-top: auto;
-  border-top: 1px solid rgba(255, 255, 255, 0.15);
-  padding-top: 8px;
-}
+/* ---------- Footer (usuario) ---------- */
 .sidebar-footer {
   position: relative;
+  flex-shrink: 0;
   margin-top: auto;
   border-top: 1px solid rgba(255, 255, 255, 0.15);
-  padding-top: 8px;
+  padding: 8px 0;
 }
 
 .sidebar-usuario-toggle {
@@ -145,6 +190,7 @@
   white-space: nowrap;
 }
 
+/* ---------- Dropdown del usuario ---------- */
 .usuario-dropdown {
   position: absolute;
   bottom: calc(100% + 8px);
@@ -222,10 +268,4 @@
 .usuario-dropdown-logout {
   color: #0047ab;
   border-top: 1px solid #eceef1;
-}
-
-.sidebar-sublink-disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  pointer-events: none;
 }

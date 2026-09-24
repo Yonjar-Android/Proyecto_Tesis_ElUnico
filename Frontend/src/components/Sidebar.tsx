@@ -12,8 +12,9 @@ import {
   LogOut,
   UserCog,
   Wallet,
+  Info,
 } from "lucide-react";
-import logo from "../assets/LogoAzulNaranja.png";
+import logo from "../assets/LogoAzulNaranja-transparente.png";
 import "./Sidebar.css";
 import { obtenerSesionActiva } from "../services/caja.service";
 import cajaModalStyles from "./CajaModal.module.css";
@@ -60,7 +61,7 @@ export default function Sidebar() {
 
       if (data.sesion != null && data.sesion.estado == "Abierta") {
         console.log(data);
-        setCajaSesionAbierta(true);
+        setCajaAbierto(true);
         setMostrarModalCaja(true);
         return;
       }
@@ -145,7 +146,7 @@ export default function Sidebar() {
           <div className="sidebar-submenu">
             <NavLink
               to="/caja"
-               end
+              end
               className={`sidebar-sublink ${!cajaSesionActiva ? "sidebar-sublink-disabled" : ""}`}
               onClick={(e) => {
                 if (!cajaSesionActiva) e.preventDefault();
@@ -246,6 +247,12 @@ export default function Sidebar() {
             <span>Mantenimiento</span>
           </NavLink>
         )}
+
+        {/* Acerca de: todos los usuarios */}
+        <NavLink to="/acerca-de" className="sidebar-link">
+          <Info size={20} />
+          <span>Acerca de</span>
+        </NavLink>
       </nav>
 
       {/* Usuario con menú desplegable */}

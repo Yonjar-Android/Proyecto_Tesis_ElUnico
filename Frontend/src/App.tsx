@@ -37,7 +37,9 @@ import SalidasInventario from "./interfaces/SalidasInventario/SalidasInventario"
 import { CajaProvider } from "./context/CajaContext";
 import RutaProtegidaCaja from "./components/RutaProtegidaCaja";
 import Credito from "./interfaces/Credito/GestionCredito";
- 
+ import AcercaDe from "./interfaces/AcercaDe/AcercaDe";
+
+
 function App() {
   return (
     <BrowserRouter>
@@ -49,6 +51,7 @@ function App() {
             <Route path="/marcas" element={<Marca />} />
             <Route path="/categorias" element={<Categoria />} />
             <Route path="/clientes" element={<Cliente />} />
+            <Route path="/acerca-de" element={<AcercaDe />} />
             <Route path="/credito" element={
                <RutaProtegidaCaja>
               <Credito /></RutaProtegidaCaja>} />

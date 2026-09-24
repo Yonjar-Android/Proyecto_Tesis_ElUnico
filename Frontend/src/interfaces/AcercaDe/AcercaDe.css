@@ -1,0 +1,219 @@
+.acerca {
+  --azul: #0047ab;
+  --azul-oscuro: #003682;
+  --naranja: #ff8c00;
+  --texto: #14161a;
+  --gris: #6b7280;
+  --borde: #e5e8ee;
+
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 32px 24px 24px;
+  color: var(--texto);
+  font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+.acerca *,
+.acerca *::before,
+.acerca *::after {
+  box-sizing: border-box;
+}
+
+/* ===== Hero ===== */
+.acerca-hero {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  background: linear-gradient(135deg, var(--azul) 0%, var(--azul-oscuro) 100%);
+  border-radius: 20px;
+  border-bottom: 5px solid var(--naranja);
+  padding: 32px 36px;
+  color: #fff;
+}
+.acerca .acerca-hero img {
+  width: 190px;
+  height: auto;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+.acerca .acerca-hero h1 {
+  margin: 0 0 8px;
+  font-size: 28px;
+  font-weight: 800;
+  color: #ffffff;
+}
+.acerca .acerca-hero p {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.6;
+  color: #ffffff;
+  opacity: 0.92;
+}
+.acerca-badge {
+  display: inline-block;
+  margin-bottom: 12px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: var(--naranja);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* ===== Tarjetas de información ===== */
+.acerca-info-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin: 20px 0 8px;
+}
+.acerca-info-card {
+  background: #fff;
+  border: 1px solid var(--borde);
+  border-left: 4px solid var(--naranja);
+  border-radius: 14px;
+  padding: 18px 20px;
+}
+.acerca-info-card span {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--gris);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.acerca-info-card strong {
+  display: block;
+  margin-top: 6px;
+  font-size: 14.5px;
+  line-height: 1.4;
+  color: var(--azul);
+}
+
+/* ===== Equipo ===== */
+.acerca .acerca-titulo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 32px 0 16px;
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--azul);
+}
+.acerca-titulo::before {
+  content: "";
+  width: 6px;
+  height: 22px;
+  border-radius: 3px;
+  background: var(--naranja);
+}
+
+.acerca-equipo {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+.acerca-miembro {
+  background: #fff;
+  border: 1px solid var(--borde);
+  border-radius: 18px;
+  padding: 28px 22px 22px;
+  text-align: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.acerca-miembro:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 30px rgba(0, 71, 171, 0.15);
+}
+.acerca .acerca-miembro h3 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--texto);
+}
+
+.acerca-foto {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 16px;
+  border: 4px solid var(--naranja);
+  border-radius: 50%;
+  background: var(--azul);
+  color: #fff;
+  font-size: 34px;
+  font-weight: 800;
+  overflow: hidden;
+}
+.acerca-foto img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.acerca .acerca-cargo {
+  margin: 6px 0 16px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--naranja);
+}
+.acerca-contacto {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 14px;
+  border-top: 1px solid var(--borde);
+}
+.acerca-contacto a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--gris);
+  text-decoration: none;
+  word-break: break-all;
+}
+.acerca-contacto a:hover {
+  color: var(--azul);
+}
+.acerca-contacto svg {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+  fill: var(--azul);
+}
+
+/* ===== Copyright ===== */
+.acerca-copyright {
+  margin-top: 36px;
+  padding: 20px;
+  background: var(--azul);
+  border-top: 4px solid var(--naranja);
+  border-radius: 14px;
+  color: #fff;
+  font-size: 13.5px;
+  line-height: 1.7;
+  text-align: center;
+}
+.acerca-copyright strong {
+  color: var(--naranja);
+}
+
+@media (max-width: 860px) {
+  .acerca-info-grid,
+  .acerca-equipo {
+    grid-template-columns: 1fr;
+  }
+  .acerca-hero {
+    flex-direction: column;
+    padding: 28px 22px;
+    text-align: center;
+  }
+}
