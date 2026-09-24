@@ -1,5 +1,8 @@
 import { useState } from "react";
 import logo from "../../assets/LogoAzulNaranja-transparente.png";
+import fotoJuan from "../../assets/Integrantes/Juan.jpeg";
+import fotoHorell from "../../assets/Integrantes/Horell.jpeg";
+ import fotoJared from "../../assets/Integrantes/Jared.jpeg";
 import "./AcercaDe.css";
 
 interface Integrante {
@@ -7,36 +10,38 @@ interface Integrante {
   cargo: string;
   correo: string;
   telefono: string;
-  foto: string;
+  foto?: string; // opcional: si no hay foto se muestran las iniciales
 }
 
-/* Las fotos van en la carpeta /public/img/ (o cambia la ruta). */
 const EQUIPO: Integrante[] = [
   {
     nombre: "Br. Juan Antonio Centeno Castellón",
     cargo: "Líder de proyecto / Desarrollador",
     correo: "juancenteno132777@gmail.com",
     telefono: "+505 8338 4873",
-    foto: "/img/integrante1.jpg",
-  },
-  {
-    nombre: "Br. Jared Noe Leiva Mendez",
-    cargo: "Analista y documentación",
-    correo: "jarednoeleivamendez@gmail.com",
-    telefono: "+505 8540 0668",
-    foto: "/img/integrante2.jpg",
+    foto: fotoJuan,
   },
   {
     nombre: "Br. Horell Israel Altamirano Rizo",
-    cargo: "Diseñador UI/UX y desarrollador",
+    cargo: "Diseñador UX/UI / Desarrollador",
     correo: "horellaltamirano@gmail.com",
     telefono: "+505 8745 2107",
-    foto: "/img/integrante3.jpg",
+    foto: fotoHorell,
   },
+  {
+    nombre: "Br. Jared Noe Leiva Mendez",
+    cargo: "Analista / Documentación",
+    correo: "leivahared@gmail.com",
+    telefono: "+505 8540 0668",
+    foto: fotoJared,
+  },
+  
 ];
 
+// Ignora el "Br." para que las iniciales sean de los nombres reales
 const iniciales = (nombre: string): string =>
   nombre
+    .replace(/^Br\.?\s+/i, "")
     .split(" ")
     .filter(Boolean)
     .slice(0, 2)
@@ -56,12 +61,12 @@ const IconoTelefono = () => (
   </svg>
 );
 
-function Foto({ nombre, src }: { nombre: string; src: string }) {
+function Foto({ nombre, src }: { nombre: string; src?: string }) {
   const [error, setError] = useState<boolean>(false);
   return (
     <div className="acerca-foto">
       {iniciales(nombre)}
-      {!error && (
+      {src && !error && (
         <img src={src} alt={`Foto de ${nombre}`} onError={() => setError(true)} />
       )}
     </div>

@@ -138,8 +138,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 120px;
-  height: 120px;
+  width: 160px;
+  height: 160px;
   margin: 0 auto 16px;
   border: 4px solid var(--naranja);
   border-radius: 50%;
@@ -155,6 +155,7 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+   object-position: center top;   /* NUEVO: prioriza la cara */
 }
 
 .acerca .acerca-cargo {
