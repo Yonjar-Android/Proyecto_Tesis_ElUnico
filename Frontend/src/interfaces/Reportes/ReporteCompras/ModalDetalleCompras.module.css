@@ -26,6 +26,7 @@
 
 .encabezado h3 {
   margin: 0;
+  color: #0047ab;
 }
 
 .cerrarX {
@@ -94,6 +95,7 @@
   font-weight: bold;
   font-size: 15px;
   margin-bottom: 20px;
+  color: #ea7000;
 }
 
 .botonCerrar {
@@ -101,12 +103,13 @@
   padding: 10px;
   border-radius: 8px;
   border: none;
-  background: #eee;
-  color: #333;
+  background: #e5e7eb;
+  color: #374151;
   font-weight: 600;
   cursor: pointer;
+  transition: background-color 0.15s ease;
 }
 
 .botonCerrar:hover {
-  background: #e0e0e0;
+  background: #d1d5db;
 }

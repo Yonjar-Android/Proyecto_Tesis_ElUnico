@@ -139,7 +139,7 @@
 }
 
 .btnAgregar {
-  background-color: #ff8c00;
+  background: linear-gradient(135deg, #ff8c00 0%, #ea7000 100%);
   color: #ffffff;
   border: none;
   border-radius: 8px;
@@ -149,11 +149,14 @@
   cursor: pointer;
   white-space: nowrap;
   height: 42px;
-  transition: background-color 0.15s ease;
+  box-shadow: 0 4px 14px rgba(255, 140, 0, 0.35);
+  transition: background-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
 }
 
 .btnAgregar:hover {
-  background-color: #ea7000;
+  background: linear-gradient(135deg, #ffa029 0%, #ff7300 100%);
+  box-shadow: 0 6px 20px rgba(255, 140, 0, 0.45);
+  transform: translateY(-1px);
 }
 
 /* Tabla de items a registrar */

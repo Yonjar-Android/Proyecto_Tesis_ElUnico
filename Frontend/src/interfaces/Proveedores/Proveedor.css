@@ -39,7 +39,7 @@ body,
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  background-color: #E94D61;
+  background: linear-gradient(135deg, #ff8c00 0%, #ea7000 100%);
   color: #fff;
   border: none;
   border-radius: 6px;
@@ -47,11 +47,14 @@ body,
   font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s;
+  box-shadow: 0 4px 14px rgba(255, 140, 0, 0.35);
+  transition: background-color 0.2s, box-shadow 0.2s, transform 0.15s;
 }
 
 .proveedor-add-btn:hover {
-  background-color: #d04e6b;
+  background: linear-gradient(135deg, #ffa029 0%, #ff7300 100%);
+  box-shadow: 0 6px 20px rgba(255, 140, 0, 0.45);
+  transform: translateY(-1px);
 }
 
 .proveedor-add-icon {
@@ -77,11 +80,17 @@ body,
   margin-bottom: 1rem;
   gap: 0.5rem;
   max-width: 100%;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.proveedor-search-wrapper:focus-within {
+  border-color: #0047ab;
+  box-shadow: 0 0 0 3px rgba(0, 71, 171, 0.25);
 }
 
 .proveedor-search-icon {
   font-size: 0.85rem;
-  color: #9ca3af;
+  color: #0047ab;
 }
 
 .proveedor-search-input {
@@ -171,8 +180,8 @@ body,
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  background-color: #F1F5F9;
-  color: #475569;
+  background-color: #EAF1FB;
+  color: #0047ab;
   border: none;
   border-radius: 10px;
   padding: 0.45rem 0.9rem;
@@ -184,7 +193,7 @@ body,
 }
 
 .proveedor-editar-btn:hover {
-  background-color: #e5eaf0;
+  background-color: #d5e3f6;
 }
 
 .proveedor-editar-btn:disabled {
@@ -218,7 +227,7 @@ body,
 }
 
 .proveedor-page-btn {
-  background-color: #E94D61;
+  background: linear-gradient(135deg, #ff8c00 0%, #ea7000 100%);
   color: #fff;
   border: none;
   border-radius: 4px;
@@ -227,16 +236,17 @@ body,
   font-size: 0.8rem;
   cursor: pointer;
   font-weight: 600;
-  transition: background-color 0.15s;
+  transition: background-color 0.15s, box-shadow 0.15s;
 }
 
 .proveedor-page-btn:hover {
-  background-color: #d04e6b;
+  background: linear-gradient(135deg, #ffa029 0%, #ff7300 100%);
+  box-shadow: 0 4px 14px rgba(255, 140, 0, 0.35);
 }
 
 .proveedor-page-btn--active {
-  background-color: #c0394f;
-  box-shadow: 0 0 0 2px #e85d7a55;
+  background: #0047ab;
+  box-shadow: 0 0 0 2px rgba(0, 71, 171, 0.35);
 }
 
 .error-text{
