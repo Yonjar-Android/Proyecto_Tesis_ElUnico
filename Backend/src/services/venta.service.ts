@@ -25,6 +25,7 @@ export interface ReciboVentaDTO {
   fecha: string;
   hora: string;
   tipoPago: string;
+  recibidoCordobas: number,
   clienteNombre: string;
   clienteCedula?: string;
   articulos: ArticuloRecibo[];
@@ -452,7 +453,8 @@ export const obtenerReciboVenta = async (idVenta: number): Promise<ReciboVentaDT
                 v.Tipo_Pago     AS Tipo_Pago,
                 c.Nombre        AS ClienteNombre,
                 c.Apellido      AS ClienteApellido,
-                u.Nombre_Usuario AS CajeroNombre
+                u.Nombre_Usuario AS CajeroNombre,
+                v.RecibidoCordobas AS RecibidoCordobas
             FROM ventas v
             INNER JOIN clientes c ON c.id = v.Id_cliente
             INNER JOIN usuarios u ON u.id = v.Id_usuario
@@ -535,6 +537,7 @@ const devoluciones = Array.from(devolucionesMap.values());
     fecha: formatearFecha(venta.Fecha),
     hora: formatearHora(venta.Fecha),
     tipoPago: venta.Tipo_Pago,
+    recibidoCordobas: Number(venta.RecibidoCordobas),
     clienteNombre: `${venta.ClienteNombre} ${venta.ClienteApellido}`,
     clienteCedula: undefined,
     articulos: detalleRows.map((d: any) => ({

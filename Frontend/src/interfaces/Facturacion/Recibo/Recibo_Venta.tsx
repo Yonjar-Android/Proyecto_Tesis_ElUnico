@@ -33,6 +33,8 @@ export default function ReciboVenta({ datos }: Props) {
 );
 const total = subtotal - descuentoTotal;
 
+const cambio = (datos.recibidoCordobas ?? 0) - total;
+
   function descuentoLineaArticulo(articulo: ArticuloRecibo): number {
   return articulo.tipoDescuento == "porcentaje"
     ? (articulo.precioUnitario * (articulo.descuento / 100)) * articulo.cantidad
@@ -116,10 +118,24 @@ const total = subtotal - descuentoTotal;
           <span>-C${formatearMoneda(descuentoTotal)}</span>
         </div>
 
-      <div className={`${styles.filaTotal} ${styles.filaTotalFinal}`}>
+            <div className={`${styles.filaTotal} ${styles.filaTotalFinal}`}>
         <span>TOTAL:</span>
         <span>C${formatearMoneda(total)}</span>
       </div>
+
+      {/* 👇 nuevo: recibido y cambio */}
+      {datos.recibidoCordobas != null && datos.recibidoCordobas > 0 && (
+        <>
+          <div className={styles.filaTotal}>
+            <span>RECIBIDO:</span>
+            <span>C${formatearMoneda(datos.recibidoCordobas)}</span>
+          </div>
+          <div className={styles.filaTotal}>
+            <span>CAMBIO:</span>
+            <span>C${formatearMoneda(cambio)}</span>
+          </div>
+        </>
+      )}
 
       {datos.devoluciones.length > 0 && (
         <>
