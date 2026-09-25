@@ -85,7 +85,7 @@ export default function AcercaDe() {
           <p>
             Sistema desarrollado para la administración de ventas, compras,
             inventario, clientes, créditos y arqueos de caja del negocio. Es el
-            proyecto de graduación de la carrera de Ingeniería en Sistemas de
+            proyecto de graduación de estudiantes dela carrera de Ingeniería en Sistemas de
             Información de la UNAN Managua / CUR - Matagalpa.
           </p>
         </div>

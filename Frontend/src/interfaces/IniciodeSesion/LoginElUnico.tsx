@@ -1,7 +1,9 @@
-import { useState, type FormEvent } from "react";
+import { useState, type FormEvent, type CSSProperties } from "react";
 import { useNavigate } from "react-router-dom";
 import { CircleUserRound, Lock, Eye, EyeOff, X, CheckCircle2 } from "lucide-react";
 import logo from "../../assets/LogoAzulNaranja-transparente.png";
+import fondoDesktop from "../../assets/Fondo Login 2.jpg"; // horizontal, para pantallas de computadora
+import fondoMobile from "../../assets/Fondo Login.jpeg"; // vertical, para celulares
 import { enviarRecuperacion, loginUsuario } from "../../services/auth.service";
 
 type RecoveryStatus = "idle" | "loading" | "sent" | "error";
@@ -82,22 +84,45 @@ export default function LoginElUnico() {
     setRecoveryError("");
   }
 
+  // Variables CSS con las dos imágenes; el <style> de abajo decide cuál usar según el ancho de pantalla
+  const bgVars = {
+    "--bg-desktop": `url(${fondoDesktop})`,
+    "--bg-mobile": `url(${fondoMobile})`,
+  } as CSSProperties;
+
   return (
     <div
+      className="login-bg"
       style={{
         minHeight: "100vh",
         width: "100%",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        // Fondo gris oscuro con halo sutil de luz azul central
-        background: "radial-gradient(ellipse at 50% 30%, #0f1c30 0%, #0c1017 60%, #07090d 100%)",
         fontFamily: "'Inter', system-ui, -apple-system, Segoe UI, Roboto, sans-serif",
         padding: "24px",
         boxSizing: "border-box",
+        ...bgVars,
       }}
     >
       <style>{`
+        .login-bg {
+          /* Overlay oscuro sobre la foto para que el texto siga siendo legible */
+          background-image: linear-gradient(180deg, rgba(7,9,13,0.72) 0%, rgba(7,9,13,0.55) 45%, rgba(7,9,13,0.82) 100%), var(--bg-desktop);
+          background-size: cover;
+          background-position: center;
+          background-repeat: no-repeat;
+          background-attachment: scroll; /* "fixed" falla en iOS Safari */
+        }
+
+        /* Pantallas angostas / celulares: usar la imagen vertical */
+        @media (max-width: 640px) {
+          .login-bg {
+            background-image: linear-gradient(180deg, rgba(7,9,13,0.72) 0%, rgba(7,9,13,0.55) 45%, rgba(7,9,13,0.82) 100%), var(--bg-mobile);
+            background-position: center top;
+          }
+        }
+
         .login-input-wrap:focus-within {
           border-color: #0047ab !important;
           box-shadow: 0 0 0 3px rgba(0, 71, 171, 0.25) !important;
@@ -110,13 +135,23 @@ export default function LoginElUnico() {
         .login-btn-primary:active:not(:disabled) {
           transform: translateY(0);
         }
+        @media (max-width: 480px) {
+          .login-card {
+            padding: 32px 22px !important;
+            border-radius: 16px !important;
+          }
+        }
       `}</style>
 
       <div
+        className="login-card"
         style={{
           width: "100%",
           maxWidth: 410,
-          background: "#14181f",
+          // Vidrio esmerilado para integrarse mejor con la foto de fondo
+          background: "rgba(20, 24, 31, 0.82)",
+          backdropFilter: "blur(10px)",
+          WebkitBackdropFilter: "blur(10px)",
           border: "1px solid rgba(0, 71, 171, 0.45)",
           borderRadius: 20,
           padding: "40px 32px",
@@ -130,6 +165,7 @@ export default function LoginElUnico() {
             alt="El Único Moto Repuestos"
             style={{
               width: 210,
+              maxWidth: "100%",
               height: "auto",
               marginBottom: 16,
               filter: "drop-shadow(0 4px 12px rgba(0, 71, 171, 0.3))",
@@ -404,7 +440,7 @@ export default function LoginElUnico() {
   );
 }
 
-const labelStyle: React.CSSProperties = {
+const labelStyle: CSSProperties = {
   display: "block",
   color: "#cbd5e1",
   fontSize: 12.5,
@@ -412,7 +448,7 @@ const labelStyle: React.CSSProperties = {
   marginBottom: 6,
 };
 
-const inputWrapStyle: React.CSSProperties = {
+const inputWrapStyle: CSSProperties = {
   display: "flex",
   alignItems: "center",
   gap: 10,
@@ -423,7 +459,7 @@ const inputWrapStyle: React.CSSProperties = {
   transition: "all 0.2s ease",
 };
 
-const inputStyle: React.CSSProperties = {
+const inputStyle: CSSProperties = {
   flex: 1,
   background: "transparent",
   border: "none",
