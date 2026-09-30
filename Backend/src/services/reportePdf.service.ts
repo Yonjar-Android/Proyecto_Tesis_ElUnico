@@ -181,7 +181,15 @@ export const generateReporteArqueoCajeroPdf = async (
     const reportData = await obtenerReporteArqueoCajero(
         search, fechaInicio, fechaFin, idUsuario, estado, 1, 1000000
     );
-    return await generateArqueoCajeroPdfReport(reportData, nombreCajero);
+
+    const filtros: FiltroAplicado[] = [
+        { label: 'Cajero', value: idONombre(idUsuario, nombreCajero, 'Todos') },
+        { label: 'Período', value: periodoFiltro(fechaInicio, fechaFin) },
+        { label: 'Búsqueda', value: valorFiltro(search, 'Sin búsqueda') },
+        { label: 'Estado', value: valorFiltro(estado) },
+    ];
+
+    return await generateArqueoCajeroPdfReport(reportData, filtros);
 };
 
 // ---------- Cierre de caja (sin cambios) ----------

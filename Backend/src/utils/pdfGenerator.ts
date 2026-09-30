@@ -1008,7 +1008,7 @@ export const generateArqueoPeriodoPdfReport = async (reportData: any, filtros: F
     });
 };
 
-export const generateArqueoCajeroPdfReport = async (reportData: any, nombreCajero?: string): Promise<Buffer> => {
+export const generateArqueoCajeroPdfReport = async (reportData: any, filtros: FiltroAplicado[]): Promise<Buffer> => {
     return new Promise((resolve, reject) => {
         try {
             const doc = new PDFDocument({ margin: 40, size: 'A4', layout: 'landscape' });
@@ -1017,12 +1017,9 @@ export const generateArqueoCajeroPdfReport = async (reportData: any, nombreCajer
             doc.on('end', () => resolve(Buffer.concat(chunks)));
             doc.on('error', reject);
 
-            const nombreReporte = nombreCajero 
-                ? `Reporte de Arqueo de Caja - Cajero: ${nombreCajero}`
-                : 'Reporte de Arqueo de Caja por Cajero';
-            doc.on('pageAdded', () => agregarEncabezado(doc, nombreReporte));
-            agregarEncabezado(doc, nombreReporte);
-
+            const nombreReporte = 'Reporte de Arqueo de Caja por Cajero';
+            doc.on('pageAdded', () => agregarEncabezado(doc, nombreReporte, filtros));
+            agregarEncabezado(doc, nombreReporte, filtros);
             const anchoUtil = doc.page.width - doc.page.margins.left - doc.page.margins.right;
 
             // --- Estadísticas centradas ---
