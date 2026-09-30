@@ -34,7 +34,7 @@ interface ItemSalida {
     motivo: string;
 }
 
-type EstadoSalida = "Completada" | "Anulada";
+/*type EstadoSalida = "Completada" | "Anulada";
 
 interface SalidaHistorial {
   id: number;
@@ -45,7 +45,7 @@ interface SalidaHistorial {
   estado: EstadoSalida;
 }
 
-/*function claseEstado(estado: EstadoSalida) {
+function claseEstado(estado: EstadoSalida) {
   if (estado === "Completada") return styles.estadoCompletada;
   if (estado === "Anulada") return styles.estadoAnulada;
   return styles.estadoPendiente;
