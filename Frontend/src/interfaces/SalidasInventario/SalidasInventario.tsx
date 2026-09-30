@@ -45,11 +45,11 @@ interface SalidaHistorial {
   estado: EstadoSalida;
 }
 
-function claseEstado(estado: EstadoSalida) {
+/*function claseEstado(estado: EstadoSalida) {
   if (estado === "Completada") return styles.estadoCompletada;
   if (estado === "Anulada") return styles.estadoAnulada;
   return styles.estadoPendiente;
-}
+}*/
 
 function SalidasInventario() {
   const [tipoSalida, setTipoSalida] = useState("");
@@ -62,8 +62,8 @@ function SalidasInventario() {
   const [items, setItems] = useState<ItemSalida[]>([]);
   const [error, setError] = useState("");
 
-  const [historial, setHistorial] = useState<SalidaHistorial[]>([]);
-  const [cargandoHistorial, setCargandoHistorial] = useState(true);
+  //const [historial, setHistorial] = useState<SalidaHistorial[]>([]);
+  //const [cargandoHistorial, setCargandoHistorial] = useState(true);
 
   const [notif, setNotif] = useState<{ mensaje: string; tipo: TipoNotificacion } | null>(null);
 
@@ -101,9 +101,9 @@ function SalidasInventario() {
         //const data = await obtenerHistorialSalidas();
         //setHistorial(data);
       } catch {
-        setHistorial([]);
+        //setHistorial([]);
       } finally {
-        setCargandoHistorial(false);
+        //setCargandoHistorial(false);
       }
     };
     cargarHistorial();
