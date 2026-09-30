@@ -92,13 +92,17 @@ export const descargarReporteInventarioPdf = async (req: Request, res: Response)
         const {
             search = "",
             Id_categoria = null,
-            Id_marca = null
+            Id_marca = null,
+            nombreCategoria = null,
+            nombreMarca = null
         } = req.query;
 
         const pdfBuffer = await generateReporteInventarioPdf(
             search as string,
             Id_categoria ? Number(Id_categoria) : null,
-            Id_marca ? Number(Id_marca) : null
+            Id_marca ? Number(Id_marca) : null,
+            nombreCategoria as string,
+            nombreMarca as string
         );
 
         const fechaActual = new Date().toISOString().split('T')[0];
@@ -215,13 +219,15 @@ export const descargarReporteComprasPorPeriodoPdf = async (req: Request, res: Re
             fechaInicio = "",
             fechaFin = "",
             Id_proveedor = null,
+            NombreProveedor = null
         } = req.query;
 
         const pdfBuffer = await generateReporteComprasPorPeriodoPdf(
             search as string,
             fechaInicio as string,
             fechaFin as string,
-            Id_proveedor ? Number(Id_proveedor) : null
+            Id_proveedor ? Number(Id_proveedor) : null,
+            NombreProveedor as string,
         );
 
         const fechaActual = new Date().toISOString().split('T')[0];

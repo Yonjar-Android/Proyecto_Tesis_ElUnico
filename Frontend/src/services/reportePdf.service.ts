@@ -47,10 +47,12 @@ export const descargarReporteVentasServicioPdf = async (
 export const descargarReporteInventarioPdf = async (
     search: string = "",
     Id_categoria: number | null = null,
-    Id_marca: number | null = null
+    Id_marca: number | null = null,
+    nombreCategoria: string  | null = null,
+    nombreMarca: string | null = null
 ): Promise<Blob> => {
     const response = await axiosInstance.get(`${API}/inventario`, {
-        params: { search, Id_categoria, Id_marca },
+        params: { search, Id_categoria, Id_marca, nombreCategoria, nombreMarca },
         headers: { Authorization: `Bearer ${token}` },
         responseType: 'blob'
     });
@@ -110,10 +112,11 @@ export const descargarReporteComprasPorPeriodoPdf = async (
     search: string = "",
     fechaInicio: string = "",
     fechaFin: string = "",
-    Id_proveedor: number | null = null
+    Id_proveedor: number | null = null,
+    NombreProveedor: string | null = null
 ): Promise<Blob> => {
     const response = await axiosInstance.get(`${API}/compras-por-periodo`, {
-        params: { search, fechaInicio, fechaFin, Id_proveedor },
+        params: { search, fechaInicio, fechaFin, Id_proveedor, NombreProveedor },
         headers: { Authorization: `Bearer ${token}` },
         responseType: 'blob'
     });

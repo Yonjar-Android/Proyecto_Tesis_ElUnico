@@ -3,6 +3,7 @@ import PDFDocument from 'pdfkit';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
+import { FiltroAplicado } from './filtrosReporte.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -31,8 +32,57 @@ const obtenerLogo = (): Buffer | null => {
     return null;
 };
 
-// --- Encabezado Corporativo Oficial ---
-const agregarEncabezado = (doc: PDFKit.PDFDocument, nombreReporte: string) => {
+const truncar = (doc: PDFKit.PDFDocument, texto: string, maxWidth: number): string => {
+    if (doc.widthOfString(texto) <= maxWidth) return texto;
+    let t = texto;
+    while (t.length > 1 && doc.widthOfString(t + '…') > maxWidth) t = t.slice(0, -1);
+    return t + '…';
+};
+
+const dibujarFiltrosEncabezado = (
+    doc: PDFKit.PDFDocument,
+    filtros: FiltroAplicado[],
+    rightEdge: number,
+    startY: number
+) => {
+    const MAX_LINEAS = 4;
+    const lineH = 8.5;
+    const items = filtros.length ? filtros : [{ label: 'Filtros', value: 'Sin filtros' }];
+
+    const columnas = Math.ceil(items.length / MAX_LINEAS);
+    const anchoCol = columnas === 1 ? 190 : 150;
+    const ancho = columnas * anchoCol;
+    const x0 = rightEdge - ancho;
+
+    // Separador vertical
+    doc.strokeColor('#E2E8F0').lineWidth(1)
+        .moveTo(x0 - 8, startY + 2).lineTo(x0 - 8, startY + 46).stroke();
+
+    doc.fontSize(7.5).font('Helvetica-Bold').fillColor('#475569')
+        .text('FILTROS APLICADOS', x0, startY + 2, { width: ancho, lineBreak: false });
+
+    items.forEach((f, i) => {
+        const col = Math.floor(i / MAX_LINEAS);
+        const fila = i % MAX_LINEAS;
+        const x = x0 + col * anchoCol;
+        const y = startY + 13 + fila * lineH;
+
+        const etiqueta = `${f.label}: `;
+        doc.fontSize(7).font('Helvetica-Bold');
+        const wEtiqueta = doc.widthOfString(etiqueta);
+        doc.fillColor('#475569').text(etiqueta, x, y, { lineBreak: false });
+
+        doc.font('Helvetica');
+        const valor = truncar(doc, f.value?.trim() || '—', anchoCol - wEtiqueta - 8);
+        doc.fillColor('#0F172A').text(valor, x + wEtiqueta, y, { lineBreak: false });
+    });
+};
+
+const agregarEncabezado = (
+    doc: PDFKit.PDFDocument,
+    nombreReporte: string,
+    filtros?: FiltroAplicado[] // opcional: los reportes no migrados siguen igual
+) => {
     const logo = obtenerLogo();
     const startX = doc.page.margins.left; // 40
     const startY = 25;
@@ -71,6 +121,11 @@ const agregarEncabezado = (doc: PDFKit.PDFDocument, nombreReporte: string) => {
 
     doc.fontSize(7.5).font('Helvetica').fillColor('#94A3B8')
         .text('Documento Oficial Interno', metaX, startY + 27, { width: metaWidth, align: 'right' });
+
+    // NUEVO: filtros aplicados a la izquierda del bloque de emisión
+    if (filtros) {
+        dibujarFiltrosEncabezado(doc, filtros, metaX - 16, startY);
+    }
 
     // Línea divisoria decorativa
     const dividerY = startY + 50;
@@ -202,7 +257,7 @@ const formatoEntero = (v: any) =>
 
 const formatoFecha = (v: any) => v ? new Date(v).toLocaleDateString('es-NI') : '';
 
-export const generateVentasPorPeriodoPdfReport = async (reportData: any): Promise<Buffer> => {
+export const generateVentasPorPeriodoPdfReport = async (reportData: any, filtros: FiltroAplicado[]): Promise<Buffer> => {
     return new Promise((resolve, reject) => {
         try {
             const doc = new PDFDocument({ margin: 40, size: 'A4', layout: 'landscape' });
@@ -212,8 +267,8 @@ export const generateVentasPorPeriodoPdfReport = async (reportData: any): Promis
             doc.on('error', reject);
 
             const nombreReporte = 'Reporte de Ventas por Período';
-            doc.on('pageAdded', () => agregarEncabezado(doc, nombreReporte));
-            agregarEncabezado(doc, nombreReporte);
+            doc.on('pageAdded', () => agregarEncabezado(doc, nombreReporte, filtros));
+            agregarEncabezado(doc, nombreReporte, filtros);
 
             const anchoUtil = doc.page.width - doc.page.margins.left - doc.page.margins.right;
 
@@ -276,7 +331,7 @@ export const generateVentasPorPeriodoPdfReport = async (reportData: any): Promis
     });
 };
 
-export const generateVentasProductoPdfReport = async (reportData: any): Promise<Buffer> => {
+export const generateVentasProductoPdfReport = async (reportData: any, filtros: FiltroAplicado[]): Promise<Buffer> => {
     return new Promise((resolve, reject) => {
         try {
             const doc = new PDFDocument({ margin: 40, size: 'A4', layout: 'landscape' });
@@ -286,8 +341,8 @@ export const generateVentasProductoPdfReport = async (reportData: any): Promise<
             doc.on('error', reject);
 
             const nombreReporte = 'Reporte de Ventas por Producto';
-            doc.on('pageAdded', () => agregarEncabezado(doc, nombreReporte));
-            agregarEncabezado(doc, nombreReporte);
+            doc.on('pageAdded', () => agregarEncabezado(doc, nombreReporte, filtros));
+            agregarEncabezado(doc, nombreReporte, filtros);
 
             const anchoUtil = doc.page.width - doc.page.margins.left - doc.page.margins.right;
 
@@ -344,7 +399,7 @@ export const generateVentasProductoPdfReport = async (reportData: any): Promise<
     });
 };
 
-export const generateVentasServicioPdfReport = async (reportData: any): Promise<Buffer> => {
+export const generateVentasServicioPdfReport = async (reportData: any, filtros: FiltroAplicado[]): Promise<Buffer> => {
     return new Promise((resolve, reject) => {
         try {
             const doc = new PDFDocument({ margin: 40, size: 'A4', layout: 'landscape' });
@@ -354,8 +409,8 @@ export const generateVentasServicioPdfReport = async (reportData: any): Promise<
             doc.on('error', reject);
 
             const nombreReporte = 'Reporte de Ventas por Servicio';
-            doc.on('pageAdded', () => agregarEncabezado(doc, nombreReporte));
-            agregarEncabezado(doc, nombreReporte);
+            doc.on('pageAdded', () => agregarEncabezado(doc, nombreReporte, filtros));
+            agregarEncabezado(doc, nombreReporte, filtros);
 
             const anchoUtil = doc.page.width - doc.page.margins.left - doc.page.margins.right;
 
@@ -412,7 +467,7 @@ export const generateVentasServicioPdfReport = async (reportData: any): Promise<
     });
 };
 
-export const generateInventarioPdfReport = async (reportData: any): Promise<Buffer> => {
+export const generateInventarioPdfReport = async (reportData: any, filtros: FiltroAplicado[]): Promise<Buffer> => {
     return new Promise((resolve, reject) => {
         try {
             const doc = new PDFDocument({ margin: 40, size: 'A4', layout: 'landscape' });
@@ -422,8 +477,8 @@ export const generateInventarioPdfReport = async (reportData: any): Promise<Buff
             doc.on('error', reject);
 
             const nombreReporte = 'Reporte de Inventario General';
-            doc.on('pageAdded', () => agregarEncabezado(doc, nombreReporte));
-            agregarEncabezado(doc, nombreReporte);
+            doc.on('pageAdded', () => agregarEncabezado(doc, nombreReporte, filtros));
+            agregarEncabezado(doc, nombreReporte, filtros);
 
             const anchoUtil = doc.page.width - doc.page.margins.left - doc.page.margins.right;
 
@@ -483,7 +538,7 @@ export const generateInventarioPdfReport = async (reportData: any): Promise<Buff
     });
 };
 
-export const generateSalidasInventarioPdfReport = async (reportData: any): Promise<Buffer> => {
+export const generateSalidasInventarioPdfReport = async (reportData: any, filtros: FiltroAplicado[]): Promise<Buffer> => {
     return new Promise((resolve, reject) => {
         try {
             const doc = new PDFDocument({ margin: 40, size: 'A4', layout: 'landscape' });
@@ -493,8 +548,8 @@ export const generateSalidasInventarioPdfReport = async (reportData: any): Promi
             doc.on('error', reject);
 
             const nombreReporte = 'Reporte de Otras Salidas de Inventario';
-            doc.on('pageAdded', () => agregarEncabezado(doc, nombreReporte));
-            agregarEncabezado(doc, nombreReporte);
+            doc.on('pageAdded', () => agregarEncabezado(doc, nombreReporte, filtros));
+            agregarEncabezado(doc, nombreReporte, filtros);
 
             const anchoUtil = doc.page.width - doc.page.margins.left - doc.page.margins.right;
 
@@ -551,7 +606,7 @@ export const generateSalidasInventarioPdfReport = async (reportData: any): Promi
     });
 };
 
-export const generateDevolucionesPdfReport = async (reportData: any): Promise<Buffer> => {
+export const generateDevolucionesPdfReport = async (reportData: any, filtros: FiltroAplicado[]): Promise<Buffer> => {
     return new Promise((resolve, reject) => {
         try {
             const doc = new PDFDocument({ margin: 40, size: 'A4', layout: 'landscape' });
@@ -561,8 +616,8 @@ export const generateDevolucionesPdfReport = async (reportData: any): Promise<Bu
             doc.on('error', reject);
 
             const nombreReporte = 'Reporte de Devoluciones';
-            doc.on('pageAdded', () => agregarEncabezado(doc, nombreReporte));
-            agregarEncabezado(doc, nombreReporte);
+            doc.on('pageAdded', () => agregarEncabezado(doc, nombreReporte, filtros));
+            agregarEncabezado(doc, nombreReporte, filtros);
 
             const anchoUtil = doc.page.width - doc.page.margins.left - doc.page.margins.right;
 
@@ -621,7 +676,7 @@ export const generateDevolucionesPdfReport = async (reportData: any): Promise<Bu
     });
 };
 
-export const generateClientesDeudaPdfReport = async (reportData: any): Promise<Buffer> => {
+export const generateClientesDeudaPdfReport = async (reportData: any, filtros: FiltroAplicado[]): Promise<Buffer> => {
     return new Promise((resolve, reject) => {
         try {
             const doc = new PDFDocument({ margin: 40, size: 'A4', layout: 'landscape' });
@@ -631,8 +686,8 @@ export const generateClientesDeudaPdfReport = async (reportData: any): Promise<B
             doc.on('error', reject);
 
             const nombreReporte = 'Reporte de Cuentas por Cobrar';
-            doc.on('pageAdded', () => agregarEncabezado(doc, nombreReporte));
-            agregarEncabezado(doc, nombreReporte);
+            doc.on('pageAdded', () => agregarEncabezado(doc, nombreReporte, filtros));
+            agregarEncabezado(doc, nombreReporte, filtros);
 
             const anchoUtil = doc.page.width - doc.page.margins.left - doc.page.margins.right;
 
@@ -711,7 +766,8 @@ const coloresNivel: Record<NivelStock, { bg: string; text: string }> = {
 
 export const generateProductosStockPdfReport = async (
     reportData: any,
-    porcentaje: number = 30
+    porcentaje: number = 30, 
+    filtros: FiltroAplicado[]
 ): Promise<Buffer> => {
     return new Promise((resolve, reject) => {
         try {
@@ -722,8 +778,8 @@ export const generateProductosStockPdfReport = async (
             doc.on('error', reject);
 
             const nombreReporte = 'Reporte de Stock Próximo a Agotarse';
-            doc.on('pageAdded', () => agregarEncabezado(doc, nombreReporte));
-            agregarEncabezado(doc, nombreReporte);
+            doc.on('pageAdded', () => agregarEncabezado(doc, nombreReporte, filtros));
+            agregarEncabezado(doc, nombreReporte, filtros);
 
             const anchoUtil = doc.page.width - doc.page.margins.left - doc.page.margins.right;
 
@@ -784,7 +840,7 @@ export const generateProductosStockPdfReport = async (
     });
 };
 
-export const generateComprasPorPeriodoPdfReport = async (reportData: any): Promise<Buffer> => {
+export const generateComprasPorPeriodoPdfReport = async (reportData: any, filtros: FiltroAplicado[]): Promise<Buffer> => {
     return new Promise((resolve, reject) => {
         try {
             const doc = new PDFDocument({ margin: 40, size: 'A4', layout: 'landscape' });
@@ -794,8 +850,8 @@ export const generateComprasPorPeriodoPdfReport = async (reportData: any): Promi
             doc.on('error', reject);
 
             const nombreReporte = 'Reporte de Compras por Período';
-            doc.on('pageAdded', () => agregarEncabezado(doc, nombreReporte));
-            agregarEncabezado(doc, nombreReporte);
+            doc.on('pageAdded', () => agregarEncabezado(doc, nombreReporte, filtros));
+            agregarEncabezado(doc, nombreReporte, filtros);
 
             const anchoUtil = doc.page.width - doc.page.margins.left - doc.page.margins.right;
 
@@ -865,7 +921,7 @@ const formatoFechaHora = (v: any) => {
     }
 };
 
-export const generateArqueoPeriodoPdfReport = async (reportData: any): Promise<Buffer> => {
+export const generateArqueoPeriodoPdfReport = async (reportData: any, filtros: FiltroAplicado[]): Promise<Buffer> => {
     return new Promise((resolve, reject) => {
         try {
             const doc = new PDFDocument({ margin: 40, size: 'A4', layout: 'landscape' });
@@ -875,8 +931,8 @@ export const generateArqueoPeriodoPdfReport = async (reportData: any): Promise<B
             doc.on('error', reject);
 
             const nombreReporte = 'Reporte de Arqueo de Caja por Período';
-            doc.on('pageAdded', () => agregarEncabezado(doc, nombreReporte));
-            agregarEncabezado(doc, nombreReporte);
+            doc.on('pageAdded', () => agregarEncabezado(doc, nombreReporte, filtros));
+            agregarEncabezado(doc, nombreReporte, filtros);
 
             const anchoUtil = doc.page.width - doc.page.margins.left - doc.page.margins.right;
 
