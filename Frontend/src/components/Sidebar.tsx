@@ -17,7 +17,7 @@ import {
 import logo from "../assets/LogoAzulNaranja-transparente.png";
 import "./Sidebar.css";
 import { obtenerSesionActiva } from "../services/caja.service";
-import cajaModalStyles from "./CajaModal.module.css";
+import cajaModalStyles from "./cajaModal.module.css";
 import { useCajaAbierta } from "../context/CajaContext";
 
 interface UsuarioSesion {
