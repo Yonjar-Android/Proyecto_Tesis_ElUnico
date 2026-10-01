@@ -1,5 +1,5 @@
 import axiosInstance from "./axiosInstance";
-const API = "http://localhost:3001/api/credito";
+const API = "/credito";
 const token = localStorage.getItem("token");
 
 export const buscarCreditosPendientes = async (

@@ -1,6 +1,6 @@
 import axiosInstance from "./axiosInstance";
 
-const API = "http://localhost:3001/api/pdf";
+const API = "/pdf";
 const token = localStorage.getItem("token");
 
 export const descargarReporteVentasPdf = async (

@@ -1,6 +1,6 @@
 import axiosInstance from "./axiosInstance";
 
-const API = "http://localhost:3001/api/detalle_abono";
+const API = "/detalle_abono";
 const token = localStorage.getItem("token");
 
 export const crearDetalleAbono = async (

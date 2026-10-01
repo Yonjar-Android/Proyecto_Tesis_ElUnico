@@ -1,6 +1,6 @@
 import axiosInstance from "./axiosInstance";
 
-const API = "http://localhost:3001/api/excel";
+const API = "/excel";
 const token = localStorage.getItem("token");
 
 export const descargarReporteStockBajoExcel = async (

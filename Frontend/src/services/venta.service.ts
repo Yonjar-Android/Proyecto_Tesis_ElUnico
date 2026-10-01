@@ -1,7 +1,7 @@
 import axiosInstance from "./axiosInstance";
 import type { DetalleVenta } from "../models/DetalleVenta";
 
-const API = "http://localhost:3001/api/ventas";
+const API = "/ventas";
 const token = localStorage.getItem("token");
 
 export const crearVenta = async (

@@ -1,6 +1,6 @@
 import axiosInstance from "./axiosInstance";
 
-const API = "http://localhost:3001/api/marcas";
+const API = "/marcas";
 const token = localStorage.getItem("token");
 
 export const obtenerMarcas = async () => {

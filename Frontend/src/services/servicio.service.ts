@@ -1,6 +1,6 @@
 import axiosInstance from "./axiosInstance";
 
-const API = "http://localhost:3001/api/servicios";
+const API = "/servicios";
 const token = localStorage.getItem("token");
 
 export const crearServicio = async (
