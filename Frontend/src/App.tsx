@@ -37,7 +37,8 @@ import SalidasInventario from "./interfaces/SalidasInventario/SalidasInventario"
 import { CajaProvider } from "./context/CajaContext";
 import RutaProtegidaCaja from "./components/RutaProtegidaCaja";
 import Credito from "./interfaces/Credito/GestionCredito";
- import AcercaDe from "./interfaces/AcercaDe/AcercaDe";
+import AcercaDe from "./interfaces/AcercaDe/AcercaDe";
+import Bitacora from "./interfaces/Bitacora/Bitacora";
 
 
 function App() {
@@ -70,6 +71,7 @@ function App() {
             <Route path="/mantenimiento" element={<Mantenimiento />} />
             <Route path="/usuario" element={<Usuario />} />
             <Route path="/servicio" element={<Servicio />} />
+            <Route path="/bitacora" element={<Bitacora />} />
  
             {/* Rutas protegidas: requieren sesión de caja abierta */}
             <Route

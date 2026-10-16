@@ -9,6 +9,7 @@ import {
   actualizarEgresoCaja,
   obtenerHistorialCajas,
 } from "../services/caja.service.js";
+import { registrarBitacora } from "../services/bitacora.service.js";
 
 export const getSesionActiva = async (req: Request, res: Response) => {
   try {
@@ -37,6 +38,16 @@ export const postAperturaCaja = async (req: Request, res: Response) => {
   observaciones
     );
 
+    await registrarBitacora({
+      idUsuario,
+      usuario: (req as any).usuario?.usuario || "Usuario",
+      rol: (req as any).usuario?.rol || "N/A",
+      accion: "Apertura de Caja",
+      modulo: "Caja",
+      detalles: `Apertura sesión #${idSesion} con C$ ${Number(montoAperturaCordobas) || 0} y $ ${Number(montoAperturaDolares) || 0} USD`,
+      ip: req.ip,
+    });
+
     res.status(201).json({ success: true, idSesion });
   } catch (error: any) {
     res.status(400).json({ success: false, message: error.message });
@@ -55,6 +66,17 @@ export const postEgresoCaja = async (req: Request, res: Response) => {
       Number(montoDolares) || 0,
       observaciones || ""
     );
+
+    await registrarBitacora({
+      idUsuario: (req as any).usuario?.id,
+      usuario: (req as any).usuario?.usuario || "Usuario",
+      rol: (req as any).usuario?.rol || "N/A",
+      accion: "Registro de Egreso",
+      modulo: "Caja",
+      detalles: `Egreso #${idEgreso}: ${concepto} - C$ ${montoCordobas || 0} / $ ${montoDolares || 0} USD (${metodoPago})`,
+      ip: req.ip,
+    });
+
     res.status(201).json({ success: true, idEgreso });
   } catch (error: any) {
     res.status(400).json({ success: false, message: error.message });
@@ -65,6 +87,17 @@ export const deleteEgresoCaja = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     await eliminarEgresoCaja(Number(id));
+
+    await registrarBitacora({
+      idUsuario: (req as any).usuario?.id,
+      usuario: (req as any).usuario?.usuario || "Usuario",
+      rol: (req as any).usuario?.rol || "N/A",
+      accion: "Eliminación de Egreso",
+      modulo: "Caja",
+      detalles: `Eliminación de egreso #${id}`,
+      ip: req.ip,
+    });
+
     res.status(200).json({ success: true });
   } catch (error: any) {
     res.status(400).json({ success: false, message: error.message });
@@ -81,6 +114,17 @@ export const postCierreCaja = async (req: Request, res: Response) => {
       Number(diferencia),
       observaciones || ""
     );
+
+    await registrarBitacora({
+      idUsuario: (req as any).usuario?.id,
+      usuario: (req as any).usuario?.usuario || "Usuario",
+      rol: (req as any).usuario?.rol || "N/A",
+      accion: "Cierre de Caja",
+      modulo: "Caja",
+      detalles: `Cierre sesión #${idSesion} - Efectivo contado: C$ ${totalEfectivoContado}, Diferencia: C$ ${diferencia}`,
+      ip: req.ip,
+    });
+
     res.status(200).json({ success: true, ...resultado });
   } catch (error: any) {
     res.status(400).json({ success: false, message: error.message });
