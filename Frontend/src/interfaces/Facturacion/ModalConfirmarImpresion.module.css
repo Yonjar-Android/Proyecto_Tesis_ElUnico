@@ -46,8 +46,13 @@
 }
 
 .botonPrimario {
-  background: #2563eb;
+  background: #0047ab;
   color: #fff;
+  transition: background-color 0.15s ease;
+}
+
+.botonPrimario:hover {
+  background: #003682;
 }
 
 .botonSecundario {

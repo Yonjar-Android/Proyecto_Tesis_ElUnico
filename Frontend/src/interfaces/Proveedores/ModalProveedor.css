@@ -15,7 +15,7 @@
 }
 
 .modal-proveedor .modal-header .icono-titulo {
-  color: #6d5ef8;
+  color: #0047ab;
 }
 
 .modal-proveedor .modal-body {
@@ -60,7 +60,7 @@
 
 .campo input:focus {
   outline: none;
-  border-color: #6d5ef8;
+  border-color: #0047ab;
   background: #fff;
 }
 

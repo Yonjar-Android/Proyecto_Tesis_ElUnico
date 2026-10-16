@@ -14,6 +14,8 @@ import {
   Wallet,
   Info,
   ShieldCheck,
+  Menu,
+  X,
 } from "lucide-react";
 import logo from "../assets/LogoAzulNaranja-transparente.png";
 import "./Sidebar.css";
@@ -31,6 +33,7 @@ export default function Sidebar() {
   const [reportesAbierto, setReportesAbierto] = useState(false);
   const [productosAbierto, setProductosAbierto] = useState(false);
   const [usuarioMenuAbierto, setUsuarioMenuAbierto] = useState(false);
+  const [movilExpandido, setMovilExpandido] = useState(false);
   const [usuario, setUsuario] = useState<UsuarioSesion | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
@@ -39,6 +42,10 @@ export default function Sidebar() {
   const [mostrarModalCaja, setMostrarModalCaja] = useState(false);
 
   const { cajaAbierta: cajaSesionActiva } = useCajaAbierta();
+
+  const cerrarEnMovil = () => {
+    setMovilExpandido(false);
+  };
 
   useEffect(() => {
     const guardado = localStorage.getItem("usuario");
@@ -83,54 +90,79 @@ export default function Sidebar() {
   const esAdministrador = usuario?.Nombre_rol === "Administrador";
 
   return (
-    <aside className="sidebar">
-      <div className="sidebar-logo">
-        <img src={logo} alt="El Único" />
-      </div>
+    <>
+      {movilExpandido && (
+        <div className="sidebar-backdrop-movil" onClick={cerrarEnMovil} />
+      )}
+      <aside className={`sidebar ${movilExpandido ? "sidebar-movil-expandido" : "sidebar-movil-colapsado"}`}>
+        <div className="sidebar-movil-toggle-wrap">
+          <button
+            type="button"
+            className="sidebar-movil-toggle-btn"
+            onClick={() => setMovilExpandido(!movilExpandido)}
+            aria-label={movilExpandido ? "Contraer menú" : "Desplegar menú"}
+          >
+            {movilExpandido ? <X size={22} /> : <Menu size={22} />}
+          </button>
+        </div>
 
-      <nav className="sidebar-nav">
-        <NavLink to="/Facturacion" className="sidebar-link">
-          <FileText size={20} />
-          <span>Ventas</span>
-        </NavLink>
+        <div className="sidebar-logo">
+          <img src={logo} alt="El Único" />
+        </div>
 
-        <NavLink to="/devoluciones" className="sidebar-link">
-          <FileText size={20} />
-          <span>Devoluciones</span>
-        </NavLink>
+        <nav
+          className="sidebar-nav"
+          onClick={(e) => {
+            if ((e.target as HTMLElement).closest("a")) {
+              cerrarEnMovil();
+            }
+          }}
+        >
+          <NavLink to="/Facturacion" className="sidebar-link">
+            <FileText size={20} />
+            <span>Ventas</span>
+          </NavLink>
 
-        <NavLink to="/compras" className="sidebar-link">
-          <ShoppingCart size={20} />
-          <span>Compras</span>
-        </NavLink>
+          <NavLink to="/devoluciones" className="sidebar-link">
+            <FileText size={20} />
+            <span>Devoluciones</span>
+          </NavLink>
 
-        <NavLink to="/clientes" className="sidebar-link">
-          <Users size={20} />
-          <span>Clientes</span>
-        </NavLink>
+          <NavLink to="/compras" className="sidebar-link">
+            <ShoppingCart size={20} />
+            <span>Compras</span>
+          </NavLink>
 
-        <NavLink to="/credito" className="sidebar-link">
-          <Users size={20} />
-          <span>Gestión de Crédito</span>
-        </NavLink>
+          <NavLink to="/clientes" className="sidebar-link">
+            <Users size={20} />
+            <span>Clientes</span>
+          </NavLink>
 
-        <NavLink to="/proveedores" className="sidebar-link">
-          <Truck size={20} />
-          <span>Proveedores</span>
-        </NavLink>
+          <NavLink to="/credito" className="sidebar-link">
+            <Users size={20} />
+            <span>Gestión de Crédito</span>
+          </NavLink>
 
-        <button
-  type="button"
-  className="sidebar-link sidebar-dropdown-toggle"
-  onClick={() => setProductosAbierto((abierto) => !abierto)}
->
-  <Archive size={20} />
-  <span>Productos</span>
-  <ChevronDown
-    size={16}
-    className={`chevron ${productosAbierto ? "chevron-abierto" : ""}`}
-  />
-</button>
+          <NavLink to="/proveedores" className="sidebar-link">
+            <Truck size={20} />
+            <span>Proveedores</span>
+          </NavLink>
+
+          <button
+            type="button"
+            className="sidebar-link sidebar-dropdown-toggle"
+            onClick={() => {
+              if (!movilExpandido) setMovilExpandido(true);
+              setProductosAbierto((abierto) => !abierto);
+            }}
+          >
+            <Archive size={20} />
+            <span>Productos</span>
+            <ChevronDown
+              size={16}
+              className={`chevron ${productosAbierto ? "chevron-abierto" : ""}`}
+            />
+          </button>
 
 {productosAbierto && (
   <div className="sidebar-submenu">
@@ -157,7 +189,10 @@ export default function Sidebar() {
         <button
           type="button"
           className="sidebar-link sidebar-dropdown-toggle"
-          onClick={() => setCajaAbierto((abierto) => !abierto)}
+          onClick={() => {
+            if (!movilExpandido) setMovilExpandido(true);
+            setCajaAbierto((abierto) => !abierto);
+          }}
         >
           <Wallet size={20} />
           <span>Caja</span>
@@ -212,7 +247,10 @@ export default function Sidebar() {
             <button
               type="button"
               className="sidebar-link sidebar-dropdown-toggle"
-              onClick={() => setReportesAbierto((abierto) => !abierto)}
+              onClick={() => {
+                if (!movilExpandido) setMovilExpandido(true);
+                setReportesAbierto((abierto) => !abierto);
+              }}
             >
               <PieChart size={20} />
               <span>Reportes</span>
@@ -355,5 +393,6 @@ export default function Sidebar() {
         </div>
       )}
     </aside>
+    </>
   );
 }

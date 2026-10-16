@@ -377,7 +377,7 @@
 }
 
 .factura-btn-vender {
-  background-color: #059669;
+  background-color: #0047ab;
   color: #fff;
   border: none;
   border-radius: 8px;
@@ -385,10 +385,11 @@
   font-size: 0.9rem;
   font-weight: 700;
   cursor: pointer;
+  transition: background-color 0.15s ease;
 }
 
 .factura-btn-vender:hover {
-  background-color: #047857;
+  background-color: #003682;
 }
 
 .factura-btn-vender:disabled {

@@ -269,3 +269,146 @@
   color: #0047ab;
   border-top: 1px solid #eceef1;
 }
+
+/* ============================================
+   RESPONSIVE PARA MÓVILES (CELULARES)
+   ============================================ */
+.sidebar-movil-toggle-wrap {
+  display: none;
+}
+
+.sidebar-backdrop-movil {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  /* Contenido principal se ajusta al ancho del sidebar colapsado */
+  .app-content {
+    padding: 16px 12px;
+    margin-left: 60px;
+    width: calc(100% - 60px);
+    box-sizing: border-box;
+  }
+
+  /* BARRA LATERAL EN MÓVIL: COLAPSADA A SOLO ÍCONOS */
+  .sidebar {
+    width: 60px;
+    min-width: 60px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    z-index: 1000;
+    padding: 6px 0;
+    transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.15);
+  }
+
+  .sidebar-movil-toggle-wrap {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 8px 0;
+    margin-bottom: 6px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  }
+
+  .sidebar-movil-toggle-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: #ffffff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    border-radius: 8px;
+    transition: background 0.15s ease;
+  }
+
+  .sidebar-movil-toggle-btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+  }
+
+  /* En modo colapsado ocultar logo grande y textos */
+  .sidebar-movil-colapsado .sidebar-logo {
+    display: none;
+  }
+
+  .sidebar-movil-colapsado .sidebar-link span,
+  .sidebar-movil-colapsado .chevron,
+  .sidebar-movil-colapsado .sidebar-submenu,
+  .sidebar-movil-colapsado .usuario-nombre-footer {
+    display: none;
+  }
+
+  .sidebar-movil-colapsado .sidebar-link {
+    justify-content: center;
+    padding: 14px 0;
+    gap: 0;
+  }
+
+  .sidebar-movil-colapsado .sidebar-footer {
+    padding: 10px 0;
+  }
+
+  .sidebar-movil-colapsado .sidebar-usuario-toggle {
+    justify-content: center;
+    padding: 10px 0;
+  }
+
+  /* BARRA LATERAL EN MÓVIL: EXPANDIDA AL QUERER CAMBIAR DE INTERFAZ */
+  .sidebar.sidebar-movil-expandido {
+    width: 260px;
+    max-width: 85vw;
+    box-shadow: 6px 0 25px rgba(0, 0, 0, 0.4);
+  }
+
+  .sidebar-movil-expandido .sidebar-movil-toggle-wrap {
+    justify-content: flex-end;
+    padding: 8px 16px;
+  }
+
+  .sidebar-movil-expandido .sidebar-logo {
+    display: flex;
+    height: 75px;
+    padding: 0 16px;
+  }
+
+  .sidebar-movil-expandido .sidebar-logo img {
+    max-width: 190px;
+    margin: -15px 0;
+  }
+
+  .sidebar-movil-expandido .sidebar-link {
+    justify-content: flex-start;
+    padding: 13px 20px;
+    gap: 12px;
+  }
+
+  .sidebar-movil-expandido .sidebar-link span {
+    display: inline;
+    font-size: 14.5px;
+  }
+
+  .sidebar-movil-expandido .chevron {
+    display: inline;
+  }
+
+  .sidebar-movil-expandido .usuario-nombre-footer {
+    display: inline;
+  }
+
+  /* Backdrop oscuro semi-transparente para cerrar tocando fuera */
+  .sidebar-backdrop-movil {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    backdrop-filter: blur(2px);
+  }
+}

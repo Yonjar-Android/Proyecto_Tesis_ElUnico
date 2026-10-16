@@ -86,17 +86,21 @@
     color:#4B5563;
 }
 
-.btn-guardar{
+.btn-guardar {
+    flex: 1;
+    height: 60px;
+    border: none;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #ff8c00 0%, #ea7000 100%);
+    color: white;
+    cursor: pointer;
+    font-size: 20px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
 
-    flex:1;
-    height:60px;
-    border:none;
-    border-radius:14px;
-    background:#ef476f;
-    color:white;
-    cursor:pointer;
-    font-size:20px;
-    font-weight:600;
+.btn-guardar:hover {
+    background: linear-gradient(135deg, #ffa029 0%, #ff7300 100%);
 }
 
 .modal-close{

@@ -56,8 +56,9 @@
 @media (max-width: 768px) {
   .home-container {
     padding-top: 20px;
-    background-size: 320px auto;
-    background-position: center 72%;
+    background-image: url("../../assets/EL UNICO 2.png");
+    background-size: clamp(260px, 85vw, 420px) auto;
+    background-position: center 65%;
   }
 
   .home-welcome h1 {

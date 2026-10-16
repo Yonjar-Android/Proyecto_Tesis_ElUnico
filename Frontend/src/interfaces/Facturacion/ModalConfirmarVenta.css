@@ -20,7 +20,7 @@
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: #6d5ef8;
+  color: #0047ab;
 }
 
 .confirmar-total-monto {
@@ -116,13 +116,13 @@
 }
 
 .moneda-btn:hover {
-  border-color: #6d5ef8;
-  color: #6d5ef8;
+  border-color: #0047ab;
+  color: #0047ab;
 }
 
 .moneda-btn.activo {
-  background: #6d5ef8;
-  border-color: #6d5ef8;
+  background: #0047ab;
+  border-color: #0047ab;
   color: #fff;
 }
 

@@ -39,8 +39,8 @@
 
 .seleccion-buscador:focus {
   outline: none;
-  border-color: #6d5ef8;
-  box-shadow: 0 0 0 3px rgba(109, 94, 248, 0.12);
+  border-color: #0047ab;
+  box-shadow: 0 0 0 3px rgba(0, 71, 171, 0.15);
 }
 
 .seleccion-tabla {
@@ -84,18 +84,20 @@
 }
 
 .seleccion-btn {
-  background-color: #eff6ff;
-  color: #2563eb;
-  border: none;
+  background-color: #f0f5ff;
+  color: #0047ab;
+  border: 1px solid #c7d9f7;
   border-radius: 8px;
   padding: 0.45rem 1rem;
   font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
+  transition: all 0.15s ease;
 }
 
 .seleccion-btn:hover {
-  background-color: #dbeafe;
+  background-color: #0047ab;
+  color: #ffffff;
 }
 
 .seleccion-footer {
@@ -119,7 +121,7 @@
 }
 
 .seleccion-page-btn {
-  background-color: #e5484d;
+  background-color: #ff8c00;
   color: #fff;
   border: none;
   border-radius: 6px;
@@ -128,10 +130,11 @@
   font-size: 0.8rem;
   font-weight: 700;
   cursor: pointer;
+  transition: background-color 0.15s ease;
 }
 
 .seleccion-page-btn:hover {
-  background-color: #cf3d42;
+  background-color: #ea7000;
 }
 
 .seleccion-page-btn:disabled {
@@ -140,5 +143,6 @@
 }
 
 .seleccion-page-btn--active {
-  background-color: #111;
+  background-color: #0047ab !important;
+  color: #ffffff !important;
 }

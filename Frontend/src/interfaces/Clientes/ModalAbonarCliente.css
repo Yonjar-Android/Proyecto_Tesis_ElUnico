@@ -32,20 +32,18 @@
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: #6d5ef8;
+  color: #0047ab;
 }
-
-
 
 .abono-saldo-monto {
   font-size: 2rem;
   font-weight: 700;
-  color: #4338ca;
+  color: #0047ab;
 }
 
 .abono-saldo-cliente {
   font-size: 0.8rem;
-  color: #6d5ef8;
+  color: #0047ab;
 }
 
 .abono-montos-recibido{
@@ -89,7 +87,7 @@
 
 .abono-notas:focus {
   outline: none;
-  border-color: #6d5ef8;
+  border-color: #0047ab;
   background: #fff;
 }
 
@@ -146,13 +144,13 @@
 }
 
 .moneda-btn:hover {
-  border-color: #6d5ef8;
-  color: #6d5ef8;
+  border-color: #0047ab;
+  color: #0047ab;
 }
 
 .moneda-btn.activo {
-  background: #6d5ef8;
-  border-color: #6d5ef8;
+  background: #0047ab;
+  border-color: #0047ab;
   color: #fff;
 }
 
