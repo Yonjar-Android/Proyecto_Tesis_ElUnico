@@ -1,5 +1,4 @@
 import express from "express";
-//import dotenv from "dotenv";
 import { conectarDB } from "./config/database.js";
 import marcaRoutes from "./routes/marca.routes.js";
 import categoriaRoutes from "./routes/categoria.routes.js";
@@ -25,11 +24,9 @@ import devolucionesRoutes from "./routes/devoluciones.routes.js";
 import salidasRoutes from "./routes/salidas_Inventario.js";
 import mantenimientoRoutes from "./routes/mantenimiento.routes.js";
 
-//dotenv.config();
-
 const app = express();
 
-const PORT = Number(process.env.PORT) || 3001;
+const PORT = Number(process.env.PORT) || 3007;
 
 conectarDB();
 

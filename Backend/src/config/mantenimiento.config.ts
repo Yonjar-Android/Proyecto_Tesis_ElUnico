@@ -9,7 +9,7 @@ export const CARPETA_RESPALDOS = path.resolve(process.cwd(), "backups");
 // Mismas credenciales que usa config/database.ts
 export const DB_CONFIG = {
     host: "localhost",
-    port: "3306",
+    port: "3307",
     user: "root",
     password: "",
     database: "elunico_db",
