@@ -18,7 +18,7 @@ import {
 import logo from "../assets/LogoAzulNaranja-transparente.png";
 import "./Sidebar.css";
 import { obtenerSesionActiva } from "../services/caja.service";
-import cajaModalStyles from "./CajaModal.module.css";
+import cajaModalStyles from "./cajaModal.module.css";
 import { useCajaAbierta } from "../context/CajaContext";
 
 interface UsuarioSesion {
@@ -29,6 +29,7 @@ interface UsuarioSesion {
 
 export default function Sidebar() {
   const [reportesAbierto, setReportesAbierto] = useState(false);
+  const [productosAbierto, setProductosAbierto] = useState(false);
   const [usuarioMenuAbierto, setUsuarioMenuAbierto] = useState(false);
   const [usuario, setUsuario] = useState<UsuarioSesion | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -118,15 +119,35 @@ export default function Sidebar() {
           <span>Proveedores</span>
         </NavLink>
 
-        <NavLink to="/inventario" className="sidebar-link">
-          <Archive size={20} />
-          <span>Inventario</span>
-        </NavLink>
+        <button
+  type="button"
+  className="sidebar-link sidebar-dropdown-toggle"
+  onClick={() => setProductosAbierto((abierto) => !abierto)}
+>
+  <Archive size={20} />
+  <span>Productos</span>
+  <ChevronDown
+    size={16}
+    className={`chevron ${productosAbierto ? "chevron-abierto" : ""}`}
+  />
+</button>
 
-        <NavLink to="/salidasInventario" className="sidebar-link">
-          <Archive size={20} />
-          <span>Otras salidas de inventario</span>
-        </NavLink>
+{productosAbierto && (
+  <div className="sidebar-submenu">
+    <NavLink to="/inventario" className="sidebar-sublink">
+      Inventario
+    </NavLink>
+    <NavLink to="/salidasInventario" className="sidebar-sublink">
+      Otras salidas de inventario
+    </NavLink>
+    <NavLink to="/categorias" className="sidebar-sublink">
+      Categorías
+    </NavLink>
+    <NavLink to="/marcas" className="sidebar-sublink">
+      Marcas
+    </NavLink>
+  </div>
+)}
 
         <NavLink to="/servicio" className="sidebar-link">
           <Archive size={20} />

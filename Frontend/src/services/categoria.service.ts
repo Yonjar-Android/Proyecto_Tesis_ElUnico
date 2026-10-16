@@ -1,6 +1,6 @@
 import axiosInstance from "./axiosInstance";
 
-const API = "http://localhost:3001/api/categorias";
+const API = "/categorias";
 const token = localStorage.getItem("token");
 
 export const obtenerCategorias = async () => {

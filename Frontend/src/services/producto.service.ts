@@ -1,6 +1,6 @@
 import axiosInstance from "./axiosInstance";
 
-const API = "http://localhost:3001/api/productos";
+const API = "/productos";
 const token = localStorage.getItem("token");
 
 export const crearProducto = async (

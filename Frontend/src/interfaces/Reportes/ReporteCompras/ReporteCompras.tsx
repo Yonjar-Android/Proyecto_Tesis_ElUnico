@@ -143,7 +143,7 @@ const buscar = async () => {
 
 const handleDescargarPdfCompras = async () => {
     try {
-        const blob = await descargarReporteComprasPorPeriodoPdf("", fechaInicio, fechaFin,  proveedorSeleccionado?.id ?? 0);
+        const blob = await descargarReporteComprasPorPeriodoPdf("", fechaInicio, fechaFin,  proveedorSeleccionado?.id ?? 0, proveedorSeleccionado?.Nombre_Empresa ?? "");
         descargarArchivoExcel(blob, `reporte_compras_${fechaInicio}_a_${fechaFin}.pdf`);
     } catch (error) {
         console.error('Error al descargar PDF:', error);

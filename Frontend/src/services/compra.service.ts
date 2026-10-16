@@ -1,7 +1,7 @@
 import axiosInstance from "./axiosInstance";
 import type { DetalleCompraDTO } from "../models/CompraReporte";
 
-const API = "http://localhost:3001/api/compras";
+const API = "/compras";
 const token = localStorage.getItem("token");
 
 interface DetalleCompra {

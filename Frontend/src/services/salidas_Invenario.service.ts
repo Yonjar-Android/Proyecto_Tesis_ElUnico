@@ -1,6 +1,6 @@
 import axiosInstance from "./axiosInstance";
 
-const API = "http://localhost:3001/api/salidas_inventario";
+const API = "/salidas_inventario";
 
 export interface DetalleSalida {
     Id_producto: number;

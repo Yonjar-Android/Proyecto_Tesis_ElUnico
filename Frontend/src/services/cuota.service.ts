@@ -1,5 +1,5 @@
 import axiosInstance from "./axiosInstance";
-const API = "http://localhost:3001/api/cuota";
+const API = "/cuota";
 const token = localStorage.getItem("token");
 
 export const obtenerCuotasPendientes = async (

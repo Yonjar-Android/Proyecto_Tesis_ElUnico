@@ -1,5 +1,5 @@
 import axiosInstance from "./axiosInstance";
-const API = "http://localhost:3001/api/abono";
+const API = "/abono";
 const token = localStorage.getItem("token");
 
 export const obtenerHistorialAbonos = async (

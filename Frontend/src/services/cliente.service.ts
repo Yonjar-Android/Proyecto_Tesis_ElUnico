@@ -1,5 +1,5 @@
 import axiosInstance from "./axiosInstance";
-const API = "http://localhost:3001/api/clientes";
+const API = "/clientes";
 const token = localStorage.getItem("token");
 
 

@@ -8,7 +8,7 @@ import type { RespuestaReporteInventario } from "../models/RespuestaReporteInven
 import type { RespuestaReporteDevoluciones } from "../models/RespuestaReporteDevoluciones";
 import type { RespuestaReporteArqueo, DetalleArqueoDTO } from "../models/ArqueoCajaReporte";
 
-const API = "http://localhost:3001/api/reportes";
+const API = "/reportes";
 const token = localStorage.getItem("token");
 
 export const obtenerReporteStockBajo = async (

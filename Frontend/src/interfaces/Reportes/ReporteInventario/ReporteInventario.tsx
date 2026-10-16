@@ -114,7 +114,9 @@ const handleDescargarPdfInventario = async () => {
         const blob = await descargarReporteInventarioPdf(
           busquedaNombre,
         categoriaSeleccionada?.id ?? null,
-        marcaSeleccionada?.id ?? null
+        marcaSeleccionada?.id ?? null,
+        categoriaSeleccionada?.Nombre_categoria ?? null,
+        marcaSeleccionada?.Nombre_marca ?? null
         );
         descargarArchivoExcel(blob, `reporte_inventario_${new Date().toISOString().split('T')[0]}.pdf`);
     } catch (error) {
