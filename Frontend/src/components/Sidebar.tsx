@@ -13,6 +13,7 @@ import {
   UserCog,
   Wallet,
   Info,
+  ShieldCheck,
 } from "lucide-react";
 import logo from "../assets/LogoAzulNaranja-transparente.png";
 import "./Sidebar.css";
@@ -245,6 +246,14 @@ export default function Sidebar() {
           <NavLink to="/mantenimiento" className="sidebar-link">
             <Wrench size={20} />
             <span>Mantenimiento</span>
+          </NavLink>
+        )}
+
+        {/* Bitácora de Auditoría: solo Administrador */}
+        {esAdministrador && (
+          <NavLink to="/bitacora" className="sidebar-link">
+            <ShieldCheck size={20} />
+            <span>Bitácora</span>
           </NavLink>
         )}
 

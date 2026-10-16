@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { crearVenta, buscarFacturaParaDevolucion, obtenerReciboVenta, verificarLimiteCreditoPendiente } from "../services/venta.service.js";
+import { registrarBitacora } from "../services/bitacora.service.js";
 
 export const postVenta = async (req: Request, res: Response) => {
     try {
@@ -21,19 +22,29 @@ export const postVenta = async (req: Request, res: Response) => {
             DatosCredito
         } = req.body;
 
-        const resultado = await crearVenta(
-    Number(Id_cliente),
-    idUsuario,
-    Tipo_Pago,
-    Number(Total),
-    Number(RecibidoCordobas) || 0,
-    Number(RecibidoDolares) || 0,
-    Num_referencia,
-    Detalles,
-    DatosCredito
-);
+        const resultado: any = await crearVenta(
+          Number(Id_cliente),
+          idUsuario,
+          Tipo_Pago,
+          Number(Total),
+          Number(RecibidoCordobas) || 0,
+          Number(RecibidoDolares) || 0,
+          Num_referencia,
+          Detalles,
+          DatosCredito
+        );
 
-res.status(201).json(resultado);
+        await registrarBitacora({
+          idUsuario,
+          usuario: (req as any).usuario?.usuario || "Usuario",
+          rol: (req as any).usuario?.rol || "N/A",
+          accion: "Registro de Venta",
+          modulo: "Ventas",
+          detalles: `Venta #${resultado?.id || resultado?.insertId || ""} por C$ ${Total} (Pago: ${Tipo_Pago})`,
+          ip: req.ip,
+        });
+
+        res.status(201).json(resultado);
 
     } catch (error: any) {
 

@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import { loginService, resetPasswordByEmail } from "../services/auth.service.js";
+import { registrarBitacora } from "../services/bitacora.service.js";
 
 export const login = async (req: Request, res: Response) => {
   const { usuario, password } = req.body;
@@ -9,17 +10,38 @@ export const login = async (req: Request, res: Response) => {
     const user = await loginService(usuario, password);
 
     if (!user) {
+      await registrarBitacora({
+        idUsuario: null,
+        usuario: String(usuario || "Desconocido"),
+        rol: "N/A",
+        accion: "Intento fallido de inicio de sesión",
+        modulo: "Seguridad",
+        detalles: `Credenciales incorrectas para el usuario: ${usuario || ""}`,
+        ip: req.ip || req.socket.remoteAddress,
+      });
+
       return res.status(401).json({
         success: false,
         message: "Credenciales incorrectas",
       });
     }
 
-   const token = jwt.sign(
-  { id: user.id, rol: user.Nombre_rol },
-  process.env.JWT_SECRET as string,
-  { expiresIn: "8h" }
-);
+    const token = jwt.sign(
+      { id: user.id, rol: user.Nombre_rol, usuario: user.Nombre_Usuario },
+      process.env.JWT_SECRET as string,
+      { expiresIn: "8h" }
+    );
+
+    await registrarBitacora({
+      idUsuario: user.id,
+      usuario: user.Nombre_Usuario,
+      rol: user.Nombre_rol,
+      accion: "Inicio de sesión",
+      modulo: "Seguridad",
+      detalles: "Inicio de sesión exitoso",
+      ip: req.ip || req.socket.remoteAddress,
+    });
+
     return res.json({ success: true, user, token });
   } catch (error: any) {
   

@@ -25,6 +25,8 @@ import devolucionesRoutes from "./routes/devoluciones.routes.js";
 import salidasRoutes from "./routes/salidas_Inventario.js";
 import mantenimientoRoutes from "./routes/mantenimiento.routes.js";
 
+import bitacoraRoutes from "./routes/bitacora.routes.js";
+
 //dotenv.config();
 
 const app = express();
@@ -36,11 +38,11 @@ conectarDB();
 app.use(cors());
 app.use(express.json());
 
-// Rutas públicas
+// Rutas públicas de autenticación
+app.use("/api/auth", authRoutes);
 app.use("/api/servicios", authMiddleware, servicioRoutes);
-app.use("/api/auth", authRoutes)
 
-// Rutas protegidas
+// Rutas operativas protegidas
 app.use("/api/marcas", authMiddleware, marcaRoutes);
 app.use("/api/categorias", authMiddleware, categoriaRoutes);
 app.use("/api/clientes", authMiddleware, clienteRoutes);
@@ -53,18 +55,17 @@ app.use("/api/productos", authMiddleware, productoRoutes);
 app.use("/api/ventas", authMiddleware, ventaRoutes);
 app.use("/api/compras", authMiddleware, compraRoutes);
 app.use("/api/caja", authMiddleware, cajaRoutes);
-app.use("/api/reportes", authMiddleware, reporteRoutes);
-app.use("/api/usuarios", authMiddleware, usuarioRoutes);
 app.use("/api/devoluciones", authMiddleware, devolucionesRoutes);
 app.use("/api/salidas_inventario", authMiddleware, salidasRoutes);
-app.use("/api/mantenimiento", authMiddleware, mantenimientoRoutes);
 app.use("/api/excel", authMiddleware, reporteExcelRoutes);
 app.use("/api/pdf", authMiddleware, reportePdfRoutes);
 
+// Rutas administrativas protegidas (solo Administrador)
+app.use("/api/usuarios", authMiddleware, requireRole("Administrador"), usuarioRoutes);
+app.use("/api/mantenimiento", authMiddleware, requireRole("Administrador"), mantenimientoRoutes);
+app.use("/api/reportes", authMiddleware, requireRole("Administrador"), reporteRoutes);
+app.use("/api/bitacora", authMiddleware, requireRole("Administrador"), bitacoraRoutes);
+
 app.listen(PORT, () => {
     console.log(`Servidor iniciado en http://localhost:${PORT}`);
-
-    app.use("/api/mantenimiento", authMiddleware, requireRole("Administrador"), mantenimientoRoutes);
-app.use("/api/usuarios", authMiddleware, requireRole("Administrador"), usuarioRoutes);
-app.use("/api/reportes", authMiddleware, requireRole("Administrador"), reporteRoutes);
 });
