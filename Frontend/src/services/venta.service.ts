@@ -73,3 +73,33 @@ export const verificarLimiteCreditoPendiente = async (idCliente: number) => {
 
     return response.data;
 };
+
+export const obtenerHistorialVentas = async (page = 1, limit = 10) => {
+    const response = await axiosInstance.get(`${API}/historial`, {
+        params: { page, limit },
+        headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data;
+};
+
+export const obtenerVentaParaEditar = async (idVenta: number) => {
+    const response = await axiosInstance.get(`${API}/${idVenta}/editar-datos`, {
+        headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data;
+};
+
+export const actualizarVenta = async (
+    idVenta: number,
+    Estado: "Pagada" | "Anulada",
+    Detalles: { Id_producto?: number; Id_servicio?: number; Cantidad: number;
+                Descuento?: number; Tipo_Descuento?: "porcentaje" | "fijo" }[],
+    Ajuste: { metodo: "Efectivo" | "Transferencia"; recibidoCordobas: number; referencia: string }
+) => {
+    const response = await axiosInstance.put(
+        `${API}/${idVenta}`,
+        { Estado, Detalles, Ajuste },
+        { headers: { Authorization: `Bearer ${token}` } }
+    );
+    return response.data;
+};

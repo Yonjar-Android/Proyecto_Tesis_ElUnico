@@ -1,0 +1,105 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(17, 24, 39, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 1100;
+}
+
+.modal {
+  width: 100%;
+  max-width: 420px;
+  background: #fff;
+  border-radius: 14px;
+  padding: 1.5rem;
+  box-sizing: border-box;
+}
+
+.titulo {
+  margin: 0 0 0.75rem;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #111;
+}
+
+.mensaje {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  color: #374151;
+}
+
+.mensaje strong {
+  color: #111;
+}
+
+.advertencia {
+  margin: 0.75rem 0 0;
+  padding: 0.65rem 0.85rem;
+  background: #fee2e2;
+  color: #b91c1c;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+.acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.btnCancelar {
+  background: none;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 0.7rem 1.2rem;
+  font-size: 0.9rem;
+  color: #6b7280;
+  cursor: pointer;
+}
+
+.btnCancelar:hover {
+  background: #f9fafb;
+}
+
+.btnConfirmar,
+.btnPeligro {
+  border: none;
+  border-radius: 8px;
+  padding: 0.7rem 1.4rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #fff;
+  cursor: pointer;
+}
+
+.btnConfirmar {
+  background-color: #0047ab;
+}
+
+.btnConfirmar:hover {
+  background-color: #003682;
+}
+
+.btnPeligro {
+  background-color: #dd141b;
+}
+
+.btnPeligro:hover {
+  background-color: #cf3d42;
+}
+
+@media (max-width: 480px) {
+  .acciones {
+    flex-direction: column-reverse;
+  }
+
+  .acciones button {
+    width: 100%;
+  }
+}

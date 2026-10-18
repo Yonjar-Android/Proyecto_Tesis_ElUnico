@@ -39,6 +39,7 @@ import RutaProtegidaCaja from "./components/RutaProtegidaCaja";
 import Credito from "./interfaces/Credito/GestionCredito";
 import AcercaDe from "./interfaces/AcercaDe/AcercaDe";
 import Bitacora from "./interfaces/Bitacora/Bitacora";
+import EditarVenta from "./interfaces/Facturacion/EditarVenta";
 
 
 function App() {
@@ -79,6 +80,15 @@ function App() {
               element={
                 <RutaProtegidaCaja>
                   <Facturacion />
+                </RutaProtegidaCaja>
+              }
+            />
+
+            <Route
+              path="/ventas/:id/editar"
+              element={
+                <RutaProtegidaCaja>
+                  <EditarVenta />
                 </RutaProtegidaCaja>
               }
             />

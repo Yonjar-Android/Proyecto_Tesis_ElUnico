@@ -59,7 +59,14 @@ export async function buscarSesionActiva(idUsuario: number) {
   const sesion = rows[0] || null;
 
   if (!sesion) {
-    return { sesion: null, egresos: [], ingresosDia: 0, ingresosDolares: 0, transferencias: 0 };
+    return {
+      sesion: null,
+      egresos: [],
+      ingresosDia: 0,
+      ingresosDolares: 0,
+      transferencias: 0,
+      totalEgresos: 0,
+    };
   }
 
   const [egresos]: any = await pool.query(
@@ -67,41 +74,33 @@ export async function buscarSesionActiva(idUsuario: number) {
     [sesion.id_sesion]
   );
 
-  // Los componentes monetarios se leen de cada venta para conservar pagos mixtos y transferencias separadas.
-  let ingresosEfectivo = 0;
-  let ingresosDolares = 0;
-  let transferencias = 0;
+  // Efectivo y transferencias: la fuente de verdad es la sesión (triggers + ajustes de edición)
+  let ingresosEfectivo = Number(sesion.total_ingresos_sistema) || 0;
+  let transferencias = Number(sesion.total_tarjeta_transferencia) || 0;
 
-  const [desglose]: any = await pool.query(
-    `SELECT
-       COALESCE(SUM(CASE WHEN Tipo_Pago = 'Contado' THEN RecibidoCordobas ELSE 0 END), 0) AS contado_cordobas,
-       COALESCE(SUM(CASE WHEN Tipo_Pago = 'Contado' THEN RecibidoDolares ELSE 0 END), 0) AS contado_dolares,
-       COALESCE(SUM(CASE WHEN Tipo_Pago = 'Transferencia' THEN Total ELSE 0 END), 0) AS transferencias
-     FROM ventas 
-     WHERE Fecha >= ? AND (Id_usuario = ? OR ? = 0)`,
-    [sesion.fecha_apertura, idUsuario, idUsuario]
+  // Dólares: se deja como estaba, pero solo ventas de esta sesión y sin anuladas
+  const [dolares]: any = await pool.query(
+    `SELECT COALESCE(SUM(RecibidoDolares), 0) AS contado_dolares
+     FROM ventas
+     WHERE Tipo_Pago = 'Contado'
+       AND Estado <> 'Anulada'
+       AND Fecha >= ?
+       AND Id_usuario = ?`,
+    [sesion.fecha_apertura, idUsuario]
   );
+  const ingresosDolares = Number(dolares[0]?.contado_dolares) || 0;
 
-  // Sumar abonos realizados durante el turno
+  // Abonos: SOLO si tu trigger de abonos NO suma ya a la sesión (ver nota abajo)
   const [abonos]: any = await pool.query(
-    `SELECT 
+    `SELECT
        COALESCE(SUM(CASE WHEN LOWER(metodo_pago) = 'contado' THEN monto_abonado ELSE 0 END), 0) AS abonos_efectivo,
        COALESCE(SUM(CASE WHEN LOWER(metodo_pago) = 'transferencia' THEN monto_abonado ELSE 0 END), 0) AS abonos_transferencia
      FROM abono
      WHERE fecha_abono >= ?`,
     [sesion.fecha_apertura]
   );
-
-  if (desglose?.length > 0) {
-    ingresosEfectivo = Number(desglose[0].contado_cordobas) || 0;
-    ingresosDolares = Number(desglose[0].contado_dolares) || 0;
-    transferencias = Number(desglose[0].transferencias) || 0;
-  }
-
-  if (abonos?.length > 0) {
-    ingresosEfectivo += Number(abonos[0].abonos_efectivo) || 0;
-    transferencias += Number(abonos[0].abonos_transferencia) || 0;
-  }
+  ingresosEfectivo += Number(abonos[0]?.abonos_efectivo) || 0;
+  transferencias += Number(abonos[0]?.abonos_transferencia) || 0;
 
   return {
     sesion,
@@ -109,6 +108,7 @@ export async function buscarSesionActiva(idUsuario: number) {
     ingresosDia: ingresosEfectivo,
     ingresosDolares,
     transferencias,
+    totalEgresos: Number(sesion.total_egresos_sistema) || 0,
   };
 }
 

@@ -353,9 +353,9 @@ export const obtenerReporteVentas = async (
     `;
 
     // Neto para AGREGADOS (estadísticas): una venta Devuelta no debe sumar al total de ventas
-    const totalNetoExpr = `
+      const totalNetoExpr = `
         CASE
-            WHEN v.Estado = 'Devuelta' THEN 0
+            WHEN v.Estado IN ('Devuelta', 'Anulada') THEN 0
             ELSE v.Total - COALESCE(devt.TotalDevuelto, 0)
         END
     `;
@@ -580,7 +580,7 @@ export const obtenerReporteVentasServicio = async (
 
     const offset = (page - 1) * perPage;
 
-    let where = "WHERE d.Id_servicio IS NOT NULL";
+    let where = "WHERE d.Id_servicio IS NOT NULL AND v.Estado <> 'Anulada'";
     const params: any[] = [];
 
     if (search.trim() !== "") {
@@ -690,7 +690,7 @@ export const obtenerReporteVentasProducto = async (
 
     const offset = (page - 1) * perPage;
 
-    let where = "WHERE d.Id_producto IS NOT NULL";
+    let where = "WHERE d.Id_producto IS NOT NULL AND v.Estado <> 'Anulada'";
     const params: any[] = [];
 
     if (search.trim() !== "") {
@@ -1323,4 +1323,4 @@ export const obtenerDetalleArqueo = async (idSesion: number) => {
         egresos: egresos || [],
         desgloseBilletes: billetes || []
     };
-};
+};

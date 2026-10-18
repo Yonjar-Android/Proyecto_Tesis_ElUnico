@@ -582,3 +582,451 @@ export const verificarLimiteCreditoPendiente = async (
 
     return ventasPendientes;
 };
+
+const subtotalLinea = (
+    cantidad: number,
+    precio: number,
+    descuento: number,
+    tipo: string
+) => {
+    const descUnit = tipo === "porcentaje" ? precio * (descuento / 100) : descuento;
+    return Math.round((cantidad * precio - descUnit * cantidad) * 100) / 100;
+};
+
+const MAX_PORCENTAJE_DESCUENTO = 50;
+
+const esDeHoy = (fecha: Date | string): boolean => {
+    const inicioHoy = new Date();
+    inicioHoy.setHours(0, 0, 0, 0);
+    return new Date(fecha) >= inicioHoy;
+};
+
+const calcularMotivoBloqueo = (
+    venta: { Estado: string; Tipo_Pago: string; Fecha: Date | string },
+    tieneDevoluciones: boolean
+): string | null => {
+    if (venta.Estado === "Anulada") return "La factura está anulada.";
+
+    if (String(venta.Tipo_Pago).toUpperCase() === "CREDITO") {
+        return "Las facturas al crédito no se pueden editar.";
+    }
+
+    // Hoy o el día anterior (desde las 00:00 de ayer)
+    const limite = new Date();
+    limite.setHours(0, 0, 0, 0);
+    limite.setDate(limite.getDate() - 1);
+    if (new Date(venta.Fecha) < limite) {
+        return "Solo se pueden editar facturas de hoy o del día anterior.";
+    }
+
+    if (tieneDevoluciones) return "La factura tiene devoluciones registradas.";
+
+    return null;
+};
+
+const motivoBloqueoEdicion = async (
+    conn: any,
+    venta: { id: number; Estado: string; Tipo_Pago: string; Fecha: Date | string }
+): Promise<string | null> => {
+    const [dev]: any = await conn.query(
+        "SELECT id FROM devoluciones WHERE Id_venta = ? LIMIT 1",
+        [venta.id]
+    );
+    return calcularMotivoBloqueo(venta, dev.length > 0);
+};
+
+interface AjusteDinero {
+    metodo: "Efectivo" | "Transferencia";
+    recibidoCordobas: number;
+    referencia: string;
+}
+
+// monto > 0: se cobra al cliente. monto < 0: se le devuelve. 0: no hace nada.
+const aplicarAjusteDinero = async (
+    conn: any,
+    venta: { id: number; Fecha: Date | string; Num_referencia: string | null },
+    idUsuario: number,
+    monto: number,
+    ajuste: AjusteDinero,
+    soloMismaSesion = false
+) => {
+    if (monto === 0) return;
+
+    if (ajuste.metodo !== "Efectivo" && ajuste.metodo !== "Transferencia") {
+        throw new Error("Método de ajuste inválido.");
+    }
+
+    const [sesion]: any = await conn.query(
+        `SELECT id_sesion, fecha_apertura
+         FROM sesiones_caja
+         WHERE id_usuario = ? AND estado = 'Abierta'
+         LIMIT 1 FOR UPDATE`,
+        [idUsuario]
+    );
+    if (sesion.length === 0) {
+        throw new Error("No hay una sesión de caja abierta para registrar el ajuste.");
+    }
+    const idSesion = sesion[0].id_sesion;
+
+    // ¿La venta ocurrió dentro de la sesión de caja que está abierta ahora?
+    const mismaSesion = new Date(venta.Fecha) >= new Date(sesion[0].fecha_apertura);
+
+    if (soloMismaSesion && !mismaSesion) {
+        throw new Error("Solo se puede anular una factura dentro de la misma sesión de caja en que se vendió.");
+    }
+
+    if (ajuste.metodo == "Transferencia") {
+        const ref = (ajuste.referencia ?? "").trim();
+        if (!ref) throw new Error("Ingresa la referencia de la transferencia del ajuste.");
+
+        const previa = (venta.Num_referencia ?? "").trim();
+        await conn.query("UPDATE ventas SET Num_referencia = ? WHERE id = ?", [
+            previa ? `${previa} ${ref}` : ref,
+            venta.id,
+        ]);
+
+        // monto negativo resta (misma lógica que el trigger de devoluciones)
+        await conn.query(
+            `UPDATE sesiones_caja
+             SET total_tarjeta_transferencia = COALESCE(total_tarjeta_transferencia, 0) + ?
+             WHERE id_sesion = ?`,
+            [monto, idSesion]
+        );
+        return;
+    }
+
+    // Efectivo
+    if (monto > 0) {
+        if (Number(ajuste.recibidoCordobas) < monto) {
+            throw new Error(`El monto recibido no cubre la diferencia de C$ ${monto.toFixed(2)}.`);
+        }
+        await conn.query(
+            `UPDATE sesiones_caja
+             SET total_ingresos_sistema = COALESCE(total_ingresos_sistema, 0) + ?
+             WHERE id_sesion = ?`,
+            [monto, idSesion]
+        );
+        return;
+    }
+
+    // Devolución de efectivo
+    const devuelto = -monto;
+    if (mismaSesion) {
+        // El ingreso original está en esta caja: se resta de ingresos
+        await conn.query(
+            `UPDATE sesiones_caja
+             SET total_ingresos_sistema = COALESCE(total_ingresos_sistema, 0) - ?
+             WHERE id_sesion = ?`,
+            [devuelto, idSesion]
+        );
+    } else {
+        // El ingreso original quedó en una caja cerrada: sale como egreso de esta caja
+        await conn.query(
+            `UPDATE sesiones_caja
+             SET total_egresos_sistema = COALESCE(total_egresos_sistema, 0) + ?
+             WHERE id_sesion = ?`,
+            [devuelto, idSesion]
+        );
+    }
+};
+
+// ───────── Historial ─────────
+export const listarHistorialVentas = async (page = 1, limit = 10) => {
+    const offset = (page - 1) * limit;
+
+    const [[conteo]]: any = await pool.query(`SELECT COUNT(*) AS total FROM ventas`);
+
+    const [rows]: any = await pool.query(
+        `
+        SELECT
+            v.id        AS idVenta,
+            v.Fecha     AS fecha,
+            v.Estado    AS estado,
+            v.Tipo_Pago AS tipoPago,
+            v.Total     AS total,
+            CONCAT(c.Nombre, ' ', c.Apellido) AS clienteNombre,
+            EXISTS (SELECT 1 FROM devoluciones d WHERE d.Id_venta = v.id) AS tieneDevoluciones
+        FROM ventas v
+        INNER JOIN clientes c ON c.id = v.Id_cliente
+        ORDER BY v.Fecha DESC, v.id DESC
+        LIMIT ? OFFSET ?
+        `,
+        [limit, offset]
+    );
+
+    return {
+        datos: rows.map((r: any) => ({
+            idVenta: r.idVenta,
+            clienteNombre: r.clienteNombre,
+            estado: r.estado,
+            tipoPago: r.tipoPago,
+            total: Number(r.total),
+            motivoBloqueo: calcularMotivoBloqueo(
+                { Estado: r.estado, Tipo_Pago: r.tipoPago, Fecha: r.fecha },
+                Boolean(r.tieneDevoluciones)
+            ),
+        })),
+        paginacion: {
+            page,
+            limit,
+            total: conteo.total,
+            totalPaginas: Math.ceil(conteo.total / limit),
+        },
+    };
+};
+
+// ───────── Datos para la pantalla de edición ─────────
+export const obtenerVentaParaEditar = async (idVenta: number) => {
+    const [ventaRows]: any = await pool.query(
+        `
+        SELECT v.id, v.Fecha, v.Estado, v.Tipo_Pago, v.Total,
+               CONCAT(c.Nombre, ' ', c.Apellido) AS clienteNombre
+        FROM ventas v
+        INNER JOIN clientes c ON c.id = v.Id_cliente
+        WHERE v.id = ?
+        `,
+        [idVenta]
+    );
+    if (ventaRows.length === 0) throw new Error("La factura no existe.");
+    const venta = ventaRows[0];
+
+    const motivoBloqueo = await motivoBloqueoEdicion(pool, venta);
+
+    const [detalles]: any = await pool.query(
+        `
+        SELECT
+            dv.Id_producto, dv.Id_servicio,
+            COALESCE(p.Nombre, s.Nombre_servicio) AS nombre,
+            m.Nombre_marca AS marca,
+            dv.Cantidad, dv.Precio_Venta, dv.Descuento, dv.Tipo_descuento AS Tipo_Descuento,
+            p.Stock
+        FROM detalle_venta dv
+        LEFT JOIN productos p ON p.id = dv.Id_producto
+        LEFT JOIN marcas m    ON m.id = p.Id_marca
+        LEFT JOIN servicios s ON s.id = dv.Id_servicio
+        WHERE dv.Id_venta = ?
+        ORDER BY dv.id ASC
+        `,
+        [idVenta]
+    );
+
+        return {
+        idVenta: venta.id,
+        clienteNombre: venta.clienteNombre,
+        estado: venta.Estado,
+        tipoPago: venta.Tipo_Pago,
+        total: Number(venta.Total),
+        editable: motivoBloqueo === null,
+        puedeAnular: motivoBloqueo === null && esDeHoy(venta.Fecha),
+        motivoBloqueo,
+        items: detalles.map((d: any) => ({
+            tipo: d.Id_producto != null ? "producto" : "servicio",
+            id: d.Id_producto ?? d.Id_servicio,
+            nombre: d.nombre,
+            marca: d.marca ?? null,
+            cantidad: Number(d.Cantidad),
+            precio: Number(d.Precio_Venta),
+            descuento: Number(d.Descuento),
+            tipoDescuento: d.Tipo_Descuento,
+            stockMaximo: d.Id_producto != null ? Number(d.Stock) + Number(d.Cantidad) : null,
+        })),
+    };
+};
+
+// ───────── Editar / anular ─────────
+
+interface DetalleEdicionInput {
+    Id_producto?: number | null;
+    Id_servicio?: number | null;
+    Cantidad: number;
+    Descuento?: number;
+    Tipo_Descuento?: "porcentaje" | "fijo";
+}
+
+export const editarVenta = async (
+    idVenta: number,
+    idUsuario: number,
+    nuevoEstado: "Pagada" | "Anulada",
+    detalles: DetalleEdicionInput[],
+    ajuste: AjusteDinero
+) => {
+    if (nuevoEstado !== "Pagada" && nuevoEstado !== "Anulada") {
+        throw new Error("El estado solo puede ser Pagada o Anulada.");
+    }
+
+    const conn = await pool.getConnection();
+
+    try {
+        await conn.beginTransaction();
+
+                const [ventaRows]: any = await conn.query(
+            `SELECT id, Fecha, Estado, Tipo_Pago, Total, Num_referencia, RecibidoCordobas
+             FROM ventas WHERE id = ? FOR UPDATE`,
+            [idVenta]
+        );
+        if (ventaRows.length === 0) throw new Error("La factura no existe.");
+        const venta = ventaRows[0];
+
+        const bloqueo = await motivoBloqueoEdicion(conn, venta);
+        if (bloqueo) throw new Error(bloqueo);
+
+        const [actuales]: any = await conn.query(
+            `SELECT Id_producto, Id_servicio, Cantidad, Precio_Venta, Descuento, Tipo_descuento AS Tipo_Descuento
+             FROM detalle_venta WHERE Id_venta = ?`,
+            [idVenta]
+        );
+
+        // Cantidad que la factura tiene descontada hoy, por producto
+        const cantidadAntes = new Map<number, number>();
+        for (const a of actuales) {
+            if (a.Id_producto != null) {
+                cantidadAntes.set(a.Id_producto, (cantidadAntes.get(a.Id_producto) ?? 0) + Number(a.Cantidad));
+            }
+        }
+
+        // No hay trigger de UPDATE/DELETE: el stock se devuelve a mano
+        const devolverStockActual = async () => {
+            for (const [idProducto, cant] of cantidadAntes) {
+                await conn.query("UPDATE productos SET Stock = Stock + ? WHERE id = ?", [cant, idProducto]);
+            }
+        };
+
+        // ===== ANULAR (solo el mismo día y la misma sesión de caja) =====
+        if (nuevoEstado === "Anulada") {
+            if (!esDeHoy(venta.Fecha)) {
+                throw new Error("Una factura solo se puede anular el mismo día en que se vendió.");
+            }
+
+            const montoDevolver = Number(venta.Total);
+            await devolverStockActual();
+            await aplicarAjusteDinero(conn, venta, idUsuario, -montoDevolver, ajuste, true);
+            await conn.query("UPDATE ventas SET Estado = 'Anulada' WHERE id = ?", [idVenta]);
+            await conn.commit();
+            return { mensaje: "Factura anulada correctamente.", idVenta, montoDevolver };
+        }
+
+        // ===== EDITAR ITEMS =====
+        if (!detalles || detalles.length === 0) {
+            throw new Error("La factura debe tener al menos un producto o servicio.");
+        }
+
+        const clave = (p?: number | null, s?: number | null) => (p != null ? `p:${p}` : `s:${s}`);
+
+        const originales = new Map<string, any>();
+        for (const a of actuales) originales.set(clave(a.Id_producto, a.Id_servicio), a);
+
+        const vistos = new Set<string>();
+        const nuevos: any[] = [];
+
+        for (const d of detalles) {
+            if (d.Id_producto == null && d.Id_servicio == null) {
+                throw new Error("Cada línea debe tener un producto o un servicio.");
+            }
+
+            const k = clave(d.Id_producto, d.Id_servicio);
+            if (vistos.has(k)) throw new Error("Hay un producto o servicio repetido en la factura.");
+            vistos.add(k);
+
+            const cantidad = Number(d.Cantidad);
+            if (!Number.isInteger(cantidad) || cantidad <= 0) {
+                throw new Error("Todas las cantidades deben ser enteros mayores que 0.");
+            }
+
+            const original = originales.get(k);
+            let precio: number, descuento: number, tipoDescuento: string;
+
+            if (original) {
+                precio = Number(original.Precio_Venta);
+                descuento = Number(original.Descuento);
+                tipoDescuento = original.Tipo_Descuento;
+            } else {
+                const [r]: any =
+                    d.Id_producto != null
+                        ? await conn.query("SELECT Precio_venta AS precio FROM productos WHERE id = ?", [d.Id_producto])
+                        : await conn.query("SELECT Precio AS precio FROM servicios WHERE id = ?", [d.Id_servicio]);
+                if (r.length === 0) throw new Error("Un producto o servicio no existe.");
+                precio = Number(r[0].precio);
+
+                descuento = Number(d.Descuento ?? 0);
+                tipoDescuento = d.Tipo_Descuento === "porcentaje" ? "porcentaje" : "fijo";
+
+                if (!Number.isFinite(descuento) || descuento < 0) throw new Error("Hay un descuento inválido.");
+                if (tipoDescuento === "porcentaje" && descuento > MAX_PORCENTAJE_DESCUENTO) {
+                    throw new Error(`El porcentaje de descuento no puede ser mayor a ${MAX_PORCENTAJE_DESCUENTO}%.`);
+                }
+                const descUnit = tipoDescuento === "porcentaje" ? precio * (descuento / 100) : descuento;
+                if (descUnit > precio) throw new Error("El descuento no puede ser mayor al precio unitario.");
+            }
+
+            nuevos.push({
+                Id_producto: d.Id_producto ?? null,
+                Id_servicio: d.Id_servicio ?? null,
+                Cantidad: cantidad,
+                Precio_Venta: precio,
+                Descuento: descuento,
+                Tipo_Descuento: tipoDescuento,
+                Subtotal: subtotalLinea(cantidad, precio, descuento, tipoDescuento),
+            });
+        }
+
+        // Validar stock: disponible = stock actual + lo que esta factura ya tenía descontado
+        const cantidadAhora = new Map<number, number>();
+        for (const n of nuevos) if (n.Id_producto != null) cantidadAhora.set(n.Id_producto, n.Cantidad);
+
+        const idsProductos = [...new Set([...cantidadAntes.keys(), ...cantidadAhora.keys()])];
+        if (idsProductos.length > 0) {
+            const [stocks]: any = await conn.query(
+                "SELECT id, Nombre, Stock FROM productos WHERE id IN (?) FOR UPDATE",
+                [idsProductos]
+            );
+            for (const p of stocks) {
+                const disponible = Number(p.Stock) + (cantidadAntes.get(p.id) ?? 0);
+                if ((cantidadAhora.get(p.id) ?? 0) > disponible) {
+                    throw new Error(`Stock insuficiente para "${p.Nombre}". Disponible para esta factura: ${disponible}.`);
+                }
+            }
+        }
+
+        // Devolver stock, borrar, reinsertar (el trigger de INSERT descuenta)
+        await devolverStockActual();
+        await conn.query("DELETE FROM detalle_venta WHERE Id_venta = ?", [idVenta]);
+
+        for (const n of nuevos) {
+            await conn.query(
+                `INSERT INTO detalle_venta
+                 (Id_venta, Id_producto, Id_servicio, Cantidad, Precio_Venta, Descuento, Tipo_Descuento, Subtotal)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+                [idVenta, n.Id_producto, n.Id_servicio, n.Cantidad, n.Precio_Venta, n.Descuento, n.Tipo_Descuento, n.Subtotal]
+            );
+        }
+
+        // Dinero: el backend calcula la diferencia
+        const total = Math.round(nuevos.reduce((s, n) => s + n.Subtotal, 0) * 100) / 100;
+        const diferencia = Math.round((total - Number(venta.Total)) * 100) / 100;
+
+        await aplicarAjusteDinero(conn, venta, idUsuario, diferencia, ajuste);
+                // Recibo: RecibidoCordobas = total vigente + vuelto del último cobro en efectivo.
+        // Si el total baja (o no hay cobro en efectivo), el vuelto es 0.
+        if (String(venta.Tipo_Pago).toUpperCase() === "CONTADO" && diferencia !== 0) {
+            const nuevoCambio =
+                diferencia > 0 && ajuste.metodo === "Efectivo"
+                    ? Math.max(0, Number(ajuste.recibidoCordobas) - diferencia)
+                    : 0;
+
+            await conn.query("UPDATE ventas SET RecibidoCordobas = ? WHERE id = ?", [
+                Math.round((total + nuevoCambio) * 100) / 100,
+                idVenta,
+            ]);
+        }
+
+        await conn.query("UPDATE ventas SET Total = ?, Estado = 'Pagada' WHERE id = ?", [total, idVenta]);
+
+        await conn.commit();
+        return { mensaje: "Factura actualizada correctamente.", idVenta, total, diferencia };
+    } catch (error) {
+        await conn.rollback();
+        throw error;
+    } finally {
+        conn.release();
+    }
+};

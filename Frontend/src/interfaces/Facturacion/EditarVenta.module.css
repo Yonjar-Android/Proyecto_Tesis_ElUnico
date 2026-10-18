@@ -1,0 +1,34 @@
+/* Input de cantidad dentro de la tabla: mismo diseño que ".factura-campo input" */
+.inputCantidad {
+  width: 90px;
+  box-sizing: border-box;
+  border: 1px solid #e5e7eb;
+  background: #f9fafb;
+  border-radius: 8px;
+  padding: 0.55rem 0.7rem;
+  font-size: 0.9rem;
+  font-family: inherit;
+  color: #111;
+}
+
+.inputCantidad:focus {
+  outline: none;
+  border-color: #e5484d;
+  background: #fff;
+}
+
+.inputCantidad:disabled {
+  background: #f3f4f6;
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
+/* Celda de descuento editable (ítems nuevos) */
+.descuentoGrupo {
+  width: 150px;
+}
+
+/* Separación entre campos dentro de una misma tarjeta */
+.campoSeparado {
+  margin-top: 0.9rem;
+}

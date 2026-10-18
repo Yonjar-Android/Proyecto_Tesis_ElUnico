@@ -81,6 +81,8 @@ export default function Caja() {
       );
       setIngresosDolares(Number(data.ingresosDolares ?? 0));
 
+      console.log(data.transferencias, data.sesion?.total_tarjeta_transferencia, data.total_transferencias, data.ingresosTransferencias);
+
       // Ingresos por transferencias (banco / electrónico)
       setTransferencias(
         Number(

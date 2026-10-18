@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { crearVenta, buscarFacturaParaDevolucion, obtenerReciboVenta, verificarLimiteCreditoPendiente } from "../services/venta.service.js";
+import { crearVenta, buscarFacturaParaDevolucion, obtenerReciboVenta, verificarLimiteCreditoPendiente, editarVenta, listarHistorialVentas, obtenerVentaParaEditar } from "../services/venta.service.js";
 import { registrarBitacora } from "../services/bitacora.service.js";
 
 export const postVenta = async (req: Request, res: Response) => {
@@ -128,3 +128,58 @@ export const getVentasPendientes= async (
         });
     }
 }
+
+export const getHistorialVentas = async (req: Request, res: Response) => {
+    try {
+        const page = Math.max(Number(req.query.page) || 1, 1);
+        const limit = Math.min(Math.max(Number(req.query.limit) || 10, 1), 50);
+        res.json(await listarHistorialVentas(page, limit));
+    } catch (error: any) {
+        res.status(400).json({ mensaje: error.message });
+    }
+};
+
+export const getVentaParaEditar = async (req: Request, res: Response) => {
+    try {
+        res.json(await obtenerVentaParaEditar(Number(req.params.id)));
+    } catch (error: any) {
+        res.status(400).json({ mensaje: error.message });
+    }
+};
+
+const ROLES_EDICION_VENTA: string[] = []; // vacío = cualquier usuario autenticado
+
+export const putVenta = async (req: Request, res: Response) => {
+    try {
+        const idUsuario = (req as any).usuario?.id;
+        if (!idUsuario) return res.status(401).json({ mensaje: "No se pudo identificar al usuario." });
+
+        const rol = (req as any).usuario?.rol;
+        if (ROLES_EDICION_VENTA.length > 0 && !ROLES_EDICION_VENTA.includes(rol)) {
+            return res.status(403).json({ mensaje: "No tienes permiso para editar o anular facturas." });
+        }
+
+        const { Estado, Detalles, Ajuste } = req.body;
+        const idVenta = Number(req.params.id);
+
+        const resultado = await editarVenta(idVenta, idUsuario, Estado, Detalles ?? [], {
+            metodo: Ajuste?.metodo === "Transferencia" ? "Transferencia" : "Efectivo",
+            recibidoCordobas: Number(Ajuste?.recibidoCordobas) || 0,
+            referencia: String(Ajuste?.referencia ?? ""),
+        });
+
+        await registrarBitacora({
+            idUsuario,
+            usuario: (req as any).usuario?.usuario || "Usuario",
+            rol: rol || "N/A",
+            accion: Estado === "Anulada" ? "Anulación de Venta" : "Edición de Venta",
+            modulo: "Ventas",
+            detalles: `Factura #${idVenta} (${Estado})`,
+            ip: req.ip,
+        });
+
+        res.json(resultado);
+    } catch (error: any) {
+        res.status(400).json({ mensaje: error.message });
+    }
+};

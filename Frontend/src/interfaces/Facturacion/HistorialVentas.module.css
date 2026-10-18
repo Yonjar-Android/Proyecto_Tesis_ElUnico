@@ -1,0 +1,159 @@
+.seccion {
+  margin-top: 3rem; /* el margen hacia abajo respecto a "Realizar Venta" */
+  padding-top: 1.5rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.titulo {
+  margin: 0 0 1rem;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #111;
+}
+
+.card {
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 1.25rem 1.25rem 0.5rem;
+  box-sizing: border-box;
+  margin-bottom: 1.25rem;
+  overflow-x: auto;
+}
+
+.tabla {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tabla th {
+  text-align: left;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #9ca3af;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.tabla td {
+  padding: 0.9rem 0;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 0.9rem;
+  color: #374151;
+}
+
+.thAccion {
+  text-align: end !important;
+}
+
+.total {
+  font-weight: 700;
+  color: #111;
+}
+
+.tdAccion {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.btnAccion {
+  background: none;
+  border: none;
+  color: #2563eb;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+}
+
+.btnAccion:hover:not(:disabled) {
+  color: #1d4ed8;
+}
+
+.btnAccion:disabled {
+  color: #d1d5db;
+  cursor: not-allowed;
+}
+
+/* Estados */
+.estado {
+  display: inline-block;
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.estadoPagada {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.estadoPendiente {
+  background: #fef9c3;
+  color: #a16207;
+}
+
+.estadoAnulada {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.vacio {
+  text-align: center;
+  color: #9ca3af;
+  font-size: 0.85rem;
+  padding: 1.5rem 0;
+}
+
+/* Paginación */
+.footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+}
+
+.count {
+  font-size: 0.82rem;
+  color: #6b7280;
+}
+
+.pagination {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.pageBtn {
+  min-width: 34px;
+  height: 34px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  color: #374151;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pageBtn:hover:not(:disabled) {
+  background: #f3f4f6;
+}
+
+.pageBtn:disabled {
+  color: #d1d5db;
+  cursor: not-allowed;
+}
+
+.pageBtnActive {
+  background: #0047ab;
+  border-color: #0047ab;
+  color: #fff;
+}
+
+.pageBtnActive:hover:not(:disabled) {
+  background: #003682;
+}

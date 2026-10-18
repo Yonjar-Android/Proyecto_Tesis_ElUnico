@@ -17,6 +17,8 @@ import Notificacion, { type TipoNotificacion } from "../../components/Notificati
 import ModalConfirmarImpresion from "./ModalConfirmarImpresion";
 import { type DatosRecibo } from "../../models/Recibo";
 import { Joyride, type Step } from "react-joyride";
+import { useNavigate } from "react-router-dom";
+import HistorialVentas from "./HistorialVentas";
 
 type TipoDescuento = "porcentaje" | "fijo";
 
@@ -152,6 +154,9 @@ function Facturacion() {
   const [error, setError] = useState("");
   const [cajaAbierta, setCajaAbierta] = useState<boolean | null>(null);
   const [procesandoVenta, setProcesandoVenta] = useState(false);
+
+  const [refrescarHistorial, setRefrescarHistorial] = useState(0);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const verificarCaja = async () => {
@@ -468,6 +473,7 @@ const totalGeneral = subtotalGeneral - descuentoGeneral;
 
       setDatosRecibo(recibo);
       setModalReciboAbierto(true);
+      setRefrescarHistorial((n) => n + 1);
       setItems([]);
       setModalConfirmarAbierto(false);
       cancelarEdicion();
@@ -479,6 +485,15 @@ const totalGeneral = subtotalGeneral - descuentoGeneral;
       return false;
     }
   };
+
+  const verDetalleVenta = async (idVenta: number) => {
+  try {
+    setDatosRecibo(await obtenerReciboVenta(idVenta));
+    setModalReciboAbierto(true);
+  } catch {
+    setNotif({ mensaje: "No se pudo cargar el detalle", tipo: "error" });
+  }
+};
 
   const cambiarTipoSeleccion = (tipo: "producto" | "servicio") => {
     if (tipo === tipoSeleccion) return;
@@ -530,7 +545,7 @@ const manejarSeleccionCliente = async (cliente: Cliente) => {
   }
 
   setClienteSeleccionado(cliente);
-  if (cliente.id === 10 && tipoPago === "Credito") {
+  if (cliente.id === 21 && tipoPago === "Credito") {
     setTipoPago("Contado");
   }
   setError("");
@@ -658,7 +673,7 @@ const manejarSeleccionCliente = async (cliente: Cliente) => {
               </div>
             </div>
 
-<div className="factura-campo factura-campo-descuento">
+        <div className="factura-campo factura-campo-descuento">
   <label>Descuento</label>
   <div className="factura-precio-input factura-descuento-grupo">
     <select
@@ -708,7 +723,7 @@ const manejarSeleccionCliente = async (cliente: Cliente) => {
   onChange={(e) => manejarCambioTipoPago(e.target.value)}
 >
         <option value="Contado">Contado</option>
-        <option value="Credito" disabled={clienteSeleccionado.id === 10}>
+        <option value="Credito" disabled={clienteSeleccionado.id === 21}>
           Crédito
         </option>
         <option value="Transferencia">Transferencia</option>
@@ -900,7 +915,15 @@ const manejarSeleccionCliente = async (cliente: Cliente) => {
             </button>
           </div>
         </div>
+
+
       </div>
+      
+              <HistorialVentas
+  refrescar={refrescarHistorial}
+  onVerDetalle={verDetalleVenta}
+  onEditar={(id) => navigate(`/ventas/${id}/editar`)} // useNavigate de react-router
+/>
 
             <Joyride
   steps={pasosTour}
