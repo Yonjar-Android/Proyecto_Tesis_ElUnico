@@ -50,11 +50,51 @@ export async function cerrarSesionCaja(
   return result.affectedRows;
 }
 
-export async function buscarSesionActiva(idUsuario: number) {
-  await normalizarSesionesAbiertas(idUsuario);
+export async function calcularIngresosSesion(fechaInicio: Date | string, fechaFin?: Date | string | null) {
+  const fechaFinVentas = fechaFin ? "AND Fecha <= ?" : "";
+  const paramsVentas: any[] = [fechaInicio];
+  if (fechaFin) paramsVentas.push(fechaFin);
+
+  const [desglose]: any = await pool.query(
+    `SELECT
+       COALESCE(SUM(CASE WHEN Tipo_Pago = 'Contado' THEN CASE WHEN RecibidoCordobas > VueltoCordobas THEN RecibidoCordobas - VueltoCordobas ELSE 0 END ELSE 0 END), 0) AS contado_cordobas,
+       COALESCE(SUM(CASE WHEN Tipo_Pago = 'Contado' THEN CASE WHEN VueltoCordobas > RecibidoCordobas THEN VueltoCordobas - RecibidoCordobas ELSE 0 END ELSE 0 END), 0) AS vueltos_cordobas,
+       COALESCE(SUM(CASE WHEN Tipo_Pago = 'Contado' THEN RecibidoDolares ELSE 0 END), 0) AS contado_dolares,
+       COALESCE(SUM(CASE WHEN Tipo_Pago = 'Transferencia' THEN Total ELSE 0 END), 0) AS transferencias
+     FROM ventas 
+     WHERE Fecha >= ? ${fechaFinVentas} AND Estado <> 'Anulada'`,
+    paramsVentas
+  );
+
+  const fechaFinAbonos = fechaFin ? "AND fecha_abono <= ?" : "";
+  const paramsAbonos: any[] = [fechaInicio];
+  if (fechaFin) paramsAbonos.push(fechaFin);
+
+  const [abonos]: any = await pool.query(
+    `SELECT 
+       COALESCE(SUM(CASE WHEN LOWER(metodo_pago) = 'contado' THEN monto_abonado ELSE 0 END), 0) AS abonos_efectivo,
+       COALESCE(SUM(CASE WHEN LOWER(metodo_pago) = 'transferencia' THEN monto_abonado ELSE 0 END), 0) AS abonos_transferencia
+     FROM abono
+     WHERE fecha_abono >= ? ${fechaFinAbonos}`,
+    paramsAbonos
+  );
+
+  const ingresosCordobas = (Number(desglose[0]?.contado_cordobas) || 0) + (Number(abonos[0]?.abonos_efectivo) || 0);
+  const vueltosCordobas = Number(desglose[0]?.vueltos_cordobas) || 0;
+  const ingresosDolares = Number(desglose[0]?.contado_dolares) || 0;
+  const transferencias = (Number(desglose[0]?.transferencias) || 0) + (Number(abonos[0]?.abonos_transferencia) || 0);
+
+  return { ingresosCordobas, vueltosCordobas, ingresosDolares, transferencias };
+}
+
+export async function buscarSesionActiva(idUsuario?: number) {
+  await normalizarSesionesAbiertas();
   const [rows]: any = await pool.query(
-    `SELECT * FROM sesiones_caja WHERE id_usuario = ? AND estado = 'Abierta' LIMIT 1`,
-    [idUsuario]
+    `SELECT sc.*, COALESCE(u.Nombre_Usuario, 'Desconocido') AS usuario_apertura_nombre
+     FROM sesiones_caja sc
+     LEFT JOIN usuarios u ON sc.id_usuario = u.id
+     WHERE sc.estado = 'Abierta'
+     ORDER BY sc.id_sesion DESC LIMIT 1`
   );
   const sesion = rows[0] || null;
 
@@ -63,6 +103,7 @@ export async function buscarSesionActiva(idUsuario: number) {
       sesion: null,
       egresos: [],
       ingresosDia: 0,
+      vueltosCordobas: 0,
       ingresosDolares: 0,
       transferencias: 0,
       totalEgresos: 0,
@@ -74,38 +115,13 @@ export async function buscarSesionActiva(idUsuario: number) {
     [sesion.id_sesion]
   );
 
-  // Efectivo y transferencias: la fuente de verdad es la sesión (triggers + ajustes de edición)
-  let ingresosEfectivo = Number(sesion.total_ingresos_sistema) || 0;
-  let transferencias = Number(sesion.total_tarjeta_transferencia) || 0;
-
-  // Dólares: se deja como estaba, pero solo ventas de esta sesión y sin anuladas
-  const [dolares]: any = await pool.query(
-    `SELECT COALESCE(SUM(RecibidoDolares), 0) AS contado_dolares
-     FROM ventas
-     WHERE Tipo_Pago = 'Contado'
-       AND Estado <> 'Anulada'
-       AND Fecha >= ?
-       AND Id_usuario = ?`,
-    [sesion.fecha_apertura, idUsuario]
-  );
-  const ingresosDolares = Number(dolares[0]?.contado_dolares) || 0;
-
-  // Abonos: SOLO si tu trigger de abonos NO suma ya a la sesión (ver nota abajo)
-  const [abonos]: any = await pool.query(
-    `SELECT
-       COALESCE(SUM(CASE WHEN LOWER(metodo_pago) = 'contado' THEN monto_abonado ELSE 0 END), 0) AS abonos_efectivo,
-       COALESCE(SUM(CASE WHEN LOWER(metodo_pago) = 'transferencia' THEN monto_abonado ELSE 0 END), 0) AS abonos_transferencia
-     FROM abono
-     WHERE fecha_abono >= ?`,
-    [sesion.fecha_apertura]
-  );
-  ingresosEfectivo += Number(abonos[0]?.abonos_efectivo) || 0;
-  transferencias += Number(abonos[0]?.abonos_transferencia) || 0;
+  const { ingresosCordobas, vueltosCordobas, ingresosDolares, transferencias } = await calcularIngresosSesion(sesion.fecha_apertura);
 
   return {
     sesion,
     egresos,
-    ingresosDia: ingresosEfectivo,
+    ingresosDia: ingresosCordobas,
+    vueltosCordobas,
     ingresosDolares,
     transferencias,
     totalEgresos: Number(sesion.total_egresos_sistema) || 0,
@@ -137,10 +153,14 @@ export async function eliminarEgresoCajaModel(idEgreso: number) {
   return result.affectedRows;
 }
 
-export async function obtenerResumenCierreModel(idUsuario: number) {
+export async function obtenerResumenCierreModel(idUsuario?: number) {
+  await normalizarSesionesAbiertas();
   const [rows]: any = await pool.query(
-    `SELECT * FROM sesiones_caja WHERE id_usuario = ? AND estado = 'Abierta' LIMIT 1`,
-    [idUsuario]
+    `SELECT sc.*, COALESCE(u.Nombre_Usuario, 'Desconocido') AS usuario_apertura_nombre
+     FROM sesiones_caja sc
+     LEFT JOIN usuarios u ON sc.id_usuario = u.id
+     WHERE sc.estado = 'Abierta'
+     ORDER BY sc.id_sesion DESC LIMIT 1`
   );
   const sesion = rows[0] || null;
 
@@ -151,6 +171,8 @@ export async function obtenerResumenCierreModel(idUsuario: number) {
       montoAperturaCordobas: 0,
       montoAperturaDolares: 0,
       ingresosDia: 0,
+      ingresosCordobas: 0,
+      vueltosCordobas: 0,
       ingresosDolares: 0,
       transferencias: 0,
       totalEgresos: 0,
@@ -171,45 +193,24 @@ export async function obtenerResumenCierreModel(idUsuario: number) {
   const totalEgresosCordobas = Number(egresosRows[0]?.total_cordobas) || 0;
   const totalEgresosDolares = Number(egresosRows[0]?.total_dolares) || 0;
 
-  const [desglose]: any = await pool.query(
-    `SELECT
-       COALESCE(SUM(CASE WHEN Tipo_Pago = 'Contado' THEN RecibidoCordobas ELSE 0 END), 0) AS contado_cordobas,
-       COALESCE(SUM(CASE WHEN Tipo_Pago = 'Contado' THEN RecibidoDolares ELSE 0 END), 0) AS contado_dolares,
-       COALESCE(SUM(CASE WHEN Tipo_Pago = 'Transferencia' THEN Total ELSE 0 END), 0) AS transferencias
-     FROM ventas 
-     WHERE Fecha >= ? AND (Id_usuario = ? OR ? = 0)`,
-    [sesion.fecha_apertura, idUsuario, idUsuario]
-  );
-
-  const [abonos]: any = await pool.query(
-    `SELECT 
-       COALESCE(SUM(CASE WHEN LOWER(metodo_pago) = 'contado' THEN monto_abonado ELSE 0 END), 0) AS abonos_efectivo,
-       COALESCE(SUM(CASE WHEN LOWER(metodo_pago) = 'transferencia' THEN monto_abonado ELSE 0 END), 0) AS abonos_transferencia
-     FROM abono
-     WHERE fecha_abono >= ?`,
-    [sesion.fecha_apertura]
-  );
-
-  const ingresosCordobas = (Number(desglose[0]?.contado_cordobas) || 0) + (Number(abonos[0]?.abonos_efectivo) || 0);
-  const ingresosDolares = Number(desglose[0]?.contado_dolares) || 0;
-  const transferencias = (Number(desglose[0]?.transferencias) || 0) + (Number(abonos[0]?.abonos_transferencia) || 0);
+  const { ingresosCordobas, vueltosCordobas, ingresosDolares, transferencias } = await calcularIngresosSesion(sesion.fecha_apertura);
 
   const montoAperturaCordobas = Number(sesion.monto_apertura_cordobas) || 0;
   const montoAperturaDolares = Number(sesion.monto_apertura_dolares) || 0;
-  const tasaCambio = Number(sesion.tasa_cambio) || 36.62;
+  const tasaCambio = Number(sesion.tasa_cambio) || 36.60;
 
   // Efectivo esperado COMBINADO (equivalente en córdobas). Solo dinero en efectivo
   // (C$ y USD); transferencias se excluyen expresamente. Se sigue usando en el
   // frontend para calcular la "diferencia" del arqueo, así que no se toca.
   const totalAperturaEquivalente = montoAperturaCordobas + (montoAperturaDolares * tasaCambio);
-  const totalIngresosEfectivoEquivalente = ingresosCordobas + (ingresosDolares * tasaCambio);
+  const totalIngresosEfectivoEquivalente = (ingresosCordobas - vueltosCordobas) + (ingresosDolares * tasaCambio);
   const totalEgresosEfectivoEquivalente = totalEgresosCordobas + (totalEgresosDolares * tasaCambio);
 
   const efectivoEsperado = totalAperturaEquivalente + totalIngresosEfectivoEquivalente - totalEgresosEfectivoEquivalente;
 
   // Efectivo esperado PURO por moneda (sin conversión), para las tarjetas del
   // frontend que muestran córdobas y dólares por separado.
-  const efectivoEsperadoCordobas = montoAperturaCordobas + ingresosCordobas - totalEgresosCordobas;
+  const efectivoEsperadoCordobas = montoAperturaCordobas + ingresosCordobas - vueltosCordobas - totalEgresosCordobas;
   const efectivoEsperadoDolares = montoAperturaDolares + ingresosDolares - totalEgresosDolares;
 
   return {
@@ -219,6 +220,8 @@ export async function obtenerResumenCierreModel(idUsuario: number) {
     montoAperturaDolares,
     tasaCambio,
     ingresosDia: ingresosCordobas,
+    ingresosCordobas,
+    vueltosCordobas,
     ingresosDolares,
     transferencias,
     totalEgresos: totalEgresosCordobas,
@@ -272,22 +275,29 @@ export async function listarHistorialCajasModel() {
 }
 
 export async function normalizarSesionesAbiertas(idUsuario?: number) {
-  const filtro = idUsuario ? "AND sc.id_usuario = ?" : "";
-  const parametros = idUsuario ? [idUsuario] : [];
+  // 1. Cerrar automáticamente cualquier sesión abierta que ya supere las 24 horas
+  await pool.query(
+    `UPDATE sesiones_caja
+     SET estado = 'Cerrada',
+         fecha_cierre = COALESCE(fecha_cierre, DATE_ADD(fecha_apertura, INTERVAL 24 HOUR)),
+         observaciones = CONCAT(COALESCE(observaciones, ''), ' [Cierre automático del sistema: superó las 24 horas de apertura.]')
+     WHERE estado = 'Abierta'
+       AND fecha_apertura <= DATE_SUB(NOW(), INTERVAL 24 HOUR)`
+  );
+
+  // 2. Resolver bucles o aperturas duplicadas: solo puede haber una única caja abierta global en el negocio
   await pool.query(
     `UPDATE sesiones_caja sc
      JOIN (
-       SELECT id_usuario, MAX(id_sesion) AS id_sesion_activa
-       FROM (SELECT id_usuario, id_sesion FROM sesiones_caja WHERE estado = 'Abierta') abiertas
-       GROUP BY id_usuario
-     ) actuales ON actuales.id_usuario = sc.id_usuario
+       SELECT MAX(id_sesion) AS id_sesion_activa
+       FROM sesiones_caja
+       WHERE estado = 'Abierta'
+     ) actuales
      SET sc.estado = 'Cerrada',
          sc.fecha_cierre = COALESCE(sc.fecha_cierre, NOW()),
-         sc.observaciones = CONCAT(COALESCE(sc.observaciones, ''), ' Sesión cerrada automáticamente por apertura duplicada.')
+         sc.observaciones = CONCAT(COALESCE(sc.observaciones, ''), ' [Cierre automático por apertura duplicada.]')
      WHERE sc.estado = 'Abierta'
-       AND sc.id_sesion <> actuales.id_sesion_activa
-       ${filtro}`,
-    parametros
+       AND sc.id_sesion < actuales.id_sesion_activa`
   );
 }
 
@@ -319,43 +329,20 @@ export async function obtenerDetalleCierrePorSesionModel(idSesion: number) {
   const totalEgresosCordobas = Number(egresosRows[0]?.total_cordobas) || 0;
   const totalEgresosDolares = Number(egresosRows[0]?.total_dolares) || 0;
 
-  // Igual que obtenerResumenCierreModel, pero acotado entre apertura y cierre,
-  // porque la sesión ya no está "Abierta" y necesitamos su ventana de tiempo real.
-  const [desglose]: any = await pool.query(
-    `SELECT
-       COALESCE(SUM(CASE WHEN Tipo_Pago = 'Contado' THEN RecibidoCordobas ELSE 0 END), 0) AS contado_cordobas,
-       COALESCE(SUM(CASE WHEN Tipo_Pago = 'Contado' THEN RecibidoDolares ELSE 0 END), 0) AS contado_dolares,
-       COALESCE(SUM(CASE WHEN Tipo_Pago = 'Transferencia' THEN Total ELSE 0 END), 0) AS transferencias
-     FROM ventas 
-     WHERE Fecha >= ? AND Fecha <= ? AND (Id_usuario = ? OR ? = 0)`,
-    [sesion.fecha_apertura, fechaFin, sesion.id_usuario, sesion.id_usuario]
-  );
-
-  const [abonos]: any = await pool.query(
-    `SELECT 
-       COALESCE(SUM(CASE WHEN LOWER(metodo_pago) = 'contado' THEN monto_abonado ELSE 0 END), 0) AS abonos_efectivo,
-       COALESCE(SUM(CASE WHEN LOWER(metodo_pago) = 'transferencia' THEN monto_abonado ELSE 0 END), 0) AS abonos_transferencia
-     FROM abono
-     WHERE fecha_abono >= ? AND fecha_abono <= ?`,
-    [sesion.fecha_apertura, fechaFin]
-  );
-
-  const ingresosCordobas = (Number(desglose[0]?.contado_cordobas) || 0) + (Number(abonos[0]?.abonos_efectivo) || 0);
-  const ingresosDolares = Number(desglose[0]?.contado_dolares) || 0;
-  const transferencias = (Number(desglose[0]?.transferencias) || 0) + (Number(abonos[0]?.abonos_transferencia) || 0);
+  const { ingresosCordobas, vueltosCordobas, ingresosDolares, transferencias } = await calcularIngresosSesion(sesion.fecha_apertura, fechaFin);
 
   const montoAperturaCordobas = Number(sesion.monto_apertura_cordobas) || 0;
   const montoAperturaDolares = Number(sesion.monto_apertura_dolares) || 0;
-  const tasaCambio = Number(sesion.tasa_cambio) || 36.62;
+  const tasaCambio = Number(sesion.tasa_cambio) || 36.60;
 
   // Efectivo esperado COMBINADO: solo dinero físico (C$ y USD). Transferencias quedan fuera, a propósito.
   const totalAperturaEquivalente = montoAperturaCordobas + montoAperturaDolares * tasaCambio;
-  const totalIngresosEquivalente = ingresosCordobas + ingresosDolares * tasaCambio;
+  const totalIngresosEquivalente = (ingresosCordobas - vueltosCordobas) + ingresosDolares * tasaCambio;
   const totalEgresosEquivalente = totalEgresosCordobas + totalEgresosDolares * tasaCambio;
   const efectivoEsperado = totalAperturaEquivalente + totalIngresosEquivalente - totalEgresosEquivalente;
 
   // Efectivo esperado PURO por moneda (mismo criterio que obtenerResumenCierreModel).
-  const efectivoEsperadoCordobas = montoAperturaCordobas + ingresosCordobas - totalEgresosCordobas;
+  const efectivoEsperadoCordobas = montoAperturaCordobas + ingresosCordobas - vueltosCordobas - totalEgresosCordobas;
   const efectivoEsperadoDolares = montoAperturaDolares + ingresosDolares - totalEgresosDolares;
 
   return {
@@ -365,6 +352,7 @@ export async function obtenerDetalleCierrePorSesionModel(idSesion: number) {
     montoAperturaDolares,
     tasaCambio,
     ingresosCordobas,
+    vueltosCordobas,
     ingresosDolares,
     transferencias,
     totalEgresosCordobas,

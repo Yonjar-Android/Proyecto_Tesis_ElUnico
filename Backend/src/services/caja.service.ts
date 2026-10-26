@@ -9,6 +9,7 @@ import {
   listarHistorialCajasModel,
   normalizarSesionesAbiertas,
   obtenerDetalleCierrePorSesionModel,
+  calcularIngresosSesion,
 } from "../models/caja.models.js";
 
 export async function abrirCaja(
@@ -18,13 +19,12 @@ export async function abrirCaja(
   tasaCambio: number,
   observaciones: string
 ) {
-  await normalizarSesionesAbiertas(idUsuario);
+  await normalizarSesionesAbiertas();
   const [sesiones]: any = await (await import("../config/database.js")).pool.query(
-    `SELECT id_sesion FROM sesiones_caja WHERE id_usuario = ? AND estado = 'Abierta' LIMIT 1`,
-    [idUsuario]
+    `SELECT id_sesion FROM sesiones_caja WHERE estado = 'Abierta' LIMIT 1`
   );
   if (sesiones.length > 0) {
-    throw new Error(`Ya existe una caja abierta (sesión #${sesiones[0].id_sesion}). Cierre esa sesión antes de abrir otra.`);
+    throw new Error(`Ya existe una caja abierta en el negocio (sesión #${sesiones[0].id_sesion}). Debe cerrarla antes de abrir una nueva.`);
   }
 
   const totalEnCordobas =
@@ -48,10 +48,7 @@ export async function abrirCaja(
   );
 }
 
-export async function obtenerSesionActiva(idUsuario: number) {
-  if (!idUsuario || isNaN(idUsuario)) {
-    throw new Error("Usuario inválido.");
-  }
+export async function obtenerSesionActiva(idUsuario?: number) {
   return await buscarSesionActiva(idUsuario);
 }
 
@@ -87,21 +84,7 @@ export async function registrarEgresoCaja(
   if (!sesion) throw new Error("La sesión de caja no existe o está cerrada.");
 
   if (metodoPago === "Efectivo") {
-    const [desglose]: any = await pool.query(
-      `SELECT
-         COALESCE(SUM(CASE WHEN Tipo_Pago = 'Contado' THEN RecibidoCordobas ELSE 0 END), 0) AS contado_cordobas,
-         COALESCE(SUM(CASE WHEN Tipo_Pago = 'Contado' THEN RecibidoDolares ELSE 0 END), 0) AS contado_dolares
-       FROM ventas 
-       WHERE Fecha >= ? AND (Id_usuario = ? OR ? = 0)`,
-      [sesion.fecha_apertura, sesion.id_usuario, sesion.id_usuario]
-    );
-
-    const [abonos]: any = await pool.query(
-      `SELECT COALESCE(SUM(CASE WHEN LOWER(metodo_pago) = 'contado' THEN monto_abonado ELSE 0 END), 0) AS total_abonos
-       FROM abono
-       WHERE fecha_abono >= ?`,
-      [sesion.fecha_apertura]
-    );
+    const { ingresosCordobas, vueltosCordobas, ingresosDolares } = await calcularIngresosSesion(sesion.fecha_apertura);
 
     const [egresosPrevios]: any = await pool.query(
       `SELECT 
@@ -111,10 +94,7 @@ export async function registrarEgresoCaja(
       [idSesion]
     );
 
-    const ingresosCordobas = (Number(desglose[0]?.contado_cordobas) || 0) + (Number(abonos[0]?.total_abonos) || 0);
-    const ingresosDolares = Number(desglose[0]?.contado_dolares) || 0;
-
-    const disponibleCordobas = Number(sesion.monto_apertura_cordobas || 0) + ingresosCordobas - Number(egresosPrevios[0]?.total_cordobas || 0);
+    const disponibleCordobas = Number(sesion.monto_apertura_cordobas || 0) + ingresosCordobas - vueltosCordobas - Number(egresosPrevios[0]?.total_cordobas || 0);
     const disponibleDolares = Number(sesion.monto_apertura_dolares || 0) + ingresosDolares - Number(egresosPrevios[0]?.total_dolares || 0);
 
     if (montoCordobas > 0 && montoCordobas > disponibleCordobas + 0.01) {
@@ -211,21 +191,7 @@ export async function actualizarEgresoCaja(
   if (!egreso) throw new Error("El egreso no existe o la sesión está cerrada.");
 
   if (metodoPago === "Efectivo") {
-    const [desglose]: any = await pool.query(
-      `SELECT
-         COALESCE(SUM(CASE WHEN Tipo_Pago = 'Contado' THEN RecibidoCordobas ELSE 0 END), 0) AS contado_cordobas,
-         COALESCE(SUM(CASE WHEN Tipo_Pago = 'Contado' THEN RecibidoDolares ELSE 0 END), 0) AS contado_dolares
-       FROM ventas 
-       WHERE Fecha >= ? AND (Id_usuario = ? OR ? = 0)`,
-      [egreso.fecha_apertura, egreso.id_usuario, egreso.id_usuario]
-    );
-
-    const [abonos]: any = await pool.query(
-      `SELECT COALESCE(SUM(CASE WHEN LOWER(metodo_pago) = 'contado' THEN monto_abonado ELSE 0 END), 0) AS total_abonos
-       FROM abono
-       WHERE fecha_abono >= ?`,
-      [egreso.fecha_apertura]
-    );
+    const { ingresosCordobas, vueltosCordobas, ingresosDolares } = await calcularIngresosSesion(egreso.fecha_apertura);
 
     const [totales]: any = await pool.query(
       `SELECT 
@@ -236,10 +202,7 @@ export async function actualizarEgresoCaja(
       [egreso.id_sesion, idEgreso]
     );
 
-    const ingresosCordobas = (Number(desglose[0]?.contado_cordobas) || 0) + (Number(abonos[0]?.total_abonos) || 0);
-    const ingresosDolares = Number(desglose[0]?.contado_dolares) || 0;
-
-    const disponibleCordobas = Number(egreso.monto_apertura_cordobas || 0) + ingresosCordobas - Number(totales[0]?.total_cordobas || 0);
+    const disponibleCordobas = Number(egreso.monto_apertura_cordobas || 0) + ingresosCordobas - vueltosCordobas - Number(totales[0]?.total_cordobas || 0);
     const disponibleDolares = Number(egreso.monto_apertura_dolares || 0) + ingresosDolares - Number(totales[0]?.total_dolares || 0);
 
     if (montoCordobas > 0 && montoCordobas > disponibleCordobas + 0.01) {

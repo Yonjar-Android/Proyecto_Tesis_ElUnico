@@ -1,4 +1,5 @@
 import { pool } from "../config/database.js";
+import { normalizarSesionesAbiertas } from "../models/caja.models.js";
 
 interface DetalleVentaInput {
     Id_producto: number;
@@ -25,7 +26,9 @@ export interface ReciboVentaDTO {
   fecha: string;
   hora: string;
   tipoPago: string;
-  recibidoCordobas: number,
+  recibidoCordobas: number;
+  recibidoDolares: number;
+  vueltoCordobas: number;
   clienteNombre: string;
   clienteCedula?: string;
   articulos: ArticuloRecibo[];
@@ -115,15 +118,18 @@ export const crearVenta = async (
             }
         }
 
-        // Verificar que haya una sesión de caja abierta
+        // Normalizar sesiones (cierra cajas > 24h y duplicadas) y verificar que haya una caja abierta en el negocio
+        await normalizarSesionesAbiertas();
         const [sesionRows]: any = await connection.query(
-            "SELECT id_sesion FROM sesiones_caja WHERE id_usuario = ? AND estado = 'Abierta' LIMIT 1",
-            [idUsuario]
+            "SELECT id_sesion, tasa_cambio FROM sesiones_caja WHERE estado = 'Abierta' LIMIT 1"
         );
 
         if (sesionRows.length === 0) {
-            throw new Error("No se puede registrar la venta: no hay una sesión de caja abierta.");
+            throw new Error("No se puede registrar la venta: no hay una sesión de caja abierta en el negocio.");
         }
+
+        const tasa = Number(sesionRows[0]?.tasa_cambio) || 36.60;
+        const round2 = (val: number) => Math.round(val * 100) / 100;
 
         let estado = "Pagada";
 
@@ -139,18 +145,23 @@ export const crearVenta = async (
         // Para ventas al crédito y transferencias bancarias, NO ingresa efectivo físico a la caja
         let cordobasCaja = Number(recibidoCordobas) || 0;
         let dolaresCaja = Number(recibidoDolares) || 0;
+        let vueltoCordobas = 0;
 
         if (tipoPago === "Credito" || tipoPago === "Transferencia") {
             cordobasCaja = 0;
             dolaresCaja = 0;
+            vueltoCordobas = 0;
+        } else {
+            const recibidoEquiv = cordobasCaja + (dolaresCaja * tasa);
+            vueltoCordobas = Math.max(0, round2(recibidoEquiv - total));
         }
 
         // Crear venta
         const [venta]: any = await connection.query(
             `
             INSERT INTO ventas
-            (Id_cliente, Id_usuario, Fecha, Tipo_Pago, Num_referencia, Estado, Total, RecibidoCordobas, RecibidoDolares)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            (Id_cliente, Id_usuario, Fecha, Tipo_Pago, Num_referencia, Estado, Total, RecibidoCordobas, RecibidoDolares, VueltoCordobas)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `,
             [
                 idCliente,
@@ -161,7 +172,8 @@ export const crearVenta = async (
                 estado,
                 total,
                 cordobasCaja,
-                dolaresCaja
+                dolaresCaja,
+                vueltoCordobas
             ]
         );
 
@@ -454,7 +466,9 @@ export const obtenerReciboVenta = async (idVenta: number): Promise<ReciboVentaDT
                 c.Nombre        AS ClienteNombre,
                 c.Apellido      AS ClienteApellido,
                 u.Nombre_Usuario AS CajeroNombre,
-                v.RecibidoCordobas AS RecibidoCordobas
+                v.RecibidoCordobas AS RecibidoCordobas,
+                v.RecibidoDolares AS RecibidoDolares,
+                v.VueltoCordobas AS VueltoCordobas
             FROM ventas v
             INNER JOIN clientes c ON c.id = v.Id_cliente
             INNER JOIN usuarios u ON u.id = v.Id_usuario
@@ -537,7 +551,9 @@ const devoluciones = Array.from(devolucionesMap.values());
     fecha: formatearFecha(venta.Fecha),
     hora: formatearHora(venta.Fecha),
     tipoPago: venta.Tipo_Pago,
-    recibidoCordobas: Number(venta.RecibidoCordobas),
+    recibidoCordobas: Number(venta.RecibidoCordobas) || 0,
+    recibidoDolares: Number(venta.RecibidoDolares) || 0,
+    vueltoCordobas: Number(venta.VueltoCordobas) || 0,
     clienteNombre: `${venta.ClienteNombre} ${venta.ClienteApellido}`,
     clienteCedula: undefined,
     articulos: detalleRows.map((d: any) => ({
@@ -659,12 +675,12 @@ const aplicarAjusteDinero = async (
     const [sesion]: any = await conn.query(
         `SELECT id_sesion, fecha_apertura
          FROM sesiones_caja
-         WHERE id_usuario = ? AND estado = 'Abierta'
-         LIMIT 1 FOR UPDATE`,
-        [idUsuario]
+         WHERE estado = 'Abierta'
+         ORDER BY id_sesion DESC
+         LIMIT 1 FOR UPDATE`
     );
     if (sesion.length === 0) {
-        throw new Error("No hay una sesión de caja abierta para registrar el ajuste.");
+        throw new Error("No hay una sesión de caja abierta en el negocio para registrar el ajuste.");
     }
     const idSesion = sesion[0].id_sesion;
 
@@ -860,7 +876,7 @@ export const editarVenta = async (
         await conn.beginTransaction();
 
                 const [ventaRows]: any = await conn.query(
-            `SELECT id, Fecha, Estado, Tipo_Pago, Total, Num_referencia, RecibidoCordobas
+            `SELECT id, Fecha, Estado, Tipo_Pago, Total, Num_referencia, RecibidoCordobas, VueltoCordobas
              FROM ventas WHERE id = ? FOR UPDATE`,
             [idVenta]
         );
@@ -899,7 +915,10 @@ export const editarVenta = async (
 
             const montoDevolver = Number(venta.Total);
             await devolverStockActual();
-            await aplicarAjusteDinero(conn, venta, idUsuario, -montoDevolver, ajuste, true);
+            const montoRestarCaja = String(venta.Tipo_Pago).toUpperCase() === "CONTADO"
+                ? (Number(venta.RecibidoCordobas || 0) - Number(venta.VueltoCordobas || 0))
+                : montoDevolver;
+            await aplicarAjusteDinero(conn, venta, idUsuario, -montoRestarCaja, ajuste, true);
             await conn.query("UPDATE ventas SET Estado = 'Anulada' WHERE id = ?", [idVenta]);
             await conn.commit();
             return { mensaje: "Factura anulada correctamente.", idVenta, montoDevolver };
@@ -1004,17 +1023,25 @@ export const editarVenta = async (
         const total = Math.round(nuevos.reduce((s, n) => s + n.Subtotal, 0) * 100) / 100;
         const diferencia = Math.round((total - Number(venta.Total)) * 100) / 100;
 
-        await aplicarAjusteDinero(conn, venta, idUsuario, diferencia, ajuste);
-                // Recibo: RecibidoCordobas = total vigente + vuelto del último cobro en efectivo.
-        // Si el total baja (o no hay cobro en efectivo), el vuelto es 0.
-        if (String(venta.Tipo_Pago).toUpperCase() === "CONTADO" && diferencia !== 0) {
-            const nuevoCambio =
-                diferencia > 0 && ajuste.metodo === "Efectivo"
-                    ? Math.max(0, Number(ajuste.recibidoCordobas) - diferencia)
-                    : 0;
+        // Ajuste acumulativo de RecibidoCordobas y VueltoCordobas en efectivo
+        if (String(venta.Tipo_Pago).toUpperCase() === "CONTADO" && diferencia !== 0 && ajuste.metodo === "Efectivo") {
+            let nuevoRecibidoCordobas = Number(venta.RecibidoCordobas) || 0;
+            let nuevoVueltoCordobas = Number(venta.VueltoCordobas) || 0;
 
-            await conn.query("UPDATE ventas SET RecibidoCordobas = ? WHERE id = ?", [
-                Math.round((total + nuevoCambio) * 100) / 100,
+            if (diferencia > 0) {
+                const cobrado = Number(ajuste.recibidoCordobas) || 0;
+                nuevoRecibidoCordobas += cobrado;
+                nuevoVueltoCordobas += Math.max(0, cobrado - diferencia);
+            } else {
+                nuevoVueltoCordobas += (-diferencia);
+            }
+
+            nuevoRecibidoCordobas = Math.round(nuevoRecibidoCordobas * 100) / 100;
+            nuevoVueltoCordobas = Math.round(nuevoVueltoCordobas * 100) / 100;
+
+            await conn.query("UPDATE ventas SET RecibidoCordobas = ?, VueltoCordobas = ? WHERE id = ?", [
+                nuevoRecibidoCordobas,
+                nuevoVueltoCordobas,
                 idVenta,
             ]);
         }

@@ -110,23 +110,14 @@ function ModalConfirmarVenta({
       return;
     }
 
-    // Cálculo exacto de ingresos netos por moneda
-    const cordobasNetos = tipoMonedaRecibida === "cordobas"
-      ? totalVenta
-      : tipoMonedaRecibida === "dolares"
-      ? 0
-      : Math.max(0, numCordobasRecibido - cambioCordobas);
-
-    const dolaresNetos = tipoMonedaRecibida === "dolares"
-      ? (cambioCordobas === 0 ? numDolaresRecibido : Number((totalVenta / TASA_CAMBIO).toFixed(2)))
-      : tipoMonedaRecibida === "cordobas"
-      ? 0
-      : numDolaresRecibido;
+    // Efectivo FÍSICO real entregado por el cliente
+    const cordobasFisicos = tipoMonedaRecibida === "dolares" ? 0 : numCordobasRecibido;
+    const dolaresFisicos = tipoMonedaRecibida === "cordobas" ? 0 : numDolaresRecibido;
 
     const detalle: DetalleConfirmacionVenta = {
       tipoMonedaRecibida,
-      montoRecibidoCordobas: Number(cordobasNetos.toFixed(2)),
-      montoRecibidoDolares: Number(dolaresNetos.toFixed(2)),
+      montoRecibidoCordobas: Number(cordobasFisicos.toFixed(2)),
+      montoRecibidoDolares: Number(dolaresFisicos.toFixed(2)),
       cambioCordobas: Number(formatearMoneda(Number(cambioCordobas))),
       tasaCambio: TASA_CAMBIO,
       dineroRecibido: recibidoEnCordobas

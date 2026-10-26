@@ -442,7 +442,7 @@ const totalGeneral = subtotalGeneral - descuentoGeneral;
         Number(clienteSeleccionado?.id),
         tipoPago,
         totalGeneral,
-        _detalle.dineroRecibido,
+        _detalle.montoRecibidoCordobas,
         _detalle.montoRecibidoDolares,
         numReferencia ?? "",
         items.map((item) =>

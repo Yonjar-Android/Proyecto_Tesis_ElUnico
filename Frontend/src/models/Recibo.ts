@@ -12,7 +12,9 @@ export interface DatosRecibo {
   fecha: string;
   hora: string;
   tipoPago: string;
-  recibidoCordobas:number;
+  recibidoCordobas: number;
+  recibidoDolares?: number;
+  vueltoCordobas?: number;
   clienteNombre: string;
   clienteCedula?: string; 
   recibidoEfectivo?: number; 

@@ -64,23 +64,10 @@ export default function Sidebar() {
     return () => document.removeEventListener("mousedown", handleClickFuera);
   }, []);
 
-  const handleLogout = async () => {
-    try {
-      const data = await obtenerSesionActiva();
-
-      if (data.sesion != null && data.sesion.estado == "Abierta") {
-        console.log(data);
-        setCajaAbierto(true);
-        setMostrarModalCaja(true);
-        return;
-      }
-
-      localStorage.removeItem("usuario");
-      localStorage.removeItem("token");
-      navigate("/");
-    } catch (error) {
-      console.error("Error al verificar el estado de la caja:", error);
-    }
+  const handleLogout = () => {
+    localStorage.removeItem("usuario");
+    localStorage.removeItem("token");
+    navigate("/");
   };
 
   const iniciales = usuario?.Nombre_Usuario

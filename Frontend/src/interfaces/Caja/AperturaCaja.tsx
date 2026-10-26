@@ -15,7 +15,7 @@ export default function AperturaCaja() {
  
   const mensajeCaja = (location.state as { mensajeCaja?: string } | null)?.mensajeCaja;
  
-  const [tasaCambio, setTasaCambio] = useState(36.62);
+  const [tasaCambio, setTasaCambio] = useState(36.60);
   const [totalContado, setTotalContado] = useState(0);
   const [montoCordobas, setMontoCordobas] = useState(0); // <-- Córdobas contados
   const [montoDolares, setMontoDolares] = useState(0);     // <-- Dólares contados

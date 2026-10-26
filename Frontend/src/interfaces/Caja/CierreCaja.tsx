@@ -14,7 +14,7 @@ import { formatearMoneda } from "../FuncionAuxiliar";
 export default function CierreCaja() {
   const navigate = useNavigate();
   const { refrescarCaja } = useCajaAbierta();
-  const [tasaCambio] = useState(36.62);
+  const [tasaCambio] = useState(36.60);
   const [totalContado, setTotalContado] = useState(0);
   const [, setDesglose] = useState<DesgloseItem[]>([]);
   const [totalTarjeta, setTotalTarjeta] = useState("");
@@ -74,11 +74,12 @@ export default function CierreCaja() {
     try {
       const data = await obtenerResumenCierre();
       setResumenRaw(data.resumen);
+      const ingresosNetosCordobas = Number(data.resumen.ingresosDia || 0) - Number(data.resumen.vueltosCordobas || 0);
       setTotalSistema({
         montoApertura: data.resumen.montoApertura,
         ingresos: data.resumen.ingresosDia,
         egresos: data.resumen.totalEgresos,
-        neto: data.resumen.ingresosDia - data.resumen.totalEgresos,
+        neto: ingresosNetosCordobas - data.resumen.totalEgresos,
         efectivoEsperado: data.resumen.efectivoEsperado,
       });
     } catch (err) {
@@ -113,15 +114,6 @@ export default function CierreCaja() {
   // Desglose detallado por moneda, solo para mostrar en pantalla y exportar
   // (Excel / PDF). NO se usa para calcular "diferencia" arriba, así no se
   // toca la lógica de cierre que ya funcionaba.
-  //
-  // NOTA IMPORTANTE: estoy leyendo estos valores con varios nombres posibles
-  // (ej. resumenRaw?.ingresosCordobas ?? resumenRaw?.ingresosDia) porque no
-  // tengo visibilidad del shape exacto que devuelve tu endpoint
-  // obtenerResumenCierre() en el backend. Ajusta los nombres de campo de la
-  // izquierda (los que vienen de resumenRaw) para que coincidan exactamente
-  // con lo que tu API ya retorna para la pantalla de "Arqueo de Caja"
-  // (imagen que muestra Apertura Córdobas, Apertura Dólares, Ingresos del
-  // día en Córdobas/Dólares, Transferencias, etc).
   const sesionInfo = dataCaja?.sesion || sesionActiva;
   const transferenciasDetalle =
     Number(totalTarjeta) ||
@@ -133,7 +125,8 @@ export default function CierreCaja() {
   const detalleCierre = {
     aperturaCordobas: Number(sesionInfo?.monto_apertura_cordobas) || 0,
     aperturaDolares: Number(sesionInfo?.monto_apertura_dolares) || 0,
-    ingresosCordobas: Number(resumenRaw?.ingresosCordobas ?? resumenRaw?.ingresosDia) || 0,
+    ingresosCordobas: Math.max(0, Number(resumenRaw?.ingresosCordobas ?? resumenRaw?.ingresosDia ?? 0)),
+    vueltosCordobas: Number(resumenRaw?.vueltosCordobas ?? dataCaja?.vueltosCordobas ?? 0),
     ingresosDolares: Number(resumenRaw?.ingresosDolares ?? dataCaja?.ingresosDolares) || 0,
     transferencias: transferenciasDetalle,
     egresos: totalSistema.egresos,

@@ -35,6 +35,7 @@ export default function Caja() {
   const [sesionActiva, setSesionActiva] = useState<SesionCaja | null>(null);
   const [egresos, setEgresos] = useState<Egreso[]>([]);
   const [ingresosDia, setIngresosDia] = useState(0);
+  const [vueltosCordobas, setVueltosCordobas] = useState(0);
   const [ingresosDolares, setIngresosDolares] = useState(0);
   const [transferencias, setTransferencias] = useState(0);
 
@@ -75,10 +76,17 @@ export default function Caja() {
       setSesionActiva(data.sesion);
       setEgresos(data.egresos || []);
 
-      // Ingresos en efectivo del día
-      setIngresosDia(
-        Number(data.ingresosDia ?? 0)
-      );
+      // Ingresos en efectivo del día y vueltos entregados por cobros en USD
+      const rawIngresos = Number(data.ingresosDia ?? 0);
+      const rawVueltos = Number(data.vueltosCordobas ?? 0);
+      if (rawIngresos < 0 && rawVueltos === 0) {
+        setIngresosDia(0);
+        setVueltosCordobas(-rawIngresos);
+      } else {
+        setIngresosDia(Math.max(0, rawIngresos));
+        setVueltosCordobas(rawVueltos);
+      }
+
       setIngresosDolares(Number(data.ingresosDolares ?? 0));
 
       console.log(data.transferencias, data.sesion?.total_tarjeta_transferencia, data.total_transferencias, data.ingresosTransferencias);
@@ -98,13 +106,14 @@ export default function Caja() {
       setSesionActiva(null);
       setEgresos([]);
       setIngresosDia(0);
+      setVueltosCordobas(0);
       setIngresosDolares(0);
       setTransferencias(0);
     }
   }
 
   // --- CÁLCULOS FINANCIEROS LIMPIOS ---
-  const tasaCambio = Number(sesionActiva?.tasa_cambio) || 36.62;
+  const tasaCambio = Number(sesionActiva?.tasa_cambio) || 36.60;
   const aperturaCordobas = Number(sesionActiva?.monto_apertura_cordobas) || 0;
 
   // Busca los dólares de apertura bajo cualquier nombre común que devuelva el backend
@@ -131,7 +140,7 @@ export default function Caja() {
 
 
   // SALDOS DISPONIBLES EN CAJA FÍSICA (SEPARADOS):
-  const disponibleCordobas = aperturaCordobas + ingresosDia - totalEgresosCordobas;
+  const disponibleCordobas = aperturaCordobas + ingresosDia - vueltosCordobas - totalEgresosCordobas;
   const disponibleDolares = aperturaDolares + ingresosDolares - totalEgresosDolares;
 
   // NETO TOTAL CONSOLIDADO EN CAJA FÍSICA (Transferencias excluidas):
@@ -216,7 +225,11 @@ export default function Caja() {
             <div className="caja-resumen-card">
               <span>Ingresos del día en córdobas</span>
               <strong className="valor-verde">C${formatearMoneda(ingresosDia)}</strong>
-              <small style={{ color: "#16a34a", fontSize: 12 }}>Ventas en efectivo C$ y abonos</small>
+              <small style={{ color: "#16a34a", fontSize: 12 }}>
+                {vueltosCordobas > 0
+                  ? `Ventas en efectivo C$ · Vueltos entregados: -C$${formatearMoneda(vueltosCordobas)}`
+                  : "Ventas en efectivo C$ y abonos"}
+              </small>
             </div>
 
             {/* 4. Ingresos en dólares */}
