@@ -46,7 +46,6 @@ const equivalenteDolares = puedeDerivar
   ? Math.max(Math.round((total + vuelto - recibidoCordobas) * 100) / 100, 0)
   : 0;
 
-const tasaImplicita = puedeDerivar ? equivalenteDolares / recibidoDolares : 0;
 const totalRecibido = recibidoCordobas + equivalenteDolares;
 const huboPago = recibidoCordobas > 0 || recibidoDolares > 0;
 
