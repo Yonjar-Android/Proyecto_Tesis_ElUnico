@@ -111,6 +111,7 @@ const pasosTour: Step[] = [
             </button>
           </div>
 
+       <div className="inventario-tabla-scroll">
           <table className="inventario-tabla" data-tour="tabla-productos">
             <thead>
               <tr>
@@ -155,6 +156,7 @@ const pasosTour: Step[] = [
               ))}
             </tbody>
           </table>
+          </div>
 
           <div className="inventario-footer">
             <span className="inventario-count">

@@ -131,9 +131,7 @@ const buscar = async () => {
               
               // Descargar el archivo
               descargarArchivoExcel(blob, nombreArchivo);
-              
-              console.log('Reporte exportado exitosamente');
-          } catch (error) {
+                        } catch (error) {
               console.error('Error al exportar:', error);
               alert('Error al exportar el reporte');
           } finally {
@@ -274,6 +272,8 @@ const handleDescargarPdfCompras = async () => {
         </div>
 
         <div className={styles["reporte-card-tabla"]} data-tour="tabla-reporte">
+                    <div className={styles["reporte-tabla-scroll"]}>
+
           <table className={styles["reporte-tabla"]}>
             <thead>
               <tr>
@@ -302,6 +302,7 @@ const handleDescargarPdfCompras = async () => {
               ))}
             </tbody>
           </table>
+          </div>
 
           {compras.length === 0 && (
             <div className={styles["reporte-footer"]}>

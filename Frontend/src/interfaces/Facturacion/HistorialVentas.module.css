@@ -157,3 +157,46 @@
 .pageBtnActive:hover:not(:disabled) {
   background: #003682;
 }
+
+/* ================= RESPONSIVE ================= */
+
+@media (max-width: 768px) {
+  .seccion {
+    margin-top: 2rem;
+  }
+
+  .card {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* La tabla conserva su tamaño y se desplaza horizontalmente */
+  .tabla {
+    min-width: 600px;
+  }
+
+  /* Evita que el texto de las celdas se parta en varias líneas */
+  .tabla th,
+  .tabla td {
+    white-space: nowrap;
+    padding-right: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .titulo {
+    font-size: 1.1rem;
+  }
+
+  .card {
+    padding: 0.75rem 0.75rem 0.5rem;
+  }
+
+  .footer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .pagination {
+    flex-wrap: wrap;
+  }
+}

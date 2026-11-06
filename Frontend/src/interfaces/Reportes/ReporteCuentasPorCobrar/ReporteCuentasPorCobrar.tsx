@@ -60,8 +60,6 @@ function ReporteCuentasPorCobrar() {
         perPage
       );
 
-      console.log(response);
-
       setFacturas(response.data);
       setTotal(response.total);
       setLastPage(response.last_page);
@@ -93,8 +91,7 @@ function ReporteCuentasPorCobrar() {
             // Descargar el archivo
             descargarArchivoExcel(blob, nombreArchivo);
             
-            console.log('Reporte exportado exitosamente');
-        } catch (error) {
+          } catch (error) {
             console.error('Error al exportar:', error);
             alert('Error al exportar el reporte');
         } finally {
@@ -179,6 +176,7 @@ function ReporteCuentasPorCobrar() {
         </div>
 
         <div className={styles["reporte-card-tabla"]} data-tour="tabla-reporte">
+       <div className={styles["reporte-tabla-scroll"]}>
           <table className={styles["reporte-tabla"]}>
             <thead>
               <tr>
@@ -203,6 +201,8 @@ function ReporteCuentasPorCobrar() {
               ))}
             </tbody>
           </table>
+
+          </div>
 
           <div className={styles["reporte-footer"]}>
             <span className={styles["reporte-count"]}>

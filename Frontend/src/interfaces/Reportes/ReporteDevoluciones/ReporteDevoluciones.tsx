@@ -258,6 +258,7 @@ function ReporteDevoluciones() {
         </div>
 
         <div className={styles["reporte-card-tabla"]}>
+          <div className={styles["reporte-tabla-scroll"]}>
           <table className={styles["reporte-tabla"]} data-tour="tabla-reporte">
             <thead>
               <tr>
@@ -280,6 +281,7 @@ function ReporteDevoluciones() {
               ))}
             </tbody>
           </table>
+          </div>
 
           {devoluciones.length === 0 && (
             <div className={styles["reporte-footer"]}>

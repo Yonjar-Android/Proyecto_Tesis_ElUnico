@@ -141,50 +141,50 @@ useEffect(() => {
           />
         </div>
 
-        <table className="categoria-table" data-tour="tabla-categoria">
-          <thead>
-            <tr>
-              <th className="categoria-th">NOMBRE DE CATEGORIA</th>
-              <th className="categoria-th categoria-th-actions">ACCIONES</th>
-            </tr>
-          </thead>
-          <tbody>
-            {categorias.map((categoria) => (
-              <tr key={categoria.id} className="categoria-tr">
-                <td className="categoria-td">{categoria.Nombre_categoria}</td>
-                <td className="categoria-td categoria-td-actions">
-                    <button
-                        className="categoria-edit-btn"
-                        onClick={() => {
-                            setCategoriaSeleccionada(categoria);
-                            setModalEditarAbierto(true);
-                       }}
-                    >
-                        <SquarePen size={24} /> Editar
-                  </button>
-                </td>
+        {/* NUEVO: solo la tabla se desplaza */}
+        <div className="categoria-table-scroll">
+          <table className="categoria-table" data-tour="tabla-categoria">
+            <thead>
+              <tr>
+                <th className="categoria-th">NOMBRE DE CATEGORIA</th>
+                <th className="categoria-th categoria-th-actions">ACCIONES</th>
               </tr>
-            ))}
-          </tbody>
-          <tfoot>
-            <tr>
-              <td colSpan={2}>
-                <div className="categoria-footer" data-tour="paginacion-categoria">
-                  <span className="categoria-count">
-                    Mostrando {categorias.length} de {total} categorías
-                  </span>
-                  <div className="categoria-pagination">
-                    <button className="categoria-page-btn" onClick={() => setCurrentPage(1)} disabled={currentPage === 1}>«</button>
-                    <button className="categoria-page-btn" onClick={() => setCurrentPage(currentPage - 1)} disabled={currentPage === 1}>‹</button>
-                    <button className="categoria-page-btn categoria-page-btn--active">{currentPage}</button>
-                    <button className="categoria-page-btn" onClick={() => setCurrentPage(currentPage + 1)} disabled={currentPage === lastPage || lastPage == 0}>›</button>
-                    <button className="categoria-page-btn" onClick={() => setCurrentPage(lastPage)} disabled={currentPage === lastPage || lastPage == 0}>»</button>
-                  </div>
-                </div>
-              </td>
-            </tr>
-          </tfoot>
-        </table>
+            </thead>
+            <tbody>
+              {categorias.map((categoria) => (
+                <tr key={categoria.id} className="categoria-tr">
+                  <td className="categoria-td">{categoria.Nombre_categoria}</td>
+                  <td className="categoria-td categoria-td-actions">
+                    <button
+                      className="categoria-edit-btn"
+                      onClick={() => {
+                        setCategoriaSeleccionada(categoria);
+                        setModalEditarAbierto(true);
+                      }}
+                    >
+                      <SquarePen size={24} /> Editar
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+            {/* El <tfoot> se eliminó: el footer pasa debajo */}
+          </table>
+        </div>
+
+        {/* Footer fuera de la tabla */}
+        <div className="categoria-footer" data-tour="paginacion-categoria">
+          <span className="categoria-count">
+            Mostrando {categorias.length} de {total} categorías
+          </span>
+          <div className="categoria-pagination">
+            <button className="categoria-page-btn" onClick={() => setCurrentPage(1)} disabled={currentPage === 1}>«</button>
+            <button className="categoria-page-btn" onClick={() => setCurrentPage(currentPage - 1)} disabled={currentPage === 1}>‹</button>
+            <button className="categoria-page-btn categoria-page-btn--active">{currentPage}</button>
+            <button className="categoria-page-btn" onClick={() => setCurrentPage(currentPage + 1)} disabled={currentPage === lastPage || lastPage == 0}>›</button>
+            <button className="categoria-page-btn" onClick={() => setCurrentPage(lastPage)} disabled={currentPage === lastPage || lastPage == 0}>»</button>
+          </div>
+        </div>
       </div>
       </div>
 

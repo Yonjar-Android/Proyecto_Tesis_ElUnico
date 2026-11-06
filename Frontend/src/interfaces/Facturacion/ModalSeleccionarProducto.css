@@ -235,3 +235,66 @@
   color: #b45309;
   border: 1px solid #fde68a;
 }
+
+/* Solo la tabla se desplaza */
+.seleccion-tabla-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* El overlay queda por encima del sidebar. Con :has() solo afecta a overlays
+   que contienen este modal, así no toca a los demás. */
+.modal-overlay:has(> .seleccion-modal) {
+  z-index: 9999;
+  padding: 1rem;
+  box-sizing: border-box;
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media (max-width: 768px) {
+  /* Doble clase para ganar sobre el .modal de otros CSS sin importar el orden */
+  .modal.seleccion-modal--ancho {
+    width: 100%;
+    max-width: 760px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* El cuerpo es lo que crece y hace scroll vertical; header y footer quedan fijos */
+  .seleccion-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    padding: 14px 16px;
+  }
+
+  .seleccion-footer {
+    flex-shrink: 0;
+    padding: 12px 16px 14px;
+  }
+
+  /* La tabla conserva su tamaño y se desplaza horizontalmente */
+  .seleccion-tabla {
+    min-width: 600px;
+  }
+
+  .seleccion-tabla th {
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-overlay:has(> .seleccion-modal) {
+    padding: 0.5rem;
+  }
+
+  .seleccion-footer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .seleccion-pagination {
+    flex-wrap: wrap;
+  }
+}

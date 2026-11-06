@@ -174,129 +174,130 @@ function GestionCreditos() {
             />
           </div>
 
-          <table className={styles.table} data-tour="tabla-credito">
-            <thead>
-              <tr>
-                <th className={styles.th}>N.º FACTURA</th>
-                <th className={styles.th}>CLIENTE</th>
-                <th className={styles.th}>TOTAL DEUDA</th>
-                <th className={styles.th}>SALDO PENDIENTE</th>
-                <th className={styles.th}>ESTADO</th>
-                <th className={`${styles.th} ${styles.thActions}`}>ACCIONES</th>
-              </tr>
-            </thead>
-            <tbody>
-              {cargando ? (
+          {/* NUEVO: solo la tabla se desplaza */}
+          <div className={styles.tableScroll}>
+            <table className={styles.table} data-tour="tabla-credito">
+              <thead>
                 <tr>
-                  <td colSpan={7} className={styles.estadoVacio}>
-                    Cargando facturas...
-                  </td>
+                  <th className={styles.th}>N.º FACTURA</th>
+                  <th className={styles.th}>CLIENTE</th>
+                  <th className={styles.th}>TOTAL DEUDA</th>
+                  <th className={styles.th}>SALDO PENDIENTE</th>
+                  <th className={styles.th}>ESTADO</th>
+                  <th className={`${styles.th} ${styles.thActions}`}>ACCIONES</th>
                 </tr>
-              ) : facturas.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className={styles.estadoVacio}>
-                    No hay facturas de crédito pendientes.
-                  </td>
-                </tr>
-              ) : (
-                facturas.map((f) => (
-                  <tr key={f.id} className={styles.tr}>
-                    <td className={styles.td}>{f.numero_factura}</td>
-                    <td className={styles.td}>
-                        {`${f.cliente_nombre} ${f.cliente_apellido}`}
-                    </td>                    <td className={styles.td}>C${formatearMoneda(f.total_deuda)}</td>
-                    <td className={styles.td}>C${formatearMoneda(f.saldo_pendiente)}</td>
-                    <td className={styles.td}>
-                      <span className={`${styles.badge} ${claseBadge(f.estado)}`}>
-                        {f.estado === "pendiente" ? "Pendiente" : "Parcial"}
-                      </span>
-                    </td>
-                    <td className={styles.tdActions}>
-                      <div className={styles.accionesWrapper} data-tour="tabla-botones-credito">
-                        <button
-                          className={styles.abonarBtn}
-                          onClick={() => abrirAbonar(f)}
-                          disabled={f.saldo_pendiente === 0}
-                        >
-                          <CreditCard size={18} /> Abonar
-                        </button>
-
-                        <button
-                          className={styles.menuBtn}
-                          onClick={() =>
-                            setMenuAbiertoId(menuAbiertoId === f.id ? null : f.id)
-                          }
-                        >
-                          <MoreVertical size={18} />
-                        </button>
-
-                        {menuAbiertoId === f.id && (
-                          <div className={styles.dropdownMenu} ref={menuRef}>
-                            <button
-                              className={styles.dropdownItem}
-                              onClick={() => abrirHistorial(f)}
-                            >
-                              <History size={16} /> Historial de pagos
-                            </button>
-                            <button
-                              className={styles.dropdownItem}
-                              onClick={() => abrirSiguienteCuota(f)}
-                            >
-                              <Clock size={16} /> Siguiente cuota
-                            </button>
-                          </div>
-                        )}
-                      </div>
+              </thead>
+              <tbody>
+                {cargando ? (
+                  <tr>
+                    <td colSpan={7} className={styles.estadoVacio}>
+                      Cargando facturas...
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-            <tfoot>
-              <tr>
-                <td colSpan={7}>
-                  <div className={styles.footer}>
-                    <span className={styles.count}>
-                      Mostrando {facturas.length} de {total} facturas
-                    </span>
-                    <div className={styles.pagination}  data-tour="paginacion-credito">
-                      <button
-                        className={styles.pageBtn}
-                        onClick={() => setCurrentPage(1)}
-                        disabled={currentPage === 1}
-                      >
-                        «
-                      </button>
-                      <button
-                        className={styles.pageBtn}
-                        onClick={() => setCurrentPage(currentPage - 1)}
-                        disabled={currentPage === 1}
-                      >
-                        ‹
-                      </button>
-                      <button className={`${styles.pageBtn} ${styles.pageBtnActive}`}>
-                        {currentPage}
-                      </button>
-                      <button
-                        className={styles.pageBtn}
-                        onClick={() => setCurrentPage(currentPage + 1)}
-                        disabled={currentPage === lastPage || lastPage === 0}
-                      >
-                        ›
-                      </button>
-                      <button
-                        className={styles.pageBtn}
-                        onClick={() => setCurrentPage(lastPage)}
-                        disabled={currentPage === lastPage || lastPage === 0}
-                      >
-                        »
-                      </button>
-                    </div>
-                  </div>
-                </td>
-              </tr>
-            </tfoot>
-          </table>
+                ) : facturas.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className={styles.estadoVacio}>
+                      No hay facturas de crédito pendientes.
+                    </td>
+                  </tr>
+                ) : (
+                  facturas.map((f) => (
+                    <tr key={f.id} className={styles.tr}>
+                      <td className={styles.td}>{f.numero_factura}</td>
+                      <td className={styles.td}>
+                        {`${f.cliente_nombre} ${f.cliente_apellido}`}
+                      </td>
+                      <td className={styles.td}>C${formatearMoneda(f.total_deuda)}</td>
+                      <td className={styles.td}>C${formatearMoneda(f.saldo_pendiente)}</td>
+                      <td className={styles.td}>
+                        <span className={`${styles.badge} ${claseBadge(f.estado)}`}>
+                          {f.estado === "pendiente" ? "Pendiente" : "Parcial"}
+                        </span>
+                      </td>
+                      <td className={styles.tdActions}>
+                        <div className={styles.accionesWrapper} data-tour="tabla-botones-credito">
+                          <button
+                            className={styles.abonarBtn}
+                            onClick={() => abrirAbonar(f)}
+                            disabled={f.saldo_pendiente === 0}
+                          >
+                            <CreditCard size={18} /> Abonar
+                          </button>
+
+                          <button
+                            className={styles.menuBtn}
+                            onClick={() =>
+                              setMenuAbiertoId(menuAbiertoId === f.id ? null : f.id)
+                            }
+                          >
+                            <MoreVertical size={18} />
+                          </button>
+
+                          {menuAbiertoId === f.id && (
+                            <div className={styles.dropdownMenu} ref={menuRef}>
+                              <button
+                                className={styles.dropdownItem}
+                                onClick={() => abrirHistorial(f)}
+                              >
+                                <History size={16} /> Historial de pagos
+                              </button>
+                              <button
+                                className={styles.dropdownItem}
+                                onClick={() => abrirSiguienteCuota(f)}
+                              >
+                                <Clock size={16} /> Siguiente cuota
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+              {/* El <tfoot> se eliminó: el footer pasa debajo, fuera de la tabla */}
+            </table>
+          </div>
+
+          {/* Footer fuera de la tabla: ya no se desplaza con ella */}
+          <div className={styles.footer}>
+            <span className={styles.count}>
+              Mostrando {facturas.length} de {total} facturas
+            </span>
+            <div className={styles.pagination} data-tour="paginacion-credito">
+              <button
+                className={styles.pageBtn}
+                onClick={() => setCurrentPage(1)}
+                disabled={currentPage === 1}
+              >
+                «
+              </button>
+              <button
+                className={styles.pageBtn}
+                onClick={() => setCurrentPage(currentPage - 1)}
+                disabled={currentPage === 1}
+              >
+                ‹
+              </button>
+              <button className={`${styles.pageBtn} ${styles.pageBtnActive}`}>
+                {currentPage}
+              </button>
+              <button
+                className={styles.pageBtn}
+                onClick={() => setCurrentPage(currentPage + 1)}
+                disabled={currentPage === lastPage || lastPage === 0}
+              >
+                ›
+              </button>
+              <button
+                className={styles.pageBtn}
+                onClick={() => setCurrentPage(lastPage)}
+                disabled={currentPage === lastPage || lastPage === 0}
+              >
+                »
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 

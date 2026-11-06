@@ -5,7 +5,7 @@
 }
 
 .content {
-  margin: 0% 10%;
+  margin: 0% 9%;
   display: flex;
   flex-direction: column;
 }
@@ -264,4 +264,77 @@
   text-align: center;
   color: #8a8a8a;
   padding: 2rem 0;
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media (max-width: 1024px) {
+  .content {
+    margin: 0 5%;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+
+  /* Reemplaza el margen de 5% por ancho completo */
+  .content {
+    margin: 0;
+    width: 100%;
+  }
+
+  .topPart {
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .tableContainer {
+    width: 100%;
+    box-sizing: border-box;
+    -webkit-overflow-scrolling: touch;
+    /* Define el "área visible" para calcular el ancho con cqw */
+    container-type: inline-size;
+  }
+
+  /* El buscador se queda fijo mientras la tabla se desplaza */
+  .searchWrapper {
+    position: sticky;
+    left: 0;
+  }
+
+  /* La paginación también, con el ancho del área visible */
+  .footer {
+    position: sticky;
+    left: 0;
+    width: 100cqw;
+    box-sizing: border-box;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 0.75rem;
+  }
+
+  .title {
+    font-size: 1.2rem;
+  }
+
+  .tableContainer {
+    padding: 0.75rem;
+  }
+
+  .footer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .pagination {
+    flex-wrap: wrap;
+  }
 }

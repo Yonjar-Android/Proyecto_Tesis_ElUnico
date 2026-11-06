@@ -141,83 +141,82 @@ return (
         </div>
       </div>
 
-      <div className="proveedor-table-container">
+            <div className="proveedor-table-container">
         <div className="proveedor-search-wrapper" data-tour="buscar-proveedor">
           <span className="proveedor-search-icon">🔍</span>
           <input
-    className="proveedor-search-input"
-    type="text"
-    placeholder="Buscar por Razón Social o Contacto"
-    value={searchTerm}
-    onChange={(e) => setSearchTerm(e.target.value)}
-    onKeyDown={handleKeyDown}
-/>
+            className="proveedor-search-input"
+            type="text"
+            placeholder="Buscar por Razón Social o Contacto"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            onKeyDown={handleKeyDown}
+          />
         </div>
 
-        <table className="proveedor-table" data-tour="tabla-proveedor">
-          <thead>
-            <tr>
-              <th className="proveedor-th">RAZÓN SOCIAL</th>
-              <th className="proveedor-th">NOMBRE CONTACTO</th>
-              <th className="proveedor-th">TELÉFONO</th>
-              <th className="proveedor-th">DIRECCIÓN</th>
-              <th className="proveedor-th proveedor-th-actions">ACCIONES</th>
-            </tr>
-          </thead>
-          <tbody>
-            {proveedores.map((proveedor) => (
-              <tr key={proveedor.id} className="proveedor-tr">
-                <td className="proveedor-td">{proveedor.Nombre_Empresa}</td>
-                <td className="proveedor-td">{proveedor.Nombre_Contacto}</td>
-                <td className="proveedor-td">
-                {proveedor.Telefono.trim() === "" ? "Sin contacto" : formatearTelefono(proveedor.Telefono)}
-                </td>
-                <td className="proveedor-td">
-                    {proveedor.Direccion?.trim() ? proveedor.Direccion : "Sin dirección"}
-                </td>
-                <td className="proveedor-td proveedor-td-actions">
-
-                  <button
-                        className="proveedor-editar-btn"
-                        data-tour="editar-proveedor"
-                        onClick={() => {
-                            setProveedorSeleccionado(proveedor);
-                            setModalEditarAbierto(true);
-                       }}
-                    >
-                        <SquarePen size={24} /> Editar
-                  </button>
-                </td>
+        {/* NUEVO: solo la tabla se desplaza */}
+        <div className="proveedor-table-scroll">
+          <table className="proveedor-table" data-tour="tabla-proveedor">
+            <thead>
+              <tr>
+                <th className="proveedor-th">RAZÓN SOCIAL</th>
+                <th className="proveedor-th">NOMBRE CONTACTO</th>
+                <th className="proveedor-th">TELÉFONO</th>
+                <th className="proveedor-th">DIRECCIÓN</th>
+                <th className="proveedor-th proveedor-th-actions">ACCIONES</th>
               </tr>
-            ))}
-          </tbody>
-          <tfoot>
-            <tr>
-              <td colSpan={6}>
-                <div className="proveedor-footer">
-                  <span className="proveedor-count">
-                    Mostrando {proveedores.length} de {total} proveedores
-                  </span>
-                  <div className="proveedor-pagination" data-tour="paginación-proveedor">
-                    <button className="proveedor-page-btn" onClick={() => setCurrentPage(1)} disabled={currentPage === 1}>
-                      «
+            </thead>
+            <tbody>
+              {proveedores.map((proveedor) => (
+                <tr key={proveedor.id} className="proveedor-tr">
+                  <td className="proveedor-td">{proveedor.Nombre_Empresa}</td>
+                  <td className="proveedor-td">{proveedor.Nombre_Contacto}</td>
+                  <td className="proveedor-td">
+                    {proveedor.Telefono.trim() === "" ? "Sin contacto" : formatearTelefono(proveedor.Telefono)}
+                  </td>
+                  <td className="proveedor-td">
+                    {proveedor.Direccion?.trim() ? proveedor.Direccion : "Sin dirección"}
+                  </td>
+                  <td className="proveedor-td proveedor-td-actions">
+                    <button
+                      className="proveedor-editar-btn"
+                      data-tour="editar-proveedor"
+                      onClick={() => {
+                        setProveedorSeleccionado(proveedor);
+                        setModalEditarAbierto(true);
+                      }}
+                    >
+                      <SquarePen size={24} /> Editar
                     </button>
-                    <button className="proveedor-page-btn" onClick={() => setCurrentPage(currentPage - 1)} disabled={currentPage === 1}>
-                      ‹
-                    </button>
-                    <button className="proveedor-page-btn proveedor-page-btn--active">{currentPage}</button>
-                    <button className="proveedor-page-btn" onClick={() => setCurrentPage(currentPage + 1)} disabled={currentPage === lastPage || lastPage == 0}>
-                      ›
-                    </button>
-                    <button className="proveedor-page-btn" onClick={() => setCurrentPage(lastPage)} disabled={currentPage === lastPage || lastPage == 0}>
-                      »
-                    </button>
-                  </div>
-                </div>
-              </td>
-            </tr>
-          </tfoot>
-        </table>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+            {/* El <tfoot> se eliminó: el footer pasa debajo, fuera de la tabla */}
+          </table>
+        </div>
+
+        {/* Footer fuera de la tabla: ya no se desplaza con ella */}
+        <div className="proveedor-footer">
+          <span className="proveedor-count">
+            Mostrando {proveedores.length} de {total} proveedores
+          </span>
+          <div className="proveedor-pagination" data-tour="paginación-proveedor">
+            <button className="proveedor-page-btn" onClick={() => setCurrentPage(1)} disabled={currentPage === 1}>
+              «
+            </button>
+            <button className="proveedor-page-btn" onClick={() => setCurrentPage(currentPage - 1)} disabled={currentPage === 1}>
+              ‹
+            </button>
+            <button className="proveedor-page-btn proveedor-page-btn--active">{currentPage}</button>
+            <button className="proveedor-page-btn" onClick={() => setCurrentPage(currentPage + 1)} disabled={currentPage === lastPage || lastPage == 0}>
+              ›
+            </button>
+            <button className="proveedor-page-btn" onClick={() => setCurrentPage(lastPage)} disabled={currentPage === lastPage || lastPage == 0}>
+              »
+            </button>
+          </div>
+        </div>
       </div>
       </div>
 

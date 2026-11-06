@@ -127,6 +127,7 @@ function ModalSeleccionarProducto({ abierto, onClose, onSeleccionar, validarStoc
             }}
           />
 
+  <div className="seleccion-tabla-scroll">
           <table className="seleccion-tabla">
             <thead>
               <tr>
@@ -194,6 +195,7 @@ function ModalSeleccionarProducto({ abierto, onClose, onSeleccionar, validarStoc
               })}
             </tbody>
           </table>
+          </div>
 
           {productos.length === 0 && (
             <div className="seleccion-vacio">No se encontraron productos.</div>

@@ -384,6 +384,7 @@ useEffect(() => {
   </div>
 </div>
         <div className={styles["reporte-card-tabla"]} data-tour="tabla-reporte">
+          <div className={styles["reporte-tabla-scroll"]}>
           <table className={styles["reporte-tabla"]}>
             <thead>
               <tr>
@@ -441,6 +442,7 @@ useEffect(() => {
               ))}
             </tbody>
           </table>
+          </div>
 
           {ventas.length === 0 && (
             <div className={styles["reporte-footer"]}>

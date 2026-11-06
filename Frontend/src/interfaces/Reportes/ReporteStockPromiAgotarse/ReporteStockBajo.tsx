@@ -219,6 +219,7 @@ function ReporteStockBajo() {
         </div>
 
         <div className={styles["reporte-card-tabla"]} data-tour="tabla-reporte">
+          <div className={styles["reporte-tabla-scroll"]}>
           <table className={styles["reporte-tabla"]}>
             <thead>
               <tr>
@@ -248,6 +249,7 @@ function ReporteStockBajo() {
               ))}
             </tbody>
           </table>
+          </div>
 
           <div className={styles["reporte-footer"]} data-tour="paginacion-reporte">
             <span className={styles["reporte-count"]}>

@@ -8,12 +8,11 @@ body,
 
 .proveedor-container {
     min-height: 100vh;
-    background-color: #f3f4f6;
     padding: 2rem;
 }
 
 .proveedor-content{
-    margin: 0% 15%;
+    margin: 0% 10%;
     display: flex;
     flex-direction: column;
 }
@@ -253,4 +252,63 @@ body,
     color: red;
     font-size: 14px;
     margin-top: 8px;
+}
+
+.proveedor-table-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ================= RESPONSIVE ================= */
+
+/* Se activa antes de 1024 porque el sidebar le quita ~300px al contenido */
+@media (max-width: 1280px) {
+  .proveedor-content {
+    margin: 0 4%;
+  }
+}
+
+@media (max-width: 1024px) {
+  .proveedor-content {
+    margin: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .proveedor-container {
+    padding: 1rem;
+  }
+
+  .proveedor-top-part {
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .proveedor-footer {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .proveedor-container {
+    padding: 0.75rem;
+  }
+
+  .proveedor-title {
+    font-size: 1.2rem;
+  }
+
+  .proveedor-table-container {
+    padding: 0.75rem;
+  }
+
+  .proveedor-footer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .proveedor-pagination {
+    flex-wrap: wrap;
+  }
 }

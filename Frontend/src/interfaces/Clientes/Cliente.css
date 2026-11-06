@@ -255,3 +255,69 @@ body,
   font-size: 14px;
   margin-top: 8px;
 }
+
+/* ================= RESPONSIVE ================= */
+
+@media (max-width: 1024px) {
+  .cliente-content {
+    margin: 0 5%;
+  }
+}
+
+@media (max-width: 768px) {
+  .cliente-container {
+    padding: 1rem;
+  }
+
+  /* Reemplaza el margen de 5% por ancho completo */
+  .cliente-content {
+    margin: 0;
+    width: 100%;
+  }
+
+  .cliente-top-part {
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .cliente-table-container {
+    container-type: inline-size;
+  }
+
+  /* El buscador se queda fijo mientras la tabla se desplaza */
+  .cliente-search-wrapper {
+    position: sticky;
+    left: 0;
+  }
+
+  /* La paginación también, con el ancho del área visible */
+  .cliente-footer {
+    position: sticky;
+    left: 0;
+    width: 100cqw;
+    box-sizing: border-box;
+  }
+}
+
+@media (max-width: 480px) {
+  .cliente-container {
+    padding: 0.75rem;
+  }
+
+  .cliente-title {
+    font-size: 1.2rem;
+  }
+
+  .cliente-table-container {
+    padding: 0.75rem;
+  }
+
+  .cliente-footer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .cliente-pagination {
+    flex-wrap: wrap;
+  }
+}

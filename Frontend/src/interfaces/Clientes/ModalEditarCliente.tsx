@@ -237,7 +237,7 @@ function ModalEditarCliente({ abierto, cliente, onClose, onEditar }: Props) {
           <div className="campo">
             <label>
               Número de Cédula
-              {Number(saldo_deuda) > 0 && <span style={{ color: "red" }}> *</span>}
+               <span style={{ color: "red" }}> *</span>
             </label>
             <input
               type="text"

@@ -51,7 +51,7 @@ function ModalSiguienteCuota({ abierto, factura, onClose, onAbonar }: Props) {
 
   return (
     <div className="modal-overlay">
-      <div className="modal modal-cliente">
+      <div className={`modal modal-cliente ${styles.modalCuota}`}>
         <div className="modal-header">
           <h2>Siguiente Cuota — {factura.numero_factura}</h2>
           <button className="modal-close" onClick={onClose}>✕</button>

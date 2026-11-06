@@ -57,3 +57,77 @@
   background: #fdeaea;
   color: #c22b2b;
 }
+
+.modalCuota {
+  width: 100%;
+  max-width: 480px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ================= RESPONSIVE ================= */
+
+/* Con :has() solo afecta al overlay que contiene este modal, no a los demás */
+:global(.modal-overlay):has(> .modalCuota) {
+  z-index: 9999;
+  padding: 1rem;
+  box-sizing: border-box;
+}
+
+.modalCuota :global(.modal-body) {
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+}
+
+@media (max-width: 768px) {
+  .modalCuota :global(.modal-header) {
+    padding: 14px 20px;
+  }
+
+  .modalCuota :global(.modal-body) {
+    padding: 20px;
+  }
+
+  .modalCuota :global(.modal-footer) {
+    padding: 16px 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  :global(.modal-overlay):has(> .modalCuota) {
+    padding: 0.5rem;
+  }
+
+  .modalCuota :global(.modal-header) {
+    padding: 12px 16px;
+  }
+
+  .modalCuota :global(.modal-header h2) {
+    font-size: 1rem;
+  }
+
+  .modalCuota :global(.modal-body) {
+    padding: 16px;
+  }
+
+  /* Las filas "etiqueta / valor" se acomodan si el texto no cabe */
+  .fila {
+    flex-wrap: wrap;
+    gap: 0.25rem 0.75rem;
+  }
+
+  /* Cerrar y Abonar pasan hacia abajo en lugar de ir en la misma fila */
+  .modalCuota :global(.modal-footer) {
+    flex-direction: column;
+    gap: 10px;
+    padding: 14px 16px;
+  }
+
+  .modalCuota :global(.btn-cancelar),
+  .modalCuota :global(.btn-guardar) {
+    flex: none;
+    width: 100%;
+  }
+}

@@ -774,6 +774,7 @@ const manejarSeleccionCliente = async (cliente: Cliente) => {
         <input
           type="date"
           value={fechaInicio}
+          readOnly
           onChange={(e) => setFechaInicio(e.target.value)}
         />
       </div>

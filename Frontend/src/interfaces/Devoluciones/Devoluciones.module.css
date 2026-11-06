@@ -302,9 +302,14 @@
   color: #0047ab;
 }
 
-/* Responsive */
+/* ================= RESPONSIVE ================= */
 
-@media (max-width: 720px) {
+@media (max-width: 768px) {
+  .page {
+    padding: 16px;
+  }
+
+  /* Aquí alineo tu breakpoint de 720px a 768px */
   .filaTriple,
   .filaDoble {
     grid-template-columns: 1fr;
@@ -315,13 +320,52 @@
     align-items: stretch;
   }
 
-  .footer {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
+  .footer,
   .totalDevolucion {
     flex-direction: column;
     align-items: stretch;
   }
+
+  .btnCancelar,
+  .btnRegistrar {
+    width: 100%;
+  }
+
+  /* La tabla conserva su tamaño y se desplaza horizontalmente */
+  .cardTabla {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .tabla {
+    min-width: 700px;
+  }
+
+  .tabla thead th,
+  .tabla tbody td {
+    padding: 12px;
+    white-space: nowrap;
+  }
 }
+
+@media (max-width: 480px) {
+  .page {
+    padding: 12px;
+  }
+
+  .header h1 {
+    font-size: 22px;
+  }
+
+  .card {
+    padding: 16px;
+  }
+
+  /* "Total a devolver" a la izquierda y el monto a la derecha */
+  .totalLinea {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+

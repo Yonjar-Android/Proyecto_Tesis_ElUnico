@@ -503,3 +503,100 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ================= RESPONSIVE ================= */
+
+@media (max-width: 768px) {
+  .factura-contenido {
+    padding: 1rem;
+  }
+
+  .header-help {
+    flex-wrap: wrap;
+  }
+
+  /* Tipo de pago y cliente: tu breakpoint original es 750px, aquí lo alineo a 768 */
+  .factura-fila-doble {
+    grid-template-columns: 1fr;
+  }
+
+  /* Los campos pasan hacia abajo en lugar de acumularse en la fila */
+  .factura-fila-producto {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  /* flex: none evita que el flex: 2 original estire la altura en columna */
+  .factura-campo-producto,
+  .factura-campo-cantidad,
+  .factura-campo-precio,
+  .factura-campo-descuento,
+  .factura-btn-agregar,
+  .factura-btn-cancelar-edicion {
+    flex: none;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
+  /* La tabla conserva su tamaño y se desplaza horizontalmente */
+  .factura-card-tabla {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Selector más específico para ganar sin importar el orden entre CSS */
+  .factura-card-tabla .factura-tabla {
+    min-width: 640px;
+  }
+
+  .factura-footer {
+    gap: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .factura-contenido {
+    padding: 0.75rem;
+  }
+
+  .factura-header h1 {
+    font-size: 1.25rem;
+  }
+
+  .factura-card,
+  .factura-credito-card {
+    padding: 1rem;
+  }
+
+  /* Los dos botones Producto / Servicio ocupan todo el ancho */
+  .factura-tipo-toggle {
+    display: flex;
+  }
+
+  .factura-tipo-btn {
+    flex: 1;
+  }
+
+  .factura-footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .factura-total-venta {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  .factura-total-desglose {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .factura-btn-cancelar,
+  .factura-btn-vender {
+    width: 100%;
+  }
+}

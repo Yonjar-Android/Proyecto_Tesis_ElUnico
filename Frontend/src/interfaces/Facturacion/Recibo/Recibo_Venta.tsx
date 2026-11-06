@@ -27,13 +27,28 @@ export default function ReciboVenta({ datos }: Props) {
     0
   );
 
+  console.log(datos);
+
   const descuentoTotal = datos.articulos.reduce(
   (acc, a) => acc + descuentoLineaArticulo(a),
   0
 );
 const total = subtotal - descuentoTotal;
 
-const cambio = (datos.recibidoCordobas ?? 0) - total;
+const recibidoCordobas = datos.recibidoCordobas ?? 0;
+const recibidoDolares = datos.recibidoDolares ?? 0;
+const vuelto = datos.vueltoCordobas ?? 0;
+
+// Solo se puede despejar si hubo dólares y el pago cubrió el total
+const puedeDerivar = recibidoDolares > 0 && datos.tipoPago === "Contado";
+
+const equivalenteDolares = puedeDerivar
+  ? Math.max(Math.round((total + vuelto - recibidoCordobas) * 100) / 100, 0)
+  : 0;
+
+const tasaImplicita = puedeDerivar ? equivalenteDolares / recibidoDolares : 0;
+const totalRecibido = recibidoCordobas + equivalenteDolares;
+const huboPago = recibidoCordobas > 0 || recibidoDolares > 0;
 
   function descuentoLineaArticulo(articulo: ArticuloRecibo): number {
   return articulo.tipoDescuento == "porcentaje"
@@ -124,18 +139,37 @@ const cambio = (datos.recibidoCordobas ?? 0) - total;
       </div>
 
       {/* 👇 nuevo: recibido y cambio */}
-      {datos.recibidoCordobas != null && datos.recibidoCordobas > 0 && (
-        <>
-          <div className={styles.filaTotal}>
-            <span>RECIBIDO:</span>
-            <span>C${formatearMoneda(datos.recibidoCordobas)}</span>
-          </div>
-          <div className={styles.filaTotal}>
-            <span>CAMBIO:</span>
-            <span>C${formatearMoneda(cambio)}</span>
-          </div>
-        </>
-      )}
+{huboPago && (
+  <>
+    {recibidoCordobas > 0 && (
+      <div className={styles.filaTotal}>
+        <span>RECIBIDO C$:</span>
+        <span>C${formatearMoneda(recibidoCordobas)}</span>
+      </div>
+    )}
+
+    {recibidoDolares > 0 && (
+      <>
+        <div className={styles.filaTotal}>
+          <span>RECIBIDO US$:</span>
+          <span>US${formatearMoneda(recibidoDolares)}</span>
+        </div>
+      </>
+    )}
+
+    {puedeDerivar && (
+      <div className={styles.filaTotal}>
+        <span>TOTAL RECIBIDO:</span>
+        <span>C${formatearMoneda(totalRecibido)}</span>
+      </div>
+    )}
+
+    <div className={styles.filaTotal}>
+      <span>CAMBIO:</span>
+      <span>C${formatearMoneda(vuelto)}</span>
+    </div>
+  </>
+)}
 
       {datos.devoluciones.length > 0 && (
         <>

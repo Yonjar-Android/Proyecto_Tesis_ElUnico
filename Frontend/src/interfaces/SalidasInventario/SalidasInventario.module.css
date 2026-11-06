@@ -326,7 +326,14 @@
 
 /* Responsive */
 
-@media (max-width: 860px) {
+/* ================= RESPONSIVE ================= */
+
+@media (max-width: 768px) {
+  .page {
+    padding: 16px;
+  }
+
+  /* Los campos pasan hacia abajo (alineo tu breakpoint de 860px a 768px) */
   .filaRegistro {
     grid-template-columns: 1fr;
   }
@@ -334,11 +341,44 @@
   .btnAgregar {
     width: 100%;
   }
-}
 
-@media (max-width: 720px) {
   .footer {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .btnCancelar,
+  .btnRegistrar {
+    width: 100%;
+  }
+
+  /* La tabla conserva su tamaño y se desplaza horizontalmente */
+  .cardTabla {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .tabla {
+    min-width: 520px;
+  }
+
+  .tabla thead th,
+  .tabla tbody td {
+    padding: 12px;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 480px) {
+  .page {
+    padding: 12px;
+  }
+
+  .header h1 {
+    font-size: 22px;
+  }
+
+  .card {
+    padding: 16px;
   }
 }

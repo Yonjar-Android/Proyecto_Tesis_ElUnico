@@ -353,3 +353,91 @@
   font-size: 0.82rem;
   margin-top: 0.75rem;
 }
+
+/* ================= RESPONSIVE ================= */
+
+@media (max-width: 768px) {
+  .factura-contenido {
+    padding: 1rem;
+  }
+
+  .header-help {
+    flex-wrap: wrap;
+  }
+
+  /* Los campos pasan hacia abajo en lugar de acumularse en la fila */
+  .compra-fila-formulario {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  /* flex: none evita que los flex: 1/2/3 originales estiren la altura en columna */
+  .compra-campo,
+  .compra-campo-producto,
+  .compra-campo-cantidad,
+  .compra-campo-precio,
+  .compra-campo-fecha,
+  .compra-campo-factura,
+  .compra-campo-precio-venta,
+  .compra-precio-input,
+  .compra-btn-agregar {
+    flex: none;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Las tablas conservan su tamaño y se desplazan horizontalmente */
+  .factura-card,
+  .factura-card-tabla {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .factura-tabla {
+    min-width: 560px;
+  }
+}
+
+@media (max-width: 480px) {
+  .factura-contenido {
+    padding: 0.75rem;
+  }
+
+  .factura-header h1 {
+    font-size: 1.25rem;
+  }
+
+  .factura-footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .factura-btn-cancelar,
+  .factura-btn-vender {
+    width: 100%;
+  }
+
+  .factura-total-venta {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  /* "Total" a la izquierda y el monto a la derecha */
+  .factura-total-texto {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Botones del formulario de producto: pasan hacia abajo, a ancho completo */
+  .factura-btn-agregar,
+  .factura-btn-cancelar-edicion {
+    flex: none;
+    width: 100%;
+    box-sizing: border-box;
+  }
+}
